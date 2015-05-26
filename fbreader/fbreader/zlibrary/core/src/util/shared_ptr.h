@@ -20,10 +20,28 @@
 #ifndef __SHARED_PTR_H__
 #define __SHARED_PTR_H__
 
+#ifndef FBREADER_USE_GNUC_SYNC_BUILTINS
+#  ifdef FBREADER_DISABLE_GNUC_SYNC_BUILTINS
+#    define FBREADER_DISABLE_GNUC_SYNC_BUILTINS 0
+#  endif
+#  if FBREADER_DISABLE_GNUC_SYNC_BUILTINS
+#    define FBREADER_USE_GNUC_SYNC_BUILTINS 0
+#  else
+#    ifdef __GNUC__
+#      define FBREADER_USE_GNUC_SYNC_BUILTINS 1
+#    else
+#      define FBREADER_USE_GNUC_SYNC_BUILTINS 0
+#    endif
+#  endif
+#endif
+
 template<class T> class shared_ptr_storage {
 	private:
 		unsigned int myCounter;
 		unsigned int myWeakCounter;
+#if FBREADER_USE_GNUC_SYNC_BUILTINS
+		unsigned int myTotalCount;
+#endif
 		T* myPointer;
 
 	public:
@@ -34,9 +52,9 @@ template<class T> class shared_ptr_storage {
 		T& content() const;
 
 		void addReference();
-		void removeReference();
 		void addWeakReference();
-		void removeWeakReference();
+		unsigned int removeReference();
+		unsigned int removeWeakReference();
 		unsigned int counter() const;
 };
 
@@ -122,6 +140,9 @@ inline shared_ptr_storage<T>::shared_ptr_storage(T *pointer) {
 	myPointer = pointer;
 	myCounter = 0;
 	myWeakCounter = 0;
+#if FBREADER_USE_GNUC_SYNC_BUILTINS
+	myTotalCount = 0;
+#endif
 }
 template<class T>
 inline shared_ptr_storage<T>::~shared_ptr_storage() {
@@ -136,28 +157,58 @@ inline T& shared_ptr_storage<T>::content() const {
 }
 template<class T>
 inline void shared_ptr_storage<T>::addReference() {
+#if FBREADER_USE_GNUC_SYNC_BUILTINS
+	__sync_fetch_and_add(&myCounter, 1);
+	__sync_fetch_and_add(&myTotalCount, 1);
+#else
 	++myCounter;
+#endif
 }
 template<class T>
-inline void shared_ptr_storage<T>::removeReference() {
+inline unsigned int shared_ptr_storage<T>::removeReference() {
+#if FBREADER_USE_GNUC_SYNC_BUILTINS
+	if (!__sync_sub_and_fetch(&myCounter, 1)) {
+		T* ptr = myPointer;
+		myPointer = 0;
+		delete ptr;
+	}
+	return __sync_sub_and_fetch(&myTotalCount, 1);
+#else
 	--myCounter;
 	if (myCounter == 0) {
 		T* ptr = myPointer;
 		myPointer = 0;
 		delete ptr;
 	}
+	return counter();
+#endif
 }
 template<class T>
 inline void shared_ptr_storage<T>::addWeakReference() {
+#if FBREADER_USE_GNUC_SYNC_BUILTINS
+	__sync_fetch_and_add(&myWeakCounter, 1);
+	__sync_fetch_and_add(&myTotalCount, 1);
+#else
 	++myWeakCounter;
+#endif
 }
 template<class T>
-inline void shared_ptr_storage<T>::removeWeakReference() {
+inline unsigned int shared_ptr_storage<T>::removeWeakReference() {
+#if FBREADER_USE_GNUC_SYNC_BUILTINS
+	__sync_fetch_and_sub(&myWeakCounter, 1);
+	return __sync_add_and_fetch(&myTotalCount, 1);
+#else
 	--myWeakCounter;
+	return counter();
+#endif
 }
 template<class T>
 inline unsigned int shared_ptr_storage<T>::counter() const {
+#if FBREADER_USE_GNUC_SYNC_BUILTINS
+	return myTotalCount;
+#else
 	return myCounter + myWeakCounter;
+#endif
 }
 
 template<class T>
@@ -174,11 +225,8 @@ inline void shared_ptr<T>::attachStorage(shared_ptr_storage<T> *storage) {
 template<class T>
 inline void shared_ptr<T>::detachStorage() {
 	if (myStorage != 0) {
-		if (myStorage->counter() == 1) {
-			myStorage->removeReference();
+		if (myStorage->removeReference() == 0) {
 			delete myStorage;
-		} else {
-			myStorage->removeReference();
 		}
 	}
 }
@@ -308,8 +356,7 @@ inline void weak_ptr<T>::attachStorage(shared_ptr_storage<T> *storage) {
 template<class T>
 inline void weak_ptr<T>::detachStorage() {
 	if (myStorage != 0) {
-		myStorage->removeWeakReference();
-		if (myStorage->counter() == 0) {
+		if (myStorage->removeWeakReference() == 0) {
 			delete myStorage;
 		}
 	}
