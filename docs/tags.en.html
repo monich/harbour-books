@@ -1,0 +1,130 @@
+<html>
+<head>
+</head>
+<body>
+<!-- Based on tags.ru.html (2372) -->
+
+<h2><center>Book Tags in FBReader</center></h2>
+
+<h3>What is a book tag?</h3>
+<p>As of version 0.8.16 FBReader supports book tags.  This feature allows for organizing libraries
+in a way more convenient for the end user.</p>
+
+<p>A tag is just a text string, set of possible tags is not pre-defined, which means that the user
+can add a new tag at any moment.  Each book may have zero or more tags.  These tags are listed in
+the book information dialog as a list.</p>
+
+<p>For example, if the dialog shows &ldquo;Science Fiction, Fantasy, New&rdquo;, it means that the
+book has three tags &mdash; &ldquo;Science Fiction&rdquo;, &ldquo;Fantasy&rdquo; and
+&ldquo;New&rdquo;.</p>
+
+<p>Tag name <b>must not</b> contain a comma symbol (&ldquo;,&rdquo;).</p>
+
+<p>Spaces and tab symbols at the beginning and the end of a tag name are ignored.</p>
+
+<!-- Multi-level vs hierarchical: what would be more appropriate? -->
+<h3>Hierarchical tags.</h3>
+<p>If tag name contains &ldquo;/&rdquo;, then this tag is considered hierarchical.  For example, a
+string &ldquo;Fiction/SF &amp; Fantasy/Fantasy&rdquo; will be interpreted as subtag
+&ldquo;Fantasy&rdquo; of subtag &ldquo;SF &amp; Fantasy&rdquo; of top level tag
+&ldquo;Fiction&rdquo;.</p>
+<p>Tag name <b>must not</b> contain a slash symbol (&ldquo;/&rdquo;).</p>
+
+<!-- double check with the native speaker -->
+<h3>Library Tree View.</h3>
+<p>The book library is shown as a tree. The first levels of the tree are representing book tags
+hierarchy. The next levels are for the book author, for the book series (if present), and for the
+book title correspondently.</p>
+
+<p>If a book has several tags, it will be shown in several branches.</p>
+
+<p>If a book has no tags, it will be shown in the branch called &ldquo;Books with no Tags&rdquo;.</p>
+
+<p>Additionaly, all books can be found in the branch called &ldquo;All Books&rdquo;.</p>
+
+<h3>Library Tree View Settings.</h3>
+
+<p>If you open the preferences dialog and select &ldquo;Library&rdquo; tab, you can see two
+options:<dl>
+    <dt>&ldquo;Show Tag Hierarchies&rdquo;</dt>
+    <dd>By clearing this option you tell FBReader to show traditional tree with not tags</dd>
+    <dt>&ldquo;Show All Books Branch&rdquo;</dt>
+    <dd>By clearing this option you tell FBReader not to show the branch called &ldquo;All
+    Books&rdquo;</dd>
+</dl>
+
+<!-- check "locations of the book" vs "book locations" -->
+<h3>Book Highlighting in the Library View Tree.</h3>
+<p>When you open library tree view, the book you are currently reading will be shown and highlighted
+in the tree.  While all locations of the book are highlighted, you will see the last appearance of
+the book in the view.  You can go through all the locations using &ldquo;Find
+Previous&rdquo;/&ldquo;Find Next&rdquo; buttons.</p>
+
+<!-- As of version - how good this is? -->
+<h3>Automatic Extraction of Tags.</h3>
+<p>Certain book formats support tags natively.  As of version 0.8.16, FBReader can extract tags from
+books in <code>fb2</code>, <code>mobipocket</code> and <code>oeb/epub</code> formats.  Tags may be defined by the user.
+The following sections describe what operations can be performed on tags.</p>
+
+<h3>Setting/Changing Tags for a Book.</h3>
+<p>In order to set or to change list of tags for a book, open book information dialog, select
+&ldquo;Tags&rdquo; tab and edit the list.  Tag names will only be changed for the book you update.
+If you add a new tag, it will be automatically shown in the tree.  If you delete a tag that only
+this book had, the tag will automatically disappear from the tree.</p>
+
+<h3>Changing a Tag Hierarchy.</h3>
+<p>If you would like to change a tag hierarchy, you can do it in the library tree view: navigate to the tag
+that corresponds to the hierarchy you would like to change and click on the bulb that is to the right of the tag name.</p>
+
+<p>In the opened dialog you can:<ul>
+<li>Change the tag name</li>
+<p>A tag name <b>must not</b> contain a comma: if you put it there by mistake, the name won't be
+changed.</p>
+<p>Empty name won't be changed either.</p>
+<p>If you use &ldquo;/&rdquo; in the tag name, it will be considered as a separator for a
+hierarchical tag.</p>
+<p>Spaces and tab symbols will be removed from the beginning and the end of the tag name.</p>
+<p>If a tag you are editing, has subtags, in the dialog you can specify that the operation should
+affect subtags as well; that is control by &ldquo;With Subtags&rdquo; checkbox.</p>
+
+<li>Cloning a tag</li>
+<p>Select the radiobutton named &ldquo;Clone Tag&rdquo; and specify the name of the new tag. If the tag you
+specified already exists, the books from with the current tags will be tagged with the new tag.</p>
+
+<li>Merging two tag hierarchies</li>
+<p>If the tag name you specify already exists, this won't be considered as an error: renaming or
+cloning will be performed as usually.  As result, the corresponding branches of tag hierarchy will
+be merged.  Since this operation seems to be quite useful, instead of entering a tag name manually,
+you can just select it from the list.</p>
+
+</ul>
+</p>
+
+<h3>Deleting Tags.</h3>
+<p>If you would like to delete a tag, click on a minus sign right to the tag name.  You will need to
+confirm the operation when a dialog appears.  If you confirm the operations, the specified tag will
+be removed from all books that had this tag.  <b>Note</b>: no books will be removed by this operation.</p>
+
+<p>If the tag you are about to delete has subtags, the confirmation dialog will have three buttons
+&mdash; &ldquo;This Only&rdquo;, &ldquo;With Subtags&rdquo; and &ldquo;Cancel&rdquo;.  If you click
+on the &ldquo;This Only&rdquo;, exactly the selected tag will be removed (if there are any books tagged by it).  If
+you click on the &ldquo;With Subtags&rdquo;, then the selected tag and all its subtags will be removed and the
+corresponding branch will not be shown in the tree.</p>
+
+<p>For example, if you have books tagged as &ldquo;Fiction&rdquo; and books tagged as
+&ldquo;Fiction/Horror&rdquo;, and you try to delete tag &ldquo;Fiction&rdquo;, you can<ul>
+<li>Click on &ldquo;This Only&rdquo;</li>
+<p>In this case, the tag &ldquo;Fiction&rdquo; will disappear from the tag list of books that were
+tagged with it, while tag &ldquo;Fiction/Horror&rdquo; will remain. And while both tags will be shown
+in the library tree view, the first one will have no books.</p>
+<li>Click on &ldquo;With Subtags&rdquo;</li> 
+<p>In this case both tags &ldquo;Fiction&rdquo; and &ldquo;Fiction/Horror&rdquo; will be removed
+from the books that were tagged with them and the whole subtree that started with
+&ldquo;Fiction&rdquo; will not be shown.</p>
+
+</body>
+</html>
+
+<!--
+    vim:tw=100
+  -->

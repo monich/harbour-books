@@ -1,0 +1,52 @@
+ОБЩЕЕ:
+	** сообщение об ошибке для архивов без книг
+	** что делать с мультиархивами (много книг)
+	** сообщение о невозможности открыть зашифрованный ePub
+	** сообщение о невозможности открыть файл неизвестного формата
+
+GTK:
+	** размеры и координаты окна
+	DONE заголовок окна
+	DONE directory path
+	DONE file path
+	DONE filter
+	DONE определение mimeType
+
+QT3:
+	DONE размеры и координаты окна
+	DONE заголовок окна
+	DONE directory path
+	** file path
+	** filter
+	** определение mimeType
+
+QT4:
+	DONE размеры и координаты окна
+	DONE заголовок окна
+	DONE directory path
+	DONE file path
+	** filter
+	** определение mimeType
+
+WIN32:
+	** размеры и координаты окна
+	** заголовок окна
+	** directory path
+	** file path
+	** filter
+	** определение mimeType
+
+MAEMO:
+	** заголовок окна
+	** directory path
+	** file path
+	** filter
+	** определение mimeType
+
+MAC:
+	DONE размеры и координаты окна
+	DONE заголовок окна
+	DONE directory path
+	** file path
+	DONE (10.6 only) filter
+	** определение mimeType
