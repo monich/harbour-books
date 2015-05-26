@@ -1,0 +1,1 @@
+../../fribidi/lib/fribidi-joining-types-list.h

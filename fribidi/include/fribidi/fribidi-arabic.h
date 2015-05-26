@@ -1,0 +1,1 @@
+../../fribidi/lib/fribidi-arabic.h

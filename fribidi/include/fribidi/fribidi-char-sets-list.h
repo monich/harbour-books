@@ -1,0 +1,1 @@
+../../fribidi/charset/fribidi-char-sets-list.h
