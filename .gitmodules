@@ -1,0 +1,3 @@
+[submodule "fribidi/upstream"]
+	path = fribidi/upstream
+	url = git://anongit.freedesktop.org/fribidi/fribidi
