@@ -45,7 +45,7 @@ class ZLApplicationBase {
 
 protected:
 	ZLApplicationBase(const std::string &name);
-	~ZLApplicationBase();
+	virtual ~ZLApplicationBase();
 };
 
 class ZLApplication : public ZLApplicationBase {

@@ -23,8 +23,8 @@
 class ZLInputStream;
 
 struct ZLZipHeader {
-	static const int SignatureLocalFile;
-	static const int SignatureData;
+	static const unsigned long SignatureLocalFile;
+	static const unsigned long SignatureData;
 
 	unsigned long Signature;
 	unsigned short Version;

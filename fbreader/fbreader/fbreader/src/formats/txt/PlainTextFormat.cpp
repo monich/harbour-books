@@ -95,7 +95,6 @@ void PlainTextFormatDetector::detect(ZLInputStream &stream, PlainTextFormat &for
 	
 	char *buffer = new char[BUFFER_SIZE];
 	int length;
-	char previous = 0;
 	do {
 		length = stream.read(buffer, BUFFER_SIZE);
 		const char *end = buffer + length;
@@ -135,7 +134,6 @@ void PlainTextFormatDetector::detect(ZLInputStream &stream, PlainTextFormat &for
 			} else {
 				currentLineIsEmpty = false;
 			}
-			previous = *ptr;
 		}
 	} while (length == BUFFER_SIZE);
 	delete[] buffer;

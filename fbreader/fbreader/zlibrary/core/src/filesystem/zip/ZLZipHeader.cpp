@@ -23,8 +23,8 @@
 #include "ZLZDecompressor.h"
 #include "../ZLInputStream.h"
 
-const int ZLZipHeader::SignatureLocalFile = 0x04034B50;
-const int ZLZipHeader::SignatureData = 0x08074B50;
+const unsigned long ZLZipHeader::SignatureLocalFile = 0x04034B50;
+const unsigned long ZLZipHeader::SignatureData = 0x08074B50;
 
 bool ZLZipHeader::readFrom(ZLInputStream &stream) {
 	size_t startOffset = stream.offset();
