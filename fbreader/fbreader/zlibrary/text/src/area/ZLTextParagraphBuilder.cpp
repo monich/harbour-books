@@ -22,7 +22,7 @@
 #include <linebreak.h>
 
 #include <ZLImage.h>
-
+#include <ZLTextModel.h>
 #include <ZLTextParagraph.h>
 
 #include "ZLTextParagraphCursor.h"
@@ -32,6 +32,7 @@
 ZLTextParagraphCursor::Builder::Builder(ZLTextParagraphCursor &cursor) :
 	myParagraph(*cursor.myModel[cursor.myIndex]),
 	myElements(cursor.myElements),
+	myTextElementPool(cursor.myElements.elementPool()),
 	myLanguage(cursor.myModel.language()),
 	myBaseBidiLevel(cursor.myModel.isRtl() ? 1 : 0) {
 	const int paragraphIndex = cursor.myIndex;
@@ -52,16 +53,16 @@ ZLTextParagraphCursor::Builder::Builder(ZLTextParagraphCursor &cursor) :
 void ZLTextParagraphCursor::Builder::updateBidiLevel(FriBidiLevel bidiLevel) {
 	while (myCurrentBidiLevel > bidiLevel) {
 		--myCurrentBidiLevel;
-		myElements.push_back(ZLTextElementPool::Pool.EndReversedSequenceElement);
+		myElements.push_back(myTextElementPool.EndReversedSequenceElement);
 	}
 	while (myCurrentBidiLevel < bidiLevel) {
 		++myCurrentBidiLevel;
-		myElements.push_back(ZLTextElementPool::Pool.StartReversedSequenceElement);
+		myElements.push_back(myTextElementPool.StartReversedSequenceElement);
 	}
 }
 
 void ZLTextParagraphCursor::Builder::addWord(const char *ptr, int offset, int len) {
-	ZLTextWord *word = ZLTextElementPool::Pool.getWord(ptr, len, offset, myCurrentBidiLevel);
+	ZLTextWord *word = myTextElementPool.getWord(ptr, len, offset, myCurrentBidiLevel);
 	for (std::vector<ZLTextMark>::const_iterator mit = myFirstMark; mit != myLastMark; ++mit) {
 		ZLTextMark mark = *mit;
 		if ((mark.Offset < offset + len) && (mark.Offset + mark.Length > offset)) {
@@ -86,7 +87,7 @@ void ZLTextParagraphCursor::Builder::fill() {
 				break;
 			case ZLTextParagraphEntry::CONTROL_ENTRY:
 			case ZLTextParagraphEntry::HYPERLINK_CONTROL_ENTRY:
-				myElements.push_back(ZLTextElementPool::Pool.getControlElement(it.entry()));
+				myElements.push_back(myTextElementPool.getControlElement(it.entry()));
 				break;
 			case ZLTextParagraphEntry::IMAGE_ENTRY:
 			{
@@ -173,14 +174,14 @@ void ZLTextParagraphCursor::Builder::processTextEntry(const ZLTextEntry &textEnt
 			switch (spaceState) {
 				case SPACE:
 					if ((myBreaksTable[ptr - start - 1] == LINEBREAK_NOBREAK) || (previousCh == '-')) {
-						myElements.push_back(ZLTextElementPool::Pool.NBHSpaceElement);
+						myElements.push_back(myTextElementPool.NBHSpaceElement);
 					} else {
-						myElements.push_back(ZLTextElementPool::Pool.HSpaceElement);
+						myElements.push_back(myTextElementPool.HSpaceElement);
 					}
 					wordStart = ptr;
 					break;
 				case NON_BREAKABLE_SPACE:
-					myElements.push_back(ZLTextElementPool::Pool.NBHSpaceElement);
+					myElements.push_back(myTextElementPool.NBHSpaceElement);
 					wordStart = ptr;
 					break;
 				case NO_SPACE:
@@ -198,10 +199,10 @@ void ZLTextParagraphCursor::Builder::processTextEntry(const ZLTextEntry &textEnt
 	}
 	switch (spaceState) {
 		case SPACE:
-			myElements.push_back(ZLTextElementPool::Pool.HSpaceElement);
+			myElements.push_back(myTextElementPool.HSpaceElement);
 			break;
 		case NON_BREAKABLE_SPACE:
-			myElements.push_back(ZLTextElementPool::Pool.NBHSpaceElement);
+			myElements.push_back(myTextElementPool.NBHSpaceElement);
 			break;
 		case NO_SPACE:
 			addWord(wordStart, myOffset + (wordStart - start), end - wordStart);

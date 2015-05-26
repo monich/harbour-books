@@ -28,7 +28,7 @@
 #include "ZLTextLineInfo.h"
 #include "ZLTextSelectionModel.h"
 
-ZLTextArea::ZLTextArea(ZLPaintContext &context, const Properties &properties) : myContext(context), myProperties(properties), myWidth(0), myHeight(0) {
+ZLTextArea::ZLTextArea(ZLPaintContext &context, const Properties &properties, ZLTextParagraphCursorCache *cache) : myContext(context), myProperties(properties), myWidth(0), myHeight(0), myParagraphCursorCache(cache) {
 }
 
 ZLTextArea::~ZLTextArea() {
@@ -52,7 +52,7 @@ void ZLTextArea::setModel(shared_ptr<ZLTextModel> model) {
 	} else {
 		myMirroredContext.reset();
 	}
-	myStartCursor = ZLTextParagraphCursor::cursor(*model);
+	myStartCursor = myParagraphCursorCache->cursor(*model, 0);
 	myEndCursor = 0;
 }
 

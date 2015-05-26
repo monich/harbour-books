@@ -59,5 +59,5 @@ void ZLTextView::paint() {
 		}
 	}
 
-	ZLTextParagraphCursorCache::cleanup();
+	myParagraphCursorCache.cleanup();
 }

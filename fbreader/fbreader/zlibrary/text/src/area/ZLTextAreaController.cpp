@@ -22,7 +22,7 @@
 #include "ZLTextAreaStyle.h"
 #include "ZLTextLineInfo.h"
 
-ZLTextAreaController::ZLTextAreaController(ZLPaintContext &context, const ZLTextArea::Properties &properties) : myArea(context, properties), myPaintState(NOTHING_TO_PAINT) {
+ZLTextAreaController::ZLTextAreaController(ZLPaintContext &context, const ZLTextArea::Properties &properties, ZLTextParagraphCursorCache *cache) : myArea(context, properties, cache), myParagraphCursorCache(cache), myPaintState(NOTHING_TO_PAINT) {
 }
 
 ZLTextAreaController::~ZLTextAreaController() {
@@ -38,7 +38,7 @@ void ZLTextAreaController::clear() {
 	myArea.clear();
 
 	myPaintState = NOTHING_TO_PAINT;
-	ZLTextParagraphCursorCache::clear();
+	myParagraphCursorCache->clear();
 }
 
 ZLTextWordCursor ZLTextAreaController::findStart(const ZLTextWordCursor &end, SizeUnit unit, int size) {
@@ -229,7 +229,7 @@ void ZLTextAreaController::rebuildPaintInfo(bool strong) {
 
 	myArea.myLineInfos.clear();
 	if (strong) {
-		ZLTextParagraphCursorCache::clear();
+		myParagraphCursorCache->clear();
 		myArea.myLineInfoCache.clear();
 	}
 

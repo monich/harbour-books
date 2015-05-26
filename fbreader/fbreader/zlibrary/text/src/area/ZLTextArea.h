@@ -27,6 +27,7 @@
 
 #include <ZLTextParagraphCursor.h>
 #include <ZLTextRectangle.h>
+#include <ZLTextModel.h>
 
 class ZLPaintContext;
 class ZLMirroredPaintContext;
@@ -53,7 +54,7 @@ public:
 	};
 
 public:
-	ZLTextArea(ZLPaintContext &context, const Properties &properties);
+	ZLTextArea(ZLPaintContext &context, const Properties &properties, ZLTextParagraphCursorCache *cache);
 	~ZLTextArea();
 
 public:
@@ -124,6 +125,7 @@ private:
 	ZLTextTreeNodeMap myTreeNodeMap;
 
 	shared_ptr<ZLTextSelectionModel> mySelectionModel;
+	ZLTextParagraphCursorCache* myParagraphCursorCache;
 
 friend class ZLTextAreaController;
 friend class ZLTextSelectionModel;

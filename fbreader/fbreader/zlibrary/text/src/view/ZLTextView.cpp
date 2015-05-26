@@ -42,7 +42,7 @@ const ZLTypeId &ZLTextView::typeId() const {
 
 ZLTextView::ZLTextView(ZLPaintContext &context) :
 	ZLView(context),
-	myTextAreaController(context, *this),
+	myTextAreaController(context, *this, &myParagraphCursorCache),
 	myTreeStateIsFrozen(false),
 	myDoUpdateScrollbar(false),
 	myDoubleClickInfo(*this) {

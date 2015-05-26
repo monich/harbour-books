@@ -47,6 +47,7 @@ private:
 private:
 	const ZLTextParagraph &myParagraph;
 	ZLTextElementVector &myElements;
+	ZLTextElementPool &myTextElementPool;
 
 	std::vector<ZLTextMark>::const_iterator myFirstMark;
 	std::vector<ZLTextMark>::const_iterator myLastMark;

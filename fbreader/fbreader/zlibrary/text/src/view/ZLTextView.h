@@ -127,6 +127,7 @@ private:
 	void stopSelectionScrolling();
 
 private:
+	ZLTextParagraphCursorCache myParagraphCursorCache;
 	ZLTextAreaController myTextAreaController;
 
 	std::vector<size_t> myTextSize;

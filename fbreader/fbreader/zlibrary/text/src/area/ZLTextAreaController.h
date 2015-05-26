@@ -41,7 +41,7 @@ public:
 	};
 
 public:
-	ZLTextAreaController(ZLPaintContext &context, const ZLTextArea::Properties &properties);
+	ZLTextAreaController(ZLPaintContext &context, const ZLTextArea::Properties &properties, ZLTextParagraphCursorCache *cache);
 	~ZLTextAreaController();
 
 	const ZLTextArea &area() const;
@@ -77,6 +77,7 @@ private:
 
 private:
 	ZLTextArea myArea;
+	ZLTextParagraphCursorCache *myParagraphCursorCache;
 
 	enum {
 		NOTHING_TO_PAINT,
