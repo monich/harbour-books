@@ -1,0 +1,56 @@
+===== 0.99.0 (????????, 2011) =====
+
+* Esperanto interface localization has been added (by Katarína Nosková)
+* Hyphenation patterns for Polish (by Tomasz Długosz)
+* Polish interface localization (by Tomasz Długosz)
+
+===== 0.14.20100422 (April 22, 2010) =====
+
+* Chinese text drawing optimization (thanks to You Sheng (SmartDevices) for
+  idea)
+* Mobipocket image processing has been fixed
+* Standard file open dialog is now used instead of the old specially written
+  for FBReader
+* CSS processing for multi-xhtml epubs has been fixed (in 0.12.* the CSS
+  loaded for the first xhtml was also applied for all other xhtmls)
+* Chinese encodings detection has been improved
+* Language/encoding detection for small files has been improved
+* A problem with TOC in newest O'Reilly ePubs has been fixed
+* A detection of book format by mime-type (not by file extension) has been
+  partially implemented (in Gtk+ version only)
+* Polish interface localization has been added (by Rafał Bakuła)
+
+===== 0.12.10 (April 1, 2010) =====
+
+* Processing of external hyperlinks in epubs has been fixed
+
+===== 0.12.9 (March 25, 2010) =====
+
+* Processing of epub local hyperlinks of form "../dir/file.html" has been
+  fixed
+* Code is now compilable with gcc 4.4.* (missing include directives have been
+  added)
+
+===== 0.12.8 (March 22, 2010) =====
+
+* Smashwords library support has been improved: purchase links have been added
+* LitRes library support has been updated: since this version FBReader uses an
+  OPDS proxy located at http://data.fbreader.org/ for most operations with the
+  LitRes catalog
+* Processing of the xhtml hyperlinks in html encoded form (like
+  '/files/This%20is%20a%20link') has been fixed
+* A seg.fault during scanning several archives has been fixed
+* Lithuanian localization has been updated
+* Vietnamese language/encoding detection patterns have been added
+* Parsing of decimal point in CSS files has been fixed (it doesn't depend on
+the current locale now)
+
+===== 0.12.7 (March 5, 2010) =====
+
+* Vietnamese localization has been added
+* LitRes catalog browsing broken in 0.12.6 has been fixed
+
+===== 0.12.6 (March 3, 2010) =====
+
+* A processing of ePub files with incorrect CRC/entry size information
+  has been fixed. Such files are available e.g. from the FictionWise site.

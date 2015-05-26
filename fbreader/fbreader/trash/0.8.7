@@ -1,0 +1,114 @@
+*** после 0.8.7:
+
+использовать переменную BROWSER
+настройки размера индикатора для 240x320
+новые иконки
+автодобавление книг без метаинформации
+выбор профайла
+убрать путь к хедерам zlibrary/text при сборке zlibrary
+патчи в communicator
+pepperpad
+gtk (options dialog):
+	выравнивание label'ов по правому краю
+localization:
+	tooltip'ы к OptionView
+переделать ConfigTask -- чтобы он вешался после каждого изменения конфига, выполнялся через N секунд -- и умирал
+различать кнопки мыши
+oeb (converted from lib):
+	(?) pseudo-html inside (!!!!) xml argument value
+wmf (?)
+возможность узнать версию запущенной программы
+gpe: correct repaint
+text selection
+	построчная перерисовка
+	переименовать ZLDialogManager в ZLUIManager?
+открывать текст в браузере, если он похож на ссылку
+искать текст в гугле (?) в википедии?
+popup menu
+qt/qt4 desktop: win32-like color selection control
+многократный перенос (оч. длинное слово)
+мягкие переносы (symbol with code 173)
+bookmarks
+dictionary integration (cacko, maemo, all desktops)
+customizable toolbar
+добавлять файл, открываемый из командной строки, в библиотеку
+настройка дефолтного действия 'при отсутствии файла по умолчанию'
+опциональное использование системного file dialog
+multihtml
+
+*** win32 version (после 0.8.7)
+
+WaitMessage
+selection dialog
+	разобраться со скоростью перехода в другой каталог
+W32ColorComboBox::removeCustomColor()
+expat -> msxml
+cleartype option
+
+*** после 0.8.7
+
+файл от мс (sun2.oebzip)
+desktop-qt: set application icon
+более удачный вызов внешнего браузера
+	opie
+	gpe
+	pdaxrom
+vOffset для картинок
+отрефакторить XMLConfig (черт ногу сломит)
+отрефакторить файловую систему (обрабатывать '.' и '..' и в архивах тоже, правильно определять 'имя книги по умолчанию')
+восстановить GC и Sample Applications
+info dialog icon in contents tree
+	for books
+	for authors
+	for series
+
+tree-*.png
+	18x15
+	22x18
+	34x28
+	blueset
+pocketpc version
+chm
+	как же все-таки искать .hhc?
+open collection view at the same place and with the same set of opened elements
+оптимизировать seek() в архивах
+	DONE tar
+	zip
+	gzip
+	bzip2
+CollectionModel.update()
+OrderOptionEntry
+	qt
+	qtopia
+	opie
+	gtk
+	gpe
+	maemo
+ссылки под картинками в html и картинки в отдельных параграфах
+fbreader as document handler in maemo fileviewer
+about dialog
+odt
+multichm
+image scaling
+разобраться с dos/unix-текстами (письмо от Антона Фарыгина)
+options dialog -- создавать меньше объектов
+интеграция с каким-нибудь словарем в maemo
+mobipocket: где начинаются картинки?
+	ответить на письмо роберту м. (послать файл)
+
+==============================================================================
+
+*** win32 version (после 0.8.7)
+
+заменить явные размеры иконок на вычисляемые
+стирать дефолтные значения в конфиге от предыдущей версии (?)
+диалоги
+	менять шрифт диалогов в зависимости от системных настроек
+	создавать окна для элементов управления по мере необходимости(?)
+	в неактивном LineEditor позиционировать курсор слева
+	save selection dialog (для GC)
+	selection dialog resize: перерисовка кнопок
+оптимизировать PaintContext
+запретить Drag'N'Drop в toolbar и listview (падения в wine)
+предусмотреть возможность отсутствия файлов иконок
+иконка для инсталлятора
