@@ -32,7 +32,13 @@
 
 const ZLFile ZLFile::NO_FILE;
 
+#ifndef FBREADER_DISABLE_ZLFILE_PLAIN_STREAM_CACHE
+#  define FBREADER_DISABLE_ZLFILE_PLAIN_STREAM_CACHE 0
+#endif
+
+#if !FBREADER_DISABLE_ZLFILE_PLAIN_STREAM_CACHE
 std::map<std::string,weak_ptr<ZLInputStream> > ZLFile::ourPlainStreamCache;
+#endif
 
 ZLFile::ZLFile() : myMimeTypeIsUpToDate(true), myInfoIsFilled(true) {
 }
@@ -102,16 +108,20 @@ shared_ptr<ZLInputStream> ZLFile::inputStream() const {
 	
 	int index = ZLFSManager::Instance().findArchiveFileNameDelimiter(myPath);
 	if (index == -1) {
-		stream = ourPlainStreamCache[myPath];
+#if !FBREADER_DISABLE_ZLFILE_PLAIN_STREAM_CACHE
+        stream = ourPlainStreamCache[myPath];
 		if (stream.isNull()) {
+#endif
 			if (isDirectory()) {
 				return 0;
 			}
 			stream = ZLFSManager::Instance().createPlainInputStream(myPath);
 			stream = envelopeCompressedStream(stream);
-			ourPlainStreamCache[myPath] = stream;
+#if !FBREADER_DISABLE_ZLFILE_PLAIN_STREAM_CACHE
+            ourPlainStreamCache[myPath] = stream;
 		}
-	} else {
+#endif
+    } else {
 		ZLFile baseFile(myPath.substr(0, index));
 		shared_ptr<ZLInputStream> base = baseFile.inputStream();
 		if (!base.isNull()) {
