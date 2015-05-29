@@ -36,6 +36,9 @@ std::string PdbPlugin::fileType(const ZLFile &file) {
 		return "";
 	}
 
+#ifdef FBREADER_DISABLE_BOOKS_DB
+	std::string palmType;
+#else
 	const std::string &fileName = file.path();
 	//int index = fileName.find(':');
 	//ZLFile baseFile = (index == -1) ? file : ZLFile(fileName.substr(0, index));
@@ -45,6 +48,7 @@ std::string PdbPlugin::fileType(const ZLFile &file) {
 	//ZLStringOption palmTypeOption(FBCategoryKey::BOOKS, file.path(), "PalmType", "");
 	std::string palmType = BooksDB::Instance().getPalmType(fileName);
 	if ((palmType.length() != 8) || !upToDate) {
+#endif
 		shared_ptr<ZLInputStream> stream = file.inputStream();
 		if (stream.isNull() || !stream->open()) {
 			return "";
@@ -54,11 +58,13 @@ std::string PdbPlugin::fileType(const ZLFile &file) {
 		stream->read(id, 8);
 		stream->close();
 		palmType = std::string(id, 8);
+#ifndef FBREADER_DISABLE_BOOKS_DB
 		if (!upToDate) {
 			BooksDBUtil::saveInfo(baseFile);
 		}
 		//palmTypeOption.setValue(palmType);
 		BooksDB::Instance().setPalmType(fileName, palmType);
 	}
+#endif
 	return palmType;
 }
