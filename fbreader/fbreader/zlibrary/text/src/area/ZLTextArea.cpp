@@ -196,3 +196,12 @@ void ZLTextArea::paint() {
 		++index;
 	}
 }
+
+bool ZLTextArea::isVisible() const {
+	for (std::vector<ZLTextLineInfoPtr>::const_iterator it = myLineInfos.begin(); it != myLineInfos.end(); ++it) {
+		if ((*it)->IsVisible) {
+			return true;
+		}
+	}
+	return false;
+}

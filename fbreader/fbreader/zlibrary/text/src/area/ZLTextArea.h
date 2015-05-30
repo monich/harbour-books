@@ -74,6 +74,7 @@ public:
 	const ZLTextWordCursor &startCursor() const;
 	const ZLTextWordCursor &endCursor() const;
 	bool isEmpty() const;
+	bool isVisible() const;
 
 	const ZLTextElementRectangle *elementByCoordinates(int x, int y, bool absolute = true) const;
 	const ZLTextTreeNodeRectangle *treeNodeByCoordinates(int x, int y, bool absolute = true) const;
