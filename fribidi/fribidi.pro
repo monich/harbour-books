@@ -9,6 +9,8 @@ SRC_DIR = fribidi
 
 INCLUDEPATH += gen $$SRC_DIR/lib $$SRC_DIR/charset
 
+DEFINES += USE_SIMPLE_MALLOC=1
+
 SOURCES += \
   $$SRC_DIR/lib/fribidi.c \
   $$SRC_DIR/lib/fribidi-arabic.c \
