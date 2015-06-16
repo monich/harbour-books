@@ -24,7 +24,7 @@ ZLInputStreamDecorator::ZLInputStreamDecorator(shared_ptr<ZLInputStream> decorat
 
 bool ZLInputStreamDecorator::open() {
 	bool result = myBaseStream->open();
-	myBaseOffset = myBaseStream->offset();
+	if (result) myBaseOffset = myBaseStream->offset();
 	return result;
 }
 
