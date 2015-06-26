@@ -76,10 +76,15 @@ void StyleSheetTable::setLength(ZLTextStyleEntry &entry, ZLTextStyleEntry::Lengt
 		return;
 	}
 	const std::vector<std::string> &values = it->second;
-	if (!values.empty() && !values[0].empty()) {
+	if (!values.empty())
+		setLength(entry, name, values[0]);
+}
+
+void StyleSheetTable::setLength(ZLTextStyleEntry &entry, ZLTextStyleEntry::Length name, const std::string &value) {
+	if (!value.empty()) {
 		short size;
 		ZLTextStyleEntry::SizeUnit unit;
-		parseLength(values[0], size, unit);
+		parseLength(value, size, unit);
 		entry.setLength(name, size, unit);
 	}
 }
@@ -206,6 +211,34 @@ shared_ptr<ZLTextStyleEntry> StyleSheetTable::createControl(const AttributeMap &
 		} else if (fontSize[0] == "xx-large") {
 			entry->setFontSizeMag(3);
 		}
+	}
+
+	const std::vector<std::string> &margins = values(styles, "margin");
+	switch (margins.size()) {
+	case 1:
+		setLength(*entry, ZLTextStyleEntry::LENGTH_SPACE_BEFORE, margins[0]);
+		setLength(*entry, ZLTextStyleEntry::LENGTH_RIGHT_INDENT, margins[0]);
+		setLength(*entry, ZLTextStyleEntry::LENGTH_SPACE_AFTER,  margins[0]);
+		setLength(*entry, ZLTextStyleEntry::LENGTH_LEFT_INDENT,  margins[0]);
+		break;
+	case 2:
+		setLength(*entry, ZLTextStyleEntry::LENGTH_SPACE_BEFORE, margins[0]);
+		setLength(*entry, ZLTextStyleEntry::LENGTH_SPACE_AFTER,  margins[0]);
+		setLength(*entry, ZLTextStyleEntry::LENGTH_RIGHT_INDENT, margins[1]);
+		setLength(*entry, ZLTextStyleEntry::LENGTH_LEFT_INDENT,  margins[1]);
+		break;
+	case 3:
+		setLength(*entry, ZLTextStyleEntry::LENGTH_SPACE_BEFORE, margins[0]);
+		setLength(*entry, ZLTextStyleEntry::LENGTH_RIGHT_INDENT, margins[1]);
+		setLength(*entry, ZLTextStyleEntry::LENGTH_LEFT_INDENT,  margins[1]);
+		setLength(*entry, ZLTextStyleEntry::LENGTH_SPACE_AFTER,  margins[2]);
+		break;
+	case 4:
+		setLength(*entry, ZLTextStyleEntry::LENGTH_SPACE_BEFORE, margins[0]);
+		setLength(*entry, ZLTextStyleEntry::LENGTH_RIGHT_INDENT, margins[1]);
+		setLength(*entry, ZLTextStyleEntry::LENGTH_SPACE_AFTER,  margins[2]);
+		setLength(*entry, ZLTextStyleEntry::LENGTH_LEFT_INDENT,  margins[3]);
+		break;
 	}
 
 	setLength(*entry, ZLTextStyleEntry::LENGTH_LEFT_INDENT, styles, "margin-left");

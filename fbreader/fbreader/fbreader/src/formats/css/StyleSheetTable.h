@@ -38,6 +38,7 @@ private:
 	void addMap(const std::string &tag, const std::string &aClass, const AttributeMap &map);
 
 	static void setLength(ZLTextStyleEntry &entry, ZLTextStyleEntry::Length name, const AttributeMap &map, const std::string &attributeName);
+	static void setLength(ZLTextStyleEntry &entry, ZLTextStyleEntry::Length name, const std::string &value);
 	static const std::vector<std::string> &values(const AttributeMap &map, const std::string &name);
 
 public:
