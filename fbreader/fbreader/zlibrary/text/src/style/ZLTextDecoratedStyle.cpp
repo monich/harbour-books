@@ -125,20 +125,20 @@ short ZLTextForcedStyle::lineStartIndent(const ZLTextStyleEntry::Metrics &metric
 	ZLTextStyleEntry::Length lengthType = rtl ?
 		ZLTextStyleEntry::LENGTH_RIGHT_INDENT :
 		ZLTextStyleEntry::LENGTH_LEFT_INDENT;
-	return
+	return base()->lineStartIndent(metrics, rtl) + (
 		myEntry.lengthSupported(lengthType) ?
 			myEntry.length(lengthType, metrics) :
-			base()->lineStartIndent(metrics, rtl);
+			0);
 }
 
 short ZLTextForcedStyle::lineEndIndent(const ZLTextStyleEntry::Metrics &metrics, bool rtl) const {
 	ZLTextStyleEntry::Length lengthType = rtl ?
 		ZLTextStyleEntry::LENGTH_LEFT_INDENT :
 		ZLTextStyleEntry::LENGTH_RIGHT_INDENT;
-	return
+	return base()->lineEndIndent(metrics, rtl) + (
 		myEntry.lengthSupported(lengthType) ?
 			myEntry.length(lengthType, metrics) :
-			base()->lineEndIndent(metrics, rtl);
+			0);
 }
 
 short ZLTextForcedStyle::spaceBefore(const ZLTextStyleEntry::Metrics &metrics) const {
