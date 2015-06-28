@@ -1,6 +1,6 @@
 TARGET = harbour-books
 CONFIG += sailfishapp link_pkgconfig
-PKGCONFIG += sailfishapp mlite5 expat glib-2.0
+PKGCONFIG += sailfishapp mlite5 glib-2.0
 #QT += dbus
 
 !include(../common.pri)
@@ -106,6 +106,7 @@ SOURCES += \
   src/BooksTextStyle.cpp \
   src/BooksTaskQueue.cpp \
   src/BooksTextView.cpp \
+  src/expat.c \
   src/libudev.c \
   src/main.cpp \
   src/ZLApplication.cpp \

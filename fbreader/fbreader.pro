@@ -1,7 +1,7 @@
 TEMPLATE = lib
 TARGET = fbreader
 CONFIG += staticlib object_parallel_to_source link_pkgconfig
-PKGCONFIG += expat glib-2.0
+PKGCONFIG += glib-2.0
 
 !include(../common.pri)
 
