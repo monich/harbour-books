@@ -446,16 +446,14 @@ void BooksPageWidget::updateSize()
 
 void BooksPageWidget::onWidthChanged()
 {
-    const int w = width();
-    HDEBUG(w);
+    HDEBUG((int)width());
     // Width change will probably be followed by height change
     iResizeTimer->start();
 }
 
 void BooksPageWidget::onHeightChanged()
 {
-    const int h = height();
-    HDEBUG(h);
+    HDEBUG((int)height());
     if (iResizeTimer->isActive()) {
         // Height is usually changed after width, repaint right away
         iResizeTimer->stop();

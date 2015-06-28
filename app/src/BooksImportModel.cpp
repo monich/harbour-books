@@ -122,7 +122,7 @@ QByteArray BooksImportModel::Task::calculateFileHash(QString aPath)
     QByteArray result;
     QFile file(aPath);
     if (file.open(QIODevice::ReadOnly)) {
-        qint64 len;
+        qint64 len = 0;
         QCryptographicHash hash(QCryptographicHash::Md5);
         hash.reset();
         if (!iBuf) iBuf = new char[iBufSize];
