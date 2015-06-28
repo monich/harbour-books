@@ -4,3 +4,6 @@
 [submodule "fbreader/upstream"]
 	path = fbreader/upstream
 	url = https://github.com/geometer/FBReader.git
+[submodule "harbour-lib"]
+	path = harbour-lib
+	url = https://github.com/monich/harbour-lib.git

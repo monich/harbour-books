@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Books
+Name[ru]=Книги
+Comment=E-Book Reader
+Exec=harbour-books
+Icon=harbour-books
+X-Nemo-Application-Type=silica-qt5
