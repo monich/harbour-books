@@ -1,2 +1,6 @@
+* Fri Jul 3 2015 Slava Monich <slava.monich@jolla.com> 1.0.1
+- Improved recovery from infinite formatting loops
+- Fixed one infinite formatting loop
+
 * Sun Jun 28 2015 Slava Monich <slava.monich@jolla.com> 1.0.0
 - Initial version
