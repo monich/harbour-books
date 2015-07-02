@@ -174,7 +174,7 @@ ZLTextLineInfoPtr ZLTextArea::processTextLine(Style &style, const ZLTextWordCurs
 				break;
 		}
 
-		if (newInfo.Width > maxWidth) {
+		if (newInfo.Width > maxWidth && info.Start != info.End) {
 			if (!info.End.equalElementIndex(start)) {
 				break;
 			}
