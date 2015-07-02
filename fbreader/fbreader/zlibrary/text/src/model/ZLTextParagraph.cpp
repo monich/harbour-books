@@ -74,6 +74,28 @@ ZLTextStyleEntry::ZLTextStyleEntry(char *address) {
 	}
 }
 
+void ZLTextStyleEntry::apply(const ZLTextStyleEntry &entry) {
+	for (int i = 0; i < NUMBER_OF_LENGTHS; ++i) {
+		if (entry.lengthSupported((Length)i)) {
+			myLengths[i] = entry.myLengths[i];
+			myMask |= 1 << i;
+		}
+	}
+	if (entry.alignmentTypeSupported()) {
+		setAlignmentType(entry.alignmentType());
+	}
+	if (entry.mySupportedFontModifier) {
+		myFontModifier &= ~entry.mySupportedFontModifier;
+		myFontModifier |= (entry.myFontModifier & entry.mySupportedFontModifier);
+	}
+	if (entry.fontSizeSupported()) {
+		setFontSizeMag(entry.fontSizeMag());
+	}
+	if (entry.fontFamilySupported()) {
+		setFontFamily(entry.fontFamily());
+	}
+}
+
 const shared_ptr<ZLTextParagraphEntry> ZLTextParagraph::Iterator::entry() const {
 	if (myEntry.isNull()) {
 		switch (*myPointer) {

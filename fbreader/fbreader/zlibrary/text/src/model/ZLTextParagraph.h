@@ -96,6 +96,8 @@ public:
 	ZLTextStyleEntry(char *address);
 	~ZLTextStyleEntry();
 
+	void apply(const ZLTextStyleEntry &entry);
+
 	bool isEmpty() const;
 
 	bool lengthSupported(Length name) const;
@@ -336,7 +338,7 @@ inline ZLTextStyleEntry::~ZLTextStyleEntry() {}
 
 inline ZLTextStyleEntry::Metrics::Metrics(int fontSize, int fontXHeight, int fullWidth, int fullHeight) : FontSize(fontSize), FontXHeight(fontXHeight), FullWidth(fullWidth), FullHeight(fullHeight) {}
 
-inline bool ZLTextStyleEntry::isEmpty() const { return myMask == 0; }
+inline bool ZLTextStyleEntry::isEmpty() const { return myMask == 0 && mySupportedFontModifier == 0; }
 
 inline bool ZLTextStyleEntry::lengthSupported(Length name) const { return (myMask & (1 << name)) != 0; }
 inline void ZLTextStyleEntry::setLength(Length name, short length, SizeUnit unit) {

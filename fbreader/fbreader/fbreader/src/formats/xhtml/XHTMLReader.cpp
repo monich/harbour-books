@@ -506,12 +506,12 @@ bool XHTMLReader::readFile(const ZLFile &file, const std::string &referenceName)
 	return readDocument(file);
 }
 
-void XHTMLReader::addStyleEntry(const std::string &tag, const std::string &aClass) {
-	shared_ptr<ZLTextStyleEntry> entry = myStyleSheetTable.control(tag, aClass);
-	if (!entry.isNull()) {
-		myModelReader.addControl(*entry);
-		myStyleEntryStack.push_back(entry);
+shared_ptr<ZLTextStyleEntry> XHTMLReader::addStyleEntry(shared_ptr<ZLTextStyleEntry> entry, shared_ptr<ZLTextStyleEntry> styleEntry) {
+	if (!styleEntry.isNull() && !styleEntry->isEmpty()) {
+		if (entry.isNull()) entry = new ZLTextStyleEntry;
+		entry->apply(*styleEntry);
 	}
+	return entry;
 }
 
 void XHTMLReader::startElementHandler(const char *tag, const char **attributes) {
@@ -536,17 +536,21 @@ void XHTMLReader::startElementHandler(const char *tag, const char **attributes) 
 		action->doAtStart(*this, attributes);
 	}
 
-	const int sizeBefore = myStyleEntryStack.size();
-	addStyleEntry(sTag, "");
-	addStyleEntry("", sClass);
-	addStyleEntry(sTag, sClass);
+	shared_ptr<ZLTextStyleEntry> entry;
+	entry = addStyleEntry(entry, myStyleSheetTable.control(sTag, ""));
+	entry = addStyleEntry(entry, myStyleSheetTable.control("", sClass));
+	entry = addStyleEntry(entry, myStyleSheetTable.control(sTag, sClass));
 	const char *style = attributeValue(attributes, "style");
 	if (style != 0) {
-		shared_ptr<ZLTextStyleEntry> entry = myStyleParser.parseString(style);
+		entry = addStyleEntry(entry, myStyleParser.parseString(style));
+	}
+	if (!entry.isNull()) {
 		myModelReader.addControl(*entry);
 		myStyleEntryStack.push_back(entry);
+		myCSSStack.push_back(1);
+	} else {
+		myCSSStack.push_back(0);
 	}
-	myCSSStack.push_back(myStyleEntryStack.size() - sizeBefore);
 }
 
 void XHTMLReader::endElementHandler(const char *tag) {

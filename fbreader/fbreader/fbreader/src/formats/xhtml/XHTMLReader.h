@@ -73,7 +73,7 @@ private:
 
 	void beginParagraph();
 	void endParagraph();
-	void addStyleEntry(const std::string &tag, const std::string &aClass);
+	static shared_ptr<ZLTextStyleEntry> addStyleEntry(shared_ptr<ZLTextStyleEntry> entry, shared_ptr<ZLTextStyleEntry> styleEntry);
 
 private:
 	BookReader &myModelReader;
