@@ -55,7 +55,7 @@ Dialog {
         DialogHeader {
             id: dialogHeader
             spacing: 0
-            acceptText: (_loading || !importModel.count) ? "" :
+            acceptText: ((_loading || !importModel.count) && !importModel.selectedCount) ? "" :
                 //% "Import %0 book(s)"
                 importModel.selectedCount ?  qsTrId("import-view-import-n-books",importModel.selectedCount).arg(importModel.selectedCount) :
                 //% "Select books"
