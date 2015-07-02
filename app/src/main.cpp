@@ -54,6 +54,16 @@
 
 #include <QGuiApplication>
 
+// If the current task is stuck for too long after being canceled it's
+// probably stuck forever. Let "too long" be 10 seconds.
+#if HARBOUR_DEBUG
+   // But let it get stuck forever in debug build
+#  define TASK_QUEUE_TIMEOUT (-1)
+#else
+   // There's no reason to wait forever in release build though.
+#  define TASK_QUEUE_TIMEOUT (10000)
+#endif
+
 int main(int argc, char **argv)
 {
     QGuiApplication* app = SailfishApp::application(argc, argv);
@@ -85,7 +95,7 @@ int main(int argc, char **argv)
     BooksConfigManager configManager;
     if (ZLibrary::init(argc, argv)) {
         ZLibrary::run(NULL);
-        BooksTaskQueue::waitForDone();
+        BooksTaskQueue::waitForDone(TASK_QUEUE_TIMEOUT);
         ZLibrary::shutdown();
     }
 
