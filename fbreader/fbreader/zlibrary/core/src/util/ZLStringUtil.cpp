@@ -21,6 +21,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <locale.h>
+#include <string.h>
 
 #include "ZLStringUtil.h"
 
@@ -88,6 +89,20 @@ void ZLStringUtil::stripWhiteSpaces(std::string &str) {
 		r_counter--;
 	}
 	str.erase(r_counter, length - r_counter);
+}
+
+std::vector<std::string> ZLStringUtil::splitString(const std::string &str, const char* delim)
+{
+	std::vector<std::string> tokens;
+	char *buf = strdup(str.c_str());
+	char *saveptr;
+	char *token = strtok_r(buf, delim, &saveptr);
+	while (token) {
+		tokens.push_back(std::string(token));
+		token = strtok_r(NULL, delim, &saveptr);
+	}
+	free(buf);
+	return tokens;
 }
 
 std::string ZLStringUtil::printf(const std::string &format, const std::string &arg0) {

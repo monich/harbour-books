@@ -516,6 +516,7 @@ shared_ptr<ZLTextStyleEntry> XHTMLReader::addStyleEntry(shared_ptr<ZLTextStyleEn
 
 void XHTMLReader::startElementHandler(const char *tag, const char **attributes) {
 	static const std::string HASH = "#";
+	static const std::string EMPTY;
 	const char *id = attributeValue(attributes, "id");
 	if (id != 0) {
 		myModelReader.addHyperlinkLabel(myReferenceName + HASH + id);
@@ -524,7 +525,13 @@ void XHTMLReader::startElementHandler(const char *tag, const char **attributes) 
 	const std::string sTag = ZLUnicodeUtil::toLower(tag);
 
 	const char *aClass = attributeValue(attributes, "class");
-	const std::string sClass = (aClass != 0) ? aClass : "";
+	std::vector<std::string> classes;
+	if (aClass != 0) {
+		classes = ZLStringUtil::splitString(aClass, ", \n");
+	}
+	if (classes.empty()) {
+		classes.push_back(EMPTY);
+	}
 
 	shared_ptr<ZLTextStyleEntry> inlineStyle;
 	const char *style = attributeValue(attributes, "style");
@@ -532,11 +539,26 @@ void XHTMLReader::startElementHandler(const char *tag, const char **attributes) 
 	if (style != 0) {
 		inlineStyle = myStyleParser.parseString(style, &pageBreakBefore, &pageBreakAfter);
 	}
-
-	if (pageBreakBefore == B3_TRUE || (pageBreakBefore == B3_UNDEFINED && myStyleSheetTable.doBreakBefore(sTag, sClass))) {
+	if (pageBreakBefore == B3_UNDEFINED) {
+		for (unsigned int i=0; i<classes.size(); i++) {
+			if (myStyleSheetTable.doBreakBefore(sTag, classes[i])) {
+				pageBreakBefore = B3_TRUE;
+				break;
+			}
+		}
+	}
+	if (pageBreakAfter == B3_UNDEFINED) {
+		for (unsigned int i=0; i<classes.size(); i++) {
+			if (myStyleSheetTable.doBreakAfter(sTag, classes[i])) {
+				pageBreakAfter = B3_TRUE;
+				break;
+			}
+		}
+	}
+	if (pageBreakBefore == B3_TRUE) {
 		myModelReader.insertEndOfSectionParagraph();
 	}
-	myDoPageBreakAfterStack.push_back(pageBreakAfter == B3_TRUE || (pageBreakAfter == B3_UNDEFINED && myStyleSheetTable.doBreakAfter(sTag, sClass)));
+	myDoPageBreakAfterStack.push_back(pageBreakAfter == B3_TRUE);
 
 	XHTMLTagAction *action = ourTagActions[sTag];
 	if (action != 0) {
@@ -544,9 +566,14 @@ void XHTMLReader::startElementHandler(const char *tag, const char **attributes) 
 	}
 
 	shared_ptr<ZLTextStyleEntry> entry;
-	entry = addStyleEntry(entry, myStyleSheetTable.control(sTag, ""));
-	entry = addStyleEntry(entry, myStyleSheetTable.control("", sClass));
-	entry = addStyleEntry(entry, myStyleSheetTable.control(sTag, sClass));
+	entry = addStyleEntry(entry, myStyleSheetTable.control(sTag, EMPTY));
+	for (unsigned int i=0; i<classes.size(); i++) {
+		std::string klass = classes[i];
+		entry = addStyleEntry(entry, myStyleSheetTable.control(EMPTY, klass));
+		if (!klass.empty()) {
+			entry = addStyleEntry(entry, myStyleSheetTable.control(sTag, klass));
+		}
+	}
 	entry = addStyleEntry(entry, inlineStyle);
 	if (!entry.isNull()) {
 		myModelReader.addControl(*entry);
