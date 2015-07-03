@@ -55,8 +55,7 @@ private:
 		BROKEN,
 	} myReadState;
 	bool myInsideComment;
-	std::string myTagName;
-	std::string myClassName;
+	std::vector<std::string> mySelectors;
 	StyleSheetTable::AttributeMap myMap;
 
 friend class StyleSheetSingleStyleParser;

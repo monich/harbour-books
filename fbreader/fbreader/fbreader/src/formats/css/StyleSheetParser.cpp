@@ -35,7 +35,7 @@ void StyleSheetTableParser::storeData(const std::string &tagName, const std::str
 shared_ptr<ZLTextStyleEntry> StyleSheetSingleStyleParser::parseString(const char *text, ZLBoolean3 *pageBreakBefore, ZLBoolean3 *pageBreakAfter) {
 	myReadState = ATTRIBUTE_NAME;
 	parse(text, strlen(text), true);
-	shared_ptr<ZLTextStyleEntry> control = StyleSheetTable::createControl(myMap);
+	shared_ptr<ZLTextStyleEntry> control = StyleSheetTable::createControl(NULL, myMap);
 	bool value;
 	if (pageBreakBefore && StyleSheetTable::getPageBreakBefore(myMap, value)) {
 		*pageBreakBefore = value ? B3_TRUE : B3_FALSE;
@@ -58,8 +58,7 @@ void StyleSheetParser::reset() {
 	myAttributeName.erase();
 	myReadState = TAG_NAME;
 	myInsideComment = false;
-	myTagName.erase();
-	myClassName.erase();
+	mySelectors.clear();
 	myMap.clear();
 }
 
@@ -132,11 +131,21 @@ void StyleSheetParser::processControl(const char control) {
 			break;
 		case '}':
 			if (myReadState != BROKEN) {
-				storeData(myTagName, myClassName, myMap);
+				for (unsigned int i=0; i<mySelectors.size(); i++) {
+					std::string selector(mySelectors[i]);
+					std::string tag, klass;
+					const int index = selector.find('.');
+					if (index == -1) {
+						tag = selector;
+					} else {
+						tag = selector.substr(0, index);
+						klass = selector.substr(index + 1);
+					}
+					storeData(tag, klass, myMap);
+				}
 			}
 			myReadState = TAG_NAME;
-			myTagName.erase();
-			myClassName.erase();
+			mySelectors.clear();
 			myMap.clear();
 			break;
 		case ';':
@@ -171,26 +180,16 @@ void StyleSheetParser::processWord(std::string &word) {
 void StyleSheetParser::processWordWithoutComments(const std::string &word) {	
 	switch (myReadState) {
 		case TAG_NAME:
-		{
-			int index = word.find('.');
-			if (index == -1) {
-				if (myTagName.empty()) {
-					myTagName = word;
+			if (!word.empty()) {
+				const unsigned int len = word.length();
+				if (word.at(len-1) == ',') {
+					mySelectors.push_back(word.substr(0, len-1));
 				} else {
-					myTagName += ' ' + word;
-				}
-			} else {
-				if (myTagName.empty()) {
-					myTagName = word.substr(0, index);
-					myClassName = word.substr(index + 1);
-				} else {
-					myTagName += ' ' + word.substr(0, index);
-					myClassName += ' ' + word.substr(index + 1);
+					mySelectors.push_back(word);
 				}
 			}
 			myMap.clear();
 			break;
-		}
 		case ATTRIBUTE_NAME:
 			myAttributeName = word;
 			myMap[myAttributeName].clear();

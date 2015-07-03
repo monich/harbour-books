@@ -30,7 +30,9 @@ bool StyleSheetTable::isEmpty() const {
 void StyleSheetTable::addMap(const std::string &tag, const std::string &aClass, const AttributeMap &map) {
 	if ((!tag.empty() || !aClass.empty()) && !map.empty()) {
 		Key key(tag, aClass);
-		myControlMap[key] = createControl(map);
+		// This will update the existing element if it already exists
+		// or create a new one if it wasn't there yet
+		myControlMap[key] = createControl(myControlMap[key], map);
 		bool value;
 		if (getPageBreakBefore(map, value)) {
 			myPageBreakBeforeMap[key] = value;
@@ -41,20 +43,33 @@ void StyleSheetTable::addMap(const std::string &tag, const std::string &aClass, 
 	}
 }
 
-static void parseLength(const std::string &toParse, short &size, ZLTextStyleEntry::SizeUnit &unit) {
-	if (ZLStringUtil::stringEndsWith(toParse, "%")) {
-		unit = ZLTextStyleEntry::SIZE_UNIT_PERCENT;
-		size = atoi(toParse.c_str());
-	} else if (ZLStringUtil::stringEndsWith(toParse, "em")) {
-		unit = ZLTextStyleEntry::SIZE_UNIT_EM_100;
-		size = (short)(100 * ZLStringUtil::stringToDouble(toParse, 0));
-	} else if (ZLStringUtil::stringEndsWith(toParse, "ex")) {
-		unit = ZLTextStyleEntry::SIZE_UNIT_EX_100;
-		size = (short)(100 * ZLStringUtil::stringToDouble(toParse, 0));
-	} else {
-		unit = ZLTextStyleEntry::SIZE_UNIT_PIXEL;
-		size = atoi(toParse.c_str());
+static bool parseLength(const std::string &toParse, short &size, ZLTextStyleEntry::SizeUnit &unit) {
+	if (!toParse.empty()) {
+		if (ZLStringUtil::stringEndsWith(toParse, "%")) {
+			unit = ZLTextStyleEntry::SIZE_UNIT_PERCENT;
+			size = atoi(toParse.c_str());
+			return true;
+		} else if (ZLStringUtil::stringEndsWith(toParse, "em")) {
+			unit = ZLTextStyleEntry::SIZE_UNIT_EM_100;
+			size = (short)(100 * ZLStringUtil::stringToDouble(toParse, 0));
+			return true;
+		} else if (ZLStringUtil::stringEndsWith(toParse, "ex")) {
+			unit = ZLTextStyleEntry::SIZE_UNIT_EX_100;
+			size = (short)(100 * ZLStringUtil::stringToDouble(toParse, 0));
+			return true;
+		} else if (ZLStringUtil::stringEndsWith(toParse, "px") ||
+			   ZLStringUtil::stringEndsWith(toParse, "pt") ||
+			   ZLStringUtil::stringEndsWith(toParse, "pc")) {
+			unit = ZLTextStyleEntry::SIZE_UNIT_PIXEL;
+			size = atoi(toParse.c_str());
+			return true;
+		} else if (toParse == "0") {
+			unit = ZLTextStyleEntry::SIZE_UNIT_PIXEL;
+			size = 0;
+			return true;
+		}
 	}
+	return false;
 }
 
 void StyleSheetTable::setLength(ZLTextStyleEntry &entry, ZLTextStyleEntry::Length name, const AttributeMap &map, const std::string &attributeName) {
@@ -68,10 +83,9 @@ void StyleSheetTable::setLength(ZLTextStyleEntry &entry, ZLTextStyleEntry::Lengt
 }
 
 void StyleSheetTable::setLength(ZLTextStyleEntry &entry, ZLTextStyleEntry::Length name, const std::string &value) {
-	if (!value.empty()) {
-		short size;
-		ZLTextStyleEntry::SizeUnit unit;
-		parseLength(value, size, unit);
+	short size;
+	ZLTextStyleEntry::SizeUnit unit;
+	if (parseLength(value, size, unit)) {
 		entry.setLength(name, size, unit);
 	}
 }
@@ -129,8 +143,10 @@ const std::vector<std::string> &StyleSheetTable::values(const AttributeMap &map,
 	return emptyVector;
 }
 
-shared_ptr<ZLTextStyleEntry> StyleSheetTable::createControl(const AttributeMap &styles) {
-	shared_ptr<ZLTextStyleEntry> entry = new ZLTextStyleEntry();
+shared_ptr<ZLTextStyleEntry> StyleSheetTable::createControl(shared_ptr<ZLTextStyleEntry> entry, const AttributeMap &styles) {
+	if (entry.isNull()) {
+		entry = new ZLTextStyleEntry();
+	}
 
 	const std::vector<std::string> &alignment = values(styles, "text-align");
 	if (!alignment.empty()) {
@@ -181,6 +197,8 @@ shared_ptr<ZLTextStyleEntry> StyleSheetTable::createControl(const AttributeMap &
 		entry->setFontFamily(fontFamily[0]);
 	}
 
+	short size;
+	ZLTextStyleEntry::SizeUnit unit;
 	const std::vector<std::string> &fontSize = values(styles, "font-size");
 	if (!fontSize.empty()) {
 		std::string value = fontSize[0];
@@ -198,11 +216,21 @@ shared_ptr<ZLTextStyleEntry> StyleSheetTable::createControl(const AttributeMap &
 			entry->setFontSizeMag(2);
 		} else if (value == "xx-large") {
 			entry->setFontSizeMag(3);
-		} else if (value.size() > 1 && value[value.size()-1] == '%') {
-			value.erase(value.size()-1, 1);
-			int percent = atoi(value.c_str());
-			if (percent > 0) {
-				entry->setFontSizeMag((percent - 100)/20);
+		} else {
+			if (parseLength(value, size, unit)) {
+				switch (unit) {
+				case ZLTextStyleEntry::SIZE_UNIT_PIXEL:
+					// What to do with pixels?
+					break;
+				case ZLTextStyleEntry::SIZE_UNIT_EM_100:
+				case ZLTextStyleEntry::SIZE_UNIT_EX_100:
+				case ZLTextStyleEntry::SIZE_UNIT_PERCENT:
+					entry->setFontSizeMag(
+							      (size < 100 && size > 80) ? -1 :
+							      (size > 100 && size < 120) ? 1 :
+							      (size - 100)/20);
+					break;
+				}
 			}
 		}
 	}
@@ -214,21 +242,29 @@ shared_ptr<ZLTextStyleEntry> StyleSheetTable::createControl(const AttributeMap &
 	}
 	switch (margins.size()) {
 	case 1:
-		setLength(*entry, ZLTextStyleEntry::LENGTH_SPACE_BEFORE, margins[0]);
-		setLength(*entry, ZLTextStyleEntry::LENGTH_RIGHT_INDENT, margins[0]);
-		setLength(*entry, ZLTextStyleEntry::LENGTH_SPACE_AFTER,  margins[0]);
-		setLength(*entry, ZLTextStyleEntry::LENGTH_LEFT_INDENT,  margins[0]);
+		if (parseLength(margins[0], size, unit)) {
+			entry->setLength(ZLTextStyleEntry::LENGTH_SPACE_BEFORE, size, unit);
+			entry->setLength(ZLTextStyleEntry::LENGTH_RIGHT_INDENT, size, unit);
+			entry->setLength(ZLTextStyleEntry::LENGTH_SPACE_AFTER, size, unit);
+			entry->setLength(ZLTextStyleEntry::LENGTH_LEFT_INDENT, size, unit);
+		}
 		break;
 	case 2:
-		setLength(*entry, ZLTextStyleEntry::LENGTH_SPACE_BEFORE, margins[0]);
-		setLength(*entry, ZLTextStyleEntry::LENGTH_SPACE_AFTER,  margins[0]);
-		setLength(*entry, ZLTextStyleEntry::LENGTH_RIGHT_INDENT, margins[1]);
-		setLength(*entry, ZLTextStyleEntry::LENGTH_LEFT_INDENT,  margins[1]);
+		if (parseLength(margins[0], size, unit)) {
+			entry->setLength(ZLTextStyleEntry::LENGTH_SPACE_BEFORE, size, unit);
+			entry->setLength(ZLTextStyleEntry::LENGTH_SPACE_AFTER, size, unit);
+		}
+		if (parseLength(margins[1], size, unit)) {
+			entry->setLength(ZLTextStyleEntry::LENGTH_RIGHT_INDENT, size, unit);
+			entry->setLength(ZLTextStyleEntry::LENGTH_LEFT_INDENT, size, unit);
+		}
 		break;
 	case 3:
 		setLength(*entry, ZLTextStyleEntry::LENGTH_SPACE_BEFORE, margins[0]);
-		setLength(*entry, ZLTextStyleEntry::LENGTH_RIGHT_INDENT, margins[1]);
-		setLength(*entry, ZLTextStyleEntry::LENGTH_LEFT_INDENT,  margins[1]);
+		if (parseLength(margins[1], size, unit)) {
+			entry->setLength(ZLTextStyleEntry::LENGTH_RIGHT_INDENT, size, unit);
+			entry->setLength(ZLTextStyleEntry::LENGTH_LEFT_INDENT,  size, unit);
+		}
 		setLength(*entry, ZLTextStyleEntry::LENGTH_SPACE_AFTER,  margins[2]);
 		break;
 	case 4:
