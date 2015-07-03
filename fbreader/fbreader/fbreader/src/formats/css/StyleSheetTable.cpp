@@ -183,24 +183,31 @@ shared_ptr<ZLTextStyleEntry> StyleSheetTable::createControl(const AttributeMap &
 
 	const std::vector<std::string> &fontSize = values(styles, "font-size");
 	if (!fontSize.empty()) {
-		if (fontSize[0] == "xx-small") {
+		std::string value = fontSize[0];
+		if (value == "xx-small") {
 			entry->setFontSizeMag(-3);
-		} else if (fontSize[0] == "x-small") {
+		} else if (value == "x-small") {
 			entry->setFontSizeMag(-2);
-		} else if (fontSize[0] == "small") {
+		} else if (value == "small" || value == "smaller") {
 			entry->setFontSizeMag(-1);
-		} else if (fontSize[0] == "medium") {
+		} else if (value == "medium") {
 			entry->setFontSizeMag(0);
-		} else if (fontSize[0] == "large") {
+		} else if (value == "large" || value == "larger") {
 			entry->setFontSizeMag(1);
-		} else if (fontSize[0] == "x-large") {
+		} else if (value == "x-large") {
 			entry->setFontSizeMag(2);
-		} else if (fontSize[0] == "xx-large") {
+		} else if (value == "xx-large") {
 			entry->setFontSizeMag(3);
+		} else if (value.size() > 1 && value[value.size()-1] == '%') {
+			value.erase(value.size()-1, 1);
+			int percent = atoi(value.c_str());
+			if (percent > 0) {
+				entry->setFontSizeMag((percent - 100)/20);
+			}
 		}
 	}
 
-	std::vector<std::string> margins(values(styles, "margin"));
+	std::vector<std::string> margins = values(styles, "margin");
 	if (!margins.empty() && margins.back() == "!important") {
 		// Ignore the "!important" modifier for now
 		margins.pop_back();
