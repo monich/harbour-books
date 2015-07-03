@@ -213,7 +213,11 @@ shared_ptr<ZLTextStyleEntry> StyleSheetTable::createControl(const AttributeMap &
 		}
 	}
 
-	const std::vector<std::string> &margins = values(styles, "margin");
+	std::vector<std::string> margins(values(styles, "margin"));
+	if (!margins.empty() && margins.back() == "!important") {
+		// Ignore the "!important" modifier for now
+		margins.pop_back();
+	}
 	switch (margins.size()) {
 	case 1:
 		setLength(*entry, ZLTextStyleEntry::LENGTH_SPACE_BEFORE, margins[0]);
