@@ -87,16 +87,12 @@ int BooksBookModel::Data::pickPage(const BooksPos& aPagePos,
             if (it == iPageMarks.end()) {
                 // Two 90-degrees rotations should return the reader
                 // back to the same page. That's what this is about.
-                if (iPageMarks.count() > aPageCount) {
-                    it = qUpperBound(iPageMarks, aPagePos);
-                    page = (int)(it - iPageMarks.begin()) - 1;
-                    HDEBUG("using page" << page << "for" << aPagePos);
-                } else {
-                    it = qLowerBound(iPageMarks, aNextPagePos);
-                    page = (int)(it - iPageMarks.begin());
-                    if (page > 0) page--;
-                    HDEBUG("using page" << page << "for" << aNextPagePos);
-                }
+                const BooksPos& pos = (iPageMarks.count() > aPageCount) ?
+                    aPagePos : aNextPagePos;
+                it = qUpperBound(iPageMarks, pos);
+                page = (int)(it - iPageMarks.begin());
+                if (page > 0) page--;
+                HDEBUG("using page" << page << "for" << pos);
             } else {
                 page = it - iPageMarks.begin();
                 HDEBUG("found" << aPagePos << "at page" << page);
