@@ -21,6 +21,7 @@
 #define __STYLESHEETPARSER_H__
 
 #include "StyleSheetTable.h"
+#include "ZLBoolean3.h"
 
 class ZLInputStream;
 
@@ -76,7 +77,7 @@ private:
 class StyleSheetSingleStyleParser : public StyleSheetParser {
 
 public:
-	shared_ptr<ZLTextStyleEntry> parseString(const char *text);
+	shared_ptr<ZLTextStyleEntry> parseString(const char *text, ZLBoolean3* pageBreakBefore, ZLBoolean3* pageBreakAfter);
 };
 
 #endif /* __STYLESHEETPARSER_H__ */

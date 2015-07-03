@@ -32,10 +32,17 @@ void StyleSheetTableParser::storeData(const std::string &tagName, const std::str
 	myTable.addMap(tagName, className, map);
 }
 
-shared_ptr<ZLTextStyleEntry> StyleSheetSingleStyleParser::parseString(const char *text) {
+shared_ptr<ZLTextStyleEntry> StyleSheetSingleStyleParser::parseString(const char *text, ZLBoolean3 *pageBreakBefore, ZLBoolean3 *pageBreakAfter) {
 	myReadState = ATTRIBUTE_NAME;
 	parse(text, strlen(text), true);
 	shared_ptr<ZLTextStyleEntry> control = StyleSheetTable::createControl(myMap);
+	bool value;
+	if (pageBreakBefore && StyleSheetTable::getPageBreakBefore(myMap, value)) {
+		*pageBreakBefore = value ? B3_TRUE : B3_FALSE;
+	}
+	if (pageBreakAfter && StyleSheetTable::getPageBreakAfter(myMap, value)) {
+		*pageBreakAfter = value ? B3_TRUE : B3_FALSE;
+	}
 	reset();
 	return control;
 }

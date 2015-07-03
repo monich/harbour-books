@@ -31,25 +31,12 @@ void StyleSheetTable::addMap(const std::string &tag, const std::string &aClass, 
 	if ((!tag.empty() || !aClass.empty()) && !map.empty()) {
 		Key key(tag, aClass);
 		myControlMap[key] = createControl(map);
-		const std::vector<std::string> &pbb = values(map, "page-break-before");
-		if (!pbb.empty()) {
-			if ((pbb[0] == "always") ||
-					(pbb[0] == "left") ||
-					(pbb[0] == "right")) {
-				myPageBreakBeforeMap[key] = true;
-			} else if (pbb[0] == "avoid") {
-				myPageBreakBeforeMap[key] = false;
-			}
+		bool value;
+		if (getPageBreakBefore(map, value)) {
+			myPageBreakBeforeMap[key] = value;
 		}
-		const std::vector<std::string> &pba = values(map, "page-break-after");
-		if (!pba.empty()) {
-			if ((pba[0] == "always") ||
-					(pba[0] == "left") ||
-					(pba[0] == "right")) {
-				myPageBreakAfterMap[key] = true;
-			} else if (pba[0] == "avoid") {
-				myPageBreakAfterMap[key] = false;
-			}
+		if (getPageBreakAfter(map, value)) {
+			myPageBreakAfterMap[key] = value;
 		}
 	}
 }
@@ -254,4 +241,36 @@ shared_ptr<ZLTextStyleEntry> StyleSheetTable::createControl(const AttributeMap &
 	setLength(*entry, ZLTextStyleEntry::LENGTH_SPACE_AFTER, styles, "padding-bottom");
 
 	return entry;
+}
+
+bool StyleSheetTable::getPageBreakBefore(const AttributeMap &map, bool &value) {
+	const std::vector<std::string> &pbb = values(map, "page-break-before");
+	if (!pbb.empty()) {
+		if ((pbb[0] == "always") ||
+		    (pbb[0] == "left") ||
+		    (pbb[0] == "right")) {
+			value = true;
+			return true;
+		} else if (pbb[0] == "avoid") {
+			value = false;
+			return true;
+		}
+	}
+	return false;
+}
+
+bool StyleSheetTable::getPageBreakAfter(const AttributeMap &map, bool &value) {
+	const std::vector<std::string> &pba = values(map, "page-break-after");
+	if (!pba.empty()) {
+		if ((pba[0] == "always") ||
+		    (pba[0] == "left") ||
+		    (pba[0] == "right")) {
+			value = true;
+			return true;
+		} else if (pba[0] == "avoid") {
+			value = false;
+			return true;
+		}
+	}
+	return false;
 }

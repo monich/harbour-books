@@ -33,6 +33,8 @@ class StyleSheetTable {
 public:
 	typedef std::map<std::string,std::vector<std::string> > AttributeMap;
 	static shared_ptr<ZLTextStyleEntry> createControl(const AttributeMap &map);
+	static bool getPageBreakBefore(const AttributeMap &map, bool &value);
+	static bool getPageBreakAfter(const AttributeMap &map, bool &value);
 
 private:
 	void addMap(const std::string &tag, const std::string &aClass, const AttributeMap &map);
