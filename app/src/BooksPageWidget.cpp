@@ -363,7 +363,7 @@ void BooksPageWidget::paint(QPainter* aPainter)
 
 bool BooksPageWidget::loading() const
 {
-    return iPage >= 0 && iResetTask && iRenderTask;
+    return iPage >= 0 && (iResetTask || iRenderTask);
 }
 
 void BooksPageWidget::resetView()
