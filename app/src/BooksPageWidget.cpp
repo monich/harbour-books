@@ -165,7 +165,6 @@ BooksPageWidget::BooksPageWidget(QQuickItem* aParent) :
     iSettings(NULL),
     iResetTask(NULL),
     iRenderTask(NULL),
-    iPaintRequest(false),
     iEmpty(false),
     iPage(-1)
 {
@@ -349,8 +348,7 @@ void BooksPageWidget::paint(QPainter* aPainter)
         aPainter->drawImage(0, 0, *iImage);
         iEmpty = false;
     } else if (iPage >= 0 && iPageMark.valid()) {
-        if (!iPaintRequest) {
-            iPaintRequest = true;
+        if (!iRenderTask) {
             HDEBUG("page" << iPage << "(scheduled)");
             scheduleRepaint();
         } else {
@@ -420,11 +418,7 @@ void BooksPageWidget::onResetTaskDone()
     iResetTask->iData = NULL;
     iResetTask->release(this);
     iResetTask = NULL;
-    if (iPaintRequest) {
-        scheduleRepaint();
-    } else {
-        update();
-    }
+    scheduleRepaint();
 }
 
 void BooksPageWidget::onRenderTaskDone()
@@ -434,13 +428,13 @@ void BooksPageWidget::onRenderTaskDone()
     iImage = iRenderTask->iImage;
     iRenderTask->release(this);
     iRenderTask = NULL;
-    iPaintRequest = false;
     update();
 }
 
 void BooksPageWidget::updateSize()
 {
-    HDEBUG(QSize(width(), height()));
+    HDEBUG("page" << iPage << QSize(width(), height()));
+    iImage.reset();
     resetView();
 }
 

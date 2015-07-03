@@ -134,7 +134,6 @@ private:
     shared_ptr<QImage> iImage;
     ResetTask* iResetTask;
     RenderTask* iRenderTask;
-    bool iPaintRequest;
     bool iEmpty;
     int iPage;
 };
