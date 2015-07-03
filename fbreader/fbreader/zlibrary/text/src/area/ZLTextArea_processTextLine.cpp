@@ -124,7 +124,10 @@ ZLTextLineInfoPtr ZLTextArea::processTextLine(Style &style, const ZLTextWordCurs
 	const ZLTextStyleEntry::Metrics metrics(fontSize, fontSize / 2, width(), height());
 	info.StartIndent = style.textStyle()->lineStartIndent(metrics, isRtl());
 	if (isFirstLine) {
-		info.StartIndent += style.textStyle()->firstLineIndentDelta(metrics);
+		const ZLTextAlignmentType align = style.textStyle()->alignment();
+		if (align == ALIGN_LEFT || align == ALIGN_JUSTIFY) {
+			info.StartIndent += style.textStyle()->firstLineIndentDelta(metrics);
+		}
 	}
 	if (!info.NodeInfo.isNull()) {
 		info.StartIndent += (context().stringHeight() + 2) / 3 * 4 * (info.NodeInfo->VerticalLinesStack.size() + 1);
