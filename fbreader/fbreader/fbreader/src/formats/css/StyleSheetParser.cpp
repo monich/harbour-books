@@ -95,7 +95,9 @@ void StyleSheetParser::parse(const char *text, int len, bool final) {
 			}
 			processWord(myWord);
 			myWord.erase();
-			processControl(*ptr);
+			if (!myInsideComment) {
+				processControl(*ptr);
+			}
 			start = ptr + 1;
 		}
 	}
