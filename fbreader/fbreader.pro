@@ -275,23 +275,12 @@ SOURCES += \
   $$FBREADER_SRC/migration/BookInfo.cpp \
   $$FBREADER_SRC/options/FBOptions.cpp \
   $$FBREADER_SRC/options/FBCategoryKey.cpp \
-  $$FBREADER_SRC/libraryActions/AuthorInfoDialog.cpp \
-  $$FBREADER_SRC/libraryActions/LibraryTagActions.cpp \
-  $$FBREADER_SRC/libraryActions/LibraryBookActions.cpp \
-  $$FBREADER_SRC/libraryActions/LibraryAuthorActions.cpp \
-  $$FBREADER_SRC/libraryActions/BooksUtil.cpp \
   $$FBREADER_SRC/fbreader/PreferencesPopupData.cpp \
-  $$FBREADER_SRC/fbreader/FBReaderActions.cpp \
   $$FBREADER_SRC/fbreader/TimeUpdater.cpp \
   $$FBREADER_SRC/fbreader/SearchActions.cpp \
   $$FBREADER_SRC/fbreader/ContentsView.cpp \
-  $$FBREADER_SRC/fbreader/BooksOrderAction.cpp \
   $$FBREADER_SRC/fbreader/BookTextView.cpp \
-  $$FBREADER_SRC/fbreader/FBReaderActionCode.cpp \
   $$FBREADER_SRC/fbreader/RecentBooksPopupData.cpp \
-  $$FBREADER_SRC/fbreader/SearchOnNetworkAction.cpp \
-  $$FBREADER_SRC/fbreader/ScrollingAction.cpp \
-  $$FBREADER_SRC/fbreader/AddBookAction.cpp \
   $$FBREADER_SRC/library/Book.cpp \
   $$FBREADER_SRC/library/Comparators.cpp \
   $$FBREADER_SRC/library/Library.cpp \
@@ -385,11 +374,6 @@ SOURCES += \
 HEADERS += \
   $$FBREADER_SRC/migration/BookInfo.h \
   $$FBREADER_SRC/options/FBOptions.h \
-  $$FBREADER_SRC/libraryActions/LibraryAuthorActions.h \
-  $$FBREADER_SRC/libraryActions/AuthorInfoDialog.h \
-  $$FBREADER_SRC/libraryActions/LibraryBookActions.h \
-  $$FBREADER_SRC/libraryActions/BooksUtil.h \
-  $$FBREADER_SRC/libraryActions/LibraryTagActions.h \
   $$FBREADER_SRC/fbreader/FBView.h \
   $$FBREADER_SRC/fbreader/ReadingState.h \
   $$FBREADER_SRC/fbreader/FBReaderActions.h \
@@ -398,7 +382,6 @@ HEADERS += \
   $$FBREADER_SRC/fbreader/ContentsView.h \
   $$FBREADER_SRC/fbreader/RecentBooksPopupData.h \
   $$FBREADER_SRC/fbreader/FootnoteView.h \
-  $$FBREADER_SRC/fbreader/ScrollingAction.h \
   $$FBREADER_SRC/fbreader/BookTextView.h \
   $$FBREADER_SRC/library/Author.h \
   $$FBREADER_SRC/library/Book.h \
