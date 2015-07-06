@@ -347,7 +347,7 @@ void BooksPageWidget::paint(QPainter* aPainter)
         HDEBUG("page" << iPage);
         aPainter->drawImage(0, 0, *iImage);
         iEmpty = false;
-    } else if (iPage >= 0 && iPageMark.valid()) {
+    } else if (iPage >= 0 && iPageMark.valid() && !iData.isNull()) {
         if (!iRenderTask) {
             HDEBUG("page" << iPage << "(scheduled)");
             scheduleRepaint();
