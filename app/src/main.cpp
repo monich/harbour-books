@@ -64,7 +64,7 @@
 #  define TASK_QUEUE_TIMEOUT (10000)
 #endif
 
-int main(int argc, char **argv)
+Q_DECL_EXPORT int main(int argc, char **argv)
 {
     QGuiApplication* app = SailfishApp::application(argc, argv);
     BOOKS_QML_REGISTER(BooksShelf, "Shelf");
