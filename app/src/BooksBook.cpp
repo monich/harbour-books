@@ -132,6 +132,7 @@ public:
         iStorage(aStorage), iBook(aBook), iCoverMissing(false) {}
 
     bool hasImage() const;
+    QString cachedImagePath() const;
 
 public:
     BooksStorage iStorage;
@@ -143,6 +144,16 @@ public:
 inline bool BooksBook::CoverTask::hasImage() const
 {
     return iCoverImage.width() > 0 && iCoverImage.height() > 0;
+}
+
+QString BooksBook::CoverTask::cachedImagePath() const
+{
+    if (iStorage.isValid()) {
+        return iStorage.configDir().path() + "/" +
+            QString::fromStdString(iBook->file().name(false)) +
+            BOOK_COVER_SUFFIX + "jpg";
+    }
+    return QString();
 }
 
 // ==========================================================================
@@ -244,18 +255,12 @@ void BooksBook::GuessCoverTask::performTask()
         }
     }
 
-    QString coverPath;
-    if (iStorage.isValid()) {
-        coverPath = iStorage.configDir().path() + "/" +
-            QString::fromStdString(iBook->file().name(false)) +
-            BOOK_COVER_SUFFIX + "jpg";
-    }
-
     if (hasImage()) {
         HDEBUG("using image" << iCoverImage.width() << 'x' <<
             iCoverImage.width() << "as cover for" << iBook->title().c_str());
 
         // Save the extracted image
+        QString coverPath(cachedImagePath());
         if (!coverPath.isEmpty() && iCoverImage.save(coverPath)) {
             HDEBUG("saved cover to" << qPrintable(coverPath));
         }
@@ -267,6 +272,7 @@ void BooksBook::GuessCoverTask::performTask()
 
         // Create empty file. Guessing the cover image is an expensive task,
         // we don't want to do it every time the application is started.
+        QString coverPath(cachedImagePath());
         if (!coverPath.isEmpty() &&
             // Check if the book file still exists - the failure could've
             // been caused by the SD-card removal.
@@ -471,6 +477,17 @@ void BooksBook::onLoadCoverTaskDone()
 void BooksBook::onGuessCoverTaskDone()
 {
     HDEBUG(iTitle);
+
+    if (iCoverTask->iCoverMissing && !iCoverImage.isNull()) {
+        // This may happen after the book with custom cover has been moved
+        // between SD-card and the internal storage. Store the custom cover
+        // so that it doesn't get lost. This is a fairly rare situation.
+        QString coverPath(iCoverTask->cachedImagePath());
+        if (!coverPath.isEmpty() && iCoverImage.save(coverPath)) {
+            HDEBUG("saved custom cover to" << qPrintable(coverPath));
+        }
+    }
+
     coverTaskDone();
     iCoverTasksDone = true;
     Q_EMIT loadingCoverChanged();
