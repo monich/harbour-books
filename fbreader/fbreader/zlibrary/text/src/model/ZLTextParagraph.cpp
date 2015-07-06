@@ -87,6 +87,7 @@ void ZLTextStyleEntry::apply(const ZLTextStyleEntry &entry) {
 	if (entry.mySupportedFontModifier) {
 		myFontModifier &= ~entry.mySupportedFontModifier;
 		myFontModifier |= (entry.myFontModifier & entry.mySupportedFontModifier);
+		mySupportedFontModifier |= entry.mySupportedFontModifier;
 	}
 	if (entry.fontSizeSupported()) {
 		setFontSizeMag(entry.fontSizeMag());
