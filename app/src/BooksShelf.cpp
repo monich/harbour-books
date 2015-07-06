@@ -427,6 +427,7 @@ void BooksShelf::CopyTask::performTask()
 
 class BooksShelf::DeleteTask : public BooksTask
 {
+    Q_OBJECT
 public:
     DeleteTask(BooksBook* aBook);
     ~DeleteTask();
@@ -556,6 +557,7 @@ void BooksShelf::onLoadTaskDone()
 {
     HASSERT(iLoadTask);
     HASSERT(iLoadTask == sender());
+    iLoadTask->release(this);
     iLoadTask = NULL;
     Q_EMIT loadingChanged();
 }
@@ -1025,7 +1027,12 @@ void BooksShelf::onCopyTaskDone()
 
 void BooksShelf::onDeleteTaskDone()
 {
-    HVERIFY(iDeleteTasks.removeOne((DeleteTask*)sender()));
+    DeleteTask* task = qobject_cast<DeleteTask*>(sender());
+    HASSERT(task);
+    if (task) {
+        task->release(this);
+        HVERIFY(iDeleteTasks.removeOne(task));
+    }
 }
 
 QHash<int,QByteArray> BooksShelf::roleNames() const
