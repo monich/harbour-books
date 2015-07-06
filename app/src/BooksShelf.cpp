@@ -566,7 +566,7 @@ void BooksShelf::onBookFound(BooksBook* aBook)
 {
     if (iLoadTask && iLoadTask == sender()) {
         beginInsertRows(QModelIndex(), iList.count(), iList.count());
-        iList.append(new Data(this, aBook->retain(), true));
+        iList.append(new Data(this, aBook->retain(), false));
         endInsertRows();
         Q_EMIT bookAdded(aBook);
         Q_EMIT countChanged();
@@ -947,10 +947,15 @@ void BooksShelf::onBookCopyingOutChanged()
 
 void BooksShelf::onBookMovedAway()
 {
-    int row = bookIndex(qobject_cast<BooksBook*>(sender()));
-    if (row >= 0) {
-        HDEBUG(iList.at(row)->name());
-        remove(row);
+    BooksBook* book = qobject_cast<BooksBook*>(sender());
+    HASSERT(book);
+    if (book) {
+        const int row = bookIndex(book);
+        HDEBUG(book->title() << row);
+        if (row >= 0) {
+            HDEBUG(iList.at(row)->name());
+            remove(row);
+        }
     }
 }
 
