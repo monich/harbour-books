@@ -34,6 +34,7 @@ import Sailfish.Silica 1.0
 
 Text {
     color: Theme.primaryColor
+    font.family: Theme.fontFamily
     font.pixelSize: Theme.fontSizeSmall
     horizontalAlignment: Text.AlignHCenter
     verticalAlignment: Text.AlignVCenter
