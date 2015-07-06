@@ -275,7 +275,7 @@ BooksStorageManager::Private::Private() :
     QString homeBooks = QDir::homePath();
     QString homeMount(BooksStorage::Private::mountPoint(homeBooks));
     if (!homeBooks.endsWith('/')) homeBooks += '/';
-    homeBooks += QLatin1String(BOOKS_ROOT_SHELF_DIR);
+    homeBooks += QLatin1String(BOOKS_INTERNAL_ROOT);
     HDEBUG("home mount" << qPrintable(homeMount));
     HDEBUG("home books path" << qPrintable(homeBooks));
 
@@ -297,7 +297,7 @@ BooksStorageManager::Private::Private() :
                     QString dev = entries.at(0);
                     QString path = mount;
                     if (!path.endsWith('/')) path += '/';
-                    path += QLatin1String(BOOKS_ROOT_SHELF_DIR);
+                    path += QLatin1String(BOOKS_REMOVABLE_ROOT);
                     HDEBUG("removable device" << dev << path);
                     iStorageList.append(BooksStorage(dev, path, false));
                 }
@@ -486,7 +486,7 @@ bool BooksStorageManager::scanMounts()
                     if (index < 0) {
                         QString path = mount;
                         if (!path.endsWith('/')) path += '/';
-                        path += QLatin1String(BOOKS_ROOT_SHELF_DIR);
+                        path += QLatin1String(BOOKS_REMOVABLE_ROOT);
                         HDEBUG("new removable device" << dev << path);
                         BooksStorage storage(dev, path, false);
                         iPrivate->iStorageList.append(storage);

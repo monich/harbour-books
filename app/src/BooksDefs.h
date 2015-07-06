@@ -43,7 +43,8 @@
 #define BOOKS_DATA_DIR          BOOKS_DATA_ROOT "/data"
 #define BOOKS_QML_FILE          BOOKS_QML_DIR "/BooksMain.qml"
 
-#define BOOKS_ROOT_SHELF_DIR    "Books"
+#define BOOKS_INTERNAL_ROOT     "Documents/Books"
+#define BOOKS_REMOVABLE_ROOT    "Books"
 
 #define BOOKS_QML_PLUGIN        "harbour.books"
 #define BOOKS_QML_PLUGIN_V1     1
