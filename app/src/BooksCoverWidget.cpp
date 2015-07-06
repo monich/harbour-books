@@ -333,8 +333,7 @@ void BooksCoverWidget::onSizeChanged()
 
 bool BooksCoverWidget::empty() const
 {
-    return !iBook || !iBook->hasCoverImage() ||
-        iScaleTask || iScaledImage.isNull();
+    return !iBook || !iBook->hasCoverImage() || iScaledImage.isNull();
 }
 
 bool BooksCoverWidget::loading() const
@@ -347,7 +346,6 @@ void BooksCoverWidget::scaleImage(bool aWasEmpty)
     const int w = width();
     const int h = height();
 
-    iScaledImage = QImage();
     if (iScaleTask) {
         iScaleTask->release(this);
         iScaleTask = NULL;
@@ -370,14 +368,16 @@ void BooksCoverWidget::scaleImage(bool aWasEmpty)
                 iScaledImage = ScaleTask::scale(iCoverImage, w, h, iStretch);
                 update();
             } else {
-                iScaledImage = QImage();
                 iScaleTask = new ScaleTask(iCoverImage, w, h, iStretch);
                 connect(iScaleTask, SIGNAL(done()), SLOT(onScaleTaskDone()));
                 iTaskQueue->submit(iScaleTask);
             }
         } else {
+            iScaledImage = QImage();
             update();
         }
+    } else {
+        iScaledImage = QImage();
     }
 
     if (aWasEmpty != empty()) {
