@@ -125,34 +125,50 @@ short ZLTextForcedStyle::lineStartIndent(const ZLTextStyleEntry::Metrics &metric
 	ZLTextStyleEntry::Length lengthType = rtl ?
 		ZLTextStyleEntry::LENGTH_RIGHT_INDENT :
 		ZLTextStyleEntry::LENGTH_LEFT_INDENT;
-	return base()->lineStartIndent(metrics, rtl) + (
-		myEntry.lengthSupported(lengthType) ?
-			myEntry.length(lengthType, metrics) :
-			0);
+	if (myEntry.lengthSupported(lengthType)) {
+		const short baseLen = base()->lineStartIndent(metrics, rtl);
+		ZLTextStyleEntry::Metrics adjusted(metrics);
+		adjusted.FullWidth -= baseLen + base()->lineEndIndent(metrics, rtl);
+		return baseLen + myEntry.length(lengthType, adjusted);
+	} else {
+		return base()->lineStartIndent(metrics, rtl);
+	}
 }
 
 short ZLTextForcedStyle::lineEndIndent(const ZLTextStyleEntry::Metrics &metrics, bool rtl) const {
 	ZLTextStyleEntry::Length lengthType = rtl ?
 		ZLTextStyleEntry::LENGTH_LEFT_INDENT :
 		ZLTextStyleEntry::LENGTH_RIGHT_INDENT;
-	return base()->lineEndIndent(metrics, rtl) + (
-		myEntry.lengthSupported(lengthType) ?
-			myEntry.length(lengthType, metrics) :
-			0);
+	if (myEntry.lengthSupported(lengthType)) {
+		const short baseLen = base()->lineEndIndent(metrics, rtl);
+		ZLTextStyleEntry::Metrics adjusted(metrics);
+		adjusted.FullWidth -= baseLen + base()->lineStartIndent(metrics, rtl);
+		return baseLen + myEntry.length(lengthType, adjusted);
+	} else {
+		return base()->lineEndIndent(metrics, rtl);
+	}
 }
 
 short ZLTextForcedStyle::spaceBefore(const ZLTextStyleEntry::Metrics &metrics) const {
-	return
-		myEntry.lengthSupported(ZLTextStyleEntry::LENGTH_SPACE_BEFORE) ?
-			myEntry.length(ZLTextStyleEntry::LENGTH_SPACE_BEFORE, metrics) :
-			base()->spaceBefore(metrics);
+	if (myEntry.lengthSupported(ZLTextStyleEntry::LENGTH_SPACE_BEFORE)) {
+		const short baseSpace = base()->spaceBefore(metrics);
+		ZLTextStyleEntry::Metrics adjusted(metrics);
+		adjusted.FullHeight -= baseSpace + base()->spaceAfter(metrics);
+		return baseSpace + myEntry.length(ZLTextStyleEntry::LENGTH_SPACE_BEFORE, adjusted);
+	} else {
+		return base()->spaceBefore(metrics);
+	}
 }
 
 short ZLTextForcedStyle::spaceAfter(const ZLTextStyleEntry::Metrics &metrics) const {
-	return
-		myEntry.lengthSupported(ZLTextStyleEntry::LENGTH_SPACE_AFTER) ?
-			myEntry.length(ZLTextStyleEntry::LENGTH_SPACE_AFTER, metrics) :
-			base()->spaceAfter(metrics);
+	if (myEntry.lengthSupported(ZLTextStyleEntry::LENGTH_SPACE_AFTER)) {
+		const short baseSpace = base()->spaceBefore(metrics);
+		ZLTextStyleEntry::Metrics adjusted(metrics);
+		adjusted.FullHeight -= baseSpace + base()->spaceBefore(metrics);
+		return baseSpace + myEntry.length(ZLTextStyleEntry::LENGTH_SPACE_AFTER, adjusted);
+	} else {
+		return base()->spaceAfter(metrics);
+	}
 }
 
 short ZLTextForcedStyle::firstLineIndentDelta(const ZLTextStyleEntry::Metrics &metrics) const {
