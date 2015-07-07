@@ -126,7 +126,7 @@ int BooksTextStyle::verticalShift() const
 
 ZLTextAlignmentType BooksTextStyle::alignment() const
 {
-    return ALIGN_JUSTIFY;
+    return ALIGN_LEFT;
 }
 
 double BooksTextStyle::lineSpace() const
