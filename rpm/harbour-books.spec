@@ -17,6 +17,7 @@ BuildRequires:  pkgconfig(Qt5Qml)
 BuildRequires:  pkgconfig(mlite5)
 BuildRequires:  pkgconfig(expat)
 BuildRequires:  pkgconfig(systemd)
+BuildRequires:  file-devel
 BuildRequires:  bzip2-devel
 BuildRequires:  desktop-file-utils
 BuildRequires:  qt5-qttools-linguist

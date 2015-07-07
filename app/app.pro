@@ -108,6 +108,7 @@ SOURCES += \
   src/BooksTextView.cpp \
   src/expat.c \
   src/libudev.c \
+  src/magic.c \
   src/main.cpp \
   src/ZLApplication.cpp \
   src/ZLibrary.cpp

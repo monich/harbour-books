@@ -21,10 +21,14 @@
 #define __ZLUNIXFSMANAGER_H__
 
 #include "../../filesystem/ZLFSManager.h"
+#include <magic.h>
 
 class ZLUnixFSManager : public ZLFSManager {
 
 protected:
+	ZLUnixFSManager();
+	~ZLUnixFSManager();
+
 	void normalizeRealPath(std::string &path) const;
 
 private:
@@ -34,6 +38,7 @@ private:
 	ZLInputStream *createPlainInputStream(const std::string &path) const;
 	ZLOutputStream *createOutputStream(const std::string &path) const;
 	bool removeFile(const std::string &path) const;
+	std::string mimeType(const std::string &path) const;
 
 	ZLFileInfo fileInfo(const std::string &path) const;
 
@@ -43,6 +48,9 @@ private:
 	std::string parentPath(const std::string &path) const;
 
 	bool canRemoveFile(const std::string &path) const;
+
+private:
+	magic_t myMagic;
 };
 
 #endif /* __ZLUNIXFSMANAGER_H__ */

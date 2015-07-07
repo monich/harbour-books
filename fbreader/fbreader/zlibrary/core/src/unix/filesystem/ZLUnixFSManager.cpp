@@ -41,6 +41,19 @@ static std::string getHomeDir() {
 	return (home != 0) ? home : "";
 }
 
+ZLUnixFSManager::ZLUnixFSManager() : myMagic(magic_open(MAGIC_MIME_TYPE)) {
+	if (myMagic && magic_load(myMagic, NULL) != 0) {
+		magic_close(myMagic);
+		myMagic = NULL;
+	}
+}
+
+ZLUnixFSManager::~ZLUnixFSManager() {
+	if (myMagic) {
+		magic_close(myMagic);
+	}
+}
+
 ZLFileInfo ZLUnixFSManager::fileInfo(const std::string &path) const {
 	ZLFileInfo info;
 	struct stat fileStat;
@@ -190,3 +203,12 @@ bool ZLUnixFSManager::canRemoveFile(const std::string &path) const {
 	return access(parentPath(path).c_str(), W_OK) == 0;
 }
 
+std::string ZLUnixFSManager::mimeType(const std::string &path) const {
+	if (myMagic) {
+		const char* type = magic_file(myMagic, path.c_str());
+		if (type) {
+			return std::string(type);
+		}
+	}
+	return std::string();
+}

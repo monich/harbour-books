@@ -32,7 +32,6 @@ private:
 	
 protected:
 	std::string convertFilenameToUtf8(const std::string &name) const;
-	std::string mimeType(const std::string &path) const;
 };
 
 #endif /* __ZLQTFSMANAGER_H__ */
