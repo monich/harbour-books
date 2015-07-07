@@ -106,12 +106,15 @@ SOURCES += \
   src/BooksTextStyle.cpp \
   src/BooksTaskQueue.cpp \
   src/BooksTextView.cpp \
-  src/expat.c \
-  src/libudev.c \
-  src/magic.c \
   src/main.cpp \
   src/ZLApplication.cpp \
   src/ZLibrary.cpp
+
+# Stubs for the libraries not allowed in harbour
+SOURCES += \
+  stubs/libexpat.c \
+  stubs/libmagic.c \
+  stubs/libudev.c
 
 HEADERS += \
   src/BooksBook.h \
