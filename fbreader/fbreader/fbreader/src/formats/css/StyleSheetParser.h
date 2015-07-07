@@ -21,7 +21,6 @@
 #define __STYLESHEETPARSER_H__
 
 #include "StyleSheetTable.h"
-#include "ZLBoolean3.h"
 
 class ZLInputStream;
 
@@ -37,24 +36,27 @@ public:
 	void parse(const char *text, int len, bool final = false);
 
 protected:
-	virtual void storeData(const std::string &tagName, const std::string &className, const StyleSheetTable::AttributeMap &map);
+	virtual void storeData(const std::string &selector, const StyleSheetTable::AttributeMap &map);
 
 private:
 	bool isControlSymbol(const char symbol);
 	void processWord(std::string &word);
-	void processWordWithoutComments(const std::string &word);
+	void processWordWithoutComments(std::string word);
 	void processControl(const char control);
 
 private:
 	std::string myWord;
 	std::string myAttributeName;
 	enum {
+		AT_RULE,
+		AT_BLOCK,
 		TAG_NAME,
 		ATTRIBUTE_NAME,
 		ATTRIBUTE_VALUE,
 		BROKEN,
 	} myReadState;
 	bool myInsideComment;
+	int myAtBlockDepth;
 	std::vector<std::string> mySelectors;
 	StyleSheetTable::AttributeMap myMap;
 
@@ -67,7 +69,7 @@ public:
 	StyleSheetTableParser(StyleSheetTable &table);
 
 private:
-	void storeData(const std::string &tagName, const std::string &className, const StyleSheetTable::AttributeMap &map);
+	void storeData(const std::string &selector, const StyleSheetTable::AttributeMap &map);
 
 private:
 	StyleSheetTable &myTable;
@@ -76,7 +78,7 @@ private:
 class StyleSheetSingleStyleParser : public StyleSheetParser {
 
 public:
-	shared_ptr<ZLTextStyleEntry> parseString(const char *text, ZLBoolean3* pageBreakBefore, ZLBoolean3* pageBreakAfter);
+	StyleSheetTable::Style parseString(const char *text);
 };
 
 #endif /* __STYLESHEETPARSER_H__ */

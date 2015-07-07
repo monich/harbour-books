@@ -34,6 +34,7 @@ public:
 	static void appendNumber(std::string &str, unsigned int n);
 	static void append(std::string &str, const std::vector<std::string> &buffer);
 	static void stripWhiteSpaces(std::string &str);
+	static std::vector<std::string> splitString(const char *str, const char* delim);
 	static std::vector<std::string> splitString(const std::string &str, const char* delim);
 
 	static std::string printf(const std::string &format, const std::string &arg0);
@@ -41,5 +42,9 @@ public:
 	static std::string doubleToString(double value);
 	static double stringToDouble(const std::string &value, double defaultValue);
 };
+
+inline std::vector<std::string> ZLStringUtil::splitString(const std::string &str, const char* delim) {
+	return ZLStringUtil::splitString(str.c_str(), delim);
+}
 
 #endif /* __ZLSTRINGUTIL_H__ */

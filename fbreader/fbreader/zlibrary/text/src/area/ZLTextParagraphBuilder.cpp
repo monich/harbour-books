@@ -108,6 +108,9 @@ void ZLTextParagraphCursor::Builder::fill() {
 				updateBidiLevel(myBaseBidiLevel);
 				myLatestBidiLevel = myBaseBidiLevel;
 				break;
+			case ZLTextParagraphEntry::LINE_BREAK_ENTRY:
+				myElements.push_back(myTextElementPool.LineBreakElement);
+				break;
 		}
 	}
 

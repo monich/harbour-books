@@ -44,6 +44,7 @@ public:
 		STYLE_ENTRY = 5,
 		FIXED_HSPACE_ENTRY = 6,
 		RESET_BIDI_ENTRY = 7,
+		LINE_BREAK_ENTRY = 8
 	};
 
 protected:
@@ -93,16 +94,23 @@ private:
 
 public:
 	ZLTextStyleEntry();
+	ZLTextStyleEntry(const ZLTextStyleEntry &other);
 	ZLTextStyleEntry(char *address);
 	~ZLTextStyleEntry();
 
+	void reset();
 	void apply(const ZLTextStyleEntry &entry);
+	ZLTextStyleEntry &operator = (const ZLTextStyleEntry &other);
 
 	bool isEmpty() const;
 
 	bool lengthSupported(Length name) const;
 	short length(Length name, const Metrics &metrics) const;
 	void setLength(Length name, short length, SizeUnit unit);
+
+	bool opacitySupported() const;
+	unsigned char opacity() const;
+	void setOpacity(unsigned char opacity);
 
 	bool alignmentTypeSupported() const;
 	ZLTextAlignmentType alignmentType() const;
@@ -120,9 +128,12 @@ public:
 	const std::string &fontFamily() const;
 	void setFontFamily(const std::string &fontFamily);
 
-	static const int SUPPORT_ALIGNMENT_TYPE = 1 << NUMBER_OF_LENGTHS;
-	static const int SUPPORT_FONT_SIZE = 1 << (NUMBER_OF_LENGTHS + 1);
-	static const int SUPPORT_FONT_FAMILY = 1 << (NUMBER_OF_LENGTHS + 2);
+	enum {
+		SUPPORT_ALIGNMENT_TYPE = 1 << NUMBER_OF_LENGTHS,
+		SUPPORT_FONT_SIZE = 1 << (NUMBER_OF_LENGTHS + 1),
+		SUPPORT_FONT_FAMILY = 1 << (NUMBER_OF_LENGTHS + 2),
+		SUPPORT_OPACITY = 1 << (NUMBER_OF_LENGTHS + 3)
+	};
 
 private:
 	int myMask;
@@ -130,6 +141,7 @@ private:
 	LengthType myLengths[NUMBER_OF_LENGTHS];
 
 	ZLTextAlignmentType myAlignmentType;
+	unsigned char myOpacity;
 	unsigned char mySupportedFontModifier;
 	unsigned char myFontModifier;
 	signed char myFontSizeMag;
@@ -333,12 +345,15 @@ private:
 inline ZLTextParagraphEntry::ZLTextParagraphEntry() {}
 inline ZLTextParagraphEntry::~ZLTextParagraphEntry() {}
 
-inline ZLTextStyleEntry::ZLTextStyleEntry() : myMask(0), mySupportedFontModifier(0), myFontModifier(0) {}
+inline ZLTextStyleEntry::ZLTextStyleEntry() : myMask(0), mySupportedFontModifier(0) {}
+inline ZLTextStyleEntry::ZLTextStyleEntry(const ZLTextStyleEntry &other) : ZLTextParagraphEntry(), myMask(0), mySupportedFontModifier(0) { apply(other); }
+
 inline ZLTextStyleEntry::~ZLTextStyleEntry() {}
 
 inline ZLTextStyleEntry::Metrics::Metrics(int fontSize, int fontXHeight, int fullWidth, int fullHeight) : FontSize(fontSize), FontXHeight(fontXHeight), FullWidth(fullWidth), FullHeight(fullHeight) {}
 
 inline bool ZLTextStyleEntry::isEmpty() const { return myMask == 0 && mySupportedFontModifier == 0; }
+inline ZLTextStyleEntry &ZLTextStyleEntry::operator = (const ZLTextStyleEntry &other) { reset(); apply(other); return *this; }
 
 inline bool ZLTextStyleEntry::lengthSupported(Length name) const { return (myMask & (1 << name)) != 0; }
 inline void ZLTextStyleEntry::setLength(Length name, short length, SizeUnit unit) {
@@ -347,7 +362,11 @@ inline void ZLTextStyleEntry::setLength(Length name, short length, SizeUnit unit
 	myMask |= 1 << name;
 }
 
-inline bool ZLTextStyleEntry::alignmentTypeSupported() const { return (myMask & SUPPORT_ALIGNMENT_TYPE) == SUPPORT_ALIGNMENT_TYPE; }
+inline bool ZLTextStyleEntry::opacitySupported() const { return (myMask & SUPPORT_OPACITY) != 0; }
+inline unsigned char ZLTextStyleEntry::opacity() const { return myOpacity; }
+inline void ZLTextStyleEntry::setOpacity(unsigned char opacity) { myOpacity = opacity; myMask |= SUPPORT_OPACITY; }
+
+inline bool ZLTextStyleEntry::alignmentTypeSupported() const { return (myMask & SUPPORT_ALIGNMENT_TYPE) != 0; }
 inline ZLTextAlignmentType ZLTextStyleEntry::alignmentType() const { return myAlignmentType; }
 inline void ZLTextStyleEntry::setAlignmentType(ZLTextAlignmentType alignmentType) { myAlignmentType = alignmentType; myMask |= SUPPORT_ALIGNMENT_TYPE; }
 

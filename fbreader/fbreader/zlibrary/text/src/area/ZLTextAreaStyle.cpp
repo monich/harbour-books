@@ -103,6 +103,7 @@ int ZLTextArea::Style::elementWidth(const ZLTextElement &element, unsigned int c
 		case ZLTextElement::AFTER_PARAGRAPH_ELEMENT:
 		case ZLTextElement::EMPTY_LINE_ELEMENT:
 			return metrics.FullWidth + abs(textStyle()->lineStartIndent(metrics, false)) + abs(textStyle()->lineEndIndent(metrics, false)) + abs(textStyle()->firstLineIndentDelta(metrics)) + 1;
+		case ZLTextElement::LINE_BREAK_ELEMENT:
 		case ZLTextElement::FORCED_CONTROL_ELEMENT:
 		case ZLTextElement::CONTROL_ELEMENT:
 		case ZLTextElement::START_REVERSED_SEQUENCE_ELEMENT:
@@ -131,6 +132,7 @@ int ZLTextArea::Style::elementHeight(const ZLTextElement &element, const ZLTextS
 		case ZLTextElement::AFTER_PARAGRAPH_ELEMENT:
 			return - textStyle()->spaceBefore(metrics);
 		case ZLTextElement::EMPTY_LINE_ELEMENT:
+		case ZLTextElement::LINE_BREAK_ELEMENT:
 			return myArea.context().stringHeight();
 		case ZLTextElement::INDENT_ELEMENT:
 		case ZLTextElement::HSPACE_ELEMENT:

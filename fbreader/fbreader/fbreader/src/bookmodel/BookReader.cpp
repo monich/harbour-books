@@ -109,6 +109,12 @@ void BookReader::addFixedHSpace(unsigned char length) {
 	}
 }
 
+void BookReader::addLineBreak() {
+	if (myTextParagraphExists) {
+		myCurrentTextModel->addLineBreak();
+	}
+}
+
 void BookReader::addControl(const ZLTextStyleEntry &entry) {
 	if (myTextParagraphExists) {
 		flushTextBufferToParagraph();

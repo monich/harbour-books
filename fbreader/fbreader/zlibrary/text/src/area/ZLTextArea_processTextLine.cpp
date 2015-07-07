@@ -177,7 +177,11 @@ ZLTextLineInfoPtr ZLTextArea::processTextLine(Style &style, const ZLTextWordCurs
 				break;
 		}
 
-		if (newInfo.Width > maxWidth && info.Start != info.End) {
+		if (elementKind == ZLTextElement::LINE_BREAK_ELEMENT) {
+			newInfo.End.nextWord();
+			newInfo.setTo(info);
+			break;
+		} else if (newInfo.Width > maxWidth && info.Start != info.End) {
 			if (!info.End.equalElementIndex(start)) {
 				break;
 			}
@@ -222,8 +226,7 @@ ZLTextLineInfoPtr ZLTextArea::processTextLine(Style &style, const ZLTextWordCurs
 		}
 	} while (!newInfo.End.equalElementIndex(end));
 
-	if (!newInfo.End.equalElementIndex(end) && useHyphenator &&
-		 style.textStyle()->allowHyphenations()) {
+	if (elementKind != ZLTextElement::LINE_BREAK_ELEMENT && !newInfo.End.equalElementIndex(end) && useHyphenator && style.textStyle()->allowHyphenations()) {
 		const ZLTextElement &element = paragraphCursor[newInfo.End.elementIndex()];
 		if (element.kind() == ZLTextElement::WORD_ELEMENT) {
 			const int startCharIndex = newInfo.End.charIndex();

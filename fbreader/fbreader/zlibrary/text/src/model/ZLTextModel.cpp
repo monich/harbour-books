@@ -214,24 +214,40 @@ void ZLTextModel::addControl(ZLTextKind textKind, bool isStart) {
 }
 
 void ZLTextModel::addControl(const ZLTextStyleEntry &entry) {
-	int len = sizeof(int) + 5 + ZLTextStyleEntry::NUMBER_OF_LENGTHS * (sizeof(short) + 1);
+	int len = sizeof(int) + 2;
+	if (entry.myMask & ((1 << ZLTextStyleEntry::NUMBER_OF_LENGTHS) - 1)) {
+		for (int i = 0; i < ZLTextStyleEntry::NUMBER_OF_LENGTHS; ++i) {
+			if (entry.myMask & (1 << i)) {
+				len += (sizeof(short) + 1);
+			}
+		}
+	}
+	if (entry.opacitySupported()) ++len;
+	if (entry.alignmentTypeSupported()) ++len;
+	if (entry.supportedFontModifier()) ++len;
+	if (entry.fontSizeSupported()) ++len;
 	if (entry.fontFamilySupported()) {
 		len += entry.fontFamily().length() + 1;
 	}
 	myLastEntryStart = myAllocator.allocate(len);
 	char *address = myLastEntryStart;
 	*address++ = ZLTextParagraphEntry::STYLE_ENTRY;
+	*address++ = entry.mySupportedFontModifier;
 	memcpy(address, &entry.myMask, sizeof(int));
 	address += sizeof(int);
-	for (int i = 0; i < ZLTextStyleEntry::NUMBER_OF_LENGTHS; ++i) {
-		*address++ = entry.myLengths[i].Unit;
-		memcpy(address, &entry.myLengths[i].Size, sizeof(short));
-		address += sizeof(short);
+	if (entry.myMask & ((1 << ZLTextStyleEntry::NUMBER_OF_LENGTHS) - 1)) {
+		for (int i = 0; i < ZLTextStyleEntry::NUMBER_OF_LENGTHS; ++i) {
+			if (entry.myMask & (1 << i)) {
+				*address++ = entry.myLengths[i].Unit;
+				memcpy(address, &entry.myLengths[i].Size, sizeof(short));
+				address += sizeof(short);
+			}
+		}
 	}
-	*address++ = entry.mySupportedFontModifier;
-	*address++ = entry.myFontModifier;
-	*address++ = entry.myAlignmentType;
-	*address++ = entry.myFontSizeMag;
+	if (entry.opacitySupported()) *address++ = entry.myOpacity;
+	if (entry.alignmentTypeSupported()) *address++ = entry.myAlignmentType;
+	if (entry.supportedFontModifier()) *address++ = entry.myFontModifier;
+	if (entry.fontSizeSupported()) *address++ = entry.myFontSizeMag;
 	if (entry.fontFamilySupported()) {
 		memcpy(address, entry.fontFamily().data(), entry.fontFamily().length());
 		address += entry.fontFamily().length();
@@ -265,5 +281,11 @@ void ZLTextModel::addImage(const std::string &id, const ZLImageMap &imageMap, sh
 void ZLTextModel::addBidiReset() {
 	myLastEntryStart = myAllocator.allocate(1);
 	*myLastEntryStart = ZLTextParagraphEntry::RESET_BIDI_ENTRY;
+	myParagraphs.back()->addEntry(myLastEntryStart);
+}
+
+void ZLTextModel::addLineBreak() {
+	myLastEntryStart = myAllocator.allocate(1);
+	*myLastEntryStart = ZLTextParagraphEntry::LINE_BREAK_ENTRY;
 	myParagraphs.back()->addEntry(myLastEntryStart);
 }

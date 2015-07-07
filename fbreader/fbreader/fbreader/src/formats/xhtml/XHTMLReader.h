@@ -39,8 +39,8 @@ class XHTMLTagAction {
 public:
 	virtual ~XHTMLTagAction();
 	
-	virtual void doAtStart(XHTMLReader &reader, const char **xmlattributes) = 0;
-	virtual void doAtEnd(XHTMLReader &reader) = 0;
+    virtual void doAtStart(XHTMLReader &reader, const char **xmlattributes);
+    virtual void doAtEnd(XHTMLReader &reader);
 
 protected:
 	static BookReader &bookReader(XHTMLReader &reader);	
@@ -80,13 +80,13 @@ private:
 	std::string myPathPrefix;
 	std::string myReferenceName;
 	std::string myReferenceDirName;
-	bool myPreformatted;
+    int myPreformatted;
 	bool myNewParagraphInProgress;
 	StyleSheetTable myStyleSheetTable;
-	std::vector<int> myCSSStack;
-	std::vector<shared_ptr<ZLTextStyleEntry> > myStyleEntryStack;
-	int myStylesToRemove;
-	std::vector<bool> myDoPageBreakAfterStack;
+    StyleSheetTable::ElementList myElementStack;
+    StyleSheetTable::StyleList myStyleStack;
+    std::vector<unsigned char> myOpacityStack;
+    std::vector<bool> myElementHasContents;
 	bool myCurrentParagraphIsEmpty;
 	StyleSheetSingleStyleParser myStyleParser;
 	shared_ptr<StyleSheetTableParser> myTableParser;
@@ -104,6 +104,7 @@ private:
 	friend class XHTMLTagParagraphAction;
 	friend class XHTMLTagBodyAction;
 	friend class XHTMLTagRestartParagraphAction;
+    friend class XHTMLTagImageAction;
 };
 
 #endif /* __XHTMLREADER_H__ */

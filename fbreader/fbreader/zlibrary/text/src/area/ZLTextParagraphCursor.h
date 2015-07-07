@@ -62,6 +62,7 @@ public:
 	ZLTextElement *BeforeParagraphElement;
 	ZLTextElement *AfterParagraphElement;
 	ZLTextElement *EmptyLineElement;
+	ZLTextElement *LineBreakElement;
 	ZLTextElement *StartReversedSequenceElement;
 	ZLTextElement *EndReversedSequenceElement;
 

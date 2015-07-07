@@ -58,20 +58,37 @@ short ZLTextStyleEntry::length(Length name, const Metrics &metrics) const {
 }
 
 ZLTextStyleEntry::ZLTextStyleEntry(char *address) {
+	mySupportedFontModifier = *address++;
 	memcpy(&myMask, address, sizeof(int));
 	address += sizeof(int);
 	for (int i = 0; i < NUMBER_OF_LENGTHS; ++i) {
-		myLengths[i].Unit = (SizeUnit)*address++;
-		memcpy(&myLengths[i].Size, address, sizeof(short));
-		address += sizeof(short);
+		if (myMask & (1 << i)) {
+			myLengths[i].Unit = (SizeUnit)*address++;
+			memcpy(&myLengths[i].Size, address, sizeof(short));
+			address += sizeof(short);
+		}
 	}
-	mySupportedFontModifier = *address++;
-	myFontModifier = *address++;
-	myAlignmentType = (ZLTextAlignmentType)*address++;
-	myFontSizeMag = (signed char)*address++;
+	if (opacitySupported()) {
+		myOpacity = *address++;
+	}
+	if (alignmentTypeSupported()) {
+		myAlignmentType = (ZLTextAlignmentType)*address++;
+	}
+	if (supportedFontModifier()) {
+		myFontModifier = *address++;
+	}
+	if (fontSizeSupported()) {
+		myFontSizeMag = (signed char)*address++;
+	}
 	if (fontFamilySupported()) {
 		myFontFamily = address;
 	}
+}
+
+void ZLTextStyleEntry::reset() {
+	mySupportedFontModifier = 0;
+	myMask = 0;
+	myFontFamily.clear();
 }
 
 void ZLTextStyleEntry::apply(const ZLTextStyleEntry &entry) {
@@ -80,6 +97,9 @@ void ZLTextStyleEntry::apply(const ZLTextStyleEntry &entry) {
 			myLengths[i] = entry.myLengths[i];
 			myMask |= 1 << i;
 		}
+	}
+	if (entry.opacitySupported()) {
+		setOpacity(entry.opacity());
 	}
 	if (entry.alignmentTypeSupported()) {
 		setAlignmentType(entry.alignmentType());
@@ -171,10 +191,21 @@ void ZLTextParagraph::Iterator::next() {
 			case ZLTextParagraphEntry::STYLE_ENTRY:
 			{
 				int mask;
-				memcpy(&mask, myPointer + 1, sizeof(int));
-				bool withFontFamily = (mask & ZLTextStyleEntry::SUPPORT_FONT_FAMILY) == ZLTextStyleEntry::SUPPORT_FONT_FAMILY;
-				myPointer += sizeof(int) + ZLTextStyleEntry::NUMBER_OF_LENGTHS * (sizeof(short) + 1) + 5;
-				if (withFontFamily) {
+				const unsigned char supportedFontModifier = myPointer[1];
+				memcpy(&mask, myPointer + 2, sizeof(int));
+				myPointer += sizeof(int) + 2;
+				if (mask & ((1 << ZLTextStyleEntry::NUMBER_OF_LENGTHS) - 1)) {
+					for (int i = 0; i < ZLTextStyleEntry::NUMBER_OF_LENGTHS; ++i) {
+						if (mask & (1 << i)) {
+							myPointer += (sizeof(short) + 1);
+						}
+					}
+				}
+				if (mask & ZLTextStyleEntry::SUPPORT_OPACITY) ++myPointer;
+				if (mask & ZLTextStyleEntry::SUPPORT_ALIGNMENT_TYPE) ++myPointer;
+				if (supportedFontModifier) ++myPointer;
+				if (mask & ZLTextStyleEntry::SUPPORT_FONT_SIZE) ++myPointer;
+				if (mask & ZLTextStyleEntry::SUPPORT_FONT_FAMILY) {
 					while (*myPointer != '\0') {
 						++myPointer;
 					}
@@ -186,6 +217,7 @@ void ZLTextParagraph::Iterator::next() {
 				myPointer += 2;
 				break;
 			case ZLTextParagraphEntry::RESET_BIDI_ENTRY:
+			case ZLTextParagraphEntry::LINE_BREAK_ENTRY:
 				++myPointer;
 				break;
 		}

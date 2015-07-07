@@ -46,6 +46,7 @@ ZLTextElementVector::~ZLTextElementVector() {
 			case ZLTextElement::BEFORE_PARAGRAPH_ELEMENT:
 			case ZLTextElement::AFTER_PARAGRAPH_ELEMENT:
 			case ZLTextElement::EMPTY_LINE_ELEMENT:
+			case ZLTextElement::LINE_BREAK_ELEMENT:
 			case ZLTextElement::START_REVERSED_SEQUENCE_ELEMENT:
 			case ZLTextElement::END_REVERSED_SEQUENCE_ELEMENT:
 				break;
@@ -59,6 +60,7 @@ ZLTextElementPool::ZLTextElementPool() {
 	BeforeParagraphElement = new ZLTextSpecialElement(ZLTextElement::BEFORE_PARAGRAPH_ELEMENT);
 	AfterParagraphElement = new ZLTextSpecialElement(ZLTextElement::AFTER_PARAGRAPH_ELEMENT);
 	EmptyLineElement = new ZLTextSpecialElement(ZLTextElement::EMPTY_LINE_ELEMENT);
+	LineBreakElement = new ZLTextSpecialElement(ZLTextElement::LINE_BREAK_ELEMENT);
 	StartReversedSequenceElement = new ZLTextSpecialElement(ZLTextElement::START_REVERSED_SEQUENCE_ELEMENT);
 	EndReversedSequenceElement = new ZLTextSpecialElement(ZLTextElement::END_REVERSED_SEQUENCE_ELEMENT);
 }
@@ -69,6 +71,7 @@ ZLTextElementPool::~ZLTextElementPool() {
 	delete BeforeParagraphElement;
 	delete AfterParagraphElement;
 	delete EmptyLineElement;
+	delete LineBreakElement;
 	delete StartReversedSequenceElement;
 	delete EndReversedSequenceElement;
 }
