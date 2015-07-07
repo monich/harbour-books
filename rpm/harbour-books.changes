@@ -1,3 +1,6 @@
+* Tue Jul 7 2015 Slava Monich <slava.monich@jolla.com> 1.0.3
+- Improved CSS support and XHTML formatting
+
 * Mon Jul 6 2015 Slava Monich <slava.monich@jolla.com> 1.0.2
 - Replaced Books with Documents/Books for internal storage
 
