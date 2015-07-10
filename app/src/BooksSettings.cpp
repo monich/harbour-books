@@ -43,9 +43,11 @@
 #define KEY_FONT_SIZE           "fontSize"
 #define KEY_PAGE_DETAILS        "pageDetails"
 #define KEY_CURRENT_BOOK        "currentBook"
+#define KEY_INVERT_COLORS       "invertColors"
 #define DEFAULT_FONT_SIZE       0
 #define DEFAULT_PAGE_DETAILS    0
 #define DEFAULT_CURRENT_BOOK    QString()
+#define DEFAULT_INVERT_COLORS   false
 
 // ==========================================================================
 // BooksSettings::TextStyle
@@ -191,6 +193,7 @@ BooksSettings::BooksSettings(QObject* aParent) :
     QObject(aParent),
     iFontSize(new MGConfItem(DCONF_PATH KEY_FONT_SIZE, this)),
     iPageDetails(new MGConfItem(DCONF_PATH KEY_PAGE_DETAILS, this)),
+    iInvertColors(new MGConfItem(DCONF_PATH KEY_INVERT_COLORS, this)),
     iCurrentBookPath(new MGConfItem(DCONF_PATH KEY_CURRENT_BOOK, this)),
     iCurrentBook(NULL)
 {
@@ -198,6 +201,7 @@ BooksSettings::BooksSettings(QObject* aParent) :
     updateCurrentBook();
     connect(iFontSize, SIGNAL(valueChanged()), SLOT(onFontSizeValueChanged()));
     connect(iPageDetails, SIGNAL(valueChanged()), SIGNAL(pageDetailsChanged()));
+    connect(iInvertColors, SIGNAL(valueChanged()), SIGNAL(invertColorsChanged()));
     connect(iCurrentBookPath, SIGNAL(valueChanged()), SLOT(onCurrentBookPathChanged()));
 }
 
@@ -237,6 +241,20 @@ BooksSettings::setPageDetails(
 {
     HDEBUG(aValue);
     iPageDetails->set(aValue);
+}
+
+bool
+BooksSettings::invertColors() const
+{
+    return iInvertColors->value(DEFAULT_INVERT_COLORS).toBool();
+}
+
+void
+BooksSettings::setInvertColors(
+    bool aValue)
+{
+    HDEBUG(aValue);
+    iInvertColors->set(aValue);
 }
 
 QObject*

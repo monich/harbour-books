@@ -100,8 +100,26 @@ Item {
         Behavior on opacity { FadeAnimation {} }
     }
 
+    // For some reason this MouseArea receives clicks but not double-click
+    // events. It was easier to reimplement double-click functionality than
+    // to figure out what's wrong with double clicks.
     MouseArea {
         anchors.fill: parent
-        onClicked: view.pageClicked()
+        onClicked: {
+            if (!clickTimer.running) {
+                // If there're no more clicks within DoubleClickInterval
+                // then it's a single click
+                clickTimer.start()
+            } else {
+                // Otherwise it's a double click
+                clickTimer.stop()
+                settings.invertColors = !settings.invertColors
+            }
+        }
+        Timer {
+            id: clickTimer
+            interval: DoubleClickInterval
+            onTriggered: view.pageClicked()
+        }
     }
 }

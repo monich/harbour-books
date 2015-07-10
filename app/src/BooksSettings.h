@@ -46,6 +46,7 @@ class BooksSettings : public QObject
     Q_ENUMS(FontSize)
     Q_PROPERTY(int fontSize READ fontSize WRITE setFontSize NOTIFY fontSizeChanged)
     Q_PROPERTY(int pageDetails READ pageDetails WRITE setPageDetails NOTIFY pageDetailsChanged)
+    Q_PROPERTY(bool invertColors READ invertColors WRITE setInvertColors NOTIFY invertColorsChanged)
     Q_PROPERTY(QObject* currentBook READ currentBook WRITE setCurrentBook NOTIFY currentBookChanged)
     class TextStyle;
 
@@ -66,6 +67,9 @@ public:
 
     shared_ptr<ZLTextStyle> textStyle() const { return iTextStyle; }
 
+    bool invertColors() const;
+    void setInvertColors(bool aValue);
+
     QObject* currentBook() const;
     void setCurrentBook(QObject* aBook);
 
@@ -73,6 +77,7 @@ signals:
     void fontSizeChanged();
     void textStyleChanged();
     void pageDetailsChanged();
+    void invertColorsChanged();
     void currentBookChanged();
 
 private Q_SLOTS:
@@ -86,6 +91,7 @@ private:
 private:
     MGConfItem* iFontSize;
     MGConfItem* iPageDetails;
+    MGConfItem* iInvertColors;
     MGConfItem* iCurrentBookPath;
     shared_ptr<ZLTextStyle> iTextStyle;
     BooksBook* iCurrentBook;

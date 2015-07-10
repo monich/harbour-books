@@ -166,7 +166,11 @@ void ZLibrary::run(ZLApplication* aApp)
 
     QQuickView* view = SailfishApp::createView();
     view->setSource(QUrl::fromLocalFile(qml));
-    view->rootContext()->setContextProperty("PointsPerInch", BOOKS_PPI);
+
+    QQmlContext* root = view->rootContext();
+    root->setContextProperty("PointsPerInch", BOOKS_PPI);
+    root->setContextProperty("DoubleClickInterval",
+        qApp->styleHints()->mouseDoubleClickInterval());
 
     view->show();
     HDEBUG("started");

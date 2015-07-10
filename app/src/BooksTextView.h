@@ -50,9 +50,13 @@ public:
         shared_ptr<ZLTextStyle> aTextStyle,
         BooksMargins aMargin);
 
+    static const ZLColor DEFAULT_BACKGROUND;
+    static const ZLColor INVERTED_BACKGROUND;
+
 public:
     BooksPos position() const;
     const BooksPos rewind();
+    void setInvertColors(bool aInvertColors);
     void gotoPosition(const BooksPos& aPos);
     bool nextPage();
     void paint();
@@ -74,16 +78,16 @@ public:
     virtual ZLColor color(const std::string &style = std::string()) const;
     virtual bool isSelectionEnabled() const;
 
-public:
-    BooksMargins iMargins;
-    ZLColor iBackgroundColor;
-
 private:
+    BooksMargins iMargins;
+    bool iInvertColors;
     std::string iCaption;
     shared_ptr<ZLTextStyle> iTextStyle;
 };
 
 inline BooksPos BooksTextView::position() const
     { return BooksPos(textArea().startCursor()); }
+inline void BooksTextView::setInvertColors(bool aInvertColors)
+    { iInvertColors = aInvertColors; }
 
 #endif // BOOKS_TEXT_VIEW_H

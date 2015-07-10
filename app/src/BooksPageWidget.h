@@ -109,6 +109,7 @@ private Q_SLOTS:
     void onBookModelPageMarksChanged();
     void onBookModelLoadingChanged();
     void onTextStyleChanged();
+    void onInvertColorsChanged();
     void onResetTaskDone();
     void onRenderTaskDone();
 
@@ -118,6 +119,7 @@ private:
     void resetView();
     void scheduleRepaint();
     void cancelRepaint();
+    bool invertColors() const;
 
 private:
     class ResetTask;
@@ -137,5 +139,8 @@ private:
     bool iEmpty;
     int iPage;
 };
+
+inline bool BooksPageWidget::invertColors() const
+    { return iSettings && iSettings->invertColors(); }
 
 #endif // BOOKS_PAGE_WIDGET_H

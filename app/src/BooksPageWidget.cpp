@@ -51,7 +51,7 @@ public:
     bool paint(QPainter* aPainter);
 
 public:
-    shared_ptr<ZLView> iView;
+    shared_ptr<BooksTextView> iView;
     shared_ptr<ZLTextModel> iModel;
     BooksPaintContext iPaintContext;
 };
@@ -169,7 +169,7 @@ BooksPageWidget::BooksPageWidget(QQuickItem* aParent) :
     iPage(-1)
 {
     setFlag(ItemHasContents, true);
-    setFillColor(Qt::white);
+    setFillColor(qtColor(BooksTextView::DEFAULT_BACKGROUND));
     iResizeTimer->setSingleShot(true);
     iResizeTimer->setInterval(0);
     connect(iResizeTimer, SIGNAL(timeout()), SLOT(onResizeTimeout()));
@@ -220,17 +220,36 @@ void BooksPageWidget::setModel(BooksBookModel* aModel)
 void BooksPageWidget::setSettings(BooksSettings* aSettings)
 {
     if (iSettings != aSettings) {
+        const bool colorsWereInverted = invertColors();
         shared_ptr<ZLTextStyle> oldTextStyle(iTextStyle);
         if (iSettings) iSettings->disconnect(this);
         iSettings = aSettings;
         if (iSettings) {
             iTextStyle = iSettings->textStyle();
-            connect(iSettings, SIGNAL(textStyleChanged()), SLOT(onTextStyleChanged()));
+            connect(iSettings,
+                SIGNAL(textStyleChanged()),
+                SLOT(onTextStyleChanged()));
+            connect(iSettings,
+                SIGNAL(invertColorsChanged()),
+                SLOT(onInvertColorsChanged()));
         } else {
             iTextStyle = BooksTextStyle::defaults();
         }
+        const bool colorsAreInverted = invertColors();
+        if (colorsWereInverted != colorsAreInverted) {
+            setFillColor(qtColor(colorsAreInverted ?
+                BooksTextView::INVERTED_BACKGROUND :
+                BooksTextView::DEFAULT_BACKGROUND));
+        }
         if (!BooksTextStyle::equalLayout(oldTextStyle, iTextStyle)) {
             resetView();
+        } else if (colorsWereInverted != colorsAreInverted) {
+            if (!iData.isNull() && !iData->iView.isNull()) {
+                iData->iView->setInvertColors(colorsAreInverted);
+                scheduleRepaint();
+            } else {
+                update();
+            }
         }
         Q_EMIT settingsChanged();
     }
@@ -239,8 +258,19 @@ void BooksPageWidget::setSettings(BooksSettings* aSettings)
 void BooksPageWidget::onTextStyleChanged()
 {
     HDEBUG(iPage);
+    HASSERT(sender() == iSettings);
     iTextStyle = iSettings->textStyle();
     resetView();
+}
+
+void BooksPageWidget::onInvertColorsChanged()
+{
+    HDEBUG(iPage);
+    HASSERT(sender() == iSettings);
+    if (!iData.isNull() && !iData->iView.isNull()) {
+        iData->iView->setInvertColors(iSettings->invertColors());
+        scheduleRepaint();
+    }
 }
 
 void BooksPageWidget::onBookModelChanged()
@@ -402,8 +432,11 @@ void BooksPageWidget::scheduleRepaint()
 {
     BooksLoadingSignalBlocker block(this);
     cancelRepaint();
-    if (width() > 0 && height() > 0 && !iData.isNull()) {
-        iRenderTask = new RenderTask(iData, width(), height());
+    const int w = width();
+    const int h = height();
+    if (w > 0 && h > 0 && !iData.isNull() && !iData->iView.isNull()) {
+        iData->iView->setInvertColors(invertColors());
+        iRenderTask = new RenderTask(iData, w, h);
         iTaskQueue->submit(iRenderTask, this, SLOT(onRenderTaskDone()));
     } else {
         update();

@@ -34,9 +34,10 @@
 #include "BooksTextView.h"
 #include "BooksTextStyle.h"
 
-#include "options/FBOptions.h"
-
 #define SUPER ZLTextView
+
+const ZLColor BooksTextView::DEFAULT_BACKGROUND(255, 255, 255);
+const ZLColor BooksTextView::INVERTED_BACKGROUND(0, 0, 0);
 
 BooksTextView::BooksTextView(
     ZLPaintContext& aContext,
@@ -44,7 +45,7 @@ BooksTextView::BooksTextView(
     BooksMargins aMargins) :
     SUPER(aContext),
     iMargins(aMargins),
-    iBackgroundColor(255, 255, 255),
+    iInvertColors(false),
     iTextStyle(aTextStyle)
 {
 }
@@ -81,12 +82,30 @@ int BooksTextView::bottomMargin() const
 
 ZLColor BooksTextView::backgroundColor() const
 {
-    return iBackgroundColor;
+    return iInvertColors ? INVERTED_BACKGROUND : DEFAULT_BACKGROUND;
 }
 
-ZLColor BooksTextView::color(const std::string &colorStyle) const
+ZLColor BooksTextView::color(const std::string &aStyle) const
 {
-    return FBOptions::Instance().colorOption(colorStyle).value();
+    static const std::string INTERNAL_HYPERLINK("internal");
+    static const std::string EXTERNAL_HYPERLINK("external");
+    static const std::string BOOK_HYPERLINK("book");
+
+    if (aStyle == INTERNAL_HYPERLINK) {
+        return ZLColor(33, 96, 180);
+    } else if (aStyle == EXTERNAL_HYPERLINK) {
+        return ZLColor(33, 96, 180);
+    } else if (aStyle == BOOK_HYPERLINK) {
+        return ZLColor(23, 68, 128);
+    } else if (aStyle == ZLTextStyle::SELECTION_BACKGROUND) {
+        return ZLColor(82, 131, 194);
+    } else if (aStyle == ZLTextStyle::HIGHLIGHTED_TEXT) {
+        return ZLColor(60, 139, 255);
+    } else if (iInvertColors) {
+        return ZLColor(255, 255, 255);
+    } else {
+        return ZLColor(0, 0, 0);
+    }
 }
 
 shared_ptr<ZLTextStyle> BooksTextView::baseStyle() const
