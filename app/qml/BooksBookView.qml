@@ -43,8 +43,7 @@ SilicaFlickable {
     signal pageClicked(var page)
 
     property int _currentPage: bookListWatcher.currentIndex
-    property bool _loading: minLoadingDelay.running || !bookModel.pageCount
-    property bool _pagerVisible: (_currentState.pager && book && bookModel.pageCount) ? 1 : 0
+    property bool _loading: minLoadingDelay.running || bookModel.loading
     property var _currentState: _visibilityStates[settings.pageDetails % _visibilityStates.length]
     readonly property var _visibilityStates: [
         { pager: false, page: false, title: false, tools: false },
@@ -204,50 +203,45 @@ SilicaFlickable {
         }
         pageCount: bookModel.pageCount
         width: parent.width
-        opacity: _pagerVisible ? 1 : 0
-        visible: opacity > 0
+        opacity: _currentState.pager ? 1 : 0
+        visible: opacity > 0 && book && bookModel.pageCount && !_loading
         onPageChanged: bookView.jumpTo(page)
         Behavior on opacity { FadeAnimation {} }
     }
 
-    Column {
-        id: loadingAnimation
+    BusyIndicator {
+        id: busyIndicator
+        anchors.centerIn: parent
+        size: BusyIndicatorSize.Large
+        running: _loading
+    }
+    BooksFitLabel {
+        anchors {
+            fill: busyIndicator
+            margins: Theme.paddingMedium
+        }
+        maxFontSize: Theme.fontSizeMedium
+        verticalAlignment: Text.AlignVCenter
+        horizontalAlignment: Text.AlignHCenter
+        color: Theme.highlightColor
+        text: bookModel.progress > 0 ? bookModel.progress : ""
+        visible: opacity > 0
+        opacity: (_loading && bookModel.progress) > 0 ? 1 : 0
+        Behavior on opacity { FadeAnimation {} }
+    }
+    Label {
+        anchors {
+            top: busyIndicator.bottom
+            topMargin: Theme.paddingLarge
+            horizontalCenter: busyIndicator.horizontalCenter
+
+        }
+        horizontalAlignment: Text.AlignHCenter
+        color: Theme.highlightColor
         opacity: _loading ? 1 : 0
         visible: opacity > 0
-        anchors.centerIn: parent
-        spacing: Theme.paddingLarge
         Behavior on opacity { FadeAnimation {} }
-        Item {
-            width: busyIndicator.width
-            height: busyIndicator.height
-            anchors.horizontalCenter: parent.horizontalCenter
-            BusyIndicator {
-                id: busyIndicator
-                anchors.centerIn: parent
-                size: BusyIndicatorSize.Large
-                running: _loading
-            }
-            BooksFitLabel {
-                anchors {
-                    fill: parent
-                    margins: Theme.paddingMedium
-                }
-                maxFontSize: Theme.fontSizeMedium
-                verticalAlignment: Text.AlignVCenter
-                horizontalAlignment: Text.AlignHCenter
-                color: Theme.highlightColor
-                text: bookModel.progress > 0 ? bookModel.progress : ""
-                visible: opacity > 0
-                opacity: bookModel.progress > 0 ? 1 : 0
-                Behavior on opacity { FadeAnimation {} }
-            }
-        }
-        Label {
-            anchors.horizontalCenter: parent.horizontalCenter
-            horizontalAlignment: Text.AlignHCenter
-            color: Theme.highlightColor
-            //% "Loading..."
-           text: qsTrId("book-view-loading")
-        }
+        //% "Loading..."
+        text: qsTrId("book-view-loading")
     }
 }

@@ -403,19 +403,32 @@ void BooksBookModel::setSize(QSize aSize)
             HDEBUG("size didn't change");
         } else if (iData2 && iData2->iWidth == w && iData2->iHeight == h) {
             HDEBUG("switching to backup layout");
-            const int oldPageCount(pageCount());
-            BooksPos page1 = pageMark(iCurrentPage);
-            BooksPos page2 = pageMark(iCurrentPage+1);
+            const int oldModelPageCount = pageCount();
+            int oldPageCount;
+            BooksPos page1, page2;
+            if (iTask) {
+                // Layout has been switched back before the paging task
+                // has completed
+                HDEBUG("not so fast please...");
+                oldPageCount = iTask->iOldPageCount;
+                page1 = iTask->iPagePos;
+                page2 = iTask->iNextPagePos;
+            } else {
+                oldPageCount = oldModelPageCount;
+                page1 = pageMark(iCurrentPage);
+                page2 = pageMark(iCurrentPage+1);
+            }
             Data* tmp = iData;
             iData = iData2;
             iData2 = tmp;
             if (iData) {
                 // Cancel unnecessary paging task
                 if (iTask) {
+                    BooksLoadingSignalBlocker block(this);
                     iTask->release(this);
                     iTask = NULL;
                 }
-                updateModel(oldPageCount);
+                updateModel(oldModelPageCount);
                 Q_EMIT pageMarksChanged();
                 Q_EMIT jumpToPage(iData->pickPage(page1, page2, oldPageCount));
             } else {
@@ -459,6 +472,8 @@ void BooksBookModel::startReset(bool aFullReset)
     iData = NULL;
 
     if (iBook && width() > 0 && height() > 0) {
+        HDEBUG("starting" << qPrintable(QString("%1x%2").arg(width()).
+            arg(height())) << "paging");
         iTask = new Task(this, iBook->bookRef(), thisPage, nextPage,
             iBook->lastPos(), oldPageCount);
         iTaskQueue->submit(iTask);
@@ -483,7 +498,9 @@ void BooksBookModel::startReset(bool aFullReset)
 
 void BooksBookModel::onResetProgress(int aProgress)
 {
-    if (iTask && aProgress > iProgress) {
+    // progress -> onResetProgress is a queued connection, we may received
+    // this event from the task that has already been canceled.
+    if (iTask == sender() && aProgress > iProgress) {
         iProgress = aProgress;
         Q_EMIT progressChanged();
     }
