@@ -51,6 +51,7 @@
 
 #include <QGuiApplication>
 #include <QStandardPaths>
+#include <QStyleHints>
 #include <QQuickView>
 #include <QQmlContext>
 
