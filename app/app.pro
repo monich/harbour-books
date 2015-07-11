@@ -70,6 +70,7 @@ INSTALLS += formats
 CONFIG += sailfishapp_i18n sailfishapp_i18n_idbased
 TRANSLATIONS += \
     translations/harbour-books.ts \
+    translations/harbour-books-sv.ts \
     translations/harbour-books-ru.ts
 
 INCLUDEPATH += \

@@ -2,6 +2,7 @@
 Type=Application
 Name=Books
 Name[ru]=Книги
+Name[sv]=Böcker
 Comment=E-Book Reader
 Exec=harbour-books
 Icon=harbour-books
