@@ -1,6 +1,7 @@
 [Desktop Entry]
 Type=Application
 Name=Books
+Name[fi]=Kirjat
 Name[ru]=Книги
 Name[sv]=Böcker
 Comment=E-Book Reader
