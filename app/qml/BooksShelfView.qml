@@ -36,7 +36,6 @@ import harbour.books 1.0
 SilicaFlickable {
     id: shelfView
 
-    property variant settings
     property int shelfIndex
     property bool singleStorage
     property bool removableStorage

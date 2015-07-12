@@ -39,19 +39,18 @@ Page {
     allowedOrientations: window.allowedOrientations
 
     //property variant shelf
-    property variant settings
     property variant currentShelf: storageView.currentShelf
 
     property Item _bookView
 
     function createBookViewIfNeeded() {
-        if (settings.currentBook && !_bookView) {
+        if (globalSettings.currentBook && !_bookView) {
             _bookView = bookViewComponent.createObject(root)
         }
     }
 
     Connections {
-        target: settings
+        target: globalSettings
         onCurrentBookChanged: createBookViewIfNeeded()
     }
 
@@ -61,9 +60,8 @@ Page {
             anchors.fill: parent
             opacity: book ? 1 : 0
             visible: opacity > 0
-            settings: root.settings
-            book: settings.currentBook ? settings.currentBook : null
-            onCloseBook: settings.currentBook = null
+            book: globalSettings.currentBook ? globalSettings.currentBook : null
+            onCloseBook: globalSettings.currentBook = null
             Behavior on opacity { FadeAnimation {} }
         }
     }
@@ -71,11 +69,10 @@ Page {
     BooksStorageView {
         id: storageView
         anchors.fill: parent
-        settings: root.settings
-        opacity: settings.currentBook ? 0 : 1
+        opacity: globalSettings.currentBook ? 0 : 1
         visible: opacity > 0
         Behavior on opacity { FadeAnimation {} }
-        onOpenBook: settings.currentBook = book
+        onOpenBook: globalSettings.currentBook = book
     }
 
     Component.onCompleted: createBookViewIfNeeded()

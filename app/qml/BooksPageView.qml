@@ -42,7 +42,6 @@ Item {
     property alias rightMargin: widget.rightMargin
     property alias topMargin: widget.topMargin
     property alias bottomMargin: widget.bottomMargin
-    property alias settings: widget.settings
     property alias title: titleLabel.text
     property bool titleVisible
     property bool pageNumberVisible
@@ -53,6 +52,7 @@ Item {
     PageWidget {
         id: widget
         anchors.fill: parent
+        settings: globalSettings
         model: bookModel
     }
 
@@ -113,7 +113,7 @@ Item {
             } else {
                 // Otherwise it's a double click
                 clickTimer.stop()
-                settings.invertColors = !settings.invertColors
+                globalSettings.invertColors = !globalSettings.invertColors
             }
         }
         Timer {

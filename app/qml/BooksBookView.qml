@@ -37,14 +37,13 @@ SilicaFlickable {
     id: root
 
     property variant book
-    property variant settings
 
     signal closeBook()
     signal pageClicked(var page)
 
     property int _currentPage: bookListWatcher.currentIndex
     property bool _loading: minLoadingDelay.running || bookModel.loading
-    property var _currentState: _visibilityStates[settings.pageDetails % _visibilityStates.length]
+    property var _currentState: _visibilityStates[globalSettings.pageDetails % _visibilityStates.length]
     readonly property var _visibilityStates: [
         { pager: false, page: false, title: false, tools: false },
         { pager: false, page: true,  title: true,  tools: false },
@@ -56,22 +55,22 @@ SilicaFlickable {
             id: defaultFontMenuItem
             //% "Use default fonts"
             text: qsTrId("book-font-default")
-            enabled: settings.fontSize != Settings.DefaultFontSize
-            onClicked: settings.fontSize = Settings.DefaultFontSize
+            enabled: globalSettings.fontSize != Settings.DefaultFontSize
+            onClicked: globalSettings.fontSize = Settings.DefaultFontSize
         }
         MenuItem {
             id: smallerFontMenuItem
             //% "Use smaller fonts"
             text: qsTrId("book-font-smaller")
-            enabled: settings.fontSize >= Settings.MinFontSize
-            onClicked: settings.fontSize -= 1
+            enabled: globalSettings.fontSize >= Settings.MinFontSize
+            onClicked: globalSettings.fontSize -= 1
         }
         MenuItem {
             id: largerFontMenuItem
             //% "Use larger fonts"
             text: qsTrId("book-font-larger")
-            enabled: settings.fontSize <= Settings.MaxFontSize
-            onClicked: settings.fontSize += 1
+            enabled: globalSettings.fontSize <= Settings.MaxFontSize
+            onClicked: globalSettings.fontSize += 1
         }
         MenuItem {
             //% "Back to library"
@@ -115,7 +114,6 @@ SilicaFlickable {
         rightMargin: Theme.horizontalPageMargin
         topMargin: Theme.itemSizeSmall
         bottomMargin: Theme.itemSizeSmall
-        settings: root.settings
         onJumpToPage: bookView.jumpTo(index)
         onCurrentPageChanged: {
             if (currentPage >= 0 && bookView._jumpingTo < 0) {
@@ -150,7 +148,6 @@ SilicaFlickable {
             height: bookView.height
             model: bookModel
             page: index
-            settings: root.settings
             leftMargin: bookModel.leftMargin
             rightMargin: bookModel.rightMargin
             topMargin: bookModel.topMargin
@@ -160,7 +157,7 @@ SilicaFlickable {
             title: bookModel.title
             onPageClicked: {
                 root.pageClicked(index)
-                settings.pageDetails = (settings.pageDetails+ 1) % _visibilityStates.length
+                globalSettings.pageDetails = (globalSettings.pageDetails+ 1) % _visibilityStates.length
             }
         }
 

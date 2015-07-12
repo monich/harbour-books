@@ -37,7 +37,6 @@ SilicaFlickable {
     id: storageView
     interactive: !dragInProgress
 
-    property variant settings
     property bool editMode: false
 
     signal openBook(var book)
@@ -149,7 +148,6 @@ SilicaFlickable {
             height: storageList.height
             cellWidth: storageView._cellWidth
             cellHeight: storageView._cellHeight
-            settings: storageView.settings
             singleStorage: storageModel.count < 2
             editMode: storageView.editMode
             deleteAllRequest: model.deleteAllRequest

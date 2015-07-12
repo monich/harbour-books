@@ -41,10 +41,7 @@ ApplicationWindow {
 
     Settings { id: globalSettings }
 
-    initialPage: BooksMainPage {
-        id: mainPage
-        settings: globalSettings
-    }
+    initialPage: BooksMainPage { id: mainPage }
 
     cover: Component {
         BooksCoverPage {
