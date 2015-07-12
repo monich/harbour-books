@@ -254,4 +254,30 @@ SilicaFlickable {
         id: startAnimationTimer
         interval: 2000
     }
+
+    Loader {
+        id: leftSwipeHintLoader
+        anchors.fill: parent
+        active: globalHints.storageLeftSwipe < MaximumHintCount || running
+        property bool running
+        sourceComponent: Component {
+            BooksStorageLeftSwipeHint {
+                property bool hintCanBeEnabled: !_loading &&
+                    storageView.visible &&
+                    shelfIndex == storageListWatcher.currentIndex &&
+                    (shelfIndex+1) < storageModel.count &&
+                    globalHints.storageLeftSwipe < MaximumHintCount
+
+                hintEnabled: hintCanBeEnabled && !hintDelayTimer.running
+                onHintShown: globalHints.storageLeftSwipe++
+                onHintRunningChanged: leftSwipeHintLoader.running = hintRunning
+                onHintCanBeEnabledChanged: if (hintCanBeEnabled) hintDelayTimer.restart()
+                Component.onCompleted: if (hintCanBeEnabled) hintDelayTimer.restart()
+                Timer {
+                    id: hintDelayTimer
+                    interval: 1000
+                }
+            }
+        }
+    }
 }

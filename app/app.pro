@@ -94,6 +94,7 @@ SOURCES += \
   src/BooksCoverModel.cpp \
   src/BooksCoverWidget.cpp \
   src/BooksDialogManager.cpp \
+  src/BooksHints.cpp \
   src/BooksImportModel.cpp \
   src/BooksListWatcher.cpp \
   src/BooksLoadingProperty.cpp \
@@ -126,6 +127,7 @@ HEADERS += \
   src/BooksCoverWidget.h \
   src/BooksDefs.h \
   src/BooksDialogManager.h \
+  src/BooksHints.h \
   src/BooksImportModel.h \
   src/BooksItem.h \
   src/BooksListWatcher.h \

@@ -54,6 +54,10 @@
         <source>Delete all books</source>
         <translation>Ta bort alla böcker</translation>
     </message>
+    <message id="storage-view-swipe-left-hint">
+        <source>Swipe left to see what&apos;s on the SD-card</source>
+        <translation>Svep åt vänster för att se vad som finns på SD-kortet</translation>
+    </message>
     <message id="import-view-import-n-books" numerus="yes">
         <source>Import %0 book(s)</source>
         <translation>

@@ -31,37 +31,32 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BOOKS_DEFS_H
-#define BOOKS_DEFS_H
+#ifndef BOOKS_HINTS_H
+#define BOOKS_HINTS_H
 
-#include <QString>
+#include "BooksTypes.h"
+#include <QtQml>
 
-#define BOOKS_APP_NAME          "harbour-books"
-#define BOOKS_DCONF_ROOT        "/apps/" BOOKS_APP_NAME "/"
-#define BOOKS_DATA_ROOT         "usr/share/" BOOKS_APP_NAME
-#define BOOKS_QML_DIR           BOOKS_DATA_ROOT "/qml"
-#define BOOKS_ICONS_DIR         BOOKS_DATA_ROOT "/icons"
-#define BOOKS_DATA_DIR          BOOKS_DATA_ROOT "/data"
-#define BOOKS_QML_FILE          BOOKS_QML_DIR "/BooksMain.qml"
+class MGConfItem;
 
-#define BOOKS_INTERNAL_ROOT     "Documents/Books"
-#define BOOKS_REMOVABLE_ROOT    "Books"
+class BooksHints : public QObject
+{
+    Q_OBJECT
+    Q_PROPERTY(int storageLeftSwipe READ storageLeftSwipe WRITE setStorageLeftSwipe NOTIFY storageLeftSwipeChanged)
 
-#define BOOKS_QML_PLUGIN        "harbour.books"
-#define BOOKS_QML_PLUGIN_V1     1
-#define BOOKS_QML_PLUGIN_V2     0
-#define BOOKS_QML_REGISTER(klass,name) \
-    qmlRegisterType<klass>(BOOKS_QML_PLUGIN, BOOKS_QML_PLUGIN_V1, \
-    BOOKS_QML_PLUGIN_V2, name)
+public:
+    explicit BooksHints(QObject* aParent = NULL);
 
-#define BOOKS_STATE_FILE_SUFFIX ".state"
+    int storageLeftSwipe() const;
+    void setStorageLeftSwipe(int aValue);
 
-#if defined(__i386__)
-#  define BOOKS_PPI (330)   // Tablet 1536x2048
-#elif defined(__arm__)
-#  define BOOKS_PPI (245)   // Jolla1 540x960
-#else
-#  error Unexpected architechture
-#endif
+signals:
+    void storageLeftSwipeChanged();
 
-#endif // BOOKS_DEFS_H
+private:
+    MGConfItem* iStorageLeftSwipe;
+};
+
+QML_DECLARE_TYPE(BooksHints)
+
+#endif // BOOKS_HINTS_H

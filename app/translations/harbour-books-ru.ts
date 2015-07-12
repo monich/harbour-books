@@ -55,6 +55,10 @@
         <source>Delete all books</source>
         <translation>Удалить все книги</translation>
     </message>
+    <message id="storage-view-swipe-left-hint">
+        <source>Swipe left to see what&apos;s on the SD-card</source>
+        <translation>Проведите влево, вдруг что-нибудь есть на карте памяти</translation>
+    </message>
     <message id="import-view-import-n-books" numerus="yes">
         <source>Import %0 book(s)</source>
         <translation>

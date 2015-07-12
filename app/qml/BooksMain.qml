@@ -39,7 +39,8 @@ ApplicationWindow {
 
     property variant currentShelf: mainPage.currentShelf
 
-    Settings { id: globalSettings }
+    BooksSettings { id: globalSettings }
+    BooksHints { id: globalHints }
 
     initialPage: BooksMainPage { id: mainPage }
 

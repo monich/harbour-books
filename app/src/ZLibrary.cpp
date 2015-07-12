@@ -170,6 +170,7 @@ void ZLibrary::run(ZLApplication* aApp)
 
     QQmlContext* root = view->rootContext();
     root->setContextProperty("PointsPerInch", BOOKS_PPI);
+    root->setContextProperty("MaximumHintCount", 1);
     root->setContextProperty("DoubleClickInterval",
         qApp->styleHints()->mouseDoubleClickInterval());
 

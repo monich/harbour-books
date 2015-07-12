@@ -55,21 +55,21 @@ SilicaFlickable {
             id: defaultFontMenuItem
             //% "Use default fonts"
             text: qsTrId("book-font-default")
-            enabled: globalSettings.fontSize != Settings.DefaultFontSize
-            onClicked: globalSettings.fontSize = Settings.DefaultFontSize
+            enabled: globalSettings.fontSize != BooksSettings.DefaultFontSize
+            onClicked: globalSettings.fontSize = BooksSettings.DefaultFontSize
         }
         MenuItem {
             id: smallerFontMenuItem
             //% "Use smaller fonts"
             text: qsTrId("book-font-smaller")
-            enabled: globalSettings.fontSize >= Settings.MinFontSize
+            enabled: globalSettings.fontSize >= BooksSettings.MinFontSize
             onClicked: globalSettings.fontSize -= 1
         }
         MenuItem {
             id: largerFontMenuItem
             //% "Use larger fonts"
             text: qsTrId("book-font-larger")
-            enabled: globalSettings.fontSize <= Settings.MaxFontSize
+            enabled: globalSettings.fontSize <= BooksSettings.MaxFontSize
             onClicked: globalSettings.fontSize += 1
         }
         MenuItem {

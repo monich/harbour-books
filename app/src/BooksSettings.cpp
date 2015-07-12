@@ -39,7 +39,7 @@
 
 #include <MGConfItem>
 
-#define DCONF_PATH              "/apps/" BOOKS_APP_NAME "/"
+#define DCONF_PATH              BOOKS_DCONF_ROOT
 #define KEY_FONT_SIZE           "fontSize"
 #define KEY_PAGE_DETAILS        "pageDetails"
 #define KEY_CURRENT_BOOK        "currentBook"

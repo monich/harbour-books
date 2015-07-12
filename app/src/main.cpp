@@ -44,6 +44,7 @@
 #include "BooksListWatcher.h"
 #include "BooksCoverWidget.h"
 #include "BooksTaskQueue.h"
+#include "BooksHints.h"
 
 #include "HarbourDebug.h"
 #include "HarbourLib.h"
@@ -76,7 +77,8 @@ Q_DECL_EXPORT int main(int argc, char **argv)
     BOOKS_QML_REGISTER(BooksPageWidget, "PageWidget");
     BOOKS_QML_REGISTER(BooksListWatcher, "ListWatcher");
     BOOKS_QML_REGISTER(BooksCoverWidget, "BookCover");
-    BOOKS_QML_REGISTER(BooksSettings, "Settings");
+    BOOKS_QML_REGISTER(BooksSettings, "BooksSettings");
+    BOOKS_QML_REGISTER(BooksHints, "BooksHints");
     HarbourLib::registerTypes(BOOKS_QML_PLUGIN,
         BOOKS_QML_PLUGIN_V1, BOOKS_QML_PLUGIN_V2);
 

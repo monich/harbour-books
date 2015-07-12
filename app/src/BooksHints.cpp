@@ -31,37 +31,33 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BOOKS_DEFS_H
-#define BOOKS_DEFS_H
+#include "BooksHints.h"
+#include "BooksDefs.h"
+#include "HarbourDebug.h"
 
-#include <QString>
+#include <MGConfItem>
 
-#define BOOKS_APP_NAME          "harbour-books"
-#define BOOKS_DCONF_ROOT        "/apps/" BOOKS_APP_NAME "/"
-#define BOOKS_DATA_ROOT         "usr/share/" BOOKS_APP_NAME
-#define BOOKS_QML_DIR           BOOKS_DATA_ROOT "/qml"
-#define BOOKS_ICONS_DIR         BOOKS_DATA_ROOT "/icons"
-#define BOOKS_DATA_DIR          BOOKS_DATA_ROOT "/data"
-#define BOOKS_QML_FILE          BOOKS_QML_DIR "/BooksMain.qml"
+#define DCONF_PATH                  BOOKS_DCONF_ROOT "hints/"
+#define KEY_STORAGE_LEFT_SWIPE      "storageLeftSwipt"
+#define DEFAULT_STORAGE_LEFT_SWIPE  0
 
-#define BOOKS_INTERNAL_ROOT     "Documents/Books"
-#define BOOKS_REMOVABLE_ROOT    "Books"
+BooksHints::BooksHints(QObject* aParent) :
+    QObject(aParent),
+    iStorageLeftSwipe(new MGConfItem(DCONF_PATH KEY_STORAGE_LEFT_SWIPE, this))
+{
+    connect(iStorageLeftSwipe, SIGNAL(valueChanged()), SIGNAL(storageLeftSwipeChanged()));
+}
 
-#define BOOKS_QML_PLUGIN        "harbour.books"
-#define BOOKS_QML_PLUGIN_V1     1
-#define BOOKS_QML_PLUGIN_V2     0
-#define BOOKS_QML_REGISTER(klass,name) \
-    qmlRegisterType<klass>(BOOKS_QML_PLUGIN, BOOKS_QML_PLUGIN_V1, \
-    BOOKS_QML_PLUGIN_V2, name)
+int
+BooksHints::storageLeftSwipe() const
+{
+    return iStorageLeftSwipe->value(DEFAULT_STORAGE_LEFT_SWIPE).toInt();
+}
 
-#define BOOKS_STATE_FILE_SUFFIX ".state"
-
-#if defined(__i386__)
-#  define BOOKS_PPI (330)   // Tablet 1536x2048
-#elif defined(__arm__)
-#  define BOOKS_PPI (245)   // Jolla1 540x960
-#else
-#  error Unexpected architechture
-#endif
-
-#endif // BOOKS_DEFS_H
+void
+BooksHints::setStorageLeftSwipe(
+    int aValue)
+{
+    HDEBUG(aValue);
+    iStorageLeftSwipe->set(aValue);
+}
