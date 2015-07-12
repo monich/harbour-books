@@ -44,6 +44,8 @@ class BooksStorage: public QObject
 {
     Q_OBJECT
     Q_PROPERTY(QString root READ root CONSTANT)
+    Q_PROPERTY(bool internal READ isInternal CONSTANT)
+    Q_PROPERTY(bool valid READ isValid CONSTANT)
 
 public:
     BooksStorage();

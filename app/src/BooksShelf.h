@@ -59,6 +59,7 @@ class BooksShelf: public QAbstractListModel, public BooksItem
     Q_PROPERTY(bool hasDummyItem READ hasDummyItem WRITE setHasDummyItem NOTIFY hasDummyItemChanged)
     Q_PROPERTY(int dummyItemIndex READ dummyItemIndex WRITE setDummyItemIndex NOTIFY dummyItemIndexChanged)
     Q_PROPERTY(BooksBook* book READ book CONSTANT)
+    Q_PROPERTY(QObject* storage READ storage CONSTANT)
 
 public:
     explicit BooksShelf(QObject* aParent = NULL);
@@ -80,6 +81,7 @@ public:
     QString relativePath() const { return iRelativePath; }
     void setRelativePath(QString aPath);
     BooksBook* bookAt(int aIndex) const;
+    QObject* storage() { return &iStorage; }
 
     bool editMode() const { return iEditMode; }
     void setEditMode(bool aEditMode);
