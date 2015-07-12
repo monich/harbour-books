@@ -114,6 +114,7 @@ SilicaFlickable {
         rightMargin: Theme.horizontalPageMargin
         topMargin: Theme.itemSizeSmall
         bottomMargin: Theme.itemSizeSmall
+        settings: globalSettings
         onJumpToPage: bookView.jumpTo(index)
         onCurrentPageChanged: {
             if (currentPage >= 0 && bookView._jumpingTo < 0) {
