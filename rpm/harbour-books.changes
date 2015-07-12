@@ -1,3 +1,9 @@
+* Sun Jul 12 2015 Slava Monich <slava.monich@jolla.com> 1.0.4
+- Implemented "night mode", switched by double-click
+- Added left swipe hint
+- Finnish and Swedish translations
+- Fixed a bug with current page getting reset after rotation
+
 * Tue Jul 7 2015 Slava Monich <slava.monich@jolla.com> 1.0.3
 - Improved CSS support and XHTML formatting
 
