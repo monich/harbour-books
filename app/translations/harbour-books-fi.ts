@@ -56,7 +56,7 @@
     </message>
     <message id="storage-view-swipe-left-hint">
         <source>Swipe left to see what&apos;s on the SD-card</source>
-        <translation>Näytä muistikortin sisältö pyyhkäisemällä vasemmalle</translation>
+        <translation>Katso muistikortin sisältö pyyhkäisemällä vasemmalle</translation>
     </message>
     <message id="import-view-import-n-books" numerus="yes">
         <source>Import %0 book(s)</source>
