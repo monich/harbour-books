@@ -69,7 +69,7 @@
     </message>
     <message id="import-view-select-books">
         <source>Select books</source>
-        <translation type="unfinished">Выбирайте</translation>
+        <translation>Выбирайте</translation>
     </message>
     <message id="import-view-no-new-books-found">
         <source>No new books found</source>
