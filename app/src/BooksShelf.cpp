@@ -34,6 +34,7 @@
 #include "BooksShelf.h"
 #include "BooksDefs.h"
 #include "BooksBook.h"
+#include "BooksUtil.h"
 
 #include "HarbourJson.h"
 #include "HarbourDebug.h"
@@ -175,8 +176,7 @@ void BooksShelf::LoadTask::performTask()
         const int n = list.count();
         for (int i=0; i<n && !isCanceled(); i++) {
             std::string path(list.at(i).filePath().toStdString());
-            ZLFile file(path);
-            shared_ptr<Book> book = Book::loadFromFile(file);
+            shared_ptr<Book> book = BooksUtil::bookFromFile(path);
             if (!book.isNull()) {
                 BooksBook* newBook = new BooksBook(iStorage, book);
                 newBook->moveToThread(thread());
@@ -988,15 +988,14 @@ void BooksShelf::onCopyTaskDone()
         if (src) {
             src->retain();
             if (task->iSuccess) {
-                ZLFile file(task->iDest.toStdString());
-                shared_ptr<Book> book = Book::loadFromFile(file);
+                shared_ptr<Book> book = BooksUtil::bookFromFile(task->iDest);
                 if (!book.isNull()) {
                     copy = new BooksBook(iStorage, book);
                     copy->setLastPos(src->lastPos());
                     copy->setCoverImage(src->coverImage());
                     copy->requestCoverImage();
                 } else {
-                    HWARN("can't open copied book:" << file.path().c_str());
+                    HWARN("can't open copied book" << qPrintable(task->iDest));
                 }
             }
         }

@@ -35,6 +35,8 @@
 #include "BooksTextStyle.h"
 #include "BooksBook.h"
 #include "BooksDefs.h"
+#include "BooksUtil.h"
+
 #include "HarbourDebug.h"
 
 #include <MGConfItem>
@@ -292,8 +294,7 @@ BooksSettings::updateCurrentBook()
             return true;
         }
     } else if (!iCurrentBook || iCurrentBook->path() != path) {
-        ZLFile file(path.toStdString());
-        shared_ptr<Book> book = Book::loadFromFile(file);
+        shared_ptr<Book> book = BooksUtil::bookFromFile(path);
         if (!book.isNull()) {
             QFileInfo info(path);
             BooksStorageManager* mgr = BooksStorageManager::instance();

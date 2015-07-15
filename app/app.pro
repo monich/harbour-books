@@ -109,6 +109,7 @@ SOURCES += \
   src/BooksTextStyle.cpp \
   src/BooksTaskQueue.cpp \
   src/BooksTextView.cpp \
+  src/BooksUtil.cpp \
   src/main.cpp \
   src/ZLApplication.cpp \
   src/ZLibrary.cpp
@@ -144,4 +145,5 @@ HEADERS += \
   src/BooksTaskQueue.h \
   src/BooksTextView.h \
   src/BooksTextStyle.h \
-  src/BooksTypes.h
+  src/BooksTypes.h \
+  src/BooksUtil.h

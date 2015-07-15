@@ -304,7 +304,7 @@ BooksBook::BooksBook(const BooksStorage& aStorage, shared_ptr<Book> aBook) :
     init();
     HASSERT(!iBook.isNull());
     iTitle = QString::fromStdString(iBook->title());
-    iPath = QString::fromStdString(iBook->file().path());
+    iPath = QString::fromStdString(iBook->file().physicalFilePath());
     iFileName = QString::fromStdString(iBook->file().name(false));
     iFormatPlugin = PluginCollection::Instance().plugin(*iBook);
     AuthorList authors(iBook->authors());

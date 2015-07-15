@@ -34,6 +34,7 @@
 #include "BooksImportModel.h"
 #include "BooksStorage.h"
 #include "BooksTask.h"
+#include "BooksUtil.h"
 
 #include "HarbourDebug.h"
 
@@ -201,8 +202,7 @@ void BooksImportModel::Task::scanDir(QDir aDir)
             QFileInfo fileInfo(fileList.at(i));
             QString filePath(fileInfo.canonicalFilePath());
             std::string path(filePath.toStdString());
-            ZLFile file(path);
-            shared_ptr<Book> book = Book::loadFromFile(file);
+            shared_ptr<Book> book = BooksUtil::bookFromFile(path);
             if (!book.isNull()) {
                 if (!isDuplicate(filePath, iDestFiles) &&
                     !isDuplicate(filePath, iSrcFiles)) {
