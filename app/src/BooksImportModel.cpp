@@ -35,11 +35,19 @@
 #include "BooksStorage.h"
 #include "BooksTask.h"
 #include "BooksUtil.h"
+#include "BooksDefs.h"
 
 #include "HarbourDebug.h"
 
 #include <QDir>
 #include <QCryptographicHash>
+
+#include <attr/xattr.h>
+#include <errno.h>
+
+#define DIGEST_XATTR    "user." BOOKS_APP_NAME ".md5-hash"
+#define DIGEST_TYPE     (QCryptographicHash::Md5)
+#define DIGEST_SIZE     (16)
 
 enum BooksImportRole {
     BooksImportRoleTitle = Qt::UserRole,
@@ -124,7 +132,7 @@ QByteArray BooksImportModel::Task::calculateFileHash(QString aPath)
     QFile file(aPath);
     if (file.open(QIODevice::ReadOnly)) {
         qint64 len = 0;
-        QCryptographicHash hash(QCryptographicHash::Md5);
+        QCryptographicHash hash(DIGEST_TYPE);
         hash.reset();
         if (!iBuf) iBuf = new char[iBufSize];
         while (!isCanceled() && (len = file.read(iBuf, iBufSize)) > 0) {
@@ -133,6 +141,7 @@ QByteArray BooksImportModel::Task::calculateFileHash(QString aPath)
         if (len == 0) {
             if (!isCanceled()) {
                 result = hash.result();
+                HASSERT(result.size() == DIGEST_SIZE);
                 HDEBUG(qPrintable(aPath) << QString(result.toHex()));
             }
         } else {
@@ -148,9 +157,24 @@ QByteArray BooksImportModel::Task::getFileHash(QString aPath)
     if (iFileHash.contains(aPath)) {
         return iFileHash.value(aPath);
     } else {
-        QByteArray hash = calculateFileHash(aPath);
-        iFileHash.insert(aPath, hash);
-        iHashFile.insert(hash, aPath);
+        QByteArray hash;
+        char attr[DIGEST_SIZE];
+        QByteArray fname = aPath.toLocal8Bit();
+        if (getxattr(fname, DIGEST_XATTR, attr, sizeof(attr)) == DIGEST_SIZE) {
+            hash = QByteArray(attr, sizeof(attr));
+            HDEBUG(qPrintable(aPath) << QString(hash.toHex()));
+        } else {
+            hash = calculateFileHash(aPath);
+            if (hash.size() == DIGEST_SIZE &&
+                setxattr(fname, DIGEST_XATTR, hash, hash.size(), 0)) {
+                HDEBUG("Failed to set " DIGEST_XATTR " xattr on" <<
+                    fname.constData() << ":" << strerror(errno));
+            }
+        }
+        if (hash.size() == DIGEST_SIZE) {
+            iFileHash.insert(aPath, hash);
+            iHashFile.insert(hash, aPath);
+        }
         return hash;
     }
 }
