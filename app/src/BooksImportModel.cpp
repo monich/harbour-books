@@ -42,10 +42,11 @@
 #include <QDir>
 #include <QCryptographicHash>
 
-#include <attr/xattr.h>
+#include <sys/xattr.h>
+#include <linux/xattr.h>
 #include <errno.h>
 
-#define DIGEST_XATTR    "user." BOOKS_APP_NAME ".md5-hash"
+#define DIGEST_XATTR    XATTR_USER_PREFIX BOOKS_APP_NAME ".md5-hash"
 #define DIGEST_TYPE     (QCryptographicHash::Md5)
 #define DIGEST_SIZE     (16)
 
