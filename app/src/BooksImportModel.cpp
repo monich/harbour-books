@@ -97,7 +97,7 @@ class BooksImportModel::Task : public BooksTask
     Q_OBJECT
 
 public:
-    Task(QString aDest) : iDestDir(aDest), iBufSize(0x1000), iBuf(NULL) {}
+    Task(QString aDest);
     ~Task();
 
     void performTask();
@@ -107,7 +107,8 @@ public:
     QByteArray getFileHash(QString aPath);
 
 Q_SIGNALS:
-    void bookFound(BooksBook* aBook) const;
+    void bookFound(BooksBook* aBook);
+    void progress(int aCount);
 
 public:
     QList<BooksBook*> iBooks;
@@ -118,7 +119,13 @@ public:
     QString iDestDir;
     qint64 iBufSize;
     char* iBuf;
+    int iProgress;
 };
+
+BooksImportModel::Task::Task(QString aDest) :
+    iDestDir(aDest), iBufSize(0x1000), iBuf(NULL), iProgress(0)
+{
+}
 
 BooksImportModel::Task::~Task()
 {
@@ -241,6 +248,8 @@ void BooksImportModel::Task::scanDir(QDir aDir)
             } else {
                 HDEBUG("not a book:" << path.c_str());
             }
+            iProgress++;
+            Q_EMIT progress(iProgress);
         }
     }
 
@@ -265,6 +274,7 @@ void BooksImportModel::Task::scanDir(QDir aDir)
 
 BooksImportModel::BooksImportModel(QObject* aParent) :
     QAbstractListModel(aParent),
+    iProgress(0),
     iSelectedCount(0),
     iAutoRefresh(false),
     iTaskQueue(BooksTaskQueue::instance()),
@@ -314,10 +324,17 @@ void BooksImportModel::refresh()
             Q_EMIT countChanged();
         }
 
+        if (iProgress) {
+            iProgress = 0;
+            Q_EMIT progressChanged();
+        }
+
         iTask = new Task(iDestination);
         connect(iTask, SIGNAL(bookFound(BooksBook*)),
             SLOT(onBookFound(BooksBook*)), Qt::QueuedConnection);
         connect(iTask, SIGNAL(done()), SLOT(onTaskDone()));
+        connect(iTask, SIGNAL(progress(int)), SLOT(onScanProgress(int)),
+            Qt::QueuedConnection);
         iTaskQueue->submit(iTask);
         Q_EMIT busyChanged();
     }
@@ -355,9 +372,17 @@ QObject* BooksImportModel::selectedBook(int aIndex)
     return NULL;
 }
 
+void BooksImportModel::onScanProgress(int aProgress)
+{
+    if (iTask && iTask == sender()) {
+        iProgress = aProgress;
+        Q_EMIT progressChanged();
+    }
+}
+
 void BooksImportModel::onBookFound(BooksBook* aBook)
 {
-    if (iTask) {
+    if (iTask && iTask == sender()) {
         // When we find the first book, we add two items. The second item
         // is the "virtual" that will stay at the end of the list and will
         // be removed by onTaskDone() after scanning is finished. The idea

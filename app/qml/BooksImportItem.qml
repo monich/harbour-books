@@ -93,6 +93,7 @@ BackgroundItem {
     }
 
     BusyIndicator {
+        id: busyIndicator
         anchors.centerIn: parent
         visible: !root.enabled
         running: visible

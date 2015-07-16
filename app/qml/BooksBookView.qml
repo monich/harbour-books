@@ -213,20 +213,13 @@ SilicaFlickable {
         size: BusyIndicatorSize.Large
         running: _loading
     }
+
     BooksFitLabel {
-        anchors {
-            fill: busyIndicator
-            margins: Theme.paddingMedium
-        }
-        maxFontSize: Theme.fontSizeMedium
-        verticalAlignment: Text.AlignVCenter
-        horizontalAlignment: Text.AlignHCenter
-        color: Theme.highlightColor
+        anchors.fill: busyIndicator
         text: bookModel.progress > 0 ? bookModel.progress : ""
-        visible: opacity > 0
-        opacity: (_loading && bookModel.progress) > 0 ? 1 : 0
-        Behavior on opacity { FadeAnimation {} }
+        opacity: (_loading && bookModel.progress > 0) ? 1 : 0
     }
+
     Label {
         anchors {
             top: busyIndicator.bottom

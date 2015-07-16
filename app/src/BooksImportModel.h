@@ -48,6 +48,7 @@ class BooksImportModel: public QAbstractListModel
     Q_OBJECT
     Q_PROPERTY(bool busy READ busy NOTIFY busyChanged)
     Q_PROPERTY(int count READ count NOTIFY countChanged)
+    Q_PROPERTY(int progress READ progress NOTIFY progressChanged)
     Q_PROPERTY(int selectedCount READ selectedCount NOTIFY selectedCountChanged)
     Q_PROPERTY(QString destination READ destination WRITE setDestination NOTIFY destinationChanged)
 
@@ -57,6 +58,7 @@ public:
 
     bool busy() const { return iTask != NULL; }
     int count() const { return iList.count(); }
+    int progress() const { return iProgress; }
     int selectedCount() const { return iSelectedCount; }
     QString destination() const { return iDestination; }
     void setDestination(QString aDestination);
@@ -73,10 +75,12 @@ public:
 Q_SIGNALS:
     void countChanged();
     void busyChanged();
+    void progressChanged();
     void selectedCountChanged();
     void destinationChanged();
 
 private Q_SLOTS:
+    void onScanProgress(int aProgress);
     void onBookFound(BooksBook* aBook);
     void onTaskDone();
 
@@ -89,6 +93,7 @@ private:
     QString iDestination;
     QList<Data*> iList;
     QVector<int> iSelectedRole;
+    int iProgress;
     int iSelectedCount;
     bool iAutoRefresh;
     shared_ptr<BooksTaskQueue> iTaskQueue;

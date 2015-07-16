@@ -95,10 +95,17 @@ Dialog {
     }
 
     BusyIndicator {
+        id: busyIndicator
         visible: opacity > 0
         anchors.centerIn: parent
         size: BusyIndicatorSize.Large
         running: _loading && !importModel.count
+    }
+
+    BooksFitLabel {
+        anchors.fill: busyIndicator
+        text: importModel.progress > 0 ? importModel.progress : ""
+        opacity: (busyIndicator.running && importModel.progress > 0) ? 1 : 0
     }
 
     // Give the dialog 1 second to initialize and finish the transition

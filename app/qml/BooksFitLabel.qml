@@ -34,9 +34,16 @@ import Sailfish.Silica 1.0
 
 Label {
     property int minFontSize: Theme.fontSizeTiny
-    property int maxFontSize: Theme.fontSizeHuge
+    property int maxFontSize: Theme.fontSizeMedium
 
     smooth: true
+    visible: opacity > 0
+    color: Theme.highlightColor
+    anchors.margins: Theme.paddingMedium
+    verticalAlignment: Text.AlignVCenter
+    horizontalAlignment: Text.AlignHCenter
+
+    Behavior on opacity { FadeAnimation {} }
 
     Component.onCompleted: refitText()
 
