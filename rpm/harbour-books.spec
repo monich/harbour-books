@@ -1,6 +1,6 @@
 Name:           harbour-books
 Summary:        E-book reader
-Version:        1.0.4
+Version:        1.0.5
 Release:        1
 License:        GPL
 Group:          Applications/File

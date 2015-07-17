@@ -1,3 +1,8 @@
+* Sat Jul 18 2015 Slava Monich <slava.monich@jolla.com> 1.0.5
+- Added support for zipped books
+- Improved performance of scanning for new books
+- Fixed a problem with some EPUBs being ignored
+
 * Sun Jul 12 2015 Slava Monich <slava.monich@jolla.com> 1.0.4
 - Implemented "night mode", switched by double-click
 - Added left swipe hint
