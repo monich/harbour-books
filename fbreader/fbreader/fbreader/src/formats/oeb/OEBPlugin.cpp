@@ -51,7 +51,7 @@ bool OEBPlugin::acceptsFile(const ZLFile &file) const {
 		return 
 			mimeType == ZLMimeType::APPLICATION_EPUB_ZIP ||
 			(mimeType == ZLMimeType::APPLICATION_XML && extension == OPF) ||
-			(mimeType == ZLMimeType::APPLICATION_ZIP && extension == OEBZIP);
+			(mimeType == ZLMimeType::APPLICATION_ZIP && (extension == OEBZIP || extension == EPUB));
 	}
 	return extension == OPF || extension == OEBZIP || extension == EPUB;
 }
