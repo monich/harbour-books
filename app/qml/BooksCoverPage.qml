@@ -105,5 +105,6 @@ CoverBackground {
         }
         text: book ? book.title : ""
         visible: bookCover.empty
+        color: "#FFE898"
     }
 }
