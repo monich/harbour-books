@@ -47,6 +47,7 @@
 #include "library/Author.h"
 
 #include <QFile>
+#include <QFileInfo>
 #include <QDirIterator>
 #include <QGuiApplication>
 #include <QScreen>
@@ -305,7 +306,7 @@ BooksBook::BooksBook(const BooksStorage& aStorage, shared_ptr<Book> aBook) :
     HASSERT(!iBook.isNull());
     iTitle = QString::fromStdString(iBook->title());
     iPath = QString::fromStdString(iBook->file().physicalFilePath());
-    iFileName = QString::fromStdString(iBook->file().name(false));
+    iFileName = QFileInfo(iPath).fileName();
     iFormatPlugin = PluginCollection::Instance().plugin(*iBook);
     AuthorList authors(iBook->authors());
     const int n = authors.size();
