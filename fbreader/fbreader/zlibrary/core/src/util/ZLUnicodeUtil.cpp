@@ -450,13 +450,20 @@ void ZLUnicodeUtil::toLower(Ucs4String &str) {
 }
 
 std::string ZLUnicodeUtil::toLower(const std::string &utf8String) {
-	Ucs4String ucs4String;
-	utf8ToUcs4(ucs4String, utf8String);
-
-	toLower(ucs4String);
-
 	std::string result;
-	ucs4ToUtf8(result, ucs4String, utf8String.length());
+	const int utf8Len = utf8String.length();
+	if (utf8Length(utf8String) == utf8Len) {
+		// ASCII string
+		result.reserve(utf8Len);
+		for (std::string::const_iterator it = utf8String.begin(); it != utf8String.end(); ++it) {
+			result.append(1, tolower(*it));
+		}
+	} else {
+		Ucs4String ucs4String;
+		utf8ToUcs4(ucs4String, utf8String);
+		toLower(ucs4String);
+		ucs4ToUtf8(result, ucs4String, utf8Len);
+	}
 	return result;
 }
 
@@ -473,12 +480,19 @@ void ZLUnicodeUtil::toUpper(Ucs4String &str) {
 }
 
 std::string ZLUnicodeUtil::toUpper(const std::string &utf8String) {
-	Ucs4String ucs4String;
-	utf8ToUcs4(ucs4String, utf8String);
-
-	toUpper(ucs4String);
-
 	std::string result;
-	ucs4ToUtf8(result, ucs4String, utf8String.length());
+	const int utf8Len = utf8String.length();
+	if (utf8Length(utf8String) == utf8Len) {
+		// ASCII string
+		result.reserve(utf8Len);
+		for (std::string::const_iterator it = utf8String.begin(); it != utf8String.end(); ++it) {
+			result.append(1, toupper(*it));
+		}
+	} else {
+		Ucs4String ucs4String;
+		utf8ToUcs4(ucs4String, utf8String);
+		toUpper(ucs4String);
+		ucs4ToUtf8(result, ucs4String, utf8Len);
+	}
 	return result;
 }
