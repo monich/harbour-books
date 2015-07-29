@@ -80,12 +80,21 @@ void ZLZipHeader::skipEntry(ZLInputStream &stream, ZLZipHeader &header) {
 }
 
 unsigned short ZLZipHeader::readShort(ZLInputStream &stream) {
+#if defined(BYTE_ORDER) && BYTE_ORDER == LITTLE_ENDIAN
+	u_int16_t result;
+	return (stream.read((char*)&result, 2) == 2) ? result : 0;
+#else
 	char buffer[2];
 	stream.read(buffer, 2);
 	return ((((unsigned short)buffer[1]) & 0xFF) << 8) + ((unsigned short)buffer[0] & 0xFF);
+#endif
 }
 
 unsigned long ZLZipHeader::readLong(ZLInputStream &stream) {
+#if defined(BYTE_ORDER) && BYTE_ORDER == LITTLE_ENDIAN
+	u_int32_t result;
+	return (stream.read((char*)&result, 4) == 4) ? result : 0;
+#else
 	char buffer[4];
 	stream.read(buffer, 4);
 
@@ -94,4 +103,5 @@ unsigned long ZLZipHeader::readLong(ZLInputStream &stream) {
 		((((unsigned long)buffer[2]) & 0xFF) << 16) +
 		((((unsigned long)buffer[1]) & 0xFF) << 8) +
 		((unsigned long)buffer[0] & 0xFF);
+#endif
 }
