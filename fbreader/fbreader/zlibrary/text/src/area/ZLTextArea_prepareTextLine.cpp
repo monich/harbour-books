@@ -67,11 +67,24 @@ void ZLTextArea::prepareTextLine(Style &style, const ZLTextLineInfo &info, int y
 	bool wordOccured = false;
 
 	bool endsWithLineBreak = false;
+	bool onlyImage = false;
 	if (info.RealStart < info.End) {
 		ZLTextWordCursor last(info.End);
 		last.previousWord();
-		if (last.element().kind() == ZLTextElement::LINE_BREAK_ELEMENT) {
-			endsWithLineBreak = true;
+		while (last.element().kind() == ZLTextElement::CONTROL_ELEMENT && info.RealStart < last) {
+			last.previousWord();
+		}
+		switch (last.element().kind()) {
+			case ZLTextElement::LINE_BREAK_ELEMENT:
+				endsWithLineBreak = true;
+				break;
+			case ZLTextElement::IMAGE_ELEMENT:
+				if (last == info.RealStart) {
+					onlyImage = true;
+				}
+				break;
+			default:
+				break;
 		}
 	}
 
@@ -94,13 +107,16 @@ void ZLTextArea::prepareTextLine(Style &style, const ZLTextLineInfo &info, int y
 			break;
 		case ALIGN_LINESTART:
 			break;
-		case ALIGN_CENTER:
-			x += (metrics.FullWidth - style.textStyle()->lineEndIndent(metrics, isRtl()) - info.Width) / 2;
-			break;
 		case ALIGN_JUSTIFY:
-			if (!endsWithLineBreak && !endOfParagraph && info.End.element().kind() != ZLTextElement::AFTER_PARAGRAPH_ELEMENT) {
-				fullCorrection = metrics.FullWidth - style.textStyle()->lineEndIndent(metrics, isRtl()) - info.Width;
+			if (!onlyImage) {
+				if (!endsWithLineBreak && !endOfParagraph && info.End.element().kind() != ZLTextElement::AFTER_PARAGRAPH_ELEMENT) {
+					fullCorrection = metrics.FullWidth - style.textStyle()->lineEndIndent(metrics, isRtl()) - info.Width;
+				}
+				break;
 			}
+			// Fall through to center "justified" images
+	        case ALIGN_CENTER:
+			x += (metrics.FullWidth - style.textStyle()->lineEndIndent(metrics, isRtl()) - info.Width) / 2;
 			break;
 		case ALIGN_UNDEFINED:
 			break;
