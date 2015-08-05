@@ -115,7 +115,7 @@ void ZLTextArea::prepareTextLine(Style &style, const ZLTextLineInfo &info, int y
 				break;
 			}
 			// Fall through to center "justified" images
-	        case ALIGN_CENTER:
+		case ALIGN_CENTER:
 			x += (metrics.FullWidth - style.textStyle()->lineEndIndent(metrics, isRtl()) - info.Width) / 2;
 			break;
 		case ALIGN_UNDEFINED:

@@ -135,7 +135,7 @@ ZLTextLineInfoPtr ZLTextArea::processTextLine(Style &style, const ZLTextWordCurs
 	info.Width = info.StartIndent;
 
 	if (info.RealStart.equalElementIndex(end)) {
-	  info.End = info.RealStart;
+		info.End = info.RealStart;
 		return infoPtr;
 	}
 
