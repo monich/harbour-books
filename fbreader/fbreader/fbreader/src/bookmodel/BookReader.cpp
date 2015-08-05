@@ -105,12 +105,14 @@ void BookReader::addControl(FBTextKind kind, bool start) {
 
 void BookReader::addFixedHSpace(unsigned char length) {
 	if (myTextParagraphExists) {
+		flushTextBufferToParagraph();
 		myCurrentTextModel->addFixedHSpace(length);
 	}
 }
 
 void BookReader::addLineBreak() {
 	if (myTextParagraphExists) {
+		flushTextBufferToParagraph();
 		myCurrentTextModel->addLineBreak();
 	}
 }
