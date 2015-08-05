@@ -109,7 +109,7 @@ shared_ptr<ZLInputStream> ZLFile::inputStream() const {
 	int index = ZLFSManager::Instance().findArchiveFileNameDelimiter(myPath);
 	if (index == -1) {
 #if !FBREADER_DISABLE_ZLFILE_PLAIN_STREAM_CACHE
-        stream = ourPlainStreamCache[myPath];
+		stream = ourPlainStreamCache[myPath];
 		if (stream.isNull()) {
 #endif
 			if (isDirectory()) {
@@ -118,7 +118,7 @@ shared_ptr<ZLInputStream> ZLFile::inputStream() const {
 			stream = ZLFSManager::Instance().createPlainInputStream(myPath);
 			stream = envelopeCompressedStream(stream);
 #if !FBREADER_DISABLE_ZLFILE_PLAIN_STREAM_CACHE
-            ourPlainStreamCache[myPath] = stream;
+			ourPlainStreamCache[myPath] = stream;
 		}
 #endif
     } else {
