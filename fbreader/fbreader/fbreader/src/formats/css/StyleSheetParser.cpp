@@ -35,28 +35,39 @@ void StyleSheetTableParser::storeData(const std::string &selector, const StyleSh
 StyleSheetTable::Style StyleSheetSingleStyleParser::parseString(const char *text) {
 	StyleSheetTable::Style style;
 	if (text) {
-		myReadState = ATTRIBUTE_NAME;
+		reset(ATTRIBUTE_NAME);
 		parse(text, strlen(text), true);
+		if (!myStateStack.empty()) {
+			switch (myStateStack.top()) {
+			case ATTRIBUTE_VALUE_SPACE:
+			case ATTRIBUTE_VALUE_COMMA:
+				finishAttributeValue();
+				break;
+			default:
+				break;
+			}
+		}
 		StyleSheetTable::updateStyle(style, myMap);
-		reset();
 	}
 	return style;
 }
 
-StyleSheetParser::StyleSheetParser() : myReadState(TAG_NAME), myInsideComment(false), myAtBlockDepth(0) {
+StyleSheetParser::StyleSheetParser() :
+	myBuffer1(0), myBuffer2(0), myBuffer3(0) {
+	myStateStack.push(SELECTOR);
 }
 
 StyleSheetParser::~StyleSheetParser() {
 }
 
-void StyleSheetParser::reset() {
-	myWord.erase();
-	myAttributeName.erase();
-	myReadState = TAG_NAME;
-	myInsideComment = false;
-	myAtBlockDepth = 0;
-	mySelectors.clear();
+void StyleSheetParser::reset(ReadState state) {
+	myWord.resize(0);
+	myAttributeName.resize(0);
+	myStateStack = std::stack<ReadState>();
+	myStateStack.push(state);
+	mySelectors.resize(0);
 	myMap.clear();
+	myBuffer1 = myBuffer2 = myBuffer3 = 0;
 }
 
 void StyleSheetParser::parse(ZLInputStream &stream) {
@@ -78,165 +89,279 @@ void StyleSheetParser::parse(const char *text, int len, bool final) {
 	const char *start = text;
 	const char *end = text + len;
 	for (const char *ptr = start; ptr != end; ++ptr) {
-		if ((myReadState != TAG_NAME && isspace(*ptr)) ||
-		    (myReadState == TAG_NAME && *ptr == ',')) {
-			if (start != ptr) {
-				myWord.append(start, ptr - start);
-			}
-			processWord(myWord);
-			myWord.erase();
-			start = ptr + 1;
-		} else if (isControlSymbol(*ptr)) {
-			if (start != ptr) {
-				myWord.append(start, ptr - start);
-			}
-			processWord(myWord);
-			myWord.erase();
-			if (!myInsideComment) {
-				processControl(*ptr);
-			}
-			start = ptr + 1;
-		}
-	}
-	if (start < end) {
-		myWord.append(start, end - start);
-		if (final) {
-			processWord(myWord);
-			myWord.erase();
-		}
-	}
-}
-
-bool StyleSheetParser::isControlSymbol(const char symbol) {
-	switch (symbol) {
-		case '{':
-		case '}':
-		case ';':
-		case ':':
-			return true;
-		default:
-			return false;
+		processChar1(*ptr);
 	}
 }
 
 void StyleSheetParser::storeData(const std::string&, const StyleSheetTable::AttributeMap&) {
 }
 
-void StyleSheetParser::processControl(const char control) {
-	switch (control) {
-		case '{':
-			switch (myReadState) {
-				case AT_RULE:
-					myReadState = AT_BLOCK;
-					myAtBlockDepth = 1;
-					break;
-				case AT_BLOCK:
-					myAtBlockDepth++;
-					break;
-				case TAG_NAME:
-					myReadState = ATTRIBUTE_NAME;
-					myMap.clear();
-					break;
-				default:
-					myReadState = BROKEN;
-					break;
+/* Converts \r\n into \n */
+void StyleSheetParser::processChar1(char c) {
+	if (myBuffer1 == '\r') {
+		myBuffer1 = 0;
+		if (c == '\n') {
+			processChar2('\n');
+		} else {
+			processChar2('\r');
+		}
+	} else if (c == '\r') {
+		myBuffer1 = '\r';
+	} else {
+		processChar2(c);
+	}
+}
+
+/* Glues continued lines together */
+void StyleSheetParser::processChar2(char c) {
+	if (myBuffer2 == '\\') {
+		myBuffer2 = 0;
+		if (c != '\n') {
+			processChar3('\\');
+			processChar3(c);
+		}
+	} else if (c == '\\') {
+		myBuffer2 = '\\';
+	} else {
+		processChar3(c);
+	}
+}
+
+/* Handles comments */
+void StyleSheetParser::processChar3(char c) {
+	switch (myStateStack.top()) {
+	case COMMENT:
+		if (myBuffer3 == '*' && c == '/') {
+			myBuffer3 = 0;
+			myStateStack.pop();
+		} else {
+			myBuffer3 = (c == '*') ? '*' : 0;
+		}
+		break;
+	case STRING_LITERAL_SINGLE:
+	case STRING_LITERAL_DOUBLE:
+		processChar4(c);
+		break;
+	default:
+		if (myBuffer3 == '/' && c == '*') {
+			myStateStack.push(COMMENT);
+		} else {
+			if (myBuffer3) processChar4(myBuffer3);
+			if (c == '/') {
+				myBuffer3 = c;
+			} else {
+				myBuffer3 = 0;
+				processChar4(c);
 			}
+		}
+		break;
+	}
+}
+
+/* Handles clean input */
+void StyleSheetParser::processChar4(char c) {
+	switch (myStateStack.top()) {
+	case SELECTOR:
+		switch (c) {
+		case ',':
+			if (ZLStringUtil::stripWhiteSpaces(myWord)) {
+				mySelectors.push_back(myWord);
+				myWord.resize(0);
+			}
+			break;
+		case '{':
+			if (ZLStringUtil::stripWhiteSpaces(myWord)) mySelectors.push_back(myWord);
+			if (!mySelectors.empty()) {
+				if (mySelectors[0][0] == '@') {
+					// Ignore AT-rules
+					mySelectors.resize(0);
+					myStateStack.push(SKIP_BLOCK_CURLY);
+				} else {
+					myMap.clear();
+					myStateStack.push(ATTRIBUTE_NAME);
+				}
+			} else {
+				myStateStack.push(SKIP_BLOCK_CURLY);
+			}
+			myWord.resize(0);
+			break;
+		default:
+			if (!isspace(c) || !myWord.empty()) {
+				myWord.append(1, c);
+			}
+			break;
+		}
+		break;
+
+	case ATTRIBUTE_NAME:
+		switch (c) {
+		case ':':
+			if (ZLStringUtil::stripWhiteSpaces(myWord)) {
+				myAttributeName = myWord;
+				myMap[myAttributeName].resize(0);
+				myWord.resize(0);
+				static const std::string FONT_FAMILY("font-family");
+				if (myAttributeName == FONT_FAMILY) {
+					myStateStack.top() = ATTRIBUTE_VALUE_COMMA;
+				} else {
+					myStateStack.top() = ATTRIBUTE_VALUE_SPACE;
+				}
+			} else {
+				finishAttribute();
+				myStateStack.top() = ATTRIBUTE_IGNORE;
+			}
+			break;
+		case '\n':
+		case ';':
+			finishAttribute();
 			break;
 		case '}':
-			switch (myReadState) {
-				case AT_BLOCK:
-					if (--myAtBlockDepth > 0) {
-						return;
-					}
-					break;
-				case AT_RULE:
-				case BROKEN:
-					break;
-				default:
-					for (unsigned int i=0; i<mySelectors.size(); i++) {
-						storeData(mySelectors[i], myMap);
-					}
-					break;
+			finishRule();
+			myStateStack.pop();
+			break;
+		default:
+			if (!isspace(c) || !myWord.empty()) {
+				myWord.append(1, c);
 			}
-			myReadState = TAG_NAME;
-			mySelectors.clear();
-			myMap.clear();
+			break;
+		}
+		break;
+
+	case ATTRIBUTE_VALUE_SPACE:
+	case ATTRIBUTE_VALUE_COMMA:
+		switch (c) {
+		case '\'':
+			myStateStack.push(STRING_LITERAL_SINGLE);
+			break;
+		case '"':
+			myStateStack.push(STRING_LITERAL_DOUBLE);
+			break;
+		case '}':
+			finishAttributeValue();
+			finishRule();
+			myStateStack.pop();
 			break;
 		case ';':
-			switch (myReadState) {
-				case AT_RULE:
-					myReadState = TAG_NAME;
-					mySelectors.clear();
+		case '\n':
+			finishAttributeValue();
+			finishAttribute();
+			myStateStack.top() = ATTRIBUTE_NAME;
+			break;
+		case ',':
+			if (myStateStack.top() == ATTRIBUTE_VALUE_COMMA) {
+				finishAttributeValue();
+			} else {
+				myWord.append(1, c);
+			}
+			break;
+		default:
+			if (isspace(c)) {
+				if (myStateStack.top() == ATTRIBUTE_VALUE_SPACE) {
+					finishAttributeValue();
+				} else if (!myWord.empty()) {
+					myWord.append(1, c);
+				}
+			} else {
+				myWord.append(1, c);
+			}
+			break;
+		}
+		break;
+
+	case ATTRIBUTE_IGNORE:
+		switch (c) {
+		case '\n':
+		case ';':
+			finishAttribute();
+			myStateStack.top() = ATTRIBUTE_NAME;
+			break;
+		case '}':
+			finishRule();
+			myStateStack.pop();
+			break;
+		default:
+			break;
+		}
+		break;
+
+	case STRING_LITERAL_SINGLE:
+	case STRING_LITERAL_DOUBLE:
+		if (c == myStateStack.top()) {
+			myStateStack.pop();
+		} else if (c == '\n') {
+			// User agents must close strings upon reaching
+			// the end of a line (i.e., before an unescaped
+			// line feed, carriage return or form feed character),
+			// but then drop the construct (declaration or rule)
+			// in which the string was found.
+			myStateStack.pop();
+			switch (myStateStack.top()) {
+			case ATTRIBUTE_VALUE_SPACE:
+			case ATTRIBUTE_VALUE_COMMA:
+				myStateStack.top() = ATTRIBUTE_IGNORE;
+				myMap[myAttributeName].resize(0);
+				myAttributeName.resize(0);
+				myWord.resize(0);
+				break;
+			default:
+				break;
+			}
+		} else {
+			myWord.append(1, c);
+		}
+		break;
+
+	case SKIP_BLOCK_CURLY:
+	case SKIP_BLOCK_SQUARE:
+		switch (c) {
+		case '{':
+			myStateStack.push(SKIP_BLOCK_CURLY);
+			break;
+		case '[':
+			myStateStack.push(SKIP_BLOCK_SQUARE);
+			break;
+		case '\'':
+			myStateStack.push(STRING_LITERAL_SINGLE);
+			break;
+		case '"':
+			myStateStack.push(STRING_LITERAL_DOUBLE);
+			break;
+		default:
+			if (c == myStateStack.top()) {
+				myStateStack.pop();
+				if (myStateStack.top() == SELECTOR) {
+					myWord.resize(0);
+					mySelectors.resize(0);
 					myMap.clear();
-					break;
-				case AT_BLOCK:
-					break;
-				case ATTRIBUTE_VALUE:
-				case ATTRIBUTE_NAME:
-					myReadState = ATTRIBUTE_NAME;
-					break;
-				default:
-					myReadState = BROKEN;
-					break;
-			}
-			break;
-		case ':':
-			switch (myReadState) {
-				case AT_BLOCK:
-					break;
-				case ATTRIBUTE_NAME:
-					myReadState = ATTRIBUTE_VALUE;
-					break;
-				default:
-					myReadState = BROKEN;
-					break;
-			}
-			break;
-	}
-}
-
-void StyleSheetParser::processWord(std::string &word) {
-	while (!word.empty()) {
-		int index = word.find(myInsideComment ? "*/" : "/*");
-		if (!myInsideComment) {
-			if (index == -1) {
-				processWordWithoutComments(word);
-			} else if (index > 0) {
-				processWordWithoutComments(word.substr(0, index));
-			}
-		}
-		if (index == -1) {
-			break;
-		}
-		myInsideComment = !myInsideComment;
-		word.erase(0, index + 2);
-	}
-}
-	
-void StyleSheetParser::processWordWithoutComments(std::string word) {
-	switch (myReadState) {
-		case AT_RULE:
-		case AT_BLOCK:
-			break;
-		case TAG_NAME:
-			ZLStringUtil::stripWhiteSpaces(word);
-			if (!word.empty()) {
-				if (word[0] == '@') {
-					myReadState = AT_RULE;
-
-				} else {
-					mySelectors.push_back(word);
 				}
 			}
 			break;
-		case ATTRIBUTE_NAME:
-			myAttributeName = word;
-			myMap[myAttributeName].clear();
-			break;
-		case ATTRIBUTE_VALUE:
-			myMap[myAttributeName].push_back(word);
-			break;
-		case BROKEN:
-			break;
+		}
+		break;
+
+	case COMMENT: // Comments are handled elsewhere
+		break;
 	}
+}
+
+void StyleSheetParser::finishAttributeValue() {
+	if (ZLStringUtil::stripWhiteSpaces(myWord)) {
+		myMap[myAttributeName].push_back(myWord);
+		myWord.resize(0);
+	}
+}
+
+void StyleSheetParser::finishAttribute() {
+	myAttributeName.resize(0);
+	myWord.resize(0);
+}
+
+void StyleSheetParser::finishRule() {
+	for (unsigned int i=0; i<mySelectors.size(); i++) {
+		storeData(mySelectors[i], myMap);
+	}
+	myAttributeName.resize(0);
+	myWord.resize(0);
+	mySelectors.resize(0);
+	myMap.clear();
 }

@@ -73,29 +73,43 @@ public:
 	typedef std::vector<Selector> SelectorList;
 	typedef std::map<std::string,std::vector<std::string> > AttributeMap;
 
+	typedef enum {
+		WS_UNDEFINED,
+		WS_NORMAL,
+		WS_NOWRAP,
+		WS_PRE,
+		WS_PRE_WRAP,
+		WS_PRE_LINE
+	} WhiteSpaceValue;
+
 	struct Style {
 		Style();
 		Style(const Style &other);
 		Style(const AttributeMap &map);
 
 		Style &operator = (const Style &other);
-		void apply(const Style &other);
+        bool operator == (const Style &other) const;
+        bool equals(const Style &other) const;
+        void apply(const Style &other);
+        void inherit(const Style &other);
+		bool empty() const;
 
 		ZLTextStyleEntry TextStyle;
 		ZLBoolean3 PageBreakBefore;
 		ZLBoolean3 PageBreakAfter;
+		WhiteSpaceValue WhiteSpace;
+		bool DisplayNone;
 	};
 
 	typedef std::vector<Style> StyleList;
 	static void updateStyle(Style &style, const AttributeMap &map);
 	static void updateTextStyle(ZLTextStyleEntry &entry, const AttributeMap &map);
-	static bool getPageBreakBefore(const AttributeMap &map, ZLBoolean3 &value);
-	static bool getPageBreakAfter(const AttributeMap &map, ZLBoolean3 &value);
+	static void getPageBreakValue(const std::vector<std::string> &values, ZLBoolean3 &value);
 
 private:
 	struct Entry {
 		Entry();
-		Entry(const SelectorList &selectors, int specificity, const AttributeMap &map);
+		Entry(const SelectorList &selectors, int specificity, const Style &style);
 		Entry &operator = (const Entry &other);
 		bool match(const ElementList &stack) const;
 
@@ -106,13 +120,12 @@ private:
 
 	void addMap(const std::vector<std::string> &selectors, const AttributeMap &map);
 
-	static bool parseLength(const std::string &toParse, short &size, ZLTextStyleEntry::SizeUnit &unit);
 	static bool parseMargin(const std::string &toParse, short &size, ZLTextStyleEntry::SizeUnit &unit);
 	static void setLength(ZLTextStyleEntry &entry, ZLTextStyleEntry::Length name, const AttributeMap &map, const std::string &attributeName);
 	static void setLength(ZLTextStyleEntry &entry, ZLTextStyleEntry::Length name, const std::string &value);
 	static void setMargin(ZLTextStyleEntry &entry, ZLTextStyleEntry::Length name, const AttributeMap &map, const std::string &attributeName);
 	static void setMargin(ZLTextStyleEntry &entry, ZLTextStyleEntry::Length name, const std::string &value);
-	static const std::vector<std::string> &values(const AttributeMap &map, const std::string &name);
+    static const std::vector<std::string> &values(const AttributeMap &map, const std::string &name);
 	static bool sortBySpecificity(const Entry *e1, const Entry *e2);
 
 public:
@@ -129,7 +142,7 @@ inline StyleSheetTable::Selector::Selector(const std::string &type, const std::s
 inline StyleSheetTable::Selector::Selector(const std::string &type, const std::string &klass) : myType(type), myClass(klass) {}
 inline StyleSheetTable::Selector::Selector(const StyleSheetTable::Selector &other) : myType(other.myType), myClass(other.myClass), myId(other.myId) {}
 inline StyleSheetTable::Selector::Selector() {}
-inline StyleSheetTable::Selector &StyleSheetTable::Selector::operator = (const StyleSheetTable::Selector &other) {
+inline StyleSheetTable::Selector &StyleSheetTable::Selector::operator = (const Selector &other) {
 	myType = other.myType; myClass = other.myClass; myId = other.myId; return *this;
 }
 inline bool StyleSheetTable::Selector::operator == (const Selector &other) const {
@@ -138,7 +151,7 @@ inline bool StyleSheetTable::Selector::operator == (const Selector &other) const
 inline bool StyleSheetTable::Selector::operator != (const Selector &other) const {
 	return (&other != this) && (myType != other.myType || myClass != other.myClass || myId != other.myId);
 }
-inline bool StyleSheetTable::Selector::operator < (const StyleSheetTable::Selector &other) const {
+inline bool StyleSheetTable::Selector::operator < (const Selector &other) const {
 	return myType < other.myType || (myType == other.myType && (myClass < other.myClass || (myClass == other.myClass && myId < other.myId)));
 }
 inline bool StyleSheetTable::Selector::match(const Element &element) const {
@@ -151,21 +164,30 @@ inline const std::string &StyleSheetTable::Selector::type() const { return myTyp
 inline const std::string &StyleSheetTable::Selector::klass() const { return myClass; }
 inline const std::string &StyleSheetTable::Selector::id() const { return myId; }
 
-inline StyleSheetTable::Style::Style() : PageBreakBefore(B3_UNDEFINED), PageBreakAfter(B3_UNDEFINED) {}
-inline StyleSheetTable::Style::Style(const StyleSheetTable::Style &other) : TextStyle(other.TextStyle), PageBreakBefore(other.PageBreakBefore), PageBreakAfter(other.PageBreakAfter) {}
-inline StyleSheetTable::Style::Style(const StyleSheetTable::AttributeMap &map) : PageBreakBefore(B3_UNDEFINED), PageBreakAfter(B3_UNDEFINED) {
+inline StyleSheetTable::Style::Style() :
+	PageBreakBefore(B3_UNDEFINED), PageBreakAfter(B3_UNDEFINED), WhiteSpace(WS_UNDEFINED), DisplayNone(false) {}
+inline StyleSheetTable::Style::Style(const StyleSheetTable::Style &other) :
+	TextStyle(other.TextStyle), PageBreakBefore(other.PageBreakBefore), PageBreakAfter(other.PageBreakAfter), WhiteSpace(other.WhiteSpace), DisplayNone(other.DisplayNone) {}
+inline StyleSheetTable::Style::Style(const StyleSheetTable::AttributeMap &map) :
+	PageBreakBefore(B3_UNDEFINED), PageBreakAfter(B3_UNDEFINED), WhiteSpace(WS_UNDEFINED), DisplayNone(false) {
 	updateStyle(*this, map);
 }
-inline StyleSheetTable::Style &StyleSheetTable::Style::operator = (const StyleSheetTable::Style &other) {
+inline bool StyleSheetTable::Style::empty() const {
+	return TextStyle.isEmpty() && PageBreakBefore == B3_UNDEFINED && PageBreakAfter == B3_UNDEFINED && WhiteSpace == WS_UNDEFINED && !DisplayNone;
+}
+inline bool StyleSheetTable::Style::operator == (const Style &other) const { return equals(other); }
+inline StyleSheetTable::Style &StyleSheetTable::Style::operator = (const Style &other) {
 	TextStyle = other.TextStyle;
 	PageBreakBefore = other.PageBreakBefore;
 	PageBreakAfter = other.PageBreakAfter;
+	WhiteSpace = other.WhiteSpace;
 	return *this;
 }
 
 inline StyleSheetTable::Entry::Entry() : Specificity(0) {}
-inline StyleSheetTable::Entry::Entry(const SelectorList &selectors, int specificity, const AttributeMap &map) : Selectors(selectors), Specificity(specificity), Style(map) {}
-inline StyleSheetTable::Entry &StyleSheetTable::Entry::operator = (const StyleSheetTable::Entry &other) {
+inline StyleSheetTable::Entry::Entry(const SelectorList &selectors, int specificity, const StyleSheetTable::Style &style) :
+	Selectors(selectors), Specificity(specificity), Style(style) {}
+inline StyleSheetTable::Entry &StyleSheetTable::Entry::operator = (const Entry &other) {
 	Selectors = other.Selectors;
 	Style = other.Style;
 	Specificity = other.Specificity;

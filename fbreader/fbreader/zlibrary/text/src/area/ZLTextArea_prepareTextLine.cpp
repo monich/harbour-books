@@ -167,6 +167,7 @@ void ZLTextArea::prepareTextLine(Style &style, const ZLTextLineInfo &info, int y
 			case ZLTextElement::EMPTY_LINE_ELEMENT:
 			case ZLTextElement::LINE_BREAK_ELEMENT:
 			case ZLTextElement::FIXED_HSPACE_ELEMENT:
+			case ZLTextElement::EMPTY_ELEMENT:
 				break;
 			case ZLTextElement::START_REVERSED_SEQUENCE_ELEMENT:
 				//context().setColor(ZLColor(0, 255, 0));

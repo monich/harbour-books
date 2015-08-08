@@ -59,6 +59,7 @@ public:
 	void addHyperlinkLabel(const std::string &label, int paragraphNumber);
 	void addFixedHSpace(unsigned char length);
 	void addLineBreak();
+	void addEmpty();
 
 	void addImageReference(const std::string &id, short vOffset = 0);
 	void addImage(const std::string &id, shared_ptr<const ZLImage> image);

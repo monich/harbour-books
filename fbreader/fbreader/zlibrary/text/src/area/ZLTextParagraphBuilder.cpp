@@ -111,6 +111,9 @@ void ZLTextParagraphCursor::Builder::fill() {
 			case ZLTextParagraphEntry::LINE_BREAK_ENTRY:
 				myElements.push_back(myTextElementPool.LineBreakElement);
 				break;
+			case ZLTextParagraphEntry::EMPTY_ENTRY:
+				myElements.push_back(myTextElementPool.EmptyElement);
+				break;
 		}
 	}
 

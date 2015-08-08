@@ -65,6 +65,7 @@ enum FBTextKind {
 	H6 = 36,
 	EXTERNAL_HYPERLINK = 37,
 	BOOK_HYPERLINK = 38,
+	BLOCKQUOTE = 39
 };
 
 #endif /* __FBTEXTKIND_H__ */

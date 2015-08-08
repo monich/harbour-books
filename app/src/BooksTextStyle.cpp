@@ -54,6 +54,11 @@ shared_ptr<ZLTextStyle> BooksTextStyle::defaults()
     return style;
 }
 
+BooksTextStyle::BooksTextStyle()
+{
+    iFontFamilies.push_back(Default::FONT_FAMILY);
+}
+
 bool
 BooksTextStyle::equalLayout(
     shared_ptr<ZLTextStyle> aStyle1,
@@ -74,9 +79,9 @@ bool BooksTextStyle::isDecorated() const
     return false;
 }
 
-const std::string& BooksTextStyle::fontFamily() const
+const std::vector<std::string>& BooksTextStyle::fontFamilies() const
 {
-    return Default::FONT_FAMILY;
+    return iFontFamilies;
 }
 
 int BooksTextStyle::fontSize() const

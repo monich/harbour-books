@@ -65,7 +65,7 @@ public:
 
     bool isDecorated() const;
 
-    const std::string &fontFamily() const;
+    const std::vector<std::string> &fontFamilies() const;
 
     int fontSize() const;
     bool bold() const;
@@ -102,10 +102,10 @@ BooksSettings::TextStyle::isDecorated() const
     return iDefaultStyle->isDecorated();
 }
 
-const std::string&
-BooksSettings::TextStyle::fontFamily() const
+const std::vector<std::string>&
+BooksSettings::TextStyle::fontFamilies() const
 {
-    return iDefaultStyle->fontFamily();
+    return iDefaultStyle->fontFamilies();
 }
 
 int

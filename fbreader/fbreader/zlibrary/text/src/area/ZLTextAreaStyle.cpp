@@ -33,7 +33,7 @@
 ZLTextArea::Style::Style(const ZLTextArea &area, shared_ptr<ZLTextStyle> style) : myArea(area) {
 	myTextStyle = style;
 	myWordHeight = -1;
-	myArea.context().setFont(myTextStyle->fontFamily(), myTextStyle->fontSize(), myTextStyle->bold(), myTextStyle->italic());
+	myArea.context().setFont(myArea.context().pickFontFamily(myTextStyle->fontFamilies()), myTextStyle->fontSize(), myTextStyle->bold(), myTextStyle->italic());
 	myBidiLevel = myArea.isRtl() ? 1 : 0;
 }
 
@@ -42,7 +42,7 @@ void ZLTextArea::Style::setTextStyle(shared_ptr<ZLTextStyle> style, unsigned cha
 		myTextStyle = style;
 		myWordHeight = -1;
 	}
-	myArea.context().setFont(myTextStyle->fontFamily(), myTextStyle->fontSize(), myTextStyle->bold(), myTextStyle->italic());
+	myArea.context().setFont(myArea.context().pickFontFamily(myTextStyle->fontFamilies()), myTextStyle->fontSize(), myTextStyle->bold(), myTextStyle->italic());
 	myBidiLevel = bidiLevel;
 }
 
@@ -108,6 +108,7 @@ int ZLTextArea::Style::elementWidth(const ZLTextElement &element, unsigned int c
 		case ZLTextElement::CONTROL_ELEMENT:
 		case ZLTextElement::START_REVERSED_SEQUENCE_ELEMENT:
 		case ZLTextElement::END_REVERSED_SEQUENCE_ELEMENT:
+		case ZLTextElement::EMPTY_ELEMENT:
 			return 0;
 		case ZLTextElement::FIXED_HSPACE_ELEMENT:
 			return myArea.context().spaceWidth() * ((const ZLTextFixedHSpaceElement&)element).length();
@@ -119,6 +120,8 @@ int ZLTextArea::Style::elementHeight(const ZLTextElement &element, const ZLTextS
 	switch (element.kind()) {
 		case ZLTextElement::NB_HSPACE_ELEMENT:
 		case ZLTextElement::WORD_ELEMENT:
+		case ZLTextElement::EMPTY_LINE_ELEMENT:
+		case ZLTextElement::LINE_BREAK_ELEMENT:
 			if (myWordHeight == -1) {
 				myWordHeight = myArea.context().stringHeight() * textStyle()->lineSpacePercent() / 100 + textStyle()->verticalShift();
 			}
@@ -131,9 +134,6 @@ int ZLTextArea::Style::elementHeight(const ZLTextElement &element, const ZLTextS
 			return - textStyle()->spaceAfter(metrics);
 		case ZLTextElement::AFTER_PARAGRAPH_ELEMENT:
 			return - textStyle()->spaceBefore(metrics);
-		case ZLTextElement::EMPTY_LINE_ELEMENT:
-		case ZLTextElement::LINE_BREAK_ELEMENT:
-			return myArea.context().stringHeight();
 		case ZLTextElement::INDENT_ELEMENT:
 		case ZLTextElement::HSPACE_ELEMENT:
 		case ZLTextElement::FORCED_CONTROL_ELEMENT:
@@ -141,6 +141,7 @@ int ZLTextArea::Style::elementHeight(const ZLTextElement &element, const ZLTextS
 		case ZLTextElement::FIXED_HSPACE_ELEMENT:
 		case ZLTextElement::START_REVERSED_SEQUENCE_ELEMENT:
 		case ZLTextElement::END_REVERSED_SEQUENCE_ELEMENT:
+		case ZLTextElement::EMPTY_ELEMENT:
 			return 0;
 	}
 	return 0;

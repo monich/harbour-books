@@ -64,6 +64,30 @@ void StyleSheetTable::Style::apply(const Style &other) {
 	if (other.PageBreakAfter != B3_UNDEFINED) {
 		PageBreakAfter = other.PageBreakAfter;
 	}
+	if (other.WhiteSpace != WS_UNDEFINED) {
+		WhiteSpace = other.WhiteSpace;
+	}
+	if (other.DisplayNone) {
+		DisplayNone = other.DisplayNone;
+	}
+}
+
+void StyleSheetTable::Style::inherit(const Style &other) {
+	TextStyle.inherit(other.TextStyle);
+	if (other.WhiteSpace != WS_UNDEFINED) {
+		WhiteSpace = other.WhiteSpace;
+	}
+	if (other.DisplayNone) {
+		DisplayNone = other.DisplayNone;
+	}
+}
+
+bool StyleSheetTable::Style::equals(const Style &other) const {
+	return PageBreakBefore == other.PageBreakBefore &&
+		PageBreakAfter == other.PageBreakAfter &&
+		WhiteSpace == other.WhiteSpace &&
+		DisplayNone == other.DisplayNone &&
+		TextStyle.equals(other.TextStyle);
 }
 
 bool StyleSheetTable::Entry::match(const ElementList &stack) const {
@@ -93,54 +117,28 @@ bool StyleSheetTable::Entry::match(const ElementList &stack) const {
 
 void StyleSheetTable::addMap(const std::vector<std::string> &selectors, const AttributeMap &map) {
 	if ((!selectors.empty()) && !map.empty()) {
-		// http://www.w3.org/TR/selectors/#specificity
-		int a = 0, b = 0, c = 0;
-		SelectorList stack;
-		for (unsigned int i=0; i<selectors.size(); i++) {
-			const Selector &selector = selectors[i];
-			a += selector.a();
-			b += selector.b();
-			c += selector.c();
-			stack.push_back(selector);
-		}
-		if (a > 255) a = 255;
-		if (b > 255) b = 255;
-		if (c > 255) c = 255;
-		myEntries.push_back(Entry(stack, (a << 16) + (b << 8) + c, map));
-	}
-}
-
-bool StyleSheetTable::parseLength(const std::string &toParse, short &size, ZLTextStyleEntry::SizeUnit &unit) {
-	if (!toParse.empty()) {
-		if (ZLStringUtil::stringEndsWith(toParse, "%")) {
-			unit = ZLTextStyleEntry::SIZE_UNIT_PERCENT;
-			size = atoi(toParse.c_str());
-			return true;
-		} else if (ZLStringUtil::stringEndsWith(toParse, "em")) {
-			unit = ZLTextStyleEntry::SIZE_UNIT_EM_100;
-			size = (short)(100 * ZLStringUtil::stringToDouble(toParse, 0));
-			return true;
-		} else if (ZLStringUtil::stringEndsWith(toParse, "ex")) {
-			unit = ZLTextStyleEntry::SIZE_UNIT_EX_100;
-			size = (short)(100 * ZLStringUtil::stringToDouble(toParse, 0));
-			return true;
-		} else if (ZLStringUtil::stringEndsWith(toParse, "px") ||
-			   ZLStringUtil::stringEndsWith(toParse, "pt") ||
-			   ZLStringUtil::stringEndsWith(toParse, "pc")) {
-			unit = ZLTextStyleEntry::SIZE_UNIT_PIXEL;
-			size = atoi(toParse.c_str());
-			return true;
-		} else if (toParse == "0") {
-			unit = ZLTextStyleEntry::SIZE_UNIT_PIXEL;
-			size = 0;
-			return true;
+		Style style(map);
+		if (!style.empty()) {
+			// http://www.w3.org/TR/selectors/#specificity
+			int a = 0, b = 0, c = 0;
+			SelectorList stack;
+			for (unsigned int i=0; i<selectors.size(); i++) {
+				const Selector &selector = selectors[i];
+				a += selector.a();
+				b += selector.b();
+				c += selector.c();
+				stack.push_back(selector);
+			}
+			if (a > 255) a = 255;
+			if (b > 255) b = 255;
+			if (c > 255) c = 255;
+			myEntries.push_back(Entry(stack, (a << 16) + (b << 8) + c, style));
 		}
 	}
-	return false;
 }
 
 bool StyleSheetTable::parseMargin(const std::string &toParse, short &size, ZLTextStyleEntry::SizeUnit &unit) {
-	if (parseLength(toParse, size, unit)) {
+	if (ZLTextStyleEntry::parseLength(toParse, size, unit)) {
 		// Negative margins do make sense but we don't really support them
 		if (size < 0) size = 0;
 		return true;
@@ -166,7 +164,7 @@ void StyleSheetTable::setLength(ZLTextStyleEntry &entry, ZLTextStyleEntry::Lengt
 void StyleSheetTable::setLength(ZLTextStyleEntry &entry, ZLTextStyleEntry::Length name, const std::string &value) {
 	short size;
 	ZLTextStyleEntry::SizeUnit unit;
-	if (parseLength(value, size, unit)) {
+	if (ZLTextStyleEntry::parseLength(value, size, unit)) {
 		entry.setLength(name, size, unit);
 	}
 }
@@ -200,9 +198,11 @@ void StyleSheetTable::applyStyles(const ElementList &stack, Style &style) const 
 			entries.push_back(&(*i));
 		}
 	}
-	std::sort(entries.begin(), entries.end(), sortBySpecificity);
-	for (std::vector<const Entry*>::const_iterator e = entries.begin(); e != entries.end(); ++e) {
-		style.apply((*e)->Style);
+	if (!entries.empty()) {
+		std::sort(entries.begin(), entries.end(), sortBySpecificity);
+		for (std::vector<const Entry*>::const_iterator e = entries.begin(); e != entries.end(); ++e) {
+			style.apply((*e)->Style);
+		}
 	}
 }
 
@@ -216,60 +216,77 @@ const std::vector<std::string> &StyleSheetTable::values(const AttributeMap &map,
 }
 
 void StyleSheetTable::updateTextStyle(ZLTextStyleEntry &entry, const AttributeMap &styles) {
-	const std::vector<std::string> &alignment = values(styles, "text-align");
+	static const std::string TEXT_ALIGN("text-align");
+	const std::vector<std::string> &alignment = values(styles, TEXT_ALIGN);
 	if (!alignment.empty()) {
-		if (alignment[0] == "justify") {
+		const std::string &value = alignment.at(0);
+		if (value == "justify") {
 			entry.setAlignmentType(ALIGN_JUSTIFY);
-		} else if (alignment[0] == "left") {
+		} else if (value == "left") {
 			entry.setAlignmentType(ALIGN_LEFT);
-		} else if (alignment[0] == "right") {
+		} else if (value == "right") {
 			entry.setAlignmentType(ALIGN_RIGHT);
-		} else if (alignment[0] == "center") {
+		} else if (value == "center") {
 			entry.setAlignmentType(ALIGN_CENTER);
+		}
+	} else {
+		static const std::string FLOAT("float");
+		const std::vector<std::string> &floatVal = values(styles, FLOAT);
+		if (!floatVal.empty()) {
+			const std::string &value = floatVal.at(0);
+			if (value == "left") {
+				entry.setAlignmentType(ALIGN_LEFT);
+			} else if (value == "right") {
+				entry.setAlignmentType(ALIGN_RIGHT);
+			}
 		}
 	}
 
-	const std::vector<std::string> &bold = values(styles, "font-weight");
-	if (!bold.empty()) {
+	static const std::string FONT_WEIGHT("font-weight");
+	const std::vector<std::string> &weight = values(styles, FONT_WEIGHT);
+	if (!weight.empty()) {
 		int num = -1;
-		if (bold[0] == "bold") {
+		const std::string &value = weight.at(0);
+		if (value == "bold") {
 			num = 700;
-		} else if (bold[0] == "normal") {
+		} else if (value == "normal") {
 			num = 400;
-		} else if ((bold[0].length() == 3) &&
-							 (bold[0][1] == '0') &&
-							 (bold[0][2] == '0') &&
-							 (bold[0][0] >= '1') &&
-							 (bold[0][0] <= '9')) {
-			num = 100 * (bold[0][0] - '0');
-		} else if (bold[0] == "bolder") {
-		} else if (bold[0] == "lighter") {
+		} else if ((value.length() == 3) &&
+		           (value[1] == '0') &&
+		           (value[2] == '0') &&
+		           (value[0] >= '1') &&
+		           (value[0] <= '9')) {
+			num = 100 * (value[0] - '0');
+		} else if (value == "bolder") {
+		} else if (value == "lighter") {
 		}
 		if (num != -1) {
 			entry.setFontModifier(FONT_MODIFIER_BOLD, num >= 600);
 		}
 	}
 
-	const std::vector<std::string> &italic = values(styles, "font-style");
+	static const std::string FONT_STYLE("font-style");
+	const std::vector<std::string> &italic = values(styles, FONT_STYLE);
 	if (!italic.empty()) {
 		entry.setFontModifier(FONT_MODIFIER_ITALIC, italic[0] == "italic");
 	}
 
-	const std::vector<std::string> &variant = values(styles, "font-variant");
+	static const std::string FONT_VARIANT("font-variant");
+	const std::vector<std::string> &variant = values(styles, FONT_VARIANT);
 	if (!variant.empty()) {
 		entry.setFontModifier(FONT_MODIFIER_SMALLCAPS, variant[0] == "small-caps");
 	}
 
-	const std::vector<std::string> &fontFamily = values(styles, "font-family");
-	if (!fontFamily.empty() && !fontFamily[0].empty()) {
-		entry.setFontFamily(fontFamily[0]);
-	}
+	static const std::string FONT_FAMILY("font-family");
+	const std::vector<std::string> &fontFamilies = values(styles, FONT_FAMILY);
+	if (!fontFamilies.empty()) entry.setFontFamilies(fontFamilies);
 
 	short size;
 	ZLTextStyleEntry::SizeUnit unit;
-	const std::vector<std::string> &fontSize = values(styles, "font-size");
+	static const std::string FONT_SIZE("font-size");
+	const std::vector<std::string> &fontSize = values(styles, FONT_SIZE);
 	if (!fontSize.empty()) {
-		std::string value = fontSize[0];
+		const std::string &value = fontSize.at(0);
 		if (value == "xx-small") {
 			entry.setFontSizeMag(-3);
 		} else if (value == "x-small") {
@@ -285,7 +302,7 @@ void StyleSheetTable::updateTextStyle(ZLTextStyleEntry &entry, const AttributeMa
 		} else if (value == "xx-large") {
 			entry.setFontSizeMag(3);
 		} else {
-			if (parseLength(value, size, unit)) {
+			if (ZLTextStyleEntry::parseLength(value, size, unit)) {
 				switch (unit) {
 				case ZLTextStyleEntry::SIZE_UNIT_PIXEL:
 					// What to do with pixels?
@@ -293,26 +310,68 @@ void StyleSheetTable::updateTextStyle(ZLTextStyleEntry &entry, const AttributeMa
 				case ZLTextStyleEntry::SIZE_UNIT_EM_100:
 				case ZLTextStyleEntry::SIZE_UNIT_EX_100:
 				case ZLTextStyleEntry::SIZE_UNIT_PERCENT:
-					entry.setFontSizeMag((size < 100 && size > 80) ? -1 :
-					                     (size > 100 && size < 120) ? 1 :
-					                     (size - 100)/20);
+					// Percent to magnification mapping algorithm
+					// matches ZLTextForcedStyle::fontSize() logic
+					if (size < 100) {
+						if (size >= 80) {
+							entry.setFontSizeMag(-1);
+						} else {
+							int mag;
+							unsigned int x1 = 5*100, x2 = 6*size;
+							// Too many iterations would cause 32-bit
+							// overflow and generally don't make sense.
+							for (mag=1; mag<=6 && x1<x2; ++mag) {
+								x1 *= 5; x2 *= 6;
+							}
+							entry.setFontSizeMag(-mag);
+						}
+					} else if (size > 100) {
+						if (size < 120) {
+							entry.setFontSizeMag(1);
+						} else {
+							int mag;
+							unsigned int x1 = 6*100, x2 = 5*size;
+							for (mag=1; mag<=6 && x1<x2; ++mag) {
+								x1 *= 6; x2 *= 5;
+							}
+							entry.setFontSizeMag(mag);
+						}
+					} else {
+						entry.setFontSizeMag(0);
+					}
 					break;
 				}
 			}
 		}
 	}
 
-	const std::vector<std::string> &opacity = values(styles, "opacity");
+	static const std::string OPACITY("opacity");
+	const std::vector<std::string> &opacity = values(styles, OPACITY);
 	if (!opacity.empty()) {
 		const int value = (int)(255 * ZLStringUtil::stringToDouble(opacity[0], 1));
 		entry.setOpacity((unsigned char)((value < 0) ? 0 : (value > 255) ? 255 : value));
 	}
 
-	std::vector<std::string> margins = values(styles, "margin");
-	if (!margins.empty() && margins.back() == "!important") {
+	// Margins will overwrite padding, sorry
+	static const std::string PADDING_TOP("padding-top");
+	static const std::string PADDING_BOTTOM("padding-bottom");
+	setLength(entry, ZLTextStyleEntry::LENGTH_SPACE_BEFORE, styles, PADDING_TOP);
+	setLength(entry, ZLTextStyleEntry::LENGTH_SPACE_AFTER, styles, PADDING_BOTTOM);
+
+	static const std::string MARGIN("margin");
+	std::vector<std::string> margins = values(styles, MARGIN);
+	if (!margins.empty()) {
 		// Ignore the "!important" modifier for now
-		margins.pop_back();
+		if (margins.back() == "!important") {
+			margins.pop_back();
+		} else if (margins.back() == "important") {
+			margins.pop_back();
+			if (!margins.empty() && margins.back() == "!") {
+				margins.pop_back();
+			}
+		}
 	}
+
 	switch (margins.size()) {
 	case 1:
 		if (parseMargin(margins[0], size, unit)) {
@@ -348,49 +407,61 @@ void StyleSheetTable::updateTextStyle(ZLTextStyleEntry &entry, const AttributeMa
 		break;
 	}
 
-	setMargin(entry, ZLTextStyleEntry::LENGTH_LEFT_INDENT, styles, "margin-left");
-	setMargin(entry, ZLTextStyleEntry::LENGTH_RIGHT_INDENT, styles, "margin-right");
-	setLength(entry, ZLTextStyleEntry::LENGTH_FIRST_LINE_INDENT_DELTA, styles, "text-indent");
-	setMargin(entry, ZLTextStyleEntry::LENGTH_SPACE_BEFORE, styles, "margin-top");
-	setLength(entry, ZLTextStyleEntry::LENGTH_SPACE_BEFORE, styles, "padding-top");
-	setMargin(entry, ZLTextStyleEntry::LENGTH_SPACE_AFTER, styles, "margin-bottom");
-	setLength(entry, ZLTextStyleEntry::LENGTH_SPACE_AFTER, styles, "padding-bottom");
+	static const std::string MARGIN_LEFT("margin-left");
+	static const std::string MARGIN_RIGHT("margin-right");
+	static const std::string MARGIN_TOP("margin-top");
+	static const std::string MARGIN_BOTTOM("margin-bottom");
+	static const std::string TEXT_INDENT("text-indent");
+
+	setMargin(entry, ZLTextStyleEntry::LENGTH_LEFT_INDENT, styles, MARGIN_LEFT);
+	setMargin(entry, ZLTextStyleEntry::LENGTH_RIGHT_INDENT, styles, MARGIN_RIGHT);
+	setLength(entry, ZLTextStyleEntry::LENGTH_FIRST_LINE_INDENT_DELTA, styles, TEXT_INDENT);
+	setMargin(entry, ZLTextStyleEntry::LENGTH_SPACE_BEFORE, styles, MARGIN_TOP);
+	setMargin(entry, ZLTextStyleEntry::LENGTH_SPACE_AFTER, styles, MARGIN_BOTTOM);
 }
 
-bool StyleSheetTable::getPageBreakBefore(const AttributeMap &map, ZLBoolean3 &value) {
-	const std::vector<std::string> &pbb = values(map, "page-break-before");
-	if (!pbb.empty()) {
-		if ((pbb[0] == "always") ||
-		    (pbb[0] == "left") ||
-		    (pbb[0] == "right")) {
+void StyleSheetTable::getPageBreakValue(const std::vector<std::string> &values, ZLBoolean3 &value) {
+	if (!values.empty()) {
+		const std::string &first = values.at(0);
+		if ((first == "always") ||
+		    (first == "left") ||
+		    (first == "right")) {
 			value = B3_TRUE;
-			return true;
-		} else if (pbb[0] == "avoid") {
+		} else if (first == "avoid") {
 			value = B3_FALSE;
-			return true;
 		}
 	}
-	return false;
-}
-
-bool StyleSheetTable::getPageBreakAfter(const AttributeMap &map, ZLBoolean3 &value) {
-	const std::vector<std::string> &pba = values(map, "page-break-after");
-	if (!pba.empty()) {
-		if ((pba[0] == "always") ||
-		    (pba[0] == "left") ||
-		    (pba[0] == "right")) {
-			value = B3_TRUE;
-			return true;
-		} else if (pba[0] == "avoid") {
-			value = B3_FALSE;
-			return true;
-		}
-	}
-	return false;
 }
 
 void StyleSheetTable::updateStyle(Style &style, const AttributeMap &map) {
 	updateTextStyle(style.TextStyle, map);
-	getPageBreakBefore(map, style.PageBreakBefore);
-	getPageBreakAfter(map, style.PageBreakAfter);
+
+	static const std::string PAGE_BREAK_BEFORE("page-break-before");
+	getPageBreakValue(values(map, PAGE_BREAK_BEFORE), style.PageBreakBefore);
+
+	static const std::string PAGE_BREAK_AFTER("page-break-after");
+	getPageBreakValue(values(map, PAGE_BREAK_AFTER), style.PageBreakAfter);
+
+	static const std::string WHITE_SPACE("white-space");
+	const std::vector<std::string> &whiteSpace = values(map, WHITE_SPACE);
+	if (!whiteSpace.empty()) {
+		const std::string &value = whiteSpace.at(0);
+		if (value == "normal") {
+			style.WhiteSpace = WS_NORMAL;
+		} else if (value == "nowrap") {
+			style.WhiteSpace = WS_NOWRAP;
+		} else if (value == "pre") {
+			style.WhiteSpace = WS_PRE;
+		} else if (value == "pre-wrap") {
+			style.WhiteSpace = WS_PRE_WRAP;
+		} else if (value == "pre-line") {
+			style.WhiteSpace = WS_PRE_LINE;
+		}
+	}
+
+	static const std::string DISPLAY("display");
+	const std::vector<std::string> &display = values(map, DISPLAY);
+	if (!display.empty() && display[0] == "none") {
+		style.DisplayNone = true;
+	}
 }

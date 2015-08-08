@@ -21,6 +21,7 @@
 #define __ZLTEXTSTYLE_H__
 
 #include <string>
+#include <vector>
 
 #include <shared_ptr.h>
 
@@ -43,7 +44,7 @@ public:
 
 	virtual bool isDecorated() const = 0;
 
-	virtual const std::string &fontFamily() const = 0;
+	virtual const std::vector<std::string> &fontFamilies() const = 0;
 	virtual int fontSize() const = 0;
 
 	virtual bool bold() const = 0;

@@ -22,6 +22,7 @@
 #include <algorithm>
 
 #include <ZLUnicodeUtil.h>
+#include <ZLStringUtil.h>
 #include <ZLImage.h>
 
 #include "ZLTextParagraph.h"
@@ -34,26 +35,46 @@ size_t ZLTextEntry::dataLength() const {
 	return len;
 }
 
-short ZLTextStyleEntry::length(Length name, const Metrics &metrics) const {
-	switch (myLengths[name].Unit) {
+int ZLTextStyleEntry::hlength(int size, SizeUnit unit, const Metrics &metrics)
+{
+	switch (unit) {
 		default:
 		case SIZE_UNIT_PIXEL:
-			return myLengths[name].Size;
+			return size;
 		case SIZE_UNIT_EM_100:
-			return (myLengths[name].Size * metrics.FontSize + 50) / 100;
+			return (size * metrics.FontSize + 50) / 100;
 		case SIZE_UNIT_EX_100:
-			return (myLengths[name].Size * metrics.FontXHeight + 50) / 100;
+			return (size * metrics.FontXHeight + 50) / 100;
 		case SIZE_UNIT_PERCENT:
-			switch (name) {
-				default:
-				case LENGTH_LEFT_INDENT:
-				case LENGTH_RIGHT_INDENT:
-				case LENGTH_FIRST_LINE_INDENT_DELTA:
-					return (myLengths[name].Size * metrics.FullWidth + 50) / 100;
-				case LENGTH_SPACE_BEFORE:
-				case LENGTH_SPACE_AFTER:
-					return (myLengths[name].Size * metrics.FullHeight + 50) / 100;
-			}
+			return (size * metrics.FullWidth + 50) / 100;
+	}
+}
+
+int ZLTextStyleEntry::vlength(int size, SizeUnit unit, const Metrics &metrics)
+{
+	switch (unit) {
+		default:
+		case SIZE_UNIT_PIXEL:
+			return size;
+		case SIZE_UNIT_EM_100:
+			return (size * metrics.FontSize + 50) / 100;
+		case SIZE_UNIT_EX_100:
+			return (size * metrics.FontXHeight + 50) / 100;
+		case SIZE_UNIT_PERCENT:
+			return (size * metrics.FullHeight + 50) / 100;
+	}
+}
+
+short ZLTextStyleEntry::length(Length name, const Metrics &metrics) const {
+	switch (name) {
+		default:
+		case LENGTH_LEFT_INDENT:
+		case LENGTH_RIGHT_INDENT:
+		case LENGTH_FIRST_LINE_INDENT_DELTA:
+			return hlength(myLengths[name].Size, myLengths[name].Unit, metrics);
+		case LENGTH_SPACE_BEFORE:
+		case LENGTH_SPACE_AFTER:
+			return vlength(myLengths[name].Size, myLengths[name].Unit, metrics);
 	}
 }
 
@@ -80,41 +101,143 @@ ZLTextStyleEntry::ZLTextStyleEntry(char *address) {
 	if (fontSizeSupported()) {
 		myFontSizeMag = (signed char)*address++;
 	}
-	if (fontFamilySupported()) {
-		myFontFamily = address;
+	if (fontFamiliesSupported()) {
+		unsigned char n = *address++;
+		for (unsigned int i = 0; i < n; ++i) {
+			std::string font(address);
+			address += font.length() + 1;
+			myFontFamilies.push_back(font);
+		}
 	}
 }
 
 void ZLTextStyleEntry::reset() {
 	mySupportedFontModifier = 0;
 	myMask = 0;
-	myFontFamily.clear();
+	myFontFamilies.clear();
 }
 
-void ZLTextStyleEntry::apply(const ZLTextStyleEntry &entry) {
-	for (int i = 0; i < NUMBER_OF_LENGTHS; ++i) {
-		if (entry.lengthSupported((Length)i)) {
-			myLengths[i] = entry.myLengths[i];
-			myMask |= 1 << i;
+void ZLTextStyleEntry::apply(const ZLTextStyleEntry &other) {
+	if (other.myMask & ((1 << NUMBER_OF_LENGTHS) - 1)) {
+		for (int i = 0; i < NUMBER_OF_LENGTHS; ++i) {
+			if (other.myMask & (1 << i)) {
+				myLengths[i] = other.myLengths[i];
+				myMask |= (1 << i);
+			}
 		}
 	}
-	if (entry.opacitySupported()) {
-		setOpacity(entry.opacity());
+	if (other.myMask & SUPPORT_OPACITY) {
+		setOpacity(other.myOpacity);
 	}
-	if (entry.alignmentTypeSupported()) {
-		setAlignmentType(entry.alignmentType());
+	if (other.myMask & SUPPORT_ALIGNMENT_TYPE) {
+		setAlignmentType(other.myAlignmentType);
 	}
-	if (entry.mySupportedFontModifier) {
-		myFontModifier &= ~entry.mySupportedFontModifier;
-		myFontModifier |= (entry.myFontModifier & entry.mySupportedFontModifier);
-		mySupportedFontModifier |= entry.mySupportedFontModifier;
+	if (other.mySupportedFontModifier) {
+		myFontModifier &= ~other.mySupportedFontModifier;
+		myFontModifier |= (other.myFontModifier & other.mySupportedFontModifier);
+		mySupportedFontModifier |= other.mySupportedFontModifier;
 	}
-	if (entry.fontSizeSupported()) {
-		setFontSizeMag(entry.fontSizeMag());
+	if (other.myMask & SUPPORT_FONT_SIZE) {
+		setFontSizeMag(other.myFontSizeMag);
 	}
-	if (entry.fontFamilySupported()) {
-		setFontFamily(entry.fontFamily());
+	if (other.myMask & SUPPORT_FONT_FAMILIES) {
+		setFontFamilies(other.myFontFamilies);
 	}
+}
+
+void ZLTextStyleEntry::inherit(const ZLTextStyleEntry &other) {
+	// text-indent
+	if (other.myMask & (1 << LENGTH_FIRST_LINE_INDENT_DELTA)) {
+		myLengths[LENGTH_FIRST_LINE_INDENT_DELTA] = other.myLengths[LENGTH_FIRST_LINE_INDENT_DELTA];
+		myMask |= (1 << LENGTH_FIRST_LINE_INDENT_DELTA);
+	}
+	// text-align
+	if (other.myMask & SUPPORT_ALIGNMENT_TYPE) {
+		setAlignmentType(other.myAlignmentType);
+	}
+	// font-style, font-variant, font-weight
+	if (other.mySupportedFontModifier) {
+		myFontModifier &= ~other.mySupportedFontModifier;
+		myFontModifier |= (other.myFontModifier & other.mySupportedFontModifier);
+		mySupportedFontModifier |= other.mySupportedFontModifier;
+	}
+	// font-size
+	if (other.myMask & SUPPORT_FONT_SIZE) {
+		setFontSizeMag(other.myFontSizeMag);
+	}
+	// font-family
+	if (other.myMask & SUPPORT_FONT_FAMILIES) {
+		setFontFamilies(other.myFontFamilies);
+	}
+}
+
+bool ZLTextStyleEntry::equals(const ZLTextStyleEntry &other) const {
+	if (myMask == other.myMask && mySupportedFontModifier == other.mySupportedFontModifier) {
+		if (myMask & ((1 << NUMBER_OF_LENGTHS) - 1)) {
+			for (int i = 0; i < NUMBER_OF_LENGTHS; ++i) {
+				if (myMask & (1 << i)) {
+					if (myLengths[i].Size != other.myLengths[i].Size ||
+					    myLengths[i].Unit != other.myLengths[i].Unit) {
+						return false;
+					}
+				}
+			}
+		}
+		if ((myMask & SUPPORT_OPACITY) && myOpacity != other.myOpacity) {
+			return false;
+		}
+		if ((myMask & SUPPORT_ALIGNMENT_TYPE) && myAlignmentType != other.myAlignmentType) {
+			return false;
+		}
+		if ((myFontModifier & mySupportedFontModifier) != (other.myFontModifier & mySupportedFontModifier)) {
+			return false;
+		}
+		if ((myMask & SUPPORT_FONT_SIZE) && myFontSizeMag != other.myFontSizeMag) {
+			return false;
+		}
+		if ((myMask & SUPPORT_FONT_FAMILIES) && myFontFamilies != other.myFontFamilies) {
+			return false;
+		}
+		return true;
+	} else {
+		return false;
+	}
+}
+
+bool ZLTextStyleEntry::parseLength(const std::string &toParse, short &size, SizeUnit &unit) {
+	if (!toParse.empty()) {
+		static const std::string PERCENT("%");
+		static const std::string ZERO("0");
+		static const std::string EM("em");
+		static const std::string EX("ex");
+		static const std::string PX("px");
+		static const std::string PT("pt");
+		static const std::string PC("pc");
+		if (ZLStringUtil::stringEndsWith(toParse, PERCENT)) {
+			unit = ZLTextStyleEntry::SIZE_UNIT_PERCENT;
+			size = atoi(toParse.c_str());
+			return true;
+		} else if (ZLStringUtil::stringEndsWith(toParse, EM)) {
+			unit = ZLTextStyleEntry::SIZE_UNIT_EM_100;
+			size = (short)(100 * ZLStringUtil::stringToDouble(toParse, 0));
+			return true;
+		} else if (ZLStringUtil::stringEndsWith(toParse, EX)) {
+			unit = ZLTextStyleEntry::SIZE_UNIT_EX_100;
+			size = (short)(100 * ZLStringUtil::stringToDouble(toParse, 0));
+			return true;
+		} else if (ZLStringUtil::stringEndsWith(toParse, PX) ||
+			   ZLStringUtil::stringEndsWith(toParse, PT) ||
+			   ZLStringUtil::stringEndsWith(toParse, PC)) {
+			unit = ZLTextStyleEntry::SIZE_UNIT_PIXEL;
+			size = atoi(toParse.c_str());
+			return true;
+		} else if (toParse == ZERO) {
+			unit = ZLTextStyleEntry::SIZE_UNIT_PIXEL;
+			size = 0;
+			return true;
+		}
+	}
+	return false;
 }
 
 const shared_ptr<ZLTextParagraphEntry> ZLTextParagraph::Iterator::entry() const {
@@ -205,11 +328,11 @@ void ZLTextParagraph::Iterator::next() {
 				if (mask & ZLTextStyleEntry::SUPPORT_ALIGNMENT_TYPE) ++myPointer;
 				if (supportedFontModifier) ++myPointer;
 				if (mask & ZLTextStyleEntry::SUPPORT_FONT_SIZE) ++myPointer;
-				if (mask & ZLTextStyleEntry::SUPPORT_FONT_FAMILY) {
-					while (*myPointer != '\0') {
-						++myPointer;
+				if (mask & ZLTextStyleEntry::SUPPORT_FONT_FAMILIES) {
+					unsigned char n = *myPointer++;
+					for (unsigned int i = 0; i < n; ++i) {
+						while (*myPointer++);
 					}
-					++myPointer;
 				}
 				break;
 			}
@@ -218,6 +341,7 @@ void ZLTextParagraph::Iterator::next() {
 				break;
 			case ZLTextParagraphEntry::RESET_BIDI_ENTRY:
 			case ZLTextParagraphEntry::LINE_BREAK_ENTRY:
+			case ZLTextParagraphEntry::EMPTY_ENTRY:
 				++myPointer;
 				break;
 		}

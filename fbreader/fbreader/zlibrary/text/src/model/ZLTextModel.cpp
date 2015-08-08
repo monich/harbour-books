@@ -215,43 +215,53 @@ void ZLTextModel::addControl(ZLTextKind textKind, bool isStart) {
 
 void ZLTextModel::addControl(const ZLTextStyleEntry &entry) {
 	int len = sizeof(int) + 2;
-	if (entry.myMask & ((1 << ZLTextStyleEntry::NUMBER_OF_LENGTHS) - 1)) {
+	const int mask = entry.myMask;
+	if (mask & ((1 << ZLTextStyleEntry::NUMBER_OF_LENGTHS) - 1)) {
 		for (int i = 0; i < ZLTextStyleEntry::NUMBER_OF_LENGTHS; ++i) {
-			if (entry.myMask & (1 << i)) {
+			if (mask & (1 << i)) {
 				len += (sizeof(short) + 1);
 			}
 		}
 	}
-	if (entry.opacitySupported()) ++len;
-	if (entry.alignmentTypeSupported()) ++len;
+	if (mask & ZLTextStyleEntry::SUPPORT_OPACITY) ++len;
+	if (mask & ZLTextStyleEntry::SUPPORT_ALIGNMENT_TYPE) ++len;
 	if (entry.supportedFontModifier()) ++len;
-	if (entry.fontSizeSupported()) ++len;
-	if (entry.fontFamilySupported()) {
-		len += entry.fontFamily().length() + 1;
+	if (mask & ZLTextStyleEntry::SUPPORT_FONT_SIZE) ++len;
+	if (mask & ZLTextStyleEntry::SUPPORT_FONT_FAMILIES) {
+		const unsigned char n = entry.myFontFamilies.size();
+		len += 1; // Number of entries
+		for (unsigned int i = 0; i < n; ++i) {
+			len += entry.myFontFamilies.at(i).length() + 1;
+		}
 	}
 	myLastEntryStart = myAllocator.allocate(len);
 	char *address = myLastEntryStart;
 	*address++ = ZLTextParagraphEntry::STYLE_ENTRY;
 	*address++ = entry.mySupportedFontModifier;
-	memcpy(address, &entry.myMask, sizeof(int));
+	memcpy(address, &mask, sizeof(int));
 	address += sizeof(int);
-	if (entry.myMask & ((1 << ZLTextStyleEntry::NUMBER_OF_LENGTHS) - 1)) {
+	if (mask & ((1 << ZLTextStyleEntry::NUMBER_OF_LENGTHS) - 1)) {
 		for (int i = 0; i < ZLTextStyleEntry::NUMBER_OF_LENGTHS; ++i) {
-			if (entry.myMask & (1 << i)) {
+			if (mask & (1 << i)) {
 				*address++ = entry.myLengths[i].Unit;
 				memcpy(address, &entry.myLengths[i].Size, sizeof(short));
 				address += sizeof(short);
 			}
 		}
 	}
-	if (entry.opacitySupported()) *address++ = entry.myOpacity;
-	if (entry.alignmentTypeSupported()) *address++ = entry.myAlignmentType;
+	if (mask & ZLTextStyleEntry::SUPPORT_OPACITY) *address++ = entry.myOpacity;
+	if (mask & ZLTextStyleEntry::SUPPORT_ALIGNMENT_TYPE) *address++ = entry.myAlignmentType;
 	if (entry.supportedFontModifier()) *address++ = entry.myFontModifier;
-	if (entry.fontSizeSupported()) *address++ = entry.myFontSizeMag;
-	if (entry.fontFamilySupported()) {
-		memcpy(address, entry.fontFamily().data(), entry.fontFamily().length());
-		address += entry.fontFamily().length();
-		*address++ = '\0';
+	if (mask & ZLTextStyleEntry::SUPPORT_FONT_SIZE) *address++ = entry.myFontSizeMag;
+	if (mask & ZLTextStyleEntry::SUPPORT_FONT_FAMILIES) {
+		const unsigned char n = entry.myFontFamilies.size();
+		*address++ = n;
+		for (unsigned int i = 0; i < n; ++i) {
+			const std::string &font = entry.myFontFamilies.at(i);
+			const unsigned int nbytes = font.length() + 1;
+			memcpy(address, font.c_str(), nbytes);
+			address += nbytes;
+		}
 	}
 	myParagraphs.back()->addEntry(myLastEntryStart);
 }
@@ -287,5 +297,11 @@ void ZLTextModel::addBidiReset() {
 void ZLTextModel::addLineBreak() {
 	myLastEntryStart = myAllocator.allocate(1);
 	*myLastEntryStart = ZLTextParagraphEntry::LINE_BREAK_ENTRY;
+	myParagraphs.back()->addEntry(myLastEntryStart);
+}
+
+void ZLTextModel::addEmpty() {
+	myLastEntryStart = myAllocator.allocate(1);
+	*myLastEntryStart = ZLTextParagraphEntry::EMPTY_ENTRY;
 	myParagraphs.back()->addEntry(myLastEntryStart);
 }

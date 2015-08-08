@@ -49,18 +49,18 @@ private:
     static weak_ptr<ZLTextStyle> gInstance;
 
 private:
-    BooksTextStyle() {}
+    BooksTextStyle();
 
 public:
     bool isDecorated() const;
 
-    const std::string &fontFamily() const;
+    const std::vector<std::string>& fontFamilies() const;
 
     int fontSize() const;
     bool bold() const;
     bool italic() const;
 
-    const std::string &colorStyle() const;
+    const std::string& colorStyle() const;
 
     short spaceBefore(const ZLTextStyleEntry::Metrics& aMetrics) const;
     short spaceAfter(const ZLTextStyleEntry::Metrics& aMetrics) const;
@@ -73,6 +73,9 @@ public:
 
     double lineSpace() const;
     bool allowHyphenations() const;
+
+private:
+    std::vector<std::string> iFontFamilies;
 };
 
 #endif // BOOKS_TEXT_STYLE_H

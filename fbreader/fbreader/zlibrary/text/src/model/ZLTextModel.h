@@ -73,6 +73,7 @@ public:
 	void addFixedHSpace(unsigned char length);
 	void addBidiReset();
 	void addLineBreak();
+	void addEmpty();
 
 protected:
 	void addParagraphInternal(ZLTextParagraph *paragraph);

@@ -65,6 +65,7 @@ public:
 	ZLTextElement *LineBreakElement;
 	ZLTextElement *StartReversedSequenceElement;
 	ZLTextElement *EndReversedSequenceElement;
+	ZLTextElement *EmptyElement;
 
 	ZLTextWord *getWord(const char *data, unsigned short length, size_t paragraphOffset, unsigned char bidiLevel);
 	void storeWord(ZLTextWord *word);

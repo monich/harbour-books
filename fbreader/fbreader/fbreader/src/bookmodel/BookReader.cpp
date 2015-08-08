@@ -117,6 +117,13 @@ void BookReader::addLineBreak() {
 	}
 }
 
+void BookReader::addEmpty() {
+	if (myTextParagraphExists) {
+		flushTextBufferToParagraph();
+		myCurrentTextModel->addEmpty();
+	}
+}
+
 void BookReader::addControl(const ZLTextStyleEntry &entry) {
 	if (myTextParagraphExists) {
 		flushTextBufferToParagraph();
@@ -189,7 +196,7 @@ void BookReader::addContentsData(const std::string &data) {
 
 void BookReader::flushTextBufferToParagraph() {
 	myCurrentTextModel->addText(myBuffer);
-	myBuffer.clear();
+	myBuffer.resize(0);
 }
 
 void BookReader::addImage(const std::string &id, shared_ptr<const ZLImage> image) {
@@ -239,7 +246,7 @@ void BookReader::beginContentsParagraph(int referenceNumber) {
 		ZLTextTreeParagraph *peek = myTOCStack.empty() ? 0 : myTOCStack.top();
 		if (!myContentsBuffer.empty()) {
 			contentsModel.addText(myContentsBuffer);
-			myContentsBuffer.clear();
+			myContentsBuffer.resize(0);
 			myLastTOCParagraphIsEmpty = false;
 		}
 		if (myLastTOCParagraphIsEmpty) {
@@ -259,7 +266,7 @@ void BookReader::endContentsParagraph() {
 		ContentsModel &contentsModel = (ContentsModel&)*myModel.myContentsModel;
 		if (!myContentsBuffer.empty()) {
 			contentsModel.addText(myContentsBuffer);
-			myContentsBuffer.clear();
+			myContentsBuffer.resize(0);
 			myLastTOCParagraphIsEmpty = false;
 		}
 		if (myLastTOCParagraphIsEmpty) {

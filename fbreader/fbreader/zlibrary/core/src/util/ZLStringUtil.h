@@ -31,11 +31,15 @@ private:
 public:
 	static bool stringStartsWith(const std::string &str, const std::string &start);
 	static bool stringEndsWith(const std::string &str, const std::string &end);
+	static bool endsWith(const std::string &str, char c);
+	static bool caseInsensitiveEqual(const std::string &str1, const std::string &str2);
+	static bool caseInsensitiveSort(const std::string &str1, const std::string &str2);
 	static void appendNumber(std::string &str, unsigned int n);
 	static void append(std::string &str, const std::vector<std::string> &buffer);
-	static void stripWhiteSpaces(std::string &str);
+	static bool stripWhiteSpaces(std::string &str);
 	static std::vector<std::string> splitString(const char *str, const char* delim);
 	static std::vector<std::string> splitString(const std::string &str, const char* delim);
+	static void replaceAll(std::string &str, const std::string &find, const std::string &replaceWith);
 
 	static std::string printf(const std::string &format, const std::string &arg0);
 
@@ -46,5 +50,7 @@ public:
 inline std::vector<std::string> ZLStringUtil::splitString(const std::string &str, const char* delim) {
 	return ZLStringUtil::splitString(str.c_str(), delim);
 }
-
+inline bool ZLStringUtil::endsWith(const std::string &str, char c) {
+	return !str.empty() && str[str.length()-1] == c;
+}
 #endif /* __ZLSTRINGUTIL_H__ */

@@ -30,7 +30,7 @@ ZLTextStyleDecoration::ZLTextStyleDecoration(const std::string &name, int fontSi
 	ItalicOption(ZLCategoryKey::LOOK_AND_FEEL, STYLE, name + ":italic", italic),
 	VerticalShiftOption(ZLCategoryKey::LOOK_AND_FEEL, STYLE, name + ":vShift", verticalShift),
 	AllowHyphenationsOption(ZLCategoryKey::LOOK_AND_FEEL, STYLE, name + ":allowHyphenations", allowHyphenations),
-	myName(name) {
+	myName(name), myFirstLineIndentDelta(NULL), myFirstLineIndentDeltaUnit(ZLTextStyleEntry::SIZE_UNIT_PIXEL) {
 }
 
 ZLTextFullStyleDecoration::ZLTextFullStyleDecoration(const std::string &name, int fontSizeDelta, ZLBoolean3 bold, ZLBoolean3 italic, short spaceBefore, short spaceAfter, short lineStartIndent, short lineEndIndent, short firstLineIndentDelta, int verticalShift, ZLTextAlignmentType alignment, double lineSpace, ZLBoolean3 allowHyphenations) : ZLTextStyleDecoration(name, fontSizeDelta, bold, italic, verticalShift, allowHyphenations),
@@ -38,23 +38,74 @@ ZLTextFullStyleDecoration::ZLTextFullStyleDecoration(const std::string &name, in
 	SpaceAfterOption(ZLCategoryKey::LOOK_AND_FEEL, STYLE, name + ":spaceAfter", -10, 100, spaceAfter),
 	LineStartIndentOption(ZLCategoryKey::LOOK_AND_FEEL, STYLE, name + ":leftIndent", -300, 300, lineStartIndent),
 	LineEndIndentOption(ZLCategoryKey::LOOK_AND_FEEL, STYLE, name + ":rightIndent", -300, 300, lineEndIndent),
-	FirstLineIndentDeltaOption(ZLCategoryKey::LOOK_AND_FEEL, STYLE, name + ":firstLineIndentDelta", -300, 300, firstLineIndentDelta),
 	AlignmentOption(ZLCategoryKey::LOOK_AND_FEEL, STYLE, name + ":alignment", alignment),
 	LineSpaceOption(ZLCategoryKey::LOOK_AND_FEEL, STYLE, name + ":lineSpace", lineSpace),
-	LineSpacePercentOption(ZLCategoryKey::LOOK_AND_FEEL, STYLE, name + ":lineSpacePercent", (lineSpace == 0.0) ? -1 : (int)(lineSpace * 100)) {
+	LineSpacePercentOption(ZLCategoryKey::LOOK_AND_FEEL, STYLE, name + ":lineSpacePercent", (lineSpace == 0.0) ? -1 : (int)(lineSpace * 100)),
+	FirstLineIndentDeltaOption(ZLCategoryKey::LOOK_AND_FEEL, STYLE, name + ":firstLineIndentDelta", -300, 300, firstLineIndentDelta),
+	SpaceBeforeOptionUnit(ZLTextStyleEntry::SIZE_UNIT_PIXEL),
+	SpaceAfterOptionUnit(ZLTextStyleEntry::SIZE_UNIT_PIXEL),
+	LineStartIndentOptionUnit(ZLTextStyleEntry::SIZE_UNIT_PIXEL),
+	LineEndIndentOptionUnit(ZLTextStyleEntry::SIZE_UNIT_PIXEL),
+	FirstLineIndentDeltaOptionUnit(ZLTextStyleEntry::SIZE_UNIT_PIXEL) {
+}
+
+const ZLTextFullStyleDecoration *ZLTextStyleDecoration::fullDecoration() const {
+	return NULL;
 }
 
 shared_ptr<ZLTextStyle> ZLTextStyleDecoration::createDecoratedStyle(const shared_ptr<ZLTextStyle> base) const {
 	return new ZLTextPartialDecoratedStyle(base, *this);
 }
 
+const ZLTextFullStyleDecoration *ZLTextFullStyleDecoration::fullDecoration() const {
+	return this;
+}
+
 shared_ptr<ZLTextStyle> ZLTextFullStyleDecoration::createDecoratedStyle(const shared_ptr<ZLTextStyle> base) const {
 	return new ZLTextFullDecoratedStyle(base, *this);
 }
 
-const std::string &ZLTextPartialDecoratedStyle::fontFamily() const {
+short ZLTextFullDecoratedStyle::spaceBefore(const ZLTextStyleEntry::Metrics &metrics) const {
+	return ZLTextStyleEntry::vlength(myDecoration.SpaceBeforeOption.value(), myDecoration.SpaceBeforeOptionUnit, metrics);
+}
+
+short ZLTextFullDecoratedStyle::spaceAfter(const ZLTextStyleEntry::Metrics &metrics) const {
+	return ZLTextStyleEntry::vlength(myDecoration.SpaceAfterOption.value(), myDecoration.SpaceAfterOptionUnit, metrics);
+}
+
+short ZLTextFullDecoratedStyle::lineStartIndent(const ZLTextStyleEntry::Metrics &metrics, bool rtl) const {
+	return base()->lineEndIndent(metrics, rtl) + (rtl ?
+		ZLTextStyleEntry::hlength(myDecoration.LineEndIndentOption.value(), myDecoration.LineEndIndentOptionUnit, metrics) :
+		ZLTextStyleEntry::hlength(myDecoration.LineStartIndentOption.value(), myDecoration.LineStartIndentOptionUnit, metrics));
+}
+
+short ZLTextFullDecoratedStyle::lineEndIndent(const ZLTextStyleEntry::Metrics &metrics, bool rtl) const {
+	return base()->lineStartIndent(metrics, rtl) + (rtl ?
+		ZLTextStyleEntry::hlength(myDecoration.LineStartIndentOption.value(), myDecoration.LineStartIndentOptionUnit, metrics) :
+		ZLTextStyleEntry::hlength(myDecoration.LineEndIndentOption.value(), myDecoration.LineEndIndentOptionUnit, metrics));
+}
+
+int ZLTextFullStyleDecoration::firstLineIndentDelta(const ZLTextStyleEntry::Metrics &metrics) const {
+	ZLTextStyleEntry::SizeUnit unit;
+	int size;
+	int* indent = ZLTextStyleDecoration::firstLineIndentDelta(unit);
+	if (indent) {
+		size = *indent;
+	} else {
+		size = FirstLineIndentDeltaOption.value();
+		unit = FirstLineIndentDeltaOptionUnit;
+	}
+	return ZLTextStyleEntry::hlength(size, unit, metrics);
+}
+
+ZLTextPartialDecoratedStyle::ZLTextPartialDecoratedStyle(const shared_ptr<ZLTextStyle> base, const ZLTextStyleDecoration &decoration) :
+	ZLTextDecoratedStyle(base), myDecoration(decoration) {
 	const std::string &family = myDecoration.FontFamilyOption.value();
-	return (!family.empty()) ? family : base()->fontFamily();
+	if (!family.empty()) myFontFamilies.push_back(family);
+}
+
+const std::vector<std::string> &ZLTextPartialDecoratedStyle::fontFamilies() const {
+	return (!myFontFamilies.empty()) ? myFontFamilies : base()->fontFamilies();
 }
 
 int ZLTextPartialDecoratedStyle::fontSize() const {
@@ -74,16 +125,26 @@ bool ZLTextPartialDecoratedStyle::italic() const {
 bool ZLTextPartialDecoratedStyle::allowHyphenations() const {
 	ZLBoolean3 a = myDecoration.AllowHyphenationsOption.value();
 	return (a == B3_UNDEFINED) ? base()->allowHyphenations() : (a == B3_TRUE);
-	return true;
+}
+
+short ZLTextPartialDecoratedStyle::firstLineIndentDelta(const ZLTextStyleEntry::Metrics &metrics) const {
+	ZLTextStyleEntry::SizeUnit unit;
+	int* indent = myDecoration.firstLineIndentDelta(unit);
+	return indent ? ZLTextStyleEntry::hlength(*indent, unit, metrics) :base()->firstLineIndentDelta(metrics);
+}
+
+ZLTextFullDecoratedStyle::ZLTextFullDecoratedStyle(const shared_ptr<ZLTextStyle> base, const ZLTextFullStyleDecoration &decoration) :
+	ZLTextDecoratedStyle(base), myDecoration(decoration) {
+	const std::string &family = myDecoration.FontFamilyOption.value();
+	if (!family.empty()) myFontFamilies.push_back(family);
 }
 
 short ZLTextFullDecoratedStyle::firstLineIndentDelta(const ZLTextStyleEntry::Metrics &metrics) const {
-	return (alignment() == ALIGN_CENTER) ? 0 : base()->firstLineIndentDelta(metrics) + myDecoration.FirstLineIndentDeltaOption.value();
+	return (alignment() == ALIGN_CENTER) ? 0 : myDecoration.firstLineIndentDelta(metrics);
 }
 
-const std::string &ZLTextFullDecoratedStyle::fontFamily() const {
-	const std::string &family = myDecoration.FontFamilyOption.value();
-	return (!family.empty()) ? family : base()->fontFamily();
+const std::vector<std::string> &ZLTextFullDecoratedStyle::fontFamilies() const {
+	return (!myFontFamilies.empty()) ? myFontFamilies : base()->fontFamilies();
 }
 
 int ZLTextFullDecoratedStyle::fontSize() const {
@@ -108,7 +169,6 @@ ZLTextAlignmentType ZLTextFullDecoratedStyle::alignment() const {
 bool ZLTextFullDecoratedStyle::allowHyphenations() const {
 	ZLBoolean3 a = myDecoration.AllowHyphenationsOption.value();
 	return (a == B3_UNDEFINED) ? base()->allowHyphenations() : (a == B3_TRUE);
-	return true;
 }
 
 const std::string &ZLTextPartialDecoratedStyle::colorStyle() const {
@@ -150,25 +210,17 @@ short ZLTextForcedStyle::lineEndIndent(const ZLTextStyleEntry::Metrics &metrics,
 }
 
 short ZLTextForcedStyle::spaceBefore(const ZLTextStyleEntry::Metrics &metrics) const {
-	if (myEntry.lengthSupported(ZLTextStyleEntry::LENGTH_SPACE_BEFORE)) {
-		const short baseSpace = base()->spaceBefore(metrics);
-		ZLTextStyleEntry::Metrics adjusted(metrics);
-		adjusted.FullHeight -= baseSpace + base()->spaceAfter(metrics);
-		return baseSpace + myEntry.length(ZLTextStyleEntry::LENGTH_SPACE_BEFORE, adjusted);
-	} else {
-		return base()->spaceBefore(metrics);
-	}
+	return
+		myEntry.lengthSupported(ZLTextStyleEntry::LENGTH_SPACE_BEFORE) ?
+			myEntry.length(ZLTextStyleEntry::LENGTH_SPACE_BEFORE, metrics) :
+			base()->spaceBefore(metrics);
 }
 
 short ZLTextForcedStyle::spaceAfter(const ZLTextStyleEntry::Metrics &metrics) const {
-	if (myEntry.lengthSupported(ZLTextStyleEntry::LENGTH_SPACE_AFTER)) {
-		const short baseSpace = base()->spaceBefore(metrics);
-		ZLTextStyleEntry::Metrics adjusted(metrics);
-		adjusted.FullHeight -= baseSpace + base()->spaceBefore(metrics);
-		return baseSpace + myEntry.length(ZLTextStyleEntry::LENGTH_SPACE_AFTER, adjusted);
-	} else {
-		return base()->spaceAfter(metrics);
-	}
+	return
+		myEntry.lengthSupported(ZLTextStyleEntry::LENGTH_SPACE_AFTER) ?
+			myEntry.length(ZLTextStyleEntry::LENGTH_SPACE_AFTER, metrics) :
+			base()->spaceAfter(metrics);
 }
 
 short ZLTextForcedStyle::firstLineIndentDelta(const ZLTextStyleEntry::Metrics &metrics) const {
@@ -221,10 +273,10 @@ int ZLTextForcedStyle::fontSize() const {
 	}
 }
 
-const std::string &ZLTextForcedStyle::fontFamily() const {
+const std::vector<std::string> &ZLTextForcedStyle::fontFamilies() const {
 	return (!ZLTextStyleCollection::Instance().OverrideSpecifiedFontsOption.value() &&
-					myEntry.fontFamilySupported()) ?
-						myEntry.fontFamily() : base()->fontFamily();
+					myEntry.fontFamiliesSupported()) ?
+					myEntry.fontFamilies() : base()->fontFamilies();
 }
 
 const std::string &ZLTextStyleDecoration::colorStyle() const {

@@ -170,6 +170,7 @@ ZLTextLineInfoPtr ZLTextArea::processTextLine(Style &style, const ZLTextWordCurs
 					newInfo.Width += lastSpaceWidth;
 				}
 				break;
+			case ZLTextElement::EMPTY_ELEMENT:
 			case ZLTextElement::EMPTY_LINE_ELEMENT:
 				newInfo.IsVisible = true;
 				break;
@@ -178,6 +179,7 @@ ZLTextLineInfoPtr ZLTextArea::processTextLine(Style &style, const ZLTextWordCurs
 		}
 
 		if (elementKind == ZLTextElement::LINE_BREAK_ELEMENT) {
+			newInfo.IsVisible = true;
 			newInfo.End.nextWord();
 			newInfo.setTo(info);
 			break;
