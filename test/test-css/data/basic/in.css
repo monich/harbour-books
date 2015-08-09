@@ -1,0 +1,32 @@
+/* Basic tests */
+/* 1. DOS-style EOL */
+/* 2. Ignore AT-rules */
+@foo { foo: bar; }
+@font-face {
+	font-family: "foo";
+	src: url(fonts/bar.ttf);
+}
+/* 3. Multi
+   line
+   comment */
+/* 4. Comment within a statement */
+body,h1,h2, /*///****/ div, p {
+/* 5. Empty line */
+
+/* 6. Unknown attribute */
+	unknown-attribute: unknown-value;
+/* 7. Extra semicolon */
+	extra: semicolon;;
+/* 8. Missing attribute name */
+	: missing-attribute-name;
+/* 9. Missing colon */
+	missing-colon
+/* 10. Missing semicolon */
+	missing: semicolon
+	font-family: \
+/* 11. Multi-line statement */ \
+	"Foo\
+ Bar";
+/* 12: Known style with missing semicolon */
+	font-style: italic
+}

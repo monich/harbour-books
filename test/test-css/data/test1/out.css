@@ -1,0 +1,99 @@
+.book-chapter {
+    margin-left: 0;
+    margin-bottom: 16px;
+    margin-top: 1em;
+    margin-right: 0;
+    display: none;
+    font-weight: bold;
+    font-size: 207%; /* 4 */
+}
+.calibre {
+    margin-left: 5px;
+    margin-bottom: 0;
+    margin-top: 0;
+    margin-right: 5px;
+    font-size: 100%; /* 0 */
+}
+.calibre1 {
+    display: none;
+}
+.calibre2 {
+    margin-left: 0;
+    margin-bottom: 16px;
+    margin-top: 1em;
+    margin-right: 0;
+    font-weight: bold;
+    font-size: 207%; /* 4 */
+}
+.calibre3 {
+    margin-left: 0;
+    margin-bottom: 16px;
+    margin-top: 1em;
+    margin-right: 0;
+    font-weight: bold;
+    font-size: 207%; /* 4 */
+}
+.calibre4 {
+    margin-left: 0;
+    margin-bottom: 16px;
+    margin-top: 0;
+    margin-right: 0;
+}
+.calibre5 {
+    font-style: italic;
+}
+.calibre8 {
+    font-weight: bold;
+}
+.calibre9 {
+    margin-left: 0;
+    margin-bottom: 0;
+    margin-top: 0;
+    margin-right: 0;
+    font-family: "Consolas", "Liberation Mono", "Menlo", "Courier", "monospace";
+    font-size: 83%; /* -1 */
+}
+.calibre10 {
+    margin-left: 0;
+    margin-bottom: 16px;
+    margin-top: 0;
+    margin-right: 0;
+    white-space: pre-wrap;
+    font-family: "Consolas", "Liberation Mono", "Menlo", "Courier", "monospace";
+    font-size: 83%; /* -1 */
+}
+.calibre15 {
+    margin-left: 0;
+    margin-bottom: 16px;
+    margin-top: 1em;
+    margin-right: 0;
+    font-weight: bold;
+    font-size: 144%; /* 2 */
+}
+.lang-c {
+    margin-left: 0;
+    margin-bottom: 0;
+    margin-top: 0;
+    margin-right: 0;
+    white-space: pre-wrap;
+    font-family: "Consolas", "Liberation Mono", "Menlo", "Courier", "monospace";
+    font-size: 100%; /* 0 */
+}
+.list-group {
+    margin-bottom: 16px;
+    margin-top: 0;
+    margin-right: 0;
+}
+.page {
+    font-family: "sans-serif";
+}
+.table {
+    margin-bottom: 16px;
+    margin-top: 0;
+    text-indent: 0;
+}
+.table1 {
+    margin-bottom: 16px;
+    margin-top: 0;
+    text-indent: 0;
+}
