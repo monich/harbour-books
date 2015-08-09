@@ -53,7 +53,7 @@
 #define RET_ERR_TEST    (3)
 
 static void
-dumpLength(
+dump_length(
     const ZLTextStyleEntry& entry,
     ZLTextStyleEntry::Length type,
     const char* name,
@@ -85,15 +85,15 @@ dumpLength(
 }
 
 static void
-dumpStyle(
+dump_style(
     const StyleSheetTable::Style& style,
     std::ostream& out)
 {
-    dumpLength(style.TextStyle, ZLTextStyleEntry::LENGTH_LEFT_INDENT, "margin-left", out);
-    dumpLength(style.TextStyle, ZLTextStyleEntry::LENGTH_SPACE_AFTER, "margin-bottom", out);
-    dumpLength(style.TextStyle, ZLTextStyleEntry::LENGTH_SPACE_BEFORE, "margin-top", out);
-    dumpLength(style.TextStyle, ZLTextStyleEntry::LENGTH_RIGHT_INDENT, "margin-right", out);
-    dumpLength(style.TextStyle, ZLTextStyleEntry::LENGTH_FIRST_LINE_INDENT_DELTA, "text-indent", out);
+    dump_length(style.TextStyle, ZLTextStyleEntry::LENGTH_LEFT_INDENT, "margin-left", out);
+    dump_length(style.TextStyle, ZLTextStyleEntry::LENGTH_SPACE_AFTER, "margin-bottom", out);
+    dump_length(style.TextStyle, ZLTextStyleEntry::LENGTH_SPACE_BEFORE, "margin-top", out);
+    dump_length(style.TextStyle, ZLTextStyleEntry::LENGTH_RIGHT_INDENT, "margin-right", out);
+    dump_length(style.TextStyle, ZLTextStyleEntry::LENGTH_FIRST_LINE_INDENT_DELTA, "text-indent", out);
     if (style.PageBreakBefore != B3_UNDEFINED) {
         out << "    page-break-before: " <<
             ((style.PageBreakBefore == B3_TRUE) ? "always" : "avoid") << ";\n";
@@ -164,7 +164,7 @@ dumpStyle(
 }
 
 static void
-dumpTable(
+dump_table(
     const StyleSheetTable& table,
     std::ostream& out)
 {
@@ -180,7 +180,7 @@ dumpTable(
             out << " ";
         }
         out << "{\n";
-        dumpStyle(entry.Style, out);
+        dump_style(entry.Style, out);
         out << "}\n";
     }
 }
@@ -196,7 +196,7 @@ process_file(
         StyleSheetTable table;
         StyleSheetTableParser parser(table);
         parser.parse(*stream);
-        dumpTable(table, out);
+        dump_table(table, out);
         return RET_OK;
     } else {
         std::cerr << "Failed to open " << fname << std::endl;
@@ -227,7 +227,6 @@ process(
                     ret = RET_ERR_TEST;
                 }
             } else {
-
                 std::cerr << "Failed to open " << res << std::endl;
                 ret = RET_ERR_IO;
             }
