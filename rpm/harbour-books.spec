@@ -1,6 +1,6 @@
 Name:           harbour-books
 Summary:        E-book reader
-Version:        1.0.5
+Version:        1.0.6
 Release:        1
 License:        GPL
 Group:          Applications/File
@@ -56,6 +56,10 @@ desktop-file-install --delete-original \
 make -C test test
 
 %changelog
+* Sun Aug 9 2015 Slava Monich <slava.monich@jolla.com> 1.0.6
+- Improved rendering of EPUB books
+- Fixed saving the shelf position for zipped books
+
 * Sat Jul 18 2015 Slava Monich <slava.monich@jolla.com> 1.0.5
 - Added support for zipped books
 - Improved performance of scanning for new books
