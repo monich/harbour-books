@@ -32,8 +32,12 @@
 #include "ZLUnixFileOutputStream.h"
 
 static std::string getPwdDir() {
-	char *pwd = getenv("PWD");
-	return (pwd != 0) ? pwd : "";
+	std::string cwd;
+	long size = pathconf(".", _PC_PATH_MAX);
+	char* buf = new char[size];
+	if (getcwd(buf, size)) cwd = buf;
+	delete [] buf;
+	return cwd;
 }
 
 static std::string getHomeDir() {
