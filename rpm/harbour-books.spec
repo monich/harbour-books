@@ -52,6 +52,9 @@ desktop-file-install --delete-original \
 %{_datadir}/applications/%{name}.desktop
 %{_datadir}/icons/hicolor/86x86/apps/%{name}.png
 
+%check
+make -C test test
+
 %changelog
 * Sat Jul 18 2015 Slava Monich <slava.monich@jolla.com> 1.0.5
 - Added support for zipped books
