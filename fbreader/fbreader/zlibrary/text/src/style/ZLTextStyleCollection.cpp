@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2004-2010 Geometer Plus <contact@geometerplus.com>
+ * Copyright (C) 2015 Slava Monich <slava.monich@jolla.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,8 +20,6 @@
 
 #include <cstdlib>
 #include <cstring>
-#include <errno.h>
-#include <limits.h>
 
 #include <ZLibrary.h>
 #include <ZLFile.h>
@@ -29,6 +28,7 @@
 #include "ZLTextStyle.h"
 #include "ZLTextStyleCollection.h"
 #include "ZLTextDecoratedStyle.h"
+#include "ZLStringUtil.h"
 
 ZLTextStyleCollection *ZLTextStyleCollection::ourInstance = 0;
 
@@ -72,18 +72,10 @@ int ZLTextStyleReader::lengthValue(const char **attributes, const char *name, ZL
 		if (ZLTextStyleEntry::parseLength(stringValue, size, unit)) {
 			return size;
 		} else {
-			const char *s = stringValue;
-			while (*s && isspace(*s)) s++;
-			char* endptr = NULL;
-			long number = strtol(s, &endptr, 10);
-			if (endptr && endptr != s) {
-				if ((number != LONG_MAX && number != LONG_MIN) || (errno != ERANGE)) {
-					while (*endptr && isspace(*endptr)) endptr++;
-					if (!*endptr) {
-						unit = ZLTextStyleEntry::SIZE_UNIT_PIXEL;
-						return number;
-					}
-				}
+			long number;
+			if (ZLStringUtil::stringToLong(stringValue, number)) {
+				unit = ZLTextStyleEntry::SIZE_UNIT_PIXEL;
+				return number;
 			}
 		}
 	}

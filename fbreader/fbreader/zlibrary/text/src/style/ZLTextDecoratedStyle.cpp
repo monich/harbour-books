@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2004-2010 Geometer Plus <contact@geometerplus.com>
+ * Copyright (C) 2015 Slava Monich <slava.monich@jolla.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -181,6 +182,13 @@ const std::string &ZLTextFullDecoratedStyle::colorStyle() const {
 	return style.empty() ? base()->colorStyle() : style;
 }
 
+ZLTextForcedStyle::ZLTextForcedStyle(shared_ptr<ZLTextStyle> base, const ZLTextStyleEntry &entry) :
+	ZLTextDecoratedStyle(base), myEntry(entry) {
+	if (myEntry.colorSupported()) {
+		myColorStyle = ZLTextStyle::colorStyle(myEntry.color());
+	}
+}
+
 short ZLTextForcedStyle::lineStartIndent(const ZLTextStyleEntry::Metrics &metrics, bool rtl) const {
 	ZLTextStyleEntry::Length lengthType = rtl ?
 		ZLTextStyleEntry::LENGTH_RIGHT_INDENT :
@@ -277,6 +285,10 @@ const std::vector<std::string> &ZLTextForcedStyle::fontFamilies() const {
 	return (!ZLTextStyleCollection::Instance().OverrideSpecifiedFontsOption.value() &&
 					myEntry.fontFamiliesSupported()) ?
 					myEntry.fontFamilies() : base()->fontFamilies();
+}
+
+const std::string &ZLTextForcedStyle::colorStyle() const {
+	return myEntry.colorSupported() ? myColorStyle : base()->colorStyle();
 }
 
 const std::string &ZLTextStyleDecoration::colorStyle() const {

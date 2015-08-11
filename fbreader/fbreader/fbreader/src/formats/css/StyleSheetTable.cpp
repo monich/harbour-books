@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2004-2010 Geometer Plus <contact@geometerplus.com>
+ * Copyright (C) 2015 Slava Monich <slava.monich@jolla.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,8 +20,10 @@
 
 #include <cstdlib>
 #include <algorithm>
+#include <string.h>
 
-#include <ZLStringUtil.h>
+#include "ZLStringUtil.h"
+#include "ZLUnicodeUtil.h"
 
 #include "StyleSheetTable.h"
 
@@ -219,7 +222,7 @@ void StyleSheetTable::updateTextStyle(ZLTextStyleEntry &entry, const AttributeMa
 	static const std::string TEXT_ALIGN("text-align");
 	const std::vector<std::string> &alignment = values(styles, TEXT_ALIGN);
 	if (!alignment.empty()) {
-		const std::string &value = alignment.at(0);
+		const std::string &value = alignment[0];
 		if (value == "justify") {
 			entry.setAlignmentType(ALIGN_JUSTIFY);
 		} else if (value == "left") {
@@ -233,7 +236,7 @@ void StyleSheetTable::updateTextStyle(ZLTextStyleEntry &entry, const AttributeMa
 		static const std::string FLOAT("float");
 		const std::vector<std::string> &floatVal = values(styles, FLOAT);
 		if (!floatVal.empty()) {
-			const std::string &value = floatVal.at(0);
+			const std::string &value = floatVal[0];
 			if (value == "left") {
 				entry.setAlignmentType(ALIGN_LEFT);
 			} else if (value == "right") {
@@ -246,7 +249,7 @@ void StyleSheetTable::updateTextStyle(ZLTextStyleEntry &entry, const AttributeMa
 	const std::vector<std::string> &weight = values(styles, FONT_WEIGHT);
 	if (!weight.empty()) {
 		int num = -1;
-		const std::string &value = weight.at(0);
+		const std::string &value = weight[0];
 		if (value == "bold") {
 			num = 700;
 		} else if (value == "normal") {
@@ -286,7 +289,7 @@ void StyleSheetTable::updateTextStyle(ZLTextStyleEntry &entry, const AttributeMa
 	static const std::string FONT_SIZE("font-size");
 	const std::vector<std::string> &fontSize = values(styles, FONT_SIZE);
 	if (!fontSize.empty()) {
-		const std::string &value = fontSize.at(0);
+		const std::string &value = fontSize[0];
 		if (value == "xx-small") {
 			entry.setFontSizeMag(-3);
 		} else if (value == "x-small") {
@@ -418,11 +421,20 @@ void StyleSheetTable::updateTextStyle(ZLTextStyleEntry &entry, const AttributeMa
 	setLength(entry, ZLTextStyleEntry::LENGTH_FIRST_LINE_INDENT_DELTA, styles, TEXT_INDENT);
 	setMargin(entry, ZLTextStyleEntry::LENGTH_SPACE_BEFORE, styles, MARGIN_TOP);
 	setMargin(entry, ZLTextStyleEntry::LENGTH_SPACE_AFTER, styles, MARGIN_BOTTOM);
+
+	static const std::string COLOR("color");
+	std::vector<std::string> colors = values(styles, COLOR);
+	if (colors.size() == 1) {
+		ZLColor color;
+		if (stringToColor(colors[0], color)) {
+			entry.setColor(color);
+		}
+	}
 }
 
 void StyleSheetTable::getPageBreakValue(const std::vector<std::string> &values, ZLBoolean3 &value) {
 	if (!values.empty()) {
-		const std::string &first = values.at(0);
+		const std::string &first = values[0];
 		if ((first == "always") ||
 		    (first == "left") ||
 		    (first == "right")) {
@@ -445,7 +457,7 @@ void StyleSheetTable::updateStyle(Style &style, const AttributeMap &map) {
 	static const std::string WHITE_SPACE("white-space");
 	const std::vector<std::string> &whiteSpace = values(map, WHITE_SPACE);
 	if (!whiteSpace.empty()) {
-		const std::string &value = whiteSpace.at(0);
+		const std::string &value = whiteSpace[0];
 		if (value == "normal") {
 			style.WhiteSpace = WS_NORMAL;
 		} else if (value == "nowrap") {
@@ -464,4 +476,238 @@ void StyleSheetTable::updateStyle(Style &style, const AttributeMap &map) {
 	if (!display.empty() && display[0] == "none") {
 		style.DisplayNone = true;
 	}
+}
+
+bool StyleSheetTable::stringToColor(const std::string &text, ZLColor &color) {
+	std::string str(text);
+	ZLStringUtil::stripWhiteSpaces(str);
+	if (!str.empty()) {
+		// Color spec must be an ASCII string
+		if (ZLUnicodeUtil::utf8Length(str) == (int)str.length()) {
+			static const std::string RGB("rgb");
+			if (str[0] == '#') {
+				if (str.length() == 4) {
+					// Hexadecimal notation #RGB
+					int rgb[3];
+					for (int i=0; i<3; i++) {
+						if ((rgb[i] = ZLStringUtil::fromHex(str[i+1])) < 0) {
+							return false;
+						}
+					}
+					color.Red = ((rgb[0] << 4) | rgb[0]);
+					color.Green = ((rgb[1] << 4) | rgb[1]);
+					color.Blue = ((rgb[2] << 4) | rgb[2]);
+					return true;
+				} else if (str.length() == 7) {
+					// Hexadecimal notation #RRGGBB
+					int rrggbb[6];
+					for (int i=0; i<6; i++) {
+						if ((rrggbb[i] = ZLStringUtil::fromHex(str[i+1])) < 0) {
+							return false;
+						}
+					}
+					color.Red = ((rrggbb[0] << 4) | rrggbb[1]);
+					color.Green = ((rrggbb[2] << 4) | rrggbb[3]);
+					color.Blue = ((rrggbb[4] << 4) | rrggbb[5]);
+					return true;
+				}
+			} else if (ZLStringUtil::stringStartsWith(str, RGB)) {
+				// Functional Notation rgb(R,G,B)
+				str.erase(0,3);
+				ZLStringUtil::stripWhiteSpaces(str);
+				if (ZLStringUtil::startsWith(str, '(') && ZLStringUtil::endsWith(str, ')')) {
+					str = str.substr(1,str.length()-2);
+					std::vector<std::string> rgb = ZLStringUtil::splitString(str, ",");
+					if (rgb.size() == 3) {
+						int i;
+						long c[3];
+						for (i=0; i<3; i++) {
+							std::string tmp(rgb[i]);
+							ZLStringUtil::stripWhiteSpaces(tmp);
+							if (ZLStringUtil::endsWith(tmp, '%')) {
+								tmp.resize(tmp.length()-1);
+								if (ZLStringUtil::stringToLong(tmp, c[i]) && c[i] >= 0 && c[i] <= 100) {
+									c[i] = (c[i] * 255 + 50) / 100;
+									continue;
+								}
+							} else if (ZLStringUtil::stringToLong(tmp, c[i]) && c[i] >= 0 && c[i] <= 255) {
+								continue;
+							}
+						}
+						if (i == 3) {
+							color.Red = c[0];
+							color.Green = c[1];
+							color.Blue = c[2];
+							return true;
+						}
+					}
+				}
+			} else {
+				// Color keywords
+				static const struct _CSSColorEntry {
+					const char* stringValue;
+					long intValue;
+				} knownColors [] = {
+					{ "aliceblue", 0xf0f8ff },
+					{ "antiquewhite", 0xfaebd7 },
+					{ "aqua", 0x00ffff },
+					{ "aquamarine", 0x7fffd4 },
+					{ "azure", 0xf0ffff },
+					{ "beige", 0xf5f5dc },
+					{ "bisque", 0xffe4c4 },
+					{ "black", 0x000000 },
+					{ "blanchedalmond", 0xffe4c4 },
+					{ "blue", 0x0000ff },
+					{ "blueviolet", 0x8a2be2 },
+					{ "brown", 0xa52a2a },
+					{ "burlywood", 0xdeb887 },
+					{ "cadetblue", 0x5f9ea0 },
+					{ "chartreuse", 0x7fff00 },
+					{ "chocolate", 0xd2691e },
+					{ "coral", 0xff7f50 },
+					{ "cornflowerblue", 0x6495ed },
+					{ "cornsilk", 0xfff8dc },
+					{ "crimson", 0xdc143c },
+					{ "darkblue", 0x00008b },
+					{ "darkcyan", 0x008b8b },
+					{ "darkgoldenrod", 0xb8860b },
+					{ "darkgray", 0xa9a9a9 },
+					{ "darkgreen", 0x006400 },
+					{ "darkkhaki", 0xbdb76b },
+					{ "darkmagenta", 0x8b008b },
+					{ "darkolivegreen", 0x556b2f },
+					{ "darkorange", 0xff8c00 },
+					{ "darkorchid", 0x9932cc },
+					{ "darkred", 0x8b0000 },
+					{ "darksalmon", 0xe9967a },
+					{ "darkseagreen", 0x8fbc8f },
+					{ "darkslateblue", 0x483d8b },
+					{ "darkslategray", 0x2f4f4f },
+					{ "darkturquoise", 0x00ced1 },
+					{ "darkviolet", 0x9400d3 },
+					{ "deeppink", 0xff1493 },
+					{ "deepskyblue", 0x00bfff },
+					{ "dimgray", 0x696969 },
+					{ "dodgerblue", 0x1e90ff },
+					{ "firebrick", 0xb22222 },
+					{ "floralwhite", 0xfffaf0 },
+					{ "forestgreen", 0x228b22 },
+					{ "fuchsia", 0xff00ff },
+					{ "gainsboro", 0xdcdcdc },
+					{ "ghostwhite", 0xf8f8ff },
+					{ "goldenrod", 0xdaa520 },
+					{ "gold", 0xffd700 },
+					{ "gray", 0x808080 },
+					{ "green", 0x008000 },
+					{ "greenyellow", 0xadff2f },
+					{ "grey", 0x808080 },
+					{ "honeydew", 0xf0fff0 },
+					{ "hotpink", 0xff69b4 },
+					{ "indianred", 0xcd5c5c },
+					{ "indigo", 0x4b0082 },
+					{ "ivory", 0xfffff0 },
+					{ "khaki", 0xf0e68c },
+					{ "lavenderblush", 0xfff0f5 },
+					{ "lavender", 0xe6e6fa },
+					{ "lawngreen", 0x7cfc00 },
+					{ "lemonchiffon", 0xfffacd },
+					{ "lightblue", 0xadd8e6 },
+					{ "lightcoral", 0xf08080 },
+					{ "lightcyan", 0xe0ffff },
+					{ "lightgoldenrodyellow", 0xfafad2 },
+					{ "lightgreen", 0x90ee90 },
+					{ "lightgrey", 0xd3d3d3 },
+					{ "lightpink", 0xffb6c1 },
+					{ "lightsalmon", 0xffa07a },
+					{ "lightseagreen", 0x20b2aa },
+					{ "lightskyblue", 0x87cefa },
+					{ "lightslategray", 0x778899 },
+					{ "lightsteelblue", 0xb0c4de },
+					{ "lightyellow", 0xffffe0 },
+					{ "lime", 0x00ff00 },
+					{ "limegreen", 0x32cd32 },
+					{ "linen", 0xfaf0e6 },
+					{ "maroon", 0x800000 },
+					{ "mediumaquamarine", 0x66cdaa },
+					{ "mediumblue", 0x0000cd },
+					{ "mediumorchid", 0xba55d3 },
+					{ "mediumpurple", 0x9370db },
+					{ "mediumseagreen", 0x3cb371 },
+					{ "mediumslateblue", 0x7b68ee },
+					{ "mediumspringgreen", 0x00fa9a },
+					{ "mediumturquoise", 0x48d1cc },
+					{ "mediumvioletred", 0xc71585 },
+					{ "midnightblue", 0x191970 },
+					{ "mintcream", 0xf5fffa },
+					{ "mistyrose", 0xffe4e1 },
+					{ "moccasin", 0xffe4b5 },
+					{ "navajowhite", 0xffdead },
+					{ "navy", 0x000080 },
+					{ "oldlace", 0xfdf5e6 },
+					{ "olive", 0x808000 },
+					{ "olivedrab", 0x6b8e23 },
+					{ "orange", 0xffa500 },
+					{ "orangered", 0xff4500 },
+					{ "orchid", 0xda70d6 },
+					{ "palegoldenrod", 0xeee8aa },
+					{ "palegreen", 0x98fb98 },
+					{ "paleturquoise", 0xafeeee },
+					{ "palevioletred", 0xdb7093 },
+					{ "papayawhip", 0xffefd5 },
+					{ "peachpuff", 0xffdab9 },
+					{ "peru", 0xcd853f },
+					{ "pink", 0xffc0cb },
+					{ "plum", 0xdda0dd },
+					{ "powderblue", 0xb0e0e6 },
+					{ "purple", 0x800080 },
+					{ "rebeccapurple", 0x663399 },
+					{ "red", 0xff0000 },
+					{ "rosybrown", 0xbc8f8f },
+					{ "royalblue", 0x4169e1 },
+					{ "saddlebrown", 0x8b4513 },
+					{ "salmon", 0xfa8072 },
+					{ "sandybrown", 0xf4a460 },
+					{ "seagreen", 0x2e8b57 },
+					{ "seashell", 0xfff5ee },
+					{ "sienna", 0xa0522d },
+					{ "silver", 0xc0c0c0 },
+					{ "skyblue", 0x87ceeb },
+					{ "slateblue", 0x6a5acd },
+					{ "slategrey", 0x708090 },
+					{ "snow", 0xfffafa },
+					{ "springgreen", 0x00ff7f },
+					{ "steelblue", 0x4682b4 },
+					{ "tan", 0xd2b48c },
+					{ "teal", 0x008080 },
+					{ "thistle", 0xd8bfd8 },
+					{ "tomato", 0xff6347 },
+					{ "turquoise", 0x40e0d0 },
+					{ "violet", 0xee82ee },
+					{ "wheat", 0xf5deb3 },
+					{ "white", 0xffffff },
+					{ "whitesmoke", 0xf5f5f5 },
+					{ "yellow", 0xffff00 },
+					{ "yellowgreen", 0x9acd32 }
+				};
+
+				int low = 0;
+				int high = (sizeof(knownColors)/sizeof(knownColors[0]))-1;
+				const char* key = str.c_str();
+
+				while (low <= high) {
+					const int mid = (low + high)/2;
+					int cmp = strcasecmp(knownColors[mid].stringValue, key);
+					if (cmp < 0) {
+						low = mid + 1;
+					} else if (cmp > 0) {
+						high = mid - 1;
+					} else {
+						color.setIntValue(knownColors[mid].intValue);
+						return true;
+					}
+				}
+			}
+		}
+	}
+	return false;
 }

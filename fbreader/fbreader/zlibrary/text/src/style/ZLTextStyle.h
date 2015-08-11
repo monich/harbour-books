@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2004-2010 Geometer Plus <contact@geometerplus.com>
+ * Copyright (C) 2015 Slava Monich <slava.monich@jolla.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +26,7 @@
 
 #include <shared_ptr.h>
 
+#include <ZLColor.h>
 #include <ZLTextAlignmentType.h>
 #include <ZLTextParagraph.h>
 
@@ -64,6 +66,7 @@ public:
 	virtual bool allowHyphenations() const = 0;
 
 	int lineSpacePercent() const;
+	static std::string colorStyle(ZLColor color);
 };
 
 inline ZLTextStyle::ZLTextStyle() {}

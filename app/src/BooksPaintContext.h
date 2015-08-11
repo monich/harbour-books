@@ -36,6 +36,7 @@
 
 #include "BooksTypes.h"
 
+#include "ZLColor.h"
 #include "ZLPaintContext.h"
 
 #include <QFont>
@@ -86,12 +87,17 @@ public:
     void fillRectangle(int x0, int y0, int x1, int y1);
     void drawFilledCircle(int x, int y, int r);
 
+    void setInvertColors(bool aInvertColors);
+    ZLColor realColor(quint8 aRed, quint8 aGreen, quint8 aBlue) const;
+    ZLColor realColor(const ZLColor aColor) const;
+
 private:
     QPainter* iPainter;
     int iWidth;
     int iHeight;
     mutable int iSpaceWidth;
     int iDescent;
+    bool iInvertColors;
     QFont iFont;
 };
 
@@ -108,5 +114,9 @@ inline QSize BooksPaintContext::size() const
 
 inline QColor qtColor(const ZLColor& aColor)
     { return QColor(aColor.Red, aColor.Green, aColor.Blue); }
+inline ZLColor BooksPaintContext::realColor(const ZLColor aColor) const
+    { return realColor(aColor.Red, aColor.Green, aColor.Blue); }
+inline void BooksPaintContext::setInvertColors(bool aInvertColors)
+    { iInvertColors = aInvertColors; }
 
 #endif /* BOOKS_PAINT_CONTEXT_H */

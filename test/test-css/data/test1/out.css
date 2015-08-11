@@ -42,6 +42,9 @@
 .calibre5 {
     font-style: italic;
 }
+.calibre6 {
+    color: #4183c4;
+}
 .calibre8 {
     font-weight: bold;
 }
@@ -70,6 +73,18 @@
     font-weight: bold;
     font-size: 144%; /* 2 */
 }
+.hljs-comment {
+    color: #8e908c;
+}
+.hljs-keyword {
+    color: #8959a8;
+}
+.hljs-preprocessor {
+    color: #f5871f;
+}
+.hljs-string {
+    color: #718c00;
+}
 .lang-c {
     margin-left: 0;
     margin-bottom: 0;
@@ -86,6 +101,7 @@
 }
 .page {
     font-family: "sans-serif";
+    color: #333333;
 }
 .table {
     margin-bottom: 16px;

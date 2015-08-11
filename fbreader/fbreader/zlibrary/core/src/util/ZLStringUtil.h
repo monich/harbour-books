@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2004-2010 Geometer Plus <contact@geometerplus.com>
+ * Copyright (C) 2015 Slava Monich <slava.monich@jolla.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,6 +32,7 @@ private:
 public:
 	static bool stringStartsWith(const std::string &str, const std::string &start);
 	static bool stringEndsWith(const std::string &str, const std::string &end);
+	static bool startsWith(const std::string &str, char c);
 	static bool endsWith(const std::string &str, char c);
 	static bool caseInsensitiveEqual(const std::string &str1, const std::string &str2);
 	static bool caseInsensitiveSort(const std::string &str1, const std::string &str2);
@@ -45,12 +47,22 @@ public:
 
 	static std::string doubleToString(double value);
 	static double stringToDouble(const std::string &value, double defaultValue);
+	static bool stringToLong(const std::string &str, long &result);
+	static bool stringToLong(const char *str, long &result);
+	static int fromHex(char hex);
 };
 
 inline std::vector<std::string> ZLStringUtil::splitString(const std::string &str, const char* delim) {
 	return ZLStringUtil::splitString(str.c_str(), delim);
 }
+inline bool ZLStringUtil::startsWith(const std::string &str, char c) {
+    return !str.empty() && str[0] == c;
+}
 inline bool ZLStringUtil::endsWith(const std::string &str, char c) {
 	return !str.empty() && str[str.length()-1] == c;
 }
+inline bool ZLStringUtil::stringToLong(const std::string &str, long &result) {
+	return stringToLong(str.c_str(), result);
+}
+
 #endif /* __ZLSTRINGUTIL_H__ */

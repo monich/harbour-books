@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2004-2010 Geometer Plus <contact@geometerplus.com>
+ * Copyright (C) 2015 Slava Monich <slava.monich@jolla.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,8 +21,11 @@
 #include <cctype>
 #include <cstdio>
 #include <cstdlib>
+
 #include <locale.h>
 #include <string.h>
+#include <limits.h>
+#include <errno.h>
 
 #include "ZLStringUtil.h"
 
@@ -153,4 +157,26 @@ double ZLStringUtil::stringToDouble(const std::string &value, double defaultValu
 	} else {
 		return defaultValue;
 	}
+}
+
+bool ZLStringUtil::stringToLong(const char *s, long &result) {
+	while (*s && isspace(*s)) s++;
+	char* endptr = NULL;
+	long number = strtol(s, &endptr, 10);
+	if (endptr && endptr != s) {
+		if ((number != LONG_MAX && number != LONG_MIN) || (errno != ERANGE)) {
+			while (*endptr && isspace(*endptr)) endptr++;
+			if (!*endptr) {
+				result = number;
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+int ZLStringUtil::fromHex(char hex) {
+	return (hex >= '0' && hex <= '9') ? (hex - '0') :
+	       (hex >= 'a' && hex <= 'z') ? (hex - 'a' + 10) :
+	       (hex >= 'A' && hex <= 'Z') ? (hex - 'A' + 10) : -1;
 }

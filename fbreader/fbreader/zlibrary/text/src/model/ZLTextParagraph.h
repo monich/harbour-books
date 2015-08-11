@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2004-2010 Geometer Plus <contact@geometerplus.com>
+ * Copyright (C) 2015 Slava Monich <slava.monich@jolla.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +27,7 @@
 
 #include <shared_ptr.h>
 
+#include <ZLColor.h>
 #include <ZLTextKind.h>
 #include <ZLTextAlignmentType.h>
 #include <ZLTextFontModifier.h>
@@ -137,11 +139,16 @@ public:
 	const std::vector<std::string> &fontFamilies() const;
 	void setFontFamilies(const std::vector<std::string> &fontFamilies);
 
+	bool colorSupported() const;
+	const ZLColor &color() const;
+	void setColor(const ZLColor &color);
+
 	enum {
 		SUPPORT_ALIGNMENT_TYPE = 1 << NUMBER_OF_LENGTHS,
 		SUPPORT_FONT_SIZE = 1 << (NUMBER_OF_LENGTHS + 1),
 		SUPPORT_FONT_FAMILIES = 1 << (NUMBER_OF_LENGTHS + 2),
-		SUPPORT_OPACITY = 1 << (NUMBER_OF_LENGTHS + 3)
+		SUPPORT_OPACITY = 1 << (NUMBER_OF_LENGTHS + 3),
+		SUPPORT_COLOR = 1 << (NUMBER_OF_LENGTHS + 4)
 	};
 
 private:
@@ -155,6 +162,7 @@ private:
 	unsigned char myFontModifier;
 	signed char myFontSizeMag;
 	std::vector<std::string> myFontFamilies;
+	ZLColor myColor;
 
 friend class ZLTextModel;
 };
@@ -399,6 +407,10 @@ inline void ZLTextStyleEntry::setFontSizeMag(signed char fontSizeMag) { myFontSi
 inline bool ZLTextStyleEntry::fontFamiliesSupported() const { return (myMask & SUPPORT_FONT_FAMILIES) == SUPPORT_FONT_FAMILIES; }
 inline const std::vector<std::string> &ZLTextStyleEntry::fontFamilies() const { return myFontFamilies; }
 inline void ZLTextStyleEntry::setFontFamilies(const std::vector<std::string> &fontFamilies) { myFontFamilies = fontFamilies; myMask |= SUPPORT_FONT_FAMILIES; }
+
+inline bool ZLTextStyleEntry::colorSupported() const { return (myMask & SUPPORT_COLOR) != 0; }
+inline const ZLColor &ZLTextStyleEntry::color() const { return myColor; }
+inline void ZLTextStyleEntry::setColor(const ZLColor &color) { myColor = color; myMask |= SUPPORT_COLOR; }
 
 inline ZLTextControlEntry::ZLTextControlEntry(ZLTextKind kind, bool isStart) : myKind(kind), myStart(isStart) {}
 inline ZLTextControlEntry::~ZLTextControlEntry() {}

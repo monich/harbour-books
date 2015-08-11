@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2004-2010 Geometer Plus <contact@geometerplus.com>
+ * Copyright (C) 2015 Slava Monich <slava.monich@jolla.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,6 +28,8 @@ struct ZLColor {
 
 	ZLColor(unsigned char r, unsigned char g, unsigned char b);
 	ZLColor(long longValue = 0);
+
+	void setIntValue(long longValue);
 	long intValue();
 
 	bool operator == (const ZLColor &color) const;
@@ -35,6 +38,7 @@ struct ZLColor {
 
 inline ZLColor::ZLColor(unsigned char r, unsigned char g, unsigned char b) : Red(r), Green(g), Blue(b) {}
 inline ZLColor::ZLColor(long longValue) : Red((unsigned char)(longValue >> 16)), Green((unsigned char)(longValue >> 8)), Blue((unsigned char)longValue) {}
+inline void ZLColor::setIntValue(long longValue) { Red = (unsigned char)(longValue >> 16); Green = (unsigned char)(longValue >> 8); Blue = (unsigned char)longValue; }
 inline long ZLColor::intValue() { return (((long)Red) << 16) + (((long)Green) << 8) + Blue; }
 inline bool ZLColor::operator == (const ZLColor &color) const { return (Red == color.Red) && (Green == color.Green) && (Blue == color.Blue); }
 inline bool ZLColor::operator != (const ZLColor &color) const { return !operator==(color); }

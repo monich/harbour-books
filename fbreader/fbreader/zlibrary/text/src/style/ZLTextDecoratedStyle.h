@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2004-2010 Geometer Plus <contact@geometerplus.com>
+ * Copyright (C) 2015 Slava Monich <slava.monich@jolla.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -67,6 +68,7 @@ public:
 
 private:
 	const ZLTextStyleEntry &myEntry;
+	std::string myColorStyle;
 };
 
 class ZLTextPartialDecoratedStyle : public ZLTextDecoratedStyle {
@@ -138,9 +140,7 @@ inline ZLTextDecoratedStyle::~ZLTextDecoratedStyle() {}
 inline bool ZLTextDecoratedStyle::isDecorated() const { return true; }
 inline const shared_ptr<ZLTextStyle> ZLTextDecoratedStyle::base() const { return myBase; }
 
-inline ZLTextForcedStyle::ZLTextForcedStyle(shared_ptr<ZLTextStyle> base, const ZLTextStyleEntry &entry) : ZLTextDecoratedStyle(base), myEntry(entry) {}
 inline ZLTextForcedStyle::~ZLTextForcedStyle() {}
-inline const std::string &ZLTextForcedStyle::colorStyle() const { return base()->colorStyle(); }
 inline int ZLTextForcedStyle::verticalShift() const { return base()->verticalShift(); }
 inline double ZLTextForcedStyle::lineSpace() const { return base()->lineSpace(); }
 inline bool ZLTextForcedStyle::allowHyphenations() const { return base()->allowHyphenations(); }

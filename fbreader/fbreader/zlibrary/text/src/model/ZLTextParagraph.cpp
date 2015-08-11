@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2004-2010 Geometer Plus <contact@geometerplus.com>
+ * Copyright (C) 2015 Slava Monich <slava.monich@jolla.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -109,12 +110,19 @@ ZLTextStyleEntry::ZLTextStyleEntry(char *address) {
 			myFontFamilies.push_back(font);
 		}
 	}
+	if (colorSupported()) {
+		ZLColor color;
+		color.Red = (unsigned char)*address++;
+		color.Green = (unsigned char)*address++;
+		color.Blue = (unsigned char)*address++;
+		setColor(color);
+	}
 }
 
 void ZLTextStyleEntry::reset() {
 	mySupportedFontModifier = 0;
 	myMask = 0;
-	myFontFamilies.clear();
+	myFontFamilies.resize(0);
 }
 
 void ZLTextStyleEntry::apply(const ZLTextStyleEntry &other) {
@@ -143,6 +151,9 @@ void ZLTextStyleEntry::apply(const ZLTextStyleEntry &other) {
 	if (other.myMask & SUPPORT_FONT_FAMILIES) {
 		setFontFamilies(other.myFontFamilies);
 	}
+	if (other.myMask & SUPPORT_COLOR) {
+		setColor(other.myColor);
+	}
 }
 
 void ZLTextStyleEntry::inherit(const ZLTextStyleEntry &other) {
@@ -168,6 +179,10 @@ void ZLTextStyleEntry::inherit(const ZLTextStyleEntry &other) {
 	// font-family
 	if (other.myMask & SUPPORT_FONT_FAMILIES) {
 		setFontFamilies(other.myFontFamilies);
+	}
+	// color
+	if (other.myMask & SUPPORT_COLOR) {
+		setColor(other.myColor);
 	}
 }
 
@@ -196,6 +211,9 @@ bool ZLTextStyleEntry::equals(const ZLTextStyleEntry &other) const {
 			return false;
 		}
 		if ((myMask & SUPPORT_FONT_FAMILIES) && myFontFamilies != other.myFontFamilies) {
+			return false;
+		}
+		if ((myMask & SUPPORT_OPACITY) && myColor != other.myColor) {
 			return false;
 		}
 		return true;
@@ -334,6 +352,7 @@ void ZLTextParagraph::Iterator::next() {
 						while (*myPointer++);
 					}
 				}
+				if (mask & ZLTextStyleEntry::SUPPORT_COLOR) myPointer += 3;
 				break;
 			}
 			case ZLTextParagraphEntry::FIXED_HSPACE_ENTRY:

@@ -18,3 +18,21 @@ p {
     font-style: italic;
     font-family: "Foo Bar";
 }
+.red {
+    color: #ff0000;
+}
+.green {
+    color: #00ff00;
+}
+.blue {
+    color: #0000ff;
+}
+.olive {
+    color: #808000;
+}
+.orangered {
+    color: #ff4500;
+}
+.palegreen {
+    color: #98fb98;
+}

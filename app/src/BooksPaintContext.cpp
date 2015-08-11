@@ -47,13 +47,13 @@ static const std::string HELVETICA = "Helvetica";
 
 BooksPaintContext::BooksPaintContext() :
     iPainter(NULL), iWidth(0), iHeight(0),
-    iSpaceWidth(0), iDescent(0)
+    iSpaceWidth(0), iDescent(0), iInvertColors(false)
 {
 }
 
 BooksPaintContext::BooksPaintContext(int aWidth, int aHeight) :
     iPainter(NULL), iWidth(aWidth), iHeight(aHeight),
-    iSpaceWidth(0), iDescent(0)
+    iSpaceWidth(0), iDescent(0), iInvertColors(false)
 {
 }
 
@@ -199,8 +199,7 @@ void BooksPaintContext::drawImage(int x, int y, const ZLImageData& image,
                 QSize(imageWidth(image, width, height, type),
                       imageHeight(image, width, height, type)),
                 Qt::KeepAspectRatio,
-                Qt::SmoothTransformation
-            );
+                Qt::SmoothTransformation);
             iPainter->drawImage(x, y - scaled.height(), scaled);
         }
     }
@@ -254,4 +253,11 @@ int BooksPaintContext::width() const
 int BooksPaintContext::height() const
 {
     return iHeight;
+}
+
+ZLColor BooksPaintContext::realColor(quint8 aRed, quint8 aGreen, quint8 aBlue) const
+{
+    return iInvertColors ?
+        ZLColor(255-aRed, 255-aGreen, 255-aBlue) :
+        ZLColor(aRed, aGreen, aBlue);
 }

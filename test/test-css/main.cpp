@@ -39,6 +39,7 @@
 
 #include "ZLInputStream.h"
 #include "ZLStringUtil.h"
+#include "ZLTextStyle.h"
 #include "ZLFile.h"
 
 #include "filesystem/ZLQtFSManager.h"
@@ -160,6 +161,9 @@ dump_style(
             for (int i = 0; i > mag; --i) size /= 6;
         }
         out << size << "%; /* " <<  ((int)mag) << " */\n";
+    }
+    if (style.TextStyle.colorSupported()) {
+        out << "    color: " << ZLTextStyle::colorStyle(style.TextStyle.color()) << ";\n";
     }
 }
 

@@ -30,3 +30,11 @@ body,h1,h2, /*///****/ div, p {
 /* 12: Known style with missing semicolon */
 	font-style: italic
 }
+
+/* 13. Sypported ways to represent colors */
+.red { color: #f00; }
+.green { color: "#00ff00"; }
+.blue { color: rgb(0,0, 255); }
+.olive { color: rgb(50%, 50%, 0%); }
+.orangered { color: orangered }
+.palegreen { color: "palegreen"; }

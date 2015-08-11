@@ -34,18 +34,20 @@
 #include "BooksTextView.h"
 #include "BooksTextStyle.h"
 
+#include "ZLStringUtil.h"
+
 #define SUPER ZLTextView
 
 const ZLColor BooksTextView::DEFAULT_BACKGROUND(255, 255, 255);
 const ZLColor BooksTextView::INVERTED_BACKGROUND(0, 0, 0);
 
 BooksTextView::BooksTextView(
-    ZLPaintContext& aContext,
+    BooksPaintContext& aContext,
     shared_ptr<ZLTextStyle> aTextStyle,
     BooksMargins aMargins) :
     SUPER(aContext),
     iMargins(aMargins),
-    iInvertColors(false),
+    iPaintContext(aContext),
     iTextStyle(aTextStyle)
 {
 }
@@ -82,7 +84,7 @@ int BooksTextView::bottomMargin() const
 
 ZLColor BooksTextView::backgroundColor() const
 {
-    return iInvertColors ? INVERTED_BACKGROUND : DEFAULT_BACKGROUND;
+    return iPaintContext.realColor(DEFAULT_BACKGROUND);
 }
 
 ZLColor BooksTextView::color(const std::string &aStyle) const
@@ -91,21 +93,34 @@ ZLColor BooksTextView::color(const std::string &aStyle) const
     static const std::string EXTERNAL_HYPERLINK("external");
     static const std::string BOOK_HYPERLINK("book");
 
-    if (aStyle == INTERNAL_HYPERLINK) {
-        return ZLColor(33, 96, 180);
+    if (ZLStringUtil::startsWith(aStyle, '#')) {
+        if (aStyle.length() == 7) {
+            int i, value = 0;
+            for (i=1; i<7; i++) {
+                int nibble = ZLStringUtil::fromHex(aStyle[i]);
+                if (nibble >= 0) {
+                    value <<= 4;
+                    value |= nibble;
+                } else {
+                    break;
+                }
+            }
+            if (i == 7) {
+                return iPaintContext.realColor(ZLColor(value));
+            }
+        }
+    } else if (aStyle == INTERNAL_HYPERLINK) {
+        return iPaintContext.realColor(33, 96, 180);
     } else if (aStyle == EXTERNAL_HYPERLINK) {
-        return ZLColor(33, 96, 180);
+        return iPaintContext.realColor(33, 96, 180);
     } else if (aStyle == BOOK_HYPERLINK) {
-        return ZLColor(23, 68, 128);
+        return iPaintContext.realColor(23, 68, 128);
     } else if (aStyle == ZLTextStyle::SELECTION_BACKGROUND) {
-        return ZLColor(82, 131, 194);
+        return iPaintContext.realColor(82, 131, 194);
     } else if (aStyle == ZLTextStyle::HIGHLIGHTED_TEXT) {
-        return ZLColor(60, 139, 255);
-    } else if (iInvertColors) {
-        return ZLColor(255, 255, 255);
-    } else {
-        return ZLColor(0, 0, 0);
+        return iPaintContext.realColor(60, 139, 255);
     }
+    return iPaintContext.realColor(0, 0, 0);
 }
 
 shared_ptr<ZLTextStyle> BooksTextView::baseStyle() const

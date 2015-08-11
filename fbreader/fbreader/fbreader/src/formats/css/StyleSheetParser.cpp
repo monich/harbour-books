@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2004-2010 Geometer Plus <contact@geometerplus.com>
+ * Copyright (C) 2015 Slava Monich <slava.monich@jolla.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,6 +40,7 @@ StyleSheetTable::Style StyleSheetSingleStyleParser::parseString(const char *text
 		parse(text, strlen(text), true);
 		if (!myStateStack.empty()) {
 			switch (myStateStack.top()) {
+			case ATTRIBUTE_VALUE:
 			case ATTRIBUTE_VALUE_SPACE:
 			case ATTRIBUTE_VALUE_COMMA:
 				finishAttributeValue();
@@ -201,7 +203,10 @@ void StyleSheetParser::processChar4(char c) {
 				myMap[myAttributeName].resize(0);
 				myWord.resize(0);
 				static const std::string FONT_FAMILY("font-family");
-				if (myAttributeName == FONT_FAMILY) {
+				static const std::string COLOR("color");
+				if (myAttributeName == COLOR) {
+					myStateStack.top() = ATTRIBUTE_VALUE;
+				} else if (myAttributeName == FONT_FAMILY) {
 					myStateStack.top() = ATTRIBUTE_VALUE_COMMA;
 				} else {
 					myStateStack.top() = ATTRIBUTE_VALUE_SPACE;
@@ -227,6 +232,7 @@ void StyleSheetParser::processChar4(char c) {
 		}
 		break;
 
+	case ATTRIBUTE_VALUE:
 	case ATTRIBUTE_VALUE_SPACE:
 	case ATTRIBUTE_VALUE_COMMA:
 		switch (c) {
@@ -296,6 +302,7 @@ void StyleSheetParser::processChar4(char c) {
 			// in which the string was found.
 			myStateStack.pop();
 			switch (myStateStack.top()) {
+			case ATTRIBUTE_VALUE:
 			case ATTRIBUTE_VALUE_SPACE:
 			case ATTRIBUTE_VALUE_COMMA:
 				myStateStack.top() = ATTRIBUTE_IGNORE;

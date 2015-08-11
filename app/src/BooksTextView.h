@@ -36,6 +36,7 @@
 
 #include "BooksTypes.h"
 #include "BooksPos.h"
+#include "BooksPaintContext.h"
 
 #include "ZLColor.h"
 #include "ZLTextView.h"
@@ -46,7 +47,7 @@
 class BooksTextView: public ZLTextView
 {
 public:
-    BooksTextView(ZLPaintContext& aContext,
+    BooksTextView(BooksPaintContext& aContext,
         shared_ptr<ZLTextStyle> aTextStyle,
         BooksMargins aMargin);
 
@@ -80,7 +81,7 @@ public:
 
 private:
     BooksMargins iMargins;
-    bool iInvertColors;
+    BooksPaintContext& iPaintContext;
     std::string iCaption;
     shared_ptr<ZLTextStyle> iTextStyle;
 };
@@ -88,6 +89,6 @@ private:
 inline BooksPos BooksTextView::position() const
     { return BooksPos(textArea().startCursor()); }
 inline void BooksTextView::setInvertColors(bool aInvertColors)
-    { iInvertColors = aInvertColors; }
+    { iPaintContext.setInvertColors(aInvertColors); }
 
 #endif // BOOKS_TEXT_VIEW_H

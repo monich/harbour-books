@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2004-2010 Geometer Plus <contact@geometerplus.com>
+ * Copyright (C) 2015 Slava Monich <slava.monich@jolla.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +27,7 @@
 
 #include <shared_ptr.h>
 
+#include <ZLColor.h>
 #include <ZLTextParagraph.h>
 #include <ZLBoolean3.h>
 
@@ -88,10 +90,10 @@ public:
 		Style(const AttributeMap &map);
 
 		Style &operator = (const Style &other);
-        bool operator == (const Style &other) const;
-        bool equals(const Style &other) const;
-        void apply(const Style &other);
-        void inherit(const Style &other);
+		bool operator == (const Style &other) const;
+		bool equals(const Style &other) const;
+		void apply(const Style &other);
+		void inherit(const Style &other);
 		bool empty() const;
 
 		ZLTextStyleEntry TextStyle;
@@ -125,8 +127,9 @@ private:
 	static void setLength(ZLTextStyleEntry &entry, ZLTextStyleEntry::Length name, const std::string &value);
 	static void setMargin(ZLTextStyleEntry &entry, ZLTextStyleEntry::Length name, const AttributeMap &map, const std::string &attributeName);
 	static void setMargin(ZLTextStyleEntry &entry, ZLTextStyleEntry::Length name, const std::string &value);
-    static const std::vector<std::string> &values(const AttributeMap &map, const std::string &name);
+	static const std::vector<std::string> &values(const AttributeMap &map, const std::string &name);
 	static bool sortBySpecificity(const Entry *e1, const Entry *e2);
+	static bool stringToColor(const std::string &text, ZLColor &color);
 
 public:
 	bool isEmpty() const;
