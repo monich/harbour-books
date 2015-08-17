@@ -39,7 +39,6 @@ size_t ZLTextEntry::dataLength() const {
 int ZLTextStyleEntry::hlength(int size, SizeUnit unit, const Metrics &metrics)
 {
 	switch (unit) {
-		default:
 		case SIZE_UNIT_PIXEL:
 			return size;
 		case SIZE_UNIT_EM_100:
@@ -48,13 +47,15 @@ int ZLTextStyleEntry::hlength(int size, SizeUnit unit, const Metrics &metrics)
 			return (size * metrics.FontXHeight + 50) / 100;
 		case SIZE_UNIT_PERCENT:
 			return (size * metrics.FullWidth + 50) / 100;
+		case SIZE_UNIT_AUTO:
+			return metrics.FullWidth / 2;
 	}
+	return 0;
 }
 
 int ZLTextStyleEntry::vlength(int size, SizeUnit unit, const Metrics &metrics)
 {
 	switch (unit) {
-		default:
 		case SIZE_UNIT_PIXEL:
 			return size;
 		case SIZE_UNIT_EM_100:
@@ -63,20 +64,26 @@ int ZLTextStyleEntry::vlength(int size, SizeUnit unit, const Metrics &metrics)
 			return (size * metrics.FontXHeight + 50) / 100;
 		case SIZE_UNIT_PERCENT:
 			return (size * metrics.FullHeight + 50) / 100;
+		case SIZE_UNIT_AUTO:
+			return metrics.FullHeight / 2;
 	}
+	return 0;
 }
 
 short ZLTextStyleEntry::length(Length name, const Metrics &metrics) const {
 	switch (name) {
-		default:
 		case LENGTH_LEFT_INDENT:
 		case LENGTH_RIGHT_INDENT:
 		case LENGTH_FIRST_LINE_INDENT_DELTA:
+		case LENGTH_WIDTH:
 			return hlength(myLengths[name].Size, myLengths[name].Unit, metrics);
 		case LENGTH_SPACE_BEFORE:
 		case LENGTH_SPACE_AFTER:
 			return vlength(myLengths[name].Size, myLengths[name].Unit, metrics);
+		case NUMBER_OF_LENGTHS:
+			break;
 	}
+	return 0;
 }
 
 ZLTextStyleEntry::ZLTextStyleEntry(char *address) {

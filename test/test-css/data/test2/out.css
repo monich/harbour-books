@@ -4,6 +4,9 @@ body.cover {
     margin-top: 0;
     margin-right: 0;
 }
+svg.cover-svg {
+    width: 100%;
+}
 .z {
     margin-right: 8px;
     font-family: "Times New Roman", "serif";

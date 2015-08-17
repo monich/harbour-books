@@ -75,13 +75,13 @@ short ZLTextFullDecoratedStyle::spaceAfter(const ZLTextStyleEntry::Metrics &metr
 }
 
 short ZLTextFullDecoratedStyle::lineStartIndent(const ZLTextStyleEntry::Metrics &metrics, bool rtl) const {
-	return base()->lineEndIndent(metrics, rtl) + (rtl ?
+	return base()->lineStartIndent(metrics, rtl) + (rtl ?
 		ZLTextStyleEntry::hlength(myDecoration.LineEndIndentOption.value(), myDecoration.LineEndIndentOptionUnit, metrics) :
 		ZLTextStyleEntry::hlength(myDecoration.LineStartIndentOption.value(), myDecoration.LineStartIndentOptionUnit, metrics));
 }
 
 short ZLTextFullDecoratedStyle::lineEndIndent(const ZLTextStyleEntry::Metrics &metrics, bool rtl) const {
-	return base()->lineStartIndent(metrics, rtl) + (rtl ?
+	return base()->lineEndIndent(metrics, rtl) + (rtl ?
 		ZLTextStyleEntry::hlength(myDecoration.LineStartIndentOption.value(), myDecoration.LineStartIndentOptionUnit, metrics) :
 		ZLTextStyleEntry::hlength(myDecoration.LineEndIndentOption.value(), myDecoration.LineEndIndentOptionUnit, metrics));
 }
@@ -193,28 +193,51 @@ short ZLTextForcedStyle::lineStartIndent(const ZLTextStyleEntry::Metrics &metric
 	ZLTextStyleEntry::Length lengthType = rtl ?
 		ZLTextStyleEntry::LENGTH_RIGHT_INDENT :
 		ZLTextStyleEntry::LENGTH_LEFT_INDENT;
-	if (myEntry.lengthSupported(lengthType)) {
-		const short baseLen = base()->lineStartIndent(metrics, rtl);
-		ZLTextStyleEntry::Metrics adjusted(metrics);
-		adjusted.FullWidth -= baseLen + base()->lineEndIndent(metrics, rtl);
-		return baseLen + myEntry.length(lengthType, adjusted);
-	} else {
+	if (!myEntry.lengthSupported(lengthType)) {
 		return base()->lineStartIndent(metrics, rtl);
 	}
+
+	const short baseLen = base()->lineStartIndent(metrics, rtl);
+	ZLTextStyleEntry::Metrics adjusted(metrics);
+	adjusted.FullWidth -= baseLen + base()->lineEndIndent(metrics, rtl);
+	if (adjusted.FullWidth < 0) adjusted.FullWidth = 0;
+	if (myEntry.lengthUnit(lengthType) != ZLTextStyleEntry::SIZE_UNIT_AUTO) {
+		return baseLen + myEntry.length(lengthType, adjusted);
+	}
+
+	if (myEntry.autoLeftRightMargins() && myEntry.lengthSupported(ZLTextStyleEntry::LENGTH_WIDTH)) {
+		int x = adjusted.FullWidth - myEntry.length(ZLTextStyleEntry::LENGTH_WIDTH, adjusted);
+		if (x < 0) x = 0;
+		return x/2;
+	}
+
+	return baseLen;
 }
 
 short ZLTextForcedStyle::lineEndIndent(const ZLTextStyleEntry::Metrics &metrics, bool rtl) const {
 	ZLTextStyleEntry::Length lengthType = rtl ?
 		ZLTextStyleEntry::LENGTH_LEFT_INDENT :
 		ZLTextStyleEntry::LENGTH_RIGHT_INDENT;
-	if (myEntry.lengthSupported(lengthType)) {
-		const short baseLen = base()->lineEndIndent(metrics, rtl);
-		ZLTextStyleEntry::Metrics adjusted(metrics);
-		adjusted.FullWidth -= baseLen + base()->lineStartIndent(metrics, rtl);
-		return baseLen + myEntry.length(lengthType, adjusted);
-	} else {
-		return base()->lineEndIndent(metrics, rtl);
+
+	if (!myEntry.lengthSupported(lengthType)) {
+		return base()->lineStartIndent(metrics, rtl);
 	}
+
+	const short baseLen = base()->lineEndIndent(metrics, rtl);
+	ZLTextStyleEntry::Metrics adjusted(metrics);
+	adjusted.FullWidth -= baseLen + base()->lineStartIndent(metrics, rtl);
+	if (adjusted.FullWidth < 0) adjusted.FullWidth = 0;
+	if (myEntry.lengthUnit(lengthType) != ZLTextStyleEntry::SIZE_UNIT_AUTO) {
+		return baseLen + myEntry.length(lengthType, adjusted);
+	}
+
+	if (myEntry.autoLeftRightMargins() && myEntry.lengthSupported(ZLTextStyleEntry::LENGTH_WIDTH)) {
+		int x = adjusted.FullWidth - myEntry.length(ZLTextStyleEntry::LENGTH_WIDTH, adjusted);
+		if (x < 0) x = 0;
+		return x/2;
+	}
+
+	return baseLen;
 }
 
 short ZLTextForcedStyle::spaceBefore(const ZLTextStyleEntry::Metrics &metrics) const {

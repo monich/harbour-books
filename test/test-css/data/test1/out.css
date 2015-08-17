@@ -104,11 +104,13 @@
     color: #333333;
 }
 .table {
+    width: 100%;
     margin-bottom: 16px;
     margin-top: 0;
     text-indent: 0;
 }
 .table1 {
+    width: 100%;
     margin-bottom: 16px;
     margin-top: 0;
     text-indent: 0;

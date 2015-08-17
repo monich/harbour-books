@@ -147,7 +147,7 @@ bool StyleSheetTable::parseMargin(const std::string &toParse, short &size, ZLTex
 		return true;
 	} else if (toParse == "auto") {
 		size = 0;
-		unit = ZLTextStyleEntry::SIZE_UNIT_PIXEL;
+		unit = ZLTextStyleEntry::SIZE_UNIT_AUTO;
 		return true;
 	} else {
 		return false;
@@ -307,6 +307,7 @@ void StyleSheetTable::updateTextStyle(ZLTextStyleEntry &entry, const AttributeMa
 		} else {
 			if (ZLTextStyleEntry::parseLength(value, size, unit)) {
 				switch (unit) {
+				case ZLTextStyleEntry::SIZE_UNIT_AUTO:
 				case ZLTextStyleEntry::SIZE_UNIT_PIXEL:
 					// What to do with pixels?
 					break;
@@ -354,6 +355,9 @@ void StyleSheetTable::updateTextStyle(ZLTextStyleEntry &entry, const AttributeMa
 		const int value = (int)(255 * ZLStringUtil::stringToDouble(opacity[0], 1));
 		entry.setOpacity((unsigned char)((value < 0) ? 0 : (value > 255) ? 255 : value));
 	}
+
+	static const std::string WIDTH("width");
+	setLength(entry, ZLTextStyleEntry::LENGTH_WIDTH, styles, WIDTH);
 
 	// Margins will overwrite padding, sorry
 	static const std::string PADDING_TOP("padding-top");

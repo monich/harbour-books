@@ -68,7 +68,8 @@ public:
 		SIZE_UNIT_PIXEL,
 		SIZE_UNIT_EM_100,
 		SIZE_UNIT_EX_100,
-		SIZE_UNIT_PERCENT
+		SIZE_UNIT_PERCENT,
+		SIZE_UNIT_AUTO
 	};
 
 	struct Metrics {
@@ -86,7 +87,8 @@ public:
 		LENGTH_FIRST_LINE_INDENT_DELTA = 2,
 		LENGTH_SPACE_BEFORE = 3,
 		LENGTH_SPACE_AFTER = 4,
-		NUMBER_OF_LENGTHS = 5,
+		LENGTH_WIDTH = 5,
+		NUMBER_OF_LENGTHS = 6
 	};
 
 private:
@@ -111,6 +113,8 @@ public:
 	bool isEmpty() const;
 
 	bool lengthSupported(Length name) const;
+	bool autoLeftRightMargins() const;
+	SizeUnit lengthUnit(Length name) const;
 	short length(Length name, const Metrics &metrics) const;
 	short length(Length name, SizeUnit &unit) const;
 	void setLength(Length name, short length, SizeUnit unit);
@@ -374,11 +378,17 @@ inline bool ZLTextStyleEntry::operator == (const ZLTextStyleEntry &other) const 
 inline ZLTextStyleEntry &ZLTextStyleEntry::operator = (const ZLTextStyleEntry &other) { reset(); apply(other); return *this; }
 
 inline bool ZLTextStyleEntry::lengthSupported(Length name) const { return (myMask & (1 << name)) != 0; }
+inline ZLTextStyleEntry::SizeUnit ZLTextStyleEntry::lengthUnit(Length name) const { return myLengths[name].Unit; }
 inline short ZLTextStyleEntry::length(Length name, SizeUnit &unit) const { unit = myLengths[name].Unit; return myLengths[name].Size; }
 inline void ZLTextStyleEntry::setLength(Length name, short length, SizeUnit unit) {
 	myLengths[name].Size = length;
 	myLengths[name].Unit = unit;
 	myMask |= 1 << name;
+}
+inline bool ZLTextStyleEntry::autoLeftRightMargins() const {
+	return (myMask & ((1 << LENGTH_LEFT_INDENT) | (1 << LENGTH_RIGHT_INDENT))) == ((1 << LENGTH_LEFT_INDENT) | (1 << LENGTH_RIGHT_INDENT)) &&
+		myLengths[LENGTH_LEFT_INDENT].Unit == SIZE_UNIT_AUTO &&
+		myLengths[LENGTH_RIGHT_INDENT].Unit == SIZE_UNIT_AUTO;
 }
 
 inline bool ZLTextStyleEntry::opacitySupported() const { return (myMask & SUPPORT_OPACITY) != 0; }

@@ -79,6 +79,9 @@ dump_length(
             case ZLTextStyleEntry::SIZE_UNIT_PERCENT:
                 out << length->Size << "%";
                 break;
+            case ZLTextStyleEntry::SIZE_UNIT_AUTO:
+                out << "auto";
+                break;
             }
         }
         out << ";\n";
@@ -90,6 +93,7 @@ dump_style(
     const StyleSheetTable::Style& style,
     std::ostream& out)
 {
+    dump_length(style.TextStyle, ZLTextStyleEntry::LENGTH_WIDTH, "width", out);
     dump_length(style.TextStyle, ZLTextStyleEntry::LENGTH_LEFT_INDENT, "margin-left", out);
     dump_length(style.TextStyle, ZLTextStyleEntry::LENGTH_SPACE_AFTER, "margin-bottom", out);
     dump_length(style.TextStyle, ZLTextStyleEntry::LENGTH_SPACE_BEFORE, "margin-top", out);
