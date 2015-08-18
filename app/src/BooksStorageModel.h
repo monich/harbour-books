@@ -53,6 +53,8 @@ public:
     ~BooksStorageModel();
 
     Q_INVOKABLE int count() const;
+    Q_INVOKABLE int deviceIndex(QString aDevice) const;
+    Q_INVOKABLE QString deviceAt(int aIndex) const;
     Q_INVOKABLE void setDeleteAllRequest(int aIndex, bool aValue);
     Q_INVOKABLE void cancelDeleteAllRequests();
     Q_INVOKABLE QObject* get(int aIndex) const;

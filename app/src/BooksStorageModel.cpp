@@ -102,6 +102,23 @@ int BooksStorageModel::count() const
     return iList.count();
 }
 
+int BooksStorageModel::deviceIndex(QString aDevice) const
+{
+    if (!aDevice.isEmpty()) {
+        for (int i=iList.count()-1; i>=0; i--) {
+            if (iList.at(i)->device() == aDevice) {
+                return i;
+            }
+        }
+    }
+    return -1;
+}
+
+QString BooksStorageModel::deviceAt(int aIndex) const
+{
+    return validIndex(aIndex) ? iList.at(aIndex)->device() : QString();
+}
+
 void BooksStorageModel::setDeleteAllRequest(int aIndex, bool aValue)
 {
     if (validIndex(aIndex)) {

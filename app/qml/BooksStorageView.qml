@@ -115,9 +115,9 @@ SilicaFlickable {
         }
     }
 
-    SystemState {
-        id: globalSystemState
-        onLockModeChanged: if (lockMode == "locked") editMode = false
+    Connections {
+        target: globalSystemState
+        onLockModeChanged: if (target.lockMode === "locked") editMode = false
     }
 
     BookStorage {
@@ -132,6 +132,11 @@ SilicaFlickable {
         id: storageListWatcher
         listView: storageList
         onSizeChanged: _cellWidth = calculateCellWidth()
+        onCurrentIndexChanged: {
+            if (storageList._completed && currentIndex >= 0) {
+                globalSettings.currentStorage = storageModel.deviceAt(currentIndex)
+            }
+        }
     }
 
     SilicaListView {
@@ -144,6 +149,7 @@ SilicaFlickable {
         spacing: Theme.paddingMedium
         interactive: !dragInProgress && !dragScrollAnimation.running
 
+        property bool _completed
         readonly property real maxContentX: Math.max(0, contentWidth - width)
 
         onMaxContentXChanged: {
@@ -152,6 +158,13 @@ SilicaFlickable {
                 dragScrollAnimation.to = maxContentX
                 dragScrollAnimation.restart()
             }
+        }
+
+        Component.onCompleted: {
+            var index = model.deviceIndex(globalSettings.currentStorage)
+            // positionViewAtIndex doesn't work here, update contentX directly
+            if (index >= 0) contentX = (width + spacing) * index
+            _completed = true
         }
 
         delegate: BooksShelfView {

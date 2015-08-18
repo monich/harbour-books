@@ -41,7 +41,7 @@
 
 BooksListWatcher::BooksListWatcher(QObject* aParent) :
     QObject(aParent),
-    iCurrentIndex(0),
+    iCurrentIndex(-1),
     iContentX(0),
     iContentY(0),
     iListView(NULL),

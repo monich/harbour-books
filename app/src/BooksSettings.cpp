@@ -45,10 +45,12 @@
 #define KEY_FONT_SIZE           "fontSize"
 #define KEY_PAGE_DETAILS        "pageDetails"
 #define KEY_CURRENT_BOOK        "currentBook"
+#define KEY_CURRENT_STORAGE     "currentStorage"
 #define KEY_INVERT_COLORS       "invertColors"
 #define DEFAULT_FONT_SIZE       0
 #define DEFAULT_PAGE_DETAILS    0
 #define DEFAULT_CURRENT_BOOK    QString()
+#define DEFAULT_CURRENT_STORAGE QString()
 #define DEFAULT_INVERT_COLORS   false
 
 // ==========================================================================
@@ -196,6 +198,7 @@ BooksSettings::BooksSettings(QObject* aParent) :
     iFontSize(new MGConfItem(DCONF_PATH KEY_FONT_SIZE, this)),
     iPageDetails(new MGConfItem(DCONF_PATH KEY_PAGE_DETAILS, this)),
     iInvertColors(new MGConfItem(DCONF_PATH KEY_INVERT_COLORS, this)),
+    iCurrentStorage(new MGConfItem(DCONF_PATH KEY_CURRENT_STORAGE, this)),
     iCurrentBookPath(new MGConfItem(DCONF_PATH KEY_CURRENT_BOOK, this)),
     iCurrentBook(NULL)
 {
@@ -204,6 +207,7 @@ BooksSettings::BooksSettings(QObject* aParent) :
     connect(iFontSize, SIGNAL(valueChanged()), SLOT(onFontSizeValueChanged()));
     connect(iPageDetails, SIGNAL(valueChanged()), SIGNAL(pageDetailsChanged()));
     connect(iInvertColors, SIGNAL(valueChanged()), SIGNAL(invertColorsChanged()));
+    connect(iCurrentStorage, SIGNAL(valueChanged()), SIGNAL(currentStorageChanged()));
     connect(iCurrentBookPath, SIGNAL(valueChanged()), SLOT(onCurrentBookPathChanged()));
 }
 
@@ -257,6 +261,20 @@ BooksSettings::setInvertColors(
 {
     HDEBUG(aValue);
     iInvertColors->set(aValue);
+}
+
+QString
+BooksSettings::currentStorage() const
+{
+    return iCurrentStorage->value(DEFAULT_CURRENT_STORAGE).toString();
+}
+
+void
+BooksSettings::setCurrentStorage(
+    QString aValue)
+{
+    HDEBUG(aValue);
+    iCurrentStorage->set(aValue);
 }
 
 QObject*

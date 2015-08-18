@@ -41,6 +41,7 @@ ApplicationWindow {
 
     BooksSettings { id: globalSettings }
     BooksHints { id: globalHints }
+    SystemState { id: globalSystemState }
 
     initialPage: BooksMainPage { id: mainPage }
 
