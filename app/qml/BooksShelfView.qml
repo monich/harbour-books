@@ -134,7 +134,7 @@ SilicaFlickable {
             left: parent.left
             right: parent.right
             bottom: parent.bottom
-            leftMargin: Math.floor((shelfView.width - _cellsPerRow * shelfView.cellWidth)/_cellsPerRow/2)
+            leftMargin: Math.floor((shelfView.width - _cellsPerRow * shelfView.cellWidth)/2)
         }
         model: shelfModel
         interactive: !dragInProgress

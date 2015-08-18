@@ -41,8 +41,8 @@ SilicaFlickable {
 
     signal openBook(var book)
 
-    property real _cellWidth: calculateCellWidth()
-    property real _cellHeight: _cellWidth*8/5
+    property real _cellWidth
+    property real _cellHeight: Math.ceil(_cellWidth*8/5)
     property var draggedItem
     property var currentShelf
     property var currentShelfView
@@ -57,19 +57,29 @@ SilicaFlickable {
     // Books in the library shouldn't be too small or too big.
     // At least 3 (or 5 in landscape) should fit in the horizontal direction.
     // The width shouldn't be smaller than 10*Theme.paddingMedium or 0.88 inch
-    function calculateCellWidth() {
+    function calculateCellWidth2(viewWidth, minCount) {
         var result = 0
-        if (width > 0) {
+        if (viewWidth > 0) {
             // At least 3 books in portrait, 5 in landscape
-            var n = (height > width) ? 4 : 6
-            var cellSize = width/n
+            var n = minCount + 1
+            var cellSize = viewWidth/minCount
             while (cellSize > _minGridCellWidth && (cellSize/PointsPerInch) > 0.88 && n < 11) {
-                cellSize = width/(++n)
+                cellSize = viewWidth/(++n)
             }
-            result = Math.floor(width/(n-1))
+            result = Math.floor(viewWidth/(n-1))
         }
         return result
     }
+
+    function calculateCellWidth() {
+        // At least 3 books in portrait, 5 in landscape
+        var result2 = calculateCellWidth2(Math.min(width, height), 3)
+        var result1 = calculateCellWidth2(Math.max(width, height), 5)
+        var result = Math.min(result1, result2)
+        return result
+    }
+
+    Component.onCompleted: _cellWidth = calculateCellWidth()
 
     PullDownMenu {
         MenuItem {
@@ -121,6 +131,7 @@ SilicaFlickable {
     ListWatcher {
         id: storageListWatcher
         listView: storageList
+        onSizeChanged: _cellWidth = calculateCellWidth()
     }
 
     SilicaListView {
