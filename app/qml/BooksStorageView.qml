@@ -117,7 +117,7 @@ SilicaFlickable {
 
     Connections {
         target: globalSystemState
-        onLockModeChanged: if (target.lockMode === "locked") editMode = false
+        onLockModeChanged: if (target.lockMode === globalSystemState.MCE_TK_LOCKED) editMode = false
     }
 
     BookStorage {
