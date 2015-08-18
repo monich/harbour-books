@@ -166,14 +166,13 @@ void ZLibrary::run(ZLApplication* aApp)
     HDEBUG("qml file" << qPrintable(qml));
 
     QQuickView* view = SailfishApp::createView();
-    view->setSource(QUrl::fromLocalFile(qml));
-
     QQmlContext* root = view->rootContext();
     root->setContextProperty("PointsPerInch", BOOKS_PPI);
     root->setContextProperty("MaximumHintCount", 1);
     root->setContextProperty("DoubleClickInterval",
         qApp->styleHints()->mouseDoubleClickInterval());
 
+    view->setSource(QUrl::fromLocalFile(qml));
     view->show();
     HDEBUG("started");
     qApp->exec();
