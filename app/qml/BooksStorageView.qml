@@ -81,6 +81,12 @@ SilicaFlickable {
 
     Component.onCompleted: _cellWidth = calculateCellWidth()
 
+    onCurrentShelfChanged: {
+        if (storageList.completed && currentShelf) {
+            globalSettings.currentFolder = currentShelf.path
+        }
+    }
+
     PullDownMenu {
         MenuItem {
             //% "Scan downloads"
@@ -132,11 +138,6 @@ SilicaFlickable {
         id: storageListWatcher
         listView: storageList
         onSizeChanged: _cellWidth = calculateCellWidth()
-        onCurrentIndexChanged: {
-            if (storageList._completed && currentIndex >= 0) {
-                globalSettings.currentStorage = storageModel.deviceAt(currentIndex)
-            }
-        }
     }
 
     SilicaListView {
@@ -149,7 +150,7 @@ SilicaFlickable {
         spacing: Theme.paddingMedium
         interactive: !dragInProgress && !dragScrollAnimation.running
 
-        property bool _completed
+        property bool completed
         readonly property real maxContentX: Math.max(0, contentWidth - width)
 
         onMaxContentXChanged: {
@@ -163,8 +164,14 @@ SilicaFlickable {
         Component.onCompleted: {
             var index = model.deviceIndex(globalSettings.currentStorage)
             // positionViewAtIndex doesn't work here, update contentX directly
-            if (index >= 0) contentX = (width + spacing) * index
-            _completed = true
+            if (index >= 0) {
+                contentX = (width + spacing) * index
+            } else {
+                // Most likely, removable storage is gone
+                console.log(globalSettings.currentFolder, "is gone")
+                globalSettings.currentFolder = currentShelf ? currentShelf.path : ""
+            }
+            completed = true
         }
 
         delegate: BooksShelfView {

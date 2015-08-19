@@ -48,7 +48,8 @@ class BooksSettings : public QObject
     Q_PROPERTY(int pageDetails READ pageDetails WRITE setPageDetails NOTIFY pageDetailsChanged)
     Q_PROPERTY(bool invertColors READ invertColors WRITE setInvertColors NOTIFY invertColorsChanged)
     Q_PROPERTY(QObject* currentBook READ currentBook WRITE setCurrentBook NOTIFY currentBookChanged)
-    Q_PROPERTY(QString currentStorage READ currentStorage WRITE setCurrentStorage NOTIFY currentStorageChanged)
+    Q_PROPERTY(QString currentFolder READ currentFolder WRITE setCurrentFolder NOTIFY currentFolderChanged)
+    Q_PROPERTY(QString currentStorage READ currentStorage NOTIFY currentStorageChanged)
     class TextStyle;
 
 public:
@@ -74,8 +75,10 @@ public:
     QObject* currentBook() const;
     void setCurrentBook(QObject* aBook);
 
-    QString currentStorage() const;
-    void setCurrentStorage(QString aValue);
+    QString currentFolder() const;
+    void setCurrentFolder(QString aValue);
+
+    QString currentStorage() const { return iCurrentStorageDevice; }
 
 signals:
     void fontSizeChanged();
@@ -83,24 +86,28 @@ signals:
     void pageDetailsChanged();
     void invertColorsChanged();
     void currentBookChanged();
+    void currentFolderChanged();
     void currentStorageChanged();
 
 private Q_SLOTS:
     void onFontSizeValueChanged();
     void onCurrentBookPathChanged();
+    void onCurrentFolderChanged();
 
 private:
     void updateRenderType();
     bool updateCurrentBook();
+    bool updateCurrentStorage();
 
 private:
     MGConfItem* iFontSize;
     MGConfItem* iPageDetails;
     MGConfItem* iInvertColors;
-    MGConfItem* iCurrentStorage;
+    MGConfItem* iCurrentFolder;
     MGConfItem* iCurrentBookPath;
     shared_ptr<ZLTextStyle> iTextStyle;
     BooksBook* iCurrentBook;
+    QString iCurrentStorageDevice;
 };
 
 QML_DECLARE_TYPE(BooksSettings)

@@ -45,12 +45,12 @@
 #define KEY_FONT_SIZE           "fontSize"
 #define KEY_PAGE_DETAILS        "pageDetails"
 #define KEY_CURRENT_BOOK        "currentBook"
-#define KEY_CURRENT_STORAGE     "currentStorage"
+#define KEY_CURRENT_FOLDER      "currentFolder"
 #define KEY_INVERT_COLORS       "invertColors"
 #define DEFAULT_FONT_SIZE       0
 #define DEFAULT_PAGE_DETAILS    0
 #define DEFAULT_CURRENT_BOOK    QString()
-#define DEFAULT_CURRENT_STORAGE QString()
+#define DEFAULT_CURRENT_FOLDER  QString()
 #define DEFAULT_INVERT_COLORS   false
 
 // ==========================================================================
@@ -198,16 +198,17 @@ BooksSettings::BooksSettings(QObject* aParent) :
     iFontSize(new MGConfItem(DCONF_PATH KEY_FONT_SIZE, this)),
     iPageDetails(new MGConfItem(DCONF_PATH KEY_PAGE_DETAILS, this)),
     iInvertColors(new MGConfItem(DCONF_PATH KEY_INVERT_COLORS, this)),
-    iCurrentStorage(new MGConfItem(DCONF_PATH KEY_CURRENT_STORAGE, this)),
+    iCurrentFolder(new MGConfItem(DCONF_PATH KEY_CURRENT_FOLDER, this)),
     iCurrentBookPath(new MGConfItem(DCONF_PATH KEY_CURRENT_BOOK, this)),
     iCurrentBook(NULL)
 {
     iTextStyle = new TextStyle(fontSize());
     updateCurrentBook();
+    updateCurrentStorage();
     connect(iFontSize, SIGNAL(valueChanged()), SLOT(onFontSizeValueChanged()));
     connect(iPageDetails, SIGNAL(valueChanged()), SIGNAL(pageDetailsChanged()));
     connect(iInvertColors, SIGNAL(valueChanged()), SIGNAL(invertColorsChanged()));
-    connect(iCurrentStorage, SIGNAL(valueChanged()), SIGNAL(currentStorageChanged()));
+    connect(iCurrentFolder, SIGNAL(valueChanged()), SLOT(onCurrentFolderChanged()));
     connect(iCurrentBookPath, SIGNAL(valueChanged()), SLOT(onCurrentBookPathChanged()));
 }
 
@@ -264,17 +265,38 @@ BooksSettings::setInvertColors(
 }
 
 QString
-BooksSettings::currentStorage() const
+BooksSettings::currentFolder() const
 {
-    return iCurrentStorage->value(DEFAULT_CURRENT_STORAGE).toString();
+    return iCurrentFolder->value(DEFAULT_CURRENT_FOLDER).toString();
 }
 
 void
-BooksSettings::setCurrentStorage(
+BooksSettings::setCurrentFolder(
     QString aValue)
 {
     HDEBUG(aValue);
-    iCurrentStorage->set(aValue);
+    iCurrentFolder->set(aValue);
+}
+
+void
+BooksSettings::onCurrentFolderChanged()
+{
+    if (updateCurrentStorage()) {
+        Q_EMIT currentStorageChanged();
+    }
+    Q_EMIT currentFolderChanged();
+}
+
+bool
+BooksSettings::updateCurrentStorage()
+{
+    BooksStorageManager* mgr = BooksStorageManager::instance();
+    BooksStorage storage = mgr->storageForPath(currentFolder());
+    if (storage.isValid() && storage.device() != iCurrentStorageDevice) {
+        iCurrentStorageDevice = storage.device();
+        return true;
+    }
+    return false;
 }
 
 QObject*
