@@ -56,7 +56,7 @@ public:
     enum FontSize {
         MinFontSize = -5,
         DefaultFontSize = 0,
-        MaxFontSize = 5
+        MaxFontSize = 10
     };
 
     explicit BooksSettings(QObject* aParent = NULL);
