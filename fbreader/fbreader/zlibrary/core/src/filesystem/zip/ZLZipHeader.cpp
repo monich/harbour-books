@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2004-2010 Geometer Plus <contact@geometerplus.com>
+ * Copyright (C) 2015 Slava Monich <slava.monich@jolla.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -63,7 +64,8 @@ void ZLZipHeader::skipEntry(ZLInputStream &stream, ZLZipHeader &header) {
 		default:
 			break;
 		case SignatureLocalFile:
-			if (header.Flags & 0x08) {
+			// Only DEFLATED entries can have EXT descriptor
+			if (header.CompressionMethod != ZLZipHeader::MethodStored && (header.Flags & 0x08)) {
 				stream.seek(header.ExtraLength, false);
 				ZLZDecompressor decompressor((size_t)-1);
 				size_t size;
