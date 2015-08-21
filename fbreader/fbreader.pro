@@ -11,7 +11,7 @@ LINEBREAK_DIR = $$_PRO_FILE_PWD_/../linebreak
 FBREADER_DIR = fbreader
 
 DEFINES += \
-  FBREADER_DISABLE_ZLFILE_PLAIN_STREAM_CACHE=1 \
+  FBREADER_THREAD_LOCAL_ZLFILE_PLAIN_STREAM_CACHE=1 \
   FBREADER_DISABLE_BOOKS_DB=1
 
 # Core
@@ -335,12 +335,13 @@ SOURCES += \
   $$FBREADER_SRC/formats/pdb/PluckerPlugin.cpp \
   $$FBREADER_SRC/formats/pdb/EReaderPlugin.cpp \
   $$FBREADER_SRC/formats/xhtml/XHTMLReader.cpp \
+  $$FBREADER_SRC/formats/oeb/NCXReader.cpp \
+  $$FBREADER_SRC/formats/oeb/OCFContainerReader.cpp \
   $$FBREADER_SRC/formats/oeb/OEBPlugin.cpp \
   $$FBREADER_SRC/formats/oeb/OEBMetaInfoReader.cpp \
   $$FBREADER_SRC/formats/oeb/OEBCoverReader.cpp \
   $$FBREADER_SRC/formats/oeb/OEBTextStream.cpp \
   $$FBREADER_SRC/formats/oeb/OEBBookReader.cpp \
-  $$FBREADER_SRC/formats/oeb/NCXReader.cpp \
   $$FBREADER_SRC/formats/PluginCollection.cpp \
   $$FBREADER_SRC/formats/html/HtmlPlugin.cpp \
   $$FBREADER_SRC/formats/html/HtmlReaderStream.cpp \
@@ -427,10 +428,11 @@ HEADERS += \
   $$FBREADER_SRC/formats/pdb/EReaderStream.h \
   $$FBREADER_SRC/formats/pdb/PluckerTextStream.h \
   $$FBREADER_SRC/formats/xhtml/XHTMLReader.h \
+  $$FBREADER_SRC/formats/oeb/NCXReader.h \
+  $$FBREADER_SRC/formats/oeb/OCFContainerReader.h \
   $$FBREADER_SRC/formats/oeb/OEBBookReader.h \
   $$FBREADER_SRC/formats/oeb/OEBTextStream.h \
   $$FBREADER_SRC/formats/oeb/OEBPlugin.h \
-  $$FBREADER_SRC/formats/oeb/NCXReader.h \
   $$FBREADER_SRC/formats/oeb/OEBMetaInfoReader.h \
   $$FBREADER_SRC/formats/oeb/OEBCoverReader.h \
   $$FBREADER_SRC/formats/html/HtmlPlugin.h \

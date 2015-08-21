@@ -153,6 +153,7 @@ bool ZLibrary::init(int& aArgc, char** &aArgv)
     ZLQtImageManager::createInstance();
     ZLEncodingCollection::Instance().registerProvider(new IConvEncodingConverterProvider());
     ZLApplication::Instance();
+    ZLFile::initCache();
     return true;
 }
 

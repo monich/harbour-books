@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2004-2010 Geometer Plus <contact@geometerplus.com>
+ * Copyright (C) 2015 Slava Monich <slava.monich@jolla.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,10 +36,8 @@ class ZLFile {
 public:
 	static const ZLFile NO_FILE;
 
-private:
-	static std::map<std::string,weak_ptr<ZLInputStream> > ourPlainStreamCache;
-
 public:
+	static void initCache();
 	static std::string fileNameToUtf8(const std::string &fileName);
 	static std::string replaceIllegalCharacters(const std::string &fileName, char replaceWith);
 
