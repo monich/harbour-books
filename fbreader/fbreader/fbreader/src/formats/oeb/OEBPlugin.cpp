@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2004-2010 Geometer Plus <contact@geometerplus.com>
+ * Copyright (C) 2015 Slava Monich <slava.monich@jolla.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +26,7 @@
 #include <ZLLogger.h>
 #include <ZLMimeType.h>
 
+#include "OCFContainerReader.h"
 #include "OEBPlugin.h"
 #include "OEBMetaInfoReader.h"
 #include "OEBBookReader.h"
@@ -36,6 +38,7 @@
 static const std::string OPF = "opf";
 static const std::string OEBZIP = "oebzip";
 static const std::string EPUB = "epub";
+static const std::string CONTAINER_XML = "META-INF/container.xml";
 
 OEBPlugin::~OEBPlugin() {
 }
@@ -68,6 +71,16 @@ ZLFile OEBPlugin::opfFile(const ZLFile &oebFile) {
 		ZLLogger::Instance().println("epub", "Couldn't open zip archive");
 		return ZLFile::NO_FILE;
 	}
+
+	OCFContainerReader ocfReader;
+	ZLFile containerXml(zipDir->itemPath(CONTAINER_XML));
+	if (ocfReader.readContainer(containerXml)) {
+		const std::string &opf = ocfReader.opfFile();
+		if (!opf.empty()) {
+			return ZLFile(zipDir->itemPath(opf));
+		}
+	}
+
 	std::vector<std::string> fileNames;
 	zipDir->collectFiles(fileNames, false);
 	for (std::vector<std::string>::const_iterator it = fileNames.begin(); it != fileNames.end(); ++it) {
