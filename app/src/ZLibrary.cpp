@@ -51,7 +51,6 @@
 
 #include <QGuiApplication>
 #include <QStandardPaths>
-#include <QStyleHints>
 #include <QQuickView>
 #include <QQmlContext>
 
@@ -170,8 +169,6 @@ void ZLibrary::run(ZLApplication* aApp)
     QQmlContext* root = view->rootContext();
     root->setContextProperty("PointsPerInch", BOOKS_PPI);
     root->setContextProperty("MaximumHintCount", 1);
-    root->setContextProperty("DoubleClickInterval",
-        qApp->styleHints()->mouseDoubleClickInterval());
 
     view->setSource(QUrl::fromLocalFile(qml));
     view->show();

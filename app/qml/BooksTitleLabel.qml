@@ -31,73 +31,50 @@
 
 import QtQuick 2.0
 import Sailfish.Silica 1.0
-import harbour.books 1.0
 
 Item {
-    id: view
+    id: title
+    property real centerX: Math.floor(width/2)
+    property alias text: label.text
+    property alias color: label.color
 
-    property alias model: widget.model
-    property alias page: widget.page
-    property alias leftMargin: widget.leftMargin
-    property alias rightMargin: widget.rightMargin
-    property alias topMargin: widget.topMargin
-    property alias bottomMargin: widget.bottomMargin
-    property alias title: titleLabel.text
-    property real leftSpaceReserved
-    property real rightSpaceReserved
-    property bool titleVisible
-    property bool pageNumberVisible
+    visible: opacity > 0
+    Behavior on opacity { FadeAnimation {} }
 
-    signal pageClicked()
+    Component.onCompleted: updateLayout()
 
-    PageWidget {
-        id: widget
-        anchors.fill: parent
-        settings: globalSettings
-        model: bookModel
-    }
+    onWidthChanged: updateLayout()
+    onHeightChanged: updateLayout()
+    onCenterXChanged: updateLayout()
+    onTextChanged: updateLayout()
 
-    BooksTitleLabel {
-        id: titleLabel
-        anchors {
-            top: parent.top
-            left: parent.left
-            right: parent.right
-            leftMargin: Math.max(view.leftMargin, leftSpaceReserved)
-            rightMargin: Math.max(view.rightMargin, rightSpaceReserved)
+    function updateLayout() {
+        if (centerX > 0 && centerX < width) {
+            var left = Math.ceil(centerX)
+            var right = Math.floor(width - centerX)
+            var preferredWidth = Math.floor(Math.min(left, right))*2
+            label.anchors.leftMargin = 0
+            label.anchors.rightMargin = 0
+            if (label.paintedWidth <= preferredWidth) {
+                if (left < right) {
+                    label.anchors.leftMargin = 0
+                    label.anchors.rightMargin = right - left
+                } else {
+                    label.anchors.leftMargin = left - right
+                    label.anchors.rightMargin = 0
+                }
+            }
         }
-        centerX: Math.floor(view.width/2) - anchors.leftMargin
-        height: Theme.itemSizeExtraSmall
-        color: globalSettings.primaryPageToolColor
-        opacity: titleVisible ? 1 : 0
-    }
-
-    BusyIndicator {
-        anchors.centerIn: parent
-        size: BusyIndicatorSize.Large
-        running: widget.loading
-        opacity: running ? 1 : 0
-        visible: opacity > 0
-        Behavior on opacity {}
     }
 
     Label {
-        anchors {
-            horizontalCenter: parent.horizontalCenter
-            bottom: parent.bottom
-        }
-        text: widget.page + 1
+        id: label
+        anchors.fill: parent
+        smooth: true
         height: Theme.itemSizeExtraSmall
         font.pixelSize: Theme.fontSizeSmall
+        horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
-        color: globalSettings.primaryPageToolColor
-        opacity: pageNumberVisible ? 1 : 0
-        visible: opacity > 0
-        Behavior on opacity { FadeAnimation {} }
-    }
-
-    MouseArea {
-        anchors.fill: parent
-        onClicked: view.pageClicked()
+        elide: Text.ElideRight
     }
 }

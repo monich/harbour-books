@@ -52,27 +52,6 @@ SilicaFlickable {
 
     PullDownMenu {
         MenuItem {
-            id: defaultFontMenuItem
-            //% "Use default fonts"
-            text: qsTrId("book-font-default")
-            enabled: globalSettings.fontSize != BooksSettings.DefaultFontSize
-            onClicked: globalSettings.fontSize = BooksSettings.DefaultFontSize
-        }
-        MenuItem {
-            id: smallerFontMenuItem
-            //% "Use smaller fonts"
-            text: qsTrId("book-font-smaller")
-            enabled: globalSettings.fontSize >= BooksSettings.MinFontSize
-            onClicked: globalSettings.fontSize -= 1
-        }
-        MenuItem {
-            id: largerFontMenuItem
-            //% "Use larger fonts"
-            text: qsTrId("book-font-larger")
-            enabled: globalSettings.fontSize <= BooksSettings.MaxFontSize
-            onClicked: globalSettings.fontSize += 1
-        }
-        MenuItem {
             //% "Back to library"
             text: qsTrId("book-view-back")
             onClicked: root.closeBook()
@@ -153,6 +132,8 @@ SilicaFlickable {
             rightMargin: bookModel.rightMargin
             topMargin: bookModel.topMargin
             bottomMargin: bookModel.bottomMargin
+            leftSpaceReserved: pageTools.visible ? pageTools.leftSpaceUsed : 0
+            rightSpaceReserved: pageTools.visible ? pageTools.rightSpaceUsed: 0
             titleVisible: _currentState.title
             pageNumberVisible: _currentState.page
             title: bookModel.title
@@ -176,35 +157,34 @@ SilicaFlickable {
         }
 
         Behavior on opacity { FadeAnimation {} }
-    }
 
-/*
-    BooksPageTools {
-        anchors {
-            top: parent.top
-            left: parent.left
-            right: parent.right
+        BooksPageTools {
+            id: pageTools
+            anchors {
+                top: parent.top
+                left: parent.left
+                right: parent.right
+            }
             leftMargin: bookModel.leftMargin
             rightMargin: bookModel.rightMargin
+            opacity: _currentState.tools ? 1 : 0
+            visible: opacity > 0 && book && bookModel.pageCount && !_loading
+            Behavior on opacity { FadeAnimation {} }
         }
-        opacity: _currentState.tools ? 1 : 0
-        visible: opacity > 0
-        Behavior on opacity { FadeAnimation {} }
-    }
-*/
 
-    BooksPager {
-        id: pager
-        anchors {
-            bottom: parent.bottom
-            bottomMargin: (Theme.itemSizeExtraSmall + 2*(bookModel.bottomMargin - height))/4
+        BooksPager {
+            id: pager
+            anchors {
+                bottom: parent.bottom
+                bottomMargin: (Theme.itemSizeExtraSmall + 2*(bookModel.bottomMargin - height))/4
+            }
+            pageCount: bookModel.pageCount
+            width: parent.width
+            opacity: (_currentState.pager && book && bookModel.pageCount) ? 0.75 : 0
+            visible: opacity > 0
+            onPageChanged: bookView.jumpTo(page)
+            Behavior on opacity { FadeAnimation {} }
         }
-        pageCount: bookModel.pageCount
-        width: parent.width
-        opacity: _currentState.pager ? 1 : 0
-        visible: opacity > 0 && book && bookModel.pageCount && !_loading
-        onPageChanged: bookView.jumpTo(page)
-        Behavior on opacity { FadeAnimation {} }
     }
 
     BusyIndicator {

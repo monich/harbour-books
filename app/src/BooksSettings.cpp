@@ -53,6 +53,10 @@
 #define DEFAULT_CURRENT_FOLDER  QString()
 #define DEFAULT_INVERT_COLORS   false
 
+#define PAGETOOL_COLOR                      QColor(128,128,128) // any bg
+#define NORMAL_PAGETOOL_HIGHLIGHT_COLOR     QColor(64,64,64)    // on white
+#define INVERTED_PAGETOOL_HIGHLIGHT_COLOR   QColor(192,192,192) // on black
+
 // ==========================================================================
 // BooksSettings::TextStyle
 // ==========================================================================
@@ -212,6 +216,30 @@ BooksSettings::BooksSettings(QObject* aParent) :
     connect(iCurrentBookPath, SIGNAL(valueChanged()), SLOT(onCurrentBookPathChanged()));
 }
 
+bool
+BooksSettings::increaseFontSize()
+{
+    int size = fontSize();
+    if (size < MaxFontSize) {
+        setFontSize(size+1);
+        return true;
+    } else {
+        return false;
+    }
+}
+
+bool
+BooksSettings::decreaseFontSize()
+{
+    int size = fontSize();
+    if (size > MinFontSize) {
+        setFontSize(size-1);
+        return true;
+    } else {
+        return false;
+    }
+}
+
 int
 BooksSettings::fontSize() const
 {
@@ -361,4 +389,18 @@ BooksSettings::onCurrentBookPathChanged()
     if (updateCurrentBook()) {
         Q_EMIT currentBookChanged();
     }
+}
+
+QColor
+BooksSettings::primaryPageToolColor() const
+{
+    return PAGETOOL_COLOR;
+}
+
+QColor
+BooksSettings::highlightPageToolColor() const
+{
+    return invertColors() ?
+        INVERTED_PAGETOOL_HIGHLIGHT_COLOR :
+        NORMAL_PAGETOOL_HIGHLIGHT_COLOR;
 }

@@ -3,18 +3,6 @@
 <TS version="2.1" language="fi">
 <context>
     <name></name>
-    <message id="book-font-default">
-        <source>Use default fonts</source>
-        <translation>Oletuskirjasimet</translation>
-    </message>
-    <message id="book-font-smaller">
-        <source>Use smaller fonts</source>
-        <translation>Pienemmät kirjasimet</translation>
-    </message>
-    <message id="book-font-larger">
-        <source>Use larger fonts</source>
-        <translation>Suuremmat kirjasimet</translation>
-    </message>
     <message id="book-view-back">
         <source>Back to library</source>
         <translation>Takaisin kirjalistaan</translation>

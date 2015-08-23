@@ -3,18 +3,6 @@
 <TS version="2.1" language="sv">
 <context>
     <name></name>
-    <message id="book-font-default">
-        <source>Use default fonts</source>
-        <translation>Standardteckensnitt</translation>
-    </message>
-    <message id="book-font-smaller">
-        <source>Use smaller fonts</source>
-        <translation>Mindre teckensnitt</translation>
-    </message>
-    <message id="book-font-larger">
-        <source>Use larger fonts</source>
-        <translation>Större teckensnitt</translation>
-    </message>
     <message id="book-view-back">
         <source>Back to library</source>
         <translation>Tillbaka till biblioteket</translation>

@@ -56,13 +56,10 @@ Item {
         minimumValue: 0
         valueText: ""
         label: ""
-        //highlightColor: primaryColor
-        //secondaryHighlightColor: secondaryColor
-        //highlightColor: "#000000"
-        //secondaryHighlightColor: "#808080"
-        //primaryColor: "#808080"
-        primaryColor: highlightColor
-        secondaryColor: secondaryHighlightColor
+        primaryColor: globalSettings.primaryPageToolColor
+        secondaryColor: globalSettings.primaryPageToolColor
+        highlightColor: globalSettings.highlightPageToolColor
+        secondaryHighlightColor: globalSettings.highlightPageToolColor
         onValueChanged: root.pageChanged(value)
     }
 }

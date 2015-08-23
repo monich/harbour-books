@@ -3,18 +3,6 @@
 <TS version="2.1" language="ru">
 <context>
     <name></name>
-    <message id="book-font-default">
-        <source>Use default fonts</source>
-        <translation>Шрифты по умолчанию</translation>
-    </message>
-    <message id="book-font-smaller">
-        <source>Use smaller fonts</source>
-        <translation>Шрифты поменьше</translation>
-    </message>
-    <message id="book-font-larger">
-        <source>Use larger fonts</source>
-        <translation>Шрифты побольше</translation>
-    </message>
     <message id="book-view-back">
         <source>Back to library</source>
         <translation>Вернуться в библиотеку</translation>

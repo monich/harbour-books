@@ -36,6 +36,7 @@
 
 #include "BooksTypes.h"
 #include "ZLTextStyle.h"
+#include <QColor>
 #include <QtQml>
 
 class MGConfItem;
@@ -50,6 +51,8 @@ class BooksSettings : public QObject
     Q_PROPERTY(QObject* currentBook READ currentBook WRITE setCurrentBook NOTIFY currentBookChanged)
     Q_PROPERTY(QString currentFolder READ currentFolder WRITE setCurrentFolder NOTIFY currentFolderChanged)
     Q_PROPERTY(QString currentStorage READ currentStorage NOTIFY currentStorageChanged)
+    Q_PROPERTY(QColor primaryPageToolColor READ primaryPageToolColor CONSTANT)
+    Q_PROPERTY(QColor highlightPageToolColor READ highlightPageToolColor NOTIFY invertColorsChanged)
     class TextStyle;
 
 public:
@@ -60,6 +63,9 @@ public:
     };
 
     explicit BooksSettings(QObject* aParent = NULL);
+
+    Q_INVOKABLE bool increaseFontSize();
+    Q_INVOKABLE bool decreaseFontSize();
 
     int fontSize() const;
     void setFontSize(int aValue);
@@ -79,6 +85,8 @@ public:
     void setCurrentFolder(QString aValue);
 
     QString currentStorage() const { return iCurrentStorageDevice; }
+    QColor primaryPageToolColor() const;
+    QColor highlightPageToolColor() const;
 
 signals:
     void fontSizeChanged();
