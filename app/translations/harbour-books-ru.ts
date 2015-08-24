@@ -11,6 +11,14 @@
         <source>Loading...</source>
         <translation>Загрузка...</translation>
     </message>
+    <message id="book-view-applying-larger-fonts">
+        <source>Applying larger fonts...</source>
+        <translation>Увеличиваем шрифты...</translation>
+    </message>
+    <message id="book-view-applying-smaller-fonts">
+        <source>Applying smaller fonts...</source>
+        <translation>Уменьшаем шрифты...</translation>
+    </message>
     <message id="shelf-view-about-to-delete-all">
         <source>Deleting all books</source>
         <translation>Удаляем все книги</translation>

@@ -11,6 +11,14 @@
         <source>Loading...</source>
         <translation>Latautuu...</translation>
     </message>
+    <message id="book-view-applying-larger-fonts">
+        <source>Applying larger fonts...</source>
+        <translation>Vaihdetaan isompiin fontteihin...</translation>
+    </message>
+    <message id="book-view-applying-smaller-fonts">
+        <source>Applying smaller fonts...</source>
+        <translation>Vaihdetaan pienempiin fontteihin...</translation>
+    </message>
     <message id="shelf-view-about-to-delete-all">
         <source>Deleting all books</source>
         <translation>Poistetaan kaikki kirjat</translation>

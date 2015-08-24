@@ -202,6 +202,7 @@ enum BooksBookModelRole {
 
 BooksBookModel::BooksBookModel(QObject* aParent) :
     QAbstractListModel(aParent),
+    iResetReason(ReasonUnknown),
     iCurrentPage(-1),
     iProgress(0),
     iBook(NULL),
@@ -432,10 +433,10 @@ void BooksBookModel::setSize(QSize aSize)
                 Q_EMIT pageMarksChanged();
                 Q_EMIT jumpToPage(iData->pickPage(page1, page2, oldPageCount));
             } else {
-                startReset(false);
+                startReset(ReasonUnknown, false);
             }
         } else {
-            startReset(false);
+            startReset(ReasonUnknown, false);
         }
         Q_EMIT sizeChanged();
     }
@@ -444,11 +445,18 @@ void BooksBookModel::setSize(QSize aSize)
 void BooksBookModel::onTextStyleChanged()
 {
     HDEBUG(iTitle);
-    iTextStyle = iSettings->textStyle();
-    startReset();
+    shared_ptr<ZLTextStyle> newStyle = iSettings->textStyle();
+    const int newFontSize = newStyle->fontSize();
+    const int oldFontSize = iTextStyle->fontSize();
+    const ResetReason reason =
+        (newFontSize > oldFontSize) ? ReasonIncreasingFontSize :
+        (newFontSize < oldFontSize) ? ReasonDecreasingFontSize :
+        ReasonUnknown;
+    iTextStyle = newStyle;
+    startReset(reason);
 }
 
-void BooksBookModel::startReset(bool aFullReset)
+void BooksBookModel::startReset(ResetReason aResetReason, bool aFullReset)
 {
     BooksLoadingSignalBlocker block(this);
     const BooksPos thisPage = pageMark(iCurrentPage);
@@ -493,6 +501,11 @@ void BooksBookModel::startReset(bool aFullReset)
     if (iProgress != 0) {
         iProgress = 0;
         Q_EMIT progressChanged();
+    }
+
+    if (iResetReason != aResetReason) {
+        iResetReason = aResetReason;
+        Q_EMIT resetReasonChanged();
     }
 }
 

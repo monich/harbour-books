@@ -11,6 +11,14 @@
         <source>Loading...</source>
         <translation>Läser in...</translation>
     </message>
+    <message id="book-view-applying-larger-fonts">
+        <source>Applying larger fonts...</source>
+        <translation type="unfinished">Tillämpa större typsnitt...</translation>
+    </message>
+    <message id="book-view-applying-smaller-fonts">
+        <source>Applying smaller fonts...</source>
+        <translation type="unfinished">Tillämpa mindre typsnitt...</translation>
+    </message>
     <message id="shelf-view-about-to-delete-all">
         <source>Deleting all books</source>
         <translation>Tar bort alla böcker</translation>

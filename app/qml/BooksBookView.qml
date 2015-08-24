@@ -50,6 +50,16 @@ SilicaFlickable {
         { pager: true,  page: true,  title: true,  tools: true  }
     ]
 
+    // NOTE: These have to match ResetReason in BooksBookModel
+    readonly property var _loadingTextLabel: [
+        //% "Loading..."
+        qsTrId("book-view-loading"),
+        //% "Applying larger fonts..."
+        qsTrId("book-view-applying-larger-fonts"),
+        //% "Applying smaller fonts..."
+        qsTrId("book-view-applying-smaller-fonts")
+    ]
+
     PullDownMenu {
         MenuItem {
             //% "Back to library"
@@ -202,7 +212,6 @@ SilicaFlickable {
         opacity: _loading ? 1 : 0
         visible: opacity > 0
         Behavior on opacity { FadeAnimation {} }
-        //% "Loading..."
-        text: qsTrId("book-view-loading")
+        text: bookModel ? _loadingTextLabel[bookModel.resetReason] : ""
     }
 }

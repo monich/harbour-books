@@ -57,6 +57,7 @@
 class BooksBookModel: public QAbstractListModel, private BooksLoadingProperty
 {
     Q_OBJECT
+    Q_ENUMS(ResetReason)
     Q_PROPERTY(QString title READ title NOTIFY titleChanged)
     Q_PROPERTY(QSize size READ size WRITE setSize NOTIFY sizeChanged)
     Q_PROPERTY(bool loading READ loading NOTIFY loadingChanged)
@@ -69,8 +70,16 @@ class BooksBookModel: public QAbstractListModel, private BooksLoadingProperty
     Q_PROPERTY(int bottomMargin READ bottomMargin WRITE setBottomMargin NOTIFY bottomMarginChanged)
     Q_PROPERTY(BooksBook* book READ book WRITE setBook NOTIFY bookChanged)
     Q_PROPERTY(BooksSettings* settings READ settings WRITE setSettings NOTIFY settingsChanged)
+    Q_PROPERTY(ResetReason resetReason READ resetReason NOTIFY resetReasonChanged)
 
 public:
+    // NOTE: These have to match the labels in BooksBookView.qml
+    enum ResetReason {
+        ReasonUnknown,
+        ReasonIncreasingFontSize,
+        ReasonDecreasingFontSize
+    };
+
     explicit BooksBookModel(QObject* aParent = NULL);
     ~BooksBookModel();
 
@@ -80,6 +89,7 @@ public:
     QString title() const { return iTitle; }
     int width() const { return iSize.width(); }
     int height() const { return iSize.height(); }
+    ResetReason resetReason() const { return iResetReason; }
 
     QSize size() const { return iSize; }
     void setSize(QSize aSize);
@@ -120,7 +130,7 @@ public:
 private:
     void updateSize();
     void updateModel(int aPrevPageCount);
-    void startReset(bool aFullReset = true);
+    void startReset(ResetReason aReason = ReasonUnknown, bool aFull = true);
 
 private Q_SLOTS:
     void onResetProgress(int aProgress);
@@ -142,12 +152,14 @@ Q_SIGNALS:
     void rightMarginChanged();
     void topMarginChanged();
     void bottomMarginChanged();
+    void resetReasonChanged();
     void jumpToPage(int index);
 
 private:
     class Data;
     class Task;
 
+    ResetReason iResetReason;
     int iCurrentPage;
     int iProgress;
     QSize iSize;
