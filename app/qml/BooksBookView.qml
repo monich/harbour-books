@@ -56,16 +56,6 @@ SilicaFlickable {
             text: qsTrId("book-view-back")
             onClicked: root.closeBook()
         }
-
-        // Remove disabled items from the menu when we have a chance
-        onActiveChanged: if (!active) hideDisabledItems()
-        Component.onCompleted: hideDisabledItems()
-
-        function hideDisabledItems() {
-            defaultFontMenuItem.visible = defaultFontMenuItem.enabled
-            smallerFontMenuItem.visible = smallerFontMenuItem.enabled
-            largerFontMenuItem.visible = largerFontMenuItem.enabled
-        }
     }
 
     Timer {
