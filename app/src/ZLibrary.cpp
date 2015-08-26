@@ -170,6 +170,7 @@ void ZLibrary::run(ZLApplication* aApp)
     root->setContextProperty("PointsPerInch", BOOKS_PPI);
     root->setContextProperty("MaximumHintCount", 1);
 
+    view->setTitle(qtTrId("books-app-name"));
     view->setSource(QUrl::fromLocalFile(qml));
     view->show();
     HDEBUG("started");

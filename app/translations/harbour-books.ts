@@ -3,6 +3,10 @@
 <TS version="2.1" language="en">
 <context>
     <name></name>
+    <message id="books-app-name">
+        <source>Books</source>
+        <translation>Books</translation>
+    </message>
     <message id="book-view-back">
         <source>Back to library</source>
         <translation>Back to library</translation>

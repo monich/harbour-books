@@ -37,6 +37,9 @@ ApplicationWindow {
     id: window
     allowedOrientations: Orientation.All
 
+    //% "Books"
+    readonly property string title: qsTrId("books-app-name")
+
     property variant currentShelf: mainPage.currentShelf
 
     BooksSettings { id: globalSettings }
