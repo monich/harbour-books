@@ -23,6 +23,10 @@
         <source>Applying smaller fonts...</source>
         <translation type="unfinished">Tillämpa mindre typsnitt...</translation>
     </message>
+    <message id="book-view-cancel-loading">
+        <source>Cancel</source>
+        <translation>Avbryt</translation>
+    </message>
     <message id="shelf-view-about-to-delete-all">
         <source>Deleting all books</source>
         <translation>Tar bort alla böcker</translation>

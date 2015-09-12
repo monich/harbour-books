@@ -23,6 +23,10 @@
         <source>Applying smaller fonts...</source>
         <translation>Applying smaller fonts...</translation>
     </message>
+    <message id="book-view-cancel-loading">
+        <source>Cancel</source>
+        <translation>Cancel</translation>
+    </message>
     <message id="shelf-view-about-to-delete-all">
         <source>Deleting all books</source>
         <translation>Deleting all books</translation>

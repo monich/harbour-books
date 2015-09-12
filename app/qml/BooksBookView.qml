@@ -187,6 +187,21 @@ SilicaFlickable {
         }
     }
 
+    BooksTitleLabel {
+        id: titleLabel
+        anchors {
+            top: parent.top
+            left: parent.left
+            right: parent.right
+            leftMargin: bookModel.leftMargin
+            rightMargin: bookModel.rightMargin
+        }
+        text: bookModel.title
+        height: Theme.itemSizeExtraSmall
+        color: Theme.highlightColor
+        opacity: _loading ? 0.6 : 0
+    }
+
     BusyIndicator {
         id: busyIndicator
         anchors.centerIn: parent
@@ -213,5 +228,19 @@ SilicaFlickable {
         visible: opacity > 0
         Behavior on opacity { FadeAnimation {} }
         text: bookModel ? _loadingTextLabel[bookModel.resetReason] : ""
+    }
+
+    Button {
+        //% "Cancel"
+        text: qsTrId("book-view-cancel-loading")
+        preferredWidth: Theme.buttonWidthMedium
+        height: Theme.itemSizeLarge
+        anchors {
+            bottom: parent.bottom
+            horizontalCenter: parent.horizontalCenter
+        }
+        onClicked: root.closeBook()
+        opacity: enabled ? 1.0 : 0.0
+        Behavior on opacity { FadeAnimation { } }
     }
 }

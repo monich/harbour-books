@@ -23,6 +23,10 @@
         <source>Applying smaller fonts...</source>
         <translation>Vaihdetaan pienempiin fontteihin...</translation>
     </message>
+    <message id="book-view-cancel-loading">
+        <source>Cancel</source>
+        <translation>Peru</translation>
+    </message>
     <message id="shelf-view-about-to-delete-all">
         <source>Deleting all books</source>
         <translation>Poistetaan kaikki kirjat</translation>
