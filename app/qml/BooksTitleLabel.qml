@@ -73,8 +73,9 @@ Item {
         smooth: true
         height: Theme.itemSizeExtraSmall
         font.pixelSize: Theme.fontSizeSmall
-        horizontalAlignment: Text.AlignHCenter
+        horizontalAlignment: contentWidth > Math.ceil(width) ? Text.AlignLeft : Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
-        elide: Text.ElideRight
+        truncationMode: TruncationMode.Fade
+        maximumLineCount: 1
     }
 }
