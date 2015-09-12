@@ -52,7 +52,7 @@ bool BooksCoverModel::filterAcceptsRow(int aRow, const QModelIndex& aParent) con
             return book->hasCoverImage();
         }
     }
-    return true;
+    return false;
 }
 
 int BooksCoverModel::count() const
