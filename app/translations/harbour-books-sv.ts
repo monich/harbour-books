@@ -17,11 +17,11 @@
     </message>
     <message id="book-view-applying-larger-fonts">
         <source>Applying larger fonts...</source>
-        <translation type="unfinished">Tillämpa större typsnitt...</translation>
+        <translation>Tillämpar större teckensnitt...</translation>
     </message>
     <message id="book-view-applying-smaller-fonts">
         <source>Applying smaller fonts...</source>
-        <translation type="unfinished">Tillämpa mindre typsnitt...</translation>
+        <translation>Tillämpar mindre teckensnitt...</translation>
     </message>
     <message id="book-view-cancel-loading">
         <source>Cancel</source>
