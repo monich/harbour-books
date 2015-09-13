@@ -158,8 +158,8 @@ inline T& shared_ptr_storage<T>::content() const {
 template<class T>
 inline void shared_ptr_storage<T>::addReference() {
 #if FBREADER_USE_GNUC_SYNC_BUILTINS
-	__sync_fetch_and_add(&myCounter, 1);
-	__sync_fetch_and_add(&myTotalCount, 1);
+	__sync_add_and_fetch(&myCounter, 1);
+	__sync_add_and_fetch(&myTotalCount, 1);
 #else
 	++myCounter;
 #endif
@@ -186,8 +186,8 @@ inline unsigned int shared_ptr_storage<T>::removeReference() {
 template<class T>
 inline void shared_ptr_storage<T>::addWeakReference() {
 #if FBREADER_USE_GNUC_SYNC_BUILTINS
-	__sync_fetch_and_add(&myWeakCounter, 1);
-	__sync_fetch_and_add(&myTotalCount, 1);
+	__sync_add_and_fetch(&myWeakCounter, 1);
+	__sync_add_and_fetch(&myTotalCount, 1);
 #else
 	++myWeakCounter;
 #endif
@@ -195,7 +195,7 @@ inline void shared_ptr_storage<T>::addWeakReference() {
 template<class T>
 inline unsigned int shared_ptr_storage<T>::removeWeakReference() {
 #if FBREADER_USE_GNUC_SYNC_BUILTINS
-	__sync_fetch_and_sub(&myWeakCounter, 1);
+	__sync_sub_and_fetch(&myWeakCounter, 1);
 	return __sync_sub_and_fetch(&myTotalCount, 1);
 #else
 	--myWeakCounter;
