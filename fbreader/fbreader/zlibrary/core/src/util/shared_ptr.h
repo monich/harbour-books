@@ -196,7 +196,7 @@ template<class T>
 inline unsigned int shared_ptr_storage<T>::removeWeakReference() {
 #if FBREADER_USE_GNUC_SYNC_BUILTINS
 	__sync_fetch_and_sub(&myWeakCounter, 1);
-	return __sync_add_and_fetch(&myTotalCount, 1);
+	return __sync_sub_and_fetch(&myTotalCount, 1);
 #else
 	--myWeakCounter;
 	return counter();
