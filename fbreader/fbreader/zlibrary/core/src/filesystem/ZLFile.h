@@ -38,6 +38,7 @@ public:
 
 public:
 	static void initCache();
+	static void flushCache();
 	static std::string fileNameToUtf8(const std::string &fileName);
 	static std::string replaceIllegalCharacters(const std::string &fileName, char replaceWith);
 

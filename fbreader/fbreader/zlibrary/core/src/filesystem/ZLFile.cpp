@@ -55,6 +55,16 @@ void ZLFile::initCache() {
 #endif
 }
 
+void ZLFile::flushCache() {
+#if FBREADER_THREAD_LOCAL_ZLFILE_PLAIN_STREAM_CACHE
+	ZLFilePlainStreamCache *cache = (ZLFilePlainStreamCache*)pthread_getspecific(plainStreamCacheKey);
+	if (cache) {
+		delete cache;
+		pthread_setspecific(plainStreamCacheKey, NULL);
+	}
+#endif
+}
+
 ZLFile::ZLFile() : myMimeTypeIsUpToDate(true), myInfoIsFilled(true) {
 }
 
