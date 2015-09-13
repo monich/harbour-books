@@ -52,9 +52,6 @@ desktop-file-install --delete-original \
 %{_datadir}/applications/%{name}.desktop
 %{_datadir}/icons/hicolor/86x86/apps/%{name}.png
 
-%check
-make -C test test
-
 %changelog
 * Sun Aug 9 2015 Slava Monich <slava.monich@jolla.com> 1.0.6
 - Improved rendering of EPUB books
