@@ -275,6 +275,7 @@ int main(int argc, char **argv)
         } else {
             ret = RET_OK;
             ZLQtFSManager::createInstance();
+            ZLFile::initCache();
             if (argc > 1) {
                 for (int i=1; i<argc; i++) {
                     const int ret2 = process(argv[i]);
@@ -294,6 +295,7 @@ int main(int argc, char **argv)
                     if (ret2 != RET_OK && ret == RET_OK) ret = ret2;
                 }
             }
+            ZLFile::flushCache();
             ZLFSManager::deleteInstance();
         }
     } else {
