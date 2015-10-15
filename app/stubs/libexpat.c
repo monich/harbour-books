@@ -70,6 +70,16 @@
      (XML_Parser parser, const char* s, int len, int isFinal), \
      (parser, s, len, isFinal), XML_STATUS_ERROR)
 
+#define EXPAT_NUM_FUNCTIONS (sizeof(expat_names)/sizeof(expat_names[0]))
+#define EXPAT_NO_HANDLE     ((void*)-1)
+#define EXPAT_SO            "/usr/lib/libexpat.so.1"
+
+static const char* expat_names[] = {
+    "XML_ParserCreate",
+    #define FN_NAME(type,name,params,args,fail) #name,
+    EXPAT_FUNCTIONS(FN_NAME)
+};
+
 static struct {
     void* handle;
     union {
@@ -78,19 +88,9 @@ static struct {
             #define FN_POINTER(type,name,params,args,fail) type (* name) params;
             EXPAT_FUNCTIONS(FN_POINTER)
         } expat;
-        void* entry[1];
+        void* entry[EXPAT_NUM_FUNCTIONS];
     } fn;
 } expat;
-
-static const char* expat_names[] = {
-    "XML_ParserCreate",
-    #define FN_NAME(type,name,params,args,fail) #name,
-    EXPAT_FUNCTIONS(FN_NAME)
-};
-
-#define EXPAT_NUM_FUNCTIONS (sizeof(expat_names)/sizeof(expat_names[0]))
-#define EXPAT_NO_HANDLE     ((void*)-1)
-#define EXPAT_SO            "/usr/lib/libexpat.so.1"
 
 /* XML_ParserCreate() is the special function where we load the library */
 XML_Parser

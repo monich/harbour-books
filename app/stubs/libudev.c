@@ -76,6 +76,16 @@
      (struct udev_device* dev), \
      (dev))
 
+#define LIBUDEV_NUM_FUNCTIONS (sizeof(libudev_names)/sizeof(libudev_names[0]))
+#define LIBUDEV_NO_HANDLE     ((void*)-1)
+#define LIBUDEV_SO            "/usr/lib/libudev.so.1"
+
+static const char* libudev_names[] = {
+    "udev_new",
+    #define FN_NAME(ret,name,params,args) #name,
+    LIBUDEV_FUNCTIONS(FN_NAME)
+};
+
 static struct {
     void* handle;
     union {
@@ -84,19 +94,9 @@ static struct {
             #define FN_POINTER(ret,name,params,args) ret (* name) params;
             LIBUDEV_FUNCTIONS(FN_POINTER)
         } udev;
-        void* entry[1];
+        void* entry[LIBUDEV_NUM_FUNCTIONS];
     } fn;
 } libudev;
-
-static const char* libudev_names[] = {
-    "udev_new",
-    #define FN_NAME(ret,name,params,args) #name,
-    LIBUDEV_FUNCTIONS(FN_NAME)
-};
-
-#define LIBUDEV_NUM_FUNCTIONS (sizeof(libudev_names)/sizeof(libudev_names[0]))
-#define LIBUDEV_NO_HANDLE     ((void*)-1)
-#define LIBUDEV_SO            "/usr/lib/libudev.so.1"
 
 /* udev_new() is the special function where we load the library */
 struct udev*

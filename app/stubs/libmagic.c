@@ -43,6 +43,16 @@
     f(const char*, magic_file, \
      (magic_t cookie, const char* path), (cookie, path), NULL)
 
+#define MAGIC_NUM_FUNCTIONS (sizeof(magic_names)/sizeof(magic_names[0]))
+#define MAGIC_NO_HANDLE     ((void*)-1)
+#define MAGIC_SO            "/usr/lib/libmagic.so.1"
+
+static const char* magic_names[] = {
+    "magic_open",
+    #define FN_NAME(type,name,params,args,fail) #name,
+    MAGIC_FUNCTIONS(FN_NAME)
+};
+
 static struct {
     void* handle;
     union {
@@ -51,19 +61,9 @@ static struct {
             #define FN_POINTER(type,name,params,args,fail) type (* name) params;
             MAGIC_FUNCTIONS(FN_POINTER)
         } magic;
-        void* entry[1];
+        void* entry[MAGIC_NUM_FUNCTIONS];
     } fn;
 } magic;
-
-static const char* magic_names[] = {
-    "magic_open",
-    #define FN_NAME(type,name,params,args,fail) #name,
-    MAGIC_FUNCTIONS(FN_NAME)
-};
-
-#define MAGIC_NUM_FUNCTIONS (sizeof(magic_names)/sizeof(magic_names[0]))
-#define MAGIC_NO_HANDLE     ((void*)-1)
-#define MAGIC_SO            "/usr/lib/libmagic.so.1"
 
 /* magic_open() is the special function where we load the library */
 magic_t magic_open(int flags)
