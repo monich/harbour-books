@@ -1,6 +1,6 @@
 Name:           harbour-books
 Summary:        E-book reader
-Version:        1.0.6
+Version:        1.0.7
 Release:        1
 License:        GPL
 Group:          Applications/File
@@ -56,6 +56,13 @@ desktop-file-install --delete-original \
 make -C test test
 
 %changelog
+* Thu Oct 15 2015 Slava Monich <slava.monich@jolla.com> 1.0.7
+- First official build for Jolla tablet
+- Moved font controls from pulley menu to the toolbar
+- Fixed a few EPUB rendering and decoding issues
+- Made it easier to cancel book loading
+- Plugged a few memory leaks
+
 * Sun Aug 9 2015 Slava Monich <slava.monich@jolla.com> 1.0.6
 - Improved rendering of EPUB books
 - Fixed saving the shelf position for zipped books
