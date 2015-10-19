@@ -45,12 +45,17 @@ desktop-file-install --delete-original \
   --dir %{buildroot}%{_datadir}/applications \
    %{buildroot}%{_datadir}/applications/*.desktop
 
+for x in 108 128 256 ; do \
+  mkdir -p %{buildroot}%{_datadir}/icons/hicolor/${x}x${x}/apps ; \
+  cp %{name}-${x}.png %{buildroot}%{_datadir}/icons/hicolor/${x}x${x}/apps/%{name}.png ; \
+done
+
 %files
 %defattr(-,root,root,-)
 %{_bindir}/%{name}
 %{_datadir}/%{name}
 %{_datadir}/applications/%{name}.desktop
-%{_datadir}/icons/hicolor/86x86/apps/%{name}.png
+%{_datadir}/icons/hicolor/*/apps/%{name}.png
 
 %check
 make -C test test
