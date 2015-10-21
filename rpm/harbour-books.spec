@@ -1,6 +1,6 @@
 Name:           harbour-books
 Summary:        E-book reader
-Version:        1.0.7
+Version:        1.0.8
 Release:        1
 License:        GPL
 Group:          Applications/File
@@ -56,6 +56,9 @@ desktop-file-install --delete-original \
 make -C test test
 
 %changelog
+* Wed Oct 21 2015 Slava Monich <slava.monich@jolla.com> 1.0.8
+- Fixed the cancel button problem
+
 * Thu Oct 15 2015 Slava Monich <slava.monich@jolla.com> 1.0.7
 - First official build for Jolla tablet
 - Moved font controls from pulley menu to the toolbar
