@@ -233,7 +233,6 @@ SilicaFlickable {
     Button {
         //% "Cancel"
         text: qsTrId("book-view-cancel-loading")
-        width: Math.max(Theme.buttonWidthMedium, implicitWidth)
         height: Theme.itemSizeLarge
         anchors {
             bottom: parent.bottom
