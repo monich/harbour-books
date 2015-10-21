@@ -34,7 +34,7 @@ LIBS += \
   -lbz2 -lz -ldl
 
 OTHER_FILES += \
-  harbour-books.png \
+  icons/harbour-books.svg \
   harbour-books.desktop \
   qml/*.qml \
   qml/images/* \
@@ -46,6 +46,7 @@ OTHER_FILES += \
 TARGET_DATA_DIR = /usr/share/harbour-books
 TARGET_DEFAULT_DATA_DIR = $$TARGET_DATA_DIR/data
 TARGET_ZLIBRARY_DATA_DIR = $$TARGET_DEFAULT_DATA_DIR
+TARGET_ICON_ROOT = /usr/share/icons/hicolor
 
 core_data.files = \
   data/zlibrary/core/*.gz \
@@ -66,6 +67,22 @@ INSTALLS += defaults
 formats.files = data/formats/*
 formats.path = $$TARGET_DEFAULT_DATA_DIR/formats
 INSTALLS += formats
+
+icon86.files = icons/86x86/harbour-books.png
+icon86.path = $$TARGET_ICON_ROOT/86x86/apps
+INSTALLS += icon86
+
+icon108.files = icons/108x108/harbour-books.png
+icon108.path = $$TARGET_ICON_ROOT/108x108/apps
+INSTALLS += icon108
+
+icon128.files = icons/128x128/harbour-books.png
+icon128.path = $$TARGET_ICON_ROOT/128x128/apps
+INSTALLS += icon128
+
+icon256.files = icons/256x256/harbour-books.png
+icon256.path = $$TARGET_ICON_ROOT/256x256/apps
+INSTALLS += icon256
 
 CONFIG += sailfishapp_i18n sailfishapp_i18n_idbased
 TRANSLATIONS += \
