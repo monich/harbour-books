@@ -233,13 +233,14 @@ SilicaFlickable {
     Button {
         //% "Cancel"
         text: qsTrId("book-view-cancel-loading")
-        preferredWidth: Theme.buttonWidthMedium
+        width: Math.max(Theme.buttonWidthMedium, implicitWidth)
         height: Theme.itemSizeLarge
         anchors {
             bottom: parent.bottom
             horizontalCenter: parent.horizontalCenter
         }
         onClicked: root.closeBook()
+        enabled: _loading
         opacity: enabled ? 1.0 : 0.0
         Behavior on opacity { FadeAnimation { } }
     }
