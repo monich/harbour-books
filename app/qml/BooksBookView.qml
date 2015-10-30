@@ -240,6 +240,7 @@ SilicaFlickable {
         }
         onClicked: root.closeBook()
         enabled: _loading
+        visible: opacity > 0
         opacity: enabled ? 1.0 : 0.0
         Behavior on opacity { FadeAnimation { } }
     }
