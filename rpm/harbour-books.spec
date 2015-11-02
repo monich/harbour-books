@@ -1,6 +1,6 @@
 Name:           harbour-books
 Summary:        E-book reader
-Version:        1.0.8
+Version:        1.0.9
 Release:        1
 License:        GPL
 Group:          Applications/File
@@ -56,6 +56,9 @@ desktop-file-install --delete-original \
 make -C test test
 
 %changelog
+* Mon Nov 2 2015 Slava Monich <slava.monich@jolla.com> 1.0.9
+- Workaround for Qt crash
+
 * Wed Oct 21 2015 Slava Monich <slava.monich@jolla.com> 1.0.8
 - Fixed the cancel button problem
 
