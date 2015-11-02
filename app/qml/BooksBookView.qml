@@ -52,6 +52,8 @@ SilicaFlickable {
 
     // NOTE: These have to match ResetReason in BooksBookModel
     readonly property var _loadingTextLabel: [
+        //% "Formatting..."
+        qsTrId("book-view-formatting"),
         //% "Loading..."
         qsTrId("book-view-loading"),
         //% "Applying larger fonts..."
@@ -217,8 +219,8 @@ SilicaFlickable {
 
     Label {
         anchors {
-            top: busyIndicator.bottom
-            topMargin: Theme.paddingLarge
+            bottom: busyIndicator.top
+            bottomMargin: Theme.paddingLarge
             horizontalCenter: busyIndicator.horizontalCenter
 
         }
@@ -239,7 +241,7 @@ SilicaFlickable {
             horizontalCenter: parent.horizontalCenter
         }
         onClicked: root.closeBook()
-        enabled: _loading
+        enabled: _loading && bookModel.resetReason === BookModel.ReasonLoading
         visible: opacity > 0
         opacity: enabled ? 1.0 : 0.0
         Behavior on opacity { FadeAnimation { } }

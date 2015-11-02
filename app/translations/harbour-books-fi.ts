@@ -15,6 +15,10 @@
         <source>Loading...</source>
         <translation>Latautuu...</translation>
     </message>
+    <message id="book-view-formatting">
+        <source>Formatting...</source>
+        <translation type="unfinished">Alustetaan...</translation>
+    </message>
     <message id="book-view-applying-larger-fonts">
         <source>Applying larger fonts...</source>
         <translation>Vaihdetaan isompiin fontteihin...</translation>

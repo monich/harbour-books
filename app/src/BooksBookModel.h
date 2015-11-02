@@ -76,6 +76,7 @@ public:
     // NOTE: These have to match the labels in BooksBookView.qml
     enum ResetReason {
         ReasonUnknown,
+        ReasonLoading,
         ReasonIncreasingFontSize,
         ReasonDecreasingFontSize
     };

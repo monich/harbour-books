@@ -245,7 +245,7 @@ void BooksBookModel::setBook(BooksBook* aBook)
             iTitle = QString();
             HDEBUG("<none>");
         }
-        startReset();
+        startReset(ReasonLoading, true);
         if (oldTitle != iTitle) {
             Q_EMIT titleChanged();
         }
@@ -461,6 +461,15 @@ void BooksBookModel::startReset(ResetReason aResetReason, bool aFullReset)
     BooksLoadingSignalBlocker block(this);
     const BooksPos thisPage = pageMark(iCurrentPage);
     const BooksPos nextPage = pageMark(iCurrentPage+1);
+    if (aResetReason == ReasonUnknown) {
+        if (iResetReason == ReasonUnknown) {
+            if (!iData && !iData2) {
+                aResetReason = ReasonLoading;
+            }
+        } else {
+            aResetReason = iResetReason;
+        }
+    }
     if (iTask) {
         iTask->release(this);
         iTask = NULL;
@@ -540,6 +549,10 @@ void BooksBookModel::onResetDone()
     Q_EMIT pageMarksChanged();
     if (oldBookModel != bookModel()) {
         Q_EMIT bookModelChanged();
+    }
+    if (iResetReason != ReasonUnknown) {
+        iResetReason = ReasonUnknown;
+        Q_EMIT resetReasonChanged();
     }
 }
 

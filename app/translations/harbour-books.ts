@@ -15,6 +15,10 @@
         <source>Loading...</source>
         <translation>Loading...</translation>
     </message>
+    <message id="book-view-formatting">
+        <source>Formatting...</source>
+        <translation>Formatting...</translation>
+    </message>
     <message id="book-view-applying-larger-fonts">
         <source>Applying larger fonts...</source>
         <translation>Applying larger fonts...</translation>

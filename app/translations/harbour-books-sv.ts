@@ -15,6 +15,10 @@
         <source>Loading...</source>
         <translation>Läser in...</translation>
     </message>
+    <message id="book-view-formatting">
+        <source>Formatting...</source>
+        <translation type="unfinished">Formatering...</translation>
+    </message>
     <message id="book-view-applying-larger-fonts">
         <source>Applying larger fonts...</source>
         <translation>Tillämpar större teckensnitt...</translation>
