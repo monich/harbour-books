@@ -1,6 +1,6 @@
 ## E-book reader for Sailfish OS
 
-![icon](app/harbour-books.png)
+![icon](app/icons/86x86/harbour-books.png)
 
 The core functionality is based on [FBReader](https://github.com/geometer/FBReader)
 source code with a few modifications. Books are imported from the Downloads folder,
