@@ -46,9 +46,6 @@ public:
     static bool equalLayout(shared_ptr<ZLTextStyle> aStyle1, shared_ptr<ZLTextStyle> aStyle2);
 
 private:
-    static weak_ptr<ZLTextStyle> gInstance;
-
-private:
     BooksTextStyle();
 
 public:
