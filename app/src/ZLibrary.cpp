@@ -74,6 +74,8 @@ const std::string ZLibrary::PathDelimiter(":");
 const std::string ZLibrary::EndOfLine("\n");
 const std::string ZLibrary::BaseDirectory;
 
+int booksPPI = 300;
+
 void ZLibrary::initLocale()
 {
     const char* locale = setlocale(LC_MESSAGES, "");
@@ -167,7 +169,17 @@ void ZLibrary::run(ZLApplication* aApp)
 
     QQuickView* view = SailfishApp::createView();
     QQmlContext* root = view->rootContext();
-    root->setContextProperty("PointsPerInch", BOOKS_PPI);
+    QSize screenSize(view->screen()->size());
+    booksPPI =
+#if defined(__i386__)
+        (screenSize == QSize(1536,2048)) ? 330 : 300;
+#elif defined(__arm__)
+        (screenSize == QSize(540,960)) ? 245 : 290;
+#else
+#  error Unexpected architechture
+#endif
+    HDEBUG("screen" << screenSize << booksPPI << "dpi");
+    root->setContextProperty("PointsPerInch", booksPPI);
     root->setContextProperty("MaximumHintCount", 1);
 
     view->setTitle(qtTrId("books-app-name"));

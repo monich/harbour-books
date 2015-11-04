@@ -56,12 +56,7 @@
 
 #define BOOKS_STATE_FILE_SUFFIX ".state"
 
-#if defined(__i386__)
-#  define BOOKS_PPI (330)   // Tablet 1536x2048
-#elif defined(__arm__)
-#  define BOOKS_PPI (245)   // Jolla1 540x960
-#else
-#  error Unexpected architechture
-#endif
+extern int booksPPI;
+#define BOOKS_PPI booksPPI
 
 #endif // BOOKS_DEFS_H
