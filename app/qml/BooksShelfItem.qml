@@ -125,7 +125,7 @@ Item {
     BusyIndicator {
         id: busyIndicator
         anchors.centerIn: parent
-        size: BusyIndicatorSize.Large
+        size: BusyIndicatorSize.Medium
         running: copyingIn || copyingOut
     }
 
