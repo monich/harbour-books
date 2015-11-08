@@ -57,6 +57,8 @@ public:
     QDir configDir() const;
     QString label() const { return booksDir().dirName(); }
     QString root() const { return booksDir().path(); }
+    QString fullConfigPath(QString aRelativePath) const;
+    QString fullPath(QString aRelativePath) const;
 
     bool isValid() const { return iPrivate != NULL; }
     bool isInternal() const;
@@ -93,7 +95,7 @@ public:
     int count() const;
     QList<BooksStorage> storageList() const;
     BooksStorage storageForDevice(QString aDevice) const;
-    BooksStorage storageForPath(QString aPath) const;
+    BooksStorage storageForPath(QString aPath, QString* aRelPath = NULL) const;
 
 Q_SIGNALS:
     void storageAdded(BooksStorage aStorage);

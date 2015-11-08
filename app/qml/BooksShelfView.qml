@@ -56,10 +56,10 @@ SilicaFlickable {
     signal scrollRight()
     signal scrollLeft()
 
-    property bool _haveBooks: shelf && shelf.count
+    property bool _haveBooks: shelfModel && shelfModel.count
     property int _cellsPerRow: Math.floor(width/cellWidth)
     readonly property int _remorseTimeout: 5000
-    property bool _loading: !shelf || shelf.loading || startAnimationTimer.running
+    property bool _loading: !shelfModel || shelfModel.loading || startAnimationTimer.running
     property var _remorse
 
     on_HaveBooksChanged: if (!_haveBooks) shelfView.stopEditing()
@@ -69,6 +69,12 @@ SilicaFlickable {
         property bool needDummyItem: dragInProgress && dragItem.shelfIndex !== shelfView.shelfIndex
         onNeedDummyItemChanged: if (needDummyItem) hasDummyItem = true
         editMode: shelfView.editMode
+        onRelativePathChanged: longStartTimer.restart()
+    }
+
+    BooksPathModel {
+        id: pathModel
+        path: shelfModel.relativePath
     }
 
     onEditModeChanged: {
@@ -123,27 +129,60 @@ SilicaFlickable {
     BooksStorageHeader {
         id: storageHeader
         removable: removableStorage
-        count: shelfModel.count
+        count: shelfModel.bookCount
         showCount: !_loading
+        enabled: grid.contentY > grid.minContentY || pathModel.count > 0
+        needed: !singleStorage || pathModel.count > 0
+        onClicked: {
+            if (!scrollToTopAnimation.running) {
+                if (grid.contentY > grid.minContentY) {
+                    scrollToTopAnimation.start()
+                } else {
+                    animationEnabled = true
+                    shelfModel.relativePath = ""
+                }
+            }
+        }
+    }
+
+    NumberAnimation {
+        id: scrollToTopAnimation
+        target: grid
+        property: "contentY"
+        duration: 500
+        easing.type: Easing.InOutQuad
+        to: grid.minContentY
     }
 
     SilicaGridView {
         id: grid
         anchors {
-            top: singleStorage ? parent.top : storageHeader.bottom
+            top: storageHeader.bottom
             left: parent.left
             right: parent.right
             bottom: parent.bottom
             leftMargin: Math.floor((shelfView.width - _cellsPerRow * shelfView.cellWidth)/2)
         }
         model: shelfModel
-        interactive: !dragInProgress
+        interactive: !dragInProgress && !scrollToTopAnimation.running
         clip: true
-        opacity: (!_loading && _haveBooks) ? 1 : 0
-        visible: opacity > 0
         cellWidth: shelfView.cellWidth
         cellHeight: shelfView.cellHeight
         flickableDirection: Flickable.VerticalFlick
+        header: Column {
+            Repeater {
+                model: pathModel
+                BooksShelfTitle {
+                    width: grid.width
+                    text: model.name
+                    enabled: model.index < (pathModel.count-1)
+                    onClicked: {
+                        console.log("switching to", model.path)
+                        shelfModel.relativePath = model.path
+                    }
+                }
+            }
+        }
         delegate: BooksShelfItem {
             editMode: shelfView.editMode
             dropped: dragItem.dropShelfIndex >= 0 &&
@@ -176,7 +215,16 @@ SilicaFlickable {
             }
         }
 
+        footer: BooksShelfFooter {
+            width: grid.width
+            height: visible ? Math.max(implicitHeight, (grid.height > grid.headerItem.height) ? (grid.height - grid.headerItem.height) : 0) : 0
+            allowBusyIndicator: !longStartTimer.running
+            footerState: _haveBooks ? 0 : _loading ? 1 : 2
+            visible: !_haveBooks
+        }
+
         property real itemOpacity: 1
+        property real minContentY: -headerItem.height
 
         moveDisplaced: Transition {
             SmoothedAnimation { properties: "x,y"; duration: 150 }
@@ -209,33 +257,9 @@ SilicaFlickable {
         }
 
         Behavior on y { SpringAnimation {} }
-        Behavior on opacity { FadeAnimation {} }
         VerticalScrollDecorator {}
     }
 
-    ViewPlaceholder {
-        //% "No books"
-        text: qsTrId("shelf-view-no-books")
-        enabled: !_loading && !_haveBooks
-        PulleyAnimationHint {
-            id: pulleyAnimationHint
-            flickable: storageView
-            anchors.fill: parent
-            enabled: parent.enabled && !editMode
-        }
-    }
-
-    property Item _busyIndicator
-
-    Component {
-        id: busyIndicatorComponent
-        BusyIndicator {
-            visible: opacity > 0
-            anchors.centerIn: parent
-            size: BusyIndicatorSize.Large
-            running: _loading && !longStartTimer.running
-        }
-    }
 
     Timer {
         id: longStartTimer
@@ -245,7 +269,6 @@ SilicaFlickable {
             if (shelf.loading) {
                 console.log(shelfModel.path, "startup is taking too long")
                 startAnimationTimer.start()
-                if (!_busyIndicator) _busyIndicator = busyIndicatorComponent.createObject(shelfView)
             }
         }
     }

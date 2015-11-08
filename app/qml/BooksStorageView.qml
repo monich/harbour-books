@@ -48,7 +48,8 @@ SilicaFlickable {
     property var currentShelfView
     property int currentShelfIndex: storageListWatcher.currentIndex
     readonly property bool dragInProgress: draggedItem ? true : false
-    readonly property real maxContentY: currentShelfView ? Math.max(0, currentShelfView.contentHeight - currentShelfView.height) : 0
+    readonly property real maxContentY: currentShelfView ? Math.max(0, currentShelfView.contentHeight - currentShelfView.height) -
+                            (currentShelfView.headerItem ? currentShelfView.headerItem.height : 0) : 0
     readonly property real verticalScrollThreshold: _cellHeight/2
     readonly property real horizontalScrollThreshold: _cellWidth/2
 

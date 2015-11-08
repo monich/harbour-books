@@ -65,8 +65,9 @@ class BooksBook : public QObject, public BooksItem
     Q_PROPERTY(bool copyingOut READ copyingOut NOTIFY copyingOutChanged)
 
 public:
-    BooksBook(QObject* aParent = NULL);
-    BooksBook(const BooksStorage& aStorage, shared_ptr<Book> aBook);
+    explicit BooksBook(QObject* aParent = NULL);
+    BooksBook(const BooksStorage& aStorage, QString aRelativePath,
+        shared_ptr<Book> aBook);
     ~BooksBook();
 
     QString path() const { return iPath; }
@@ -75,7 +76,7 @@ public:
     BooksPos lastPos() const { return iLastPos; }
     void setLastPos(const BooksPos& aPos);
     shared_ptr<Book> bookRef() const { return iBook; }
-    bool accessible() const { return !iCopyingOut; }
+
     bool copyingOut() const { return iCopyingOut; }
     bool loadingCover() const { return !iCoverTasksDone; }
     bool hasCoverImage() const;
@@ -85,9 +86,8 @@ public:
     QImage coverImage();
 
     void setCopyingOut(bool aValue);
-    void deleteFiles();
 
-    // BooksListItem
+    // BooksItem
     virtual BooksItem* retain();
     virtual void release();
     virtual QObject* object();
@@ -95,6 +95,8 @@ public:
     virtual BooksBook* book();
     virtual QString name() const;
     virtual QString fileName() const;
+    virtual bool accessible() const;
+    virtual void deleteFiles();
 
 Q_SIGNALS:
     void coverImageChanged();
@@ -128,6 +130,7 @@ private:
     QString iAuthors;
     QString iFileName;
     QString iPath;
+    QString iStateDir;
     QString iStateFilePath;
 };
 

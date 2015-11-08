@@ -364,12 +364,13 @@ BooksSettings::updateCurrentBook()
     } else if (!iCurrentBook || iCurrentBook->path() != path) {
         shared_ptr<Book> book = BooksUtil::bookFromFile(path);
         if (!book.isNull()) {
+            QString rel;
             QFileInfo info(path);
             BooksStorageManager* mgr = BooksStorageManager::instance();
-            BooksStorage storage = mgr->storageForPath(info.path());
+            BooksStorage storage = mgr->storageForPath(info.path(), &rel);
             if (storage.isValid()) {
                 if (iCurrentBook) iCurrentBook->release();
-                iCurrentBook = new BooksBook(storage, book);
+                iCurrentBook = new BooksBook(storage, rel, book);
                 iCurrentBook->requestCoverImage();
                 return true;
             }

@@ -203,6 +203,19 @@ bool BooksStorage::isPresent() const
     return iPrivate && iPrivate->iPresent;
 }
 
+QString BooksStorage::fullPath(QString aRelativePath) const
+{
+    if (iPrivate) {
+        QString path(booksDir().path());
+        if (!aRelativePath.isEmpty()) {
+            if (!path.endsWith('/')) path += '/';
+            path += aRelativePath;
+        }
+        return QDir::cleanPath(path);
+    }
+    return QString();
+}
+
 bool BooksStorage::equal(const BooksStorage& aStorage) const
 {
     if (iPrivate == aStorage.iPrivate) {
@@ -223,7 +236,6 @@ BooksStorage& BooksStorage::operator = (const BooksStorage& aStorage)
     }
     return *this;
 }
-
 
 // ==========================================================================
 // BooksStorageManager::Private
@@ -250,7 +262,7 @@ public:
     ~Private();
 
     int findDevice(QString aDevice) const;
-    int findPath(QString aPath) const;
+    int findPath(QString aPath, QString* aRelPath) const;
 
 public:
     QList<BooksStorage> iStorageList;
@@ -335,13 +347,22 @@ int BooksStorageManager::Private::findDevice(QString aDevice) const
     return -1;
 }
 
-int BooksStorageManager::Private::findPath(QString aPath) const
+int BooksStorageManager::Private::findPath(QString aPath, QString* aRelPath) const
 {
     if (!aPath.isEmpty()) {
         const int n = iStorageList.count();
         for (int i=0; i<n; i++) {
             BooksStorage::Private* data = iStorageList.at(i).iPrivate;
             if (aPath.startsWith(data->iBooksDir.path())) {
+                if (aRelPath) {
+                    int i = data->iBooksDir.path().length();
+                    while (aPath.length() > i && aPath.at(i) == '/') i++;
+                    if (aPath.length() > i) {
+                        *aRelPath = aPath.right(aPath.length() - i);
+                    } else {
+                        *aRelPath = QString();
+                    }
+                }
                 return i;
             }
         }
@@ -414,9 +435,9 @@ BooksStorage BooksStorageManager::storageForDevice(QString aDevice) const
     return (index >= 0) ? iPrivate->iStorageList.at(index) : BooksStorage();
 }
 
-BooksStorage BooksStorageManager::storageForPath(QString aPath) const
+BooksStorage BooksStorageManager::storageForPath(QString aPath, QString* aRelPath) const
 {
-    int index = iPrivate->findPath(aPath);
+    int index = iPrivate->findPath(aPath, aRelPath);
     return (index >= 0) ? iPrivate->iStorageList.at(index) : BooksStorage();
 }
 

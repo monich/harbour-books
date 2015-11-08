@@ -64,10 +64,22 @@ Item {
     readonly property bool animating: scaling || moving
 
     property bool _deleting: deleting && !deletingAll
-    property real _borderRadius: Theme.paddingSmall
-    property color _borderColor: Theme.primaryColor
+    readonly property real _borderRadius: Theme.paddingSmall
+    readonly property color _borderColor: Theme.primaryColor
+    readonly property real _borderWidth: 2
 
     property bool scaledDown: (editMode && !dragged && !pressed && !dropped)
+
+    Image {
+        anchors {
+            margins: root.margins
+            fill: parent
+        }
+        visible: !cover.book
+        source: "images/bookshelf.svg"
+        sourceSize.width: width
+        sourceSize.height: height
+    }
 
     BookCover {
         id: cover
@@ -75,8 +87,8 @@ Item {
             margins: root.margins
             fill: parent
         }
-        borderWidth: 2
         borderRadius: _borderRadius
+        borderWidth: book ? _borderWidth : 0
         borderColor: _borderColor
         opacity: (copyingIn || copyingOut) ? 0.1 : 1
         Behavior on opacity { FadeAnimation { } }

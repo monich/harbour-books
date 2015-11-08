@@ -117,6 +117,7 @@ SOURCES += \
   src/BooksLoadingProperty.cpp \
   src/BooksPageWidget.cpp \
   src/BooksPaintContext.cpp \
+  src/BooksPathModel.cpp \
   src/BooksSaveTimer.cpp \
   src/BooksSettings.cpp \
   src/BooksShelf.cpp \
@@ -152,6 +153,7 @@ HEADERS += \
   src/BooksLoadingProperty.h \
   src/BooksPageWidget.h \
   src/BooksPaintContext.h \
+  src/BooksPathModel.h \
   src/BooksPos.h \
   src/BooksSaveTimer.h \
   src/BooksSettings.h \

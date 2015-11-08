@@ -33,65 +33,97 @@ import QtQuick 2.0
 import Sailfish.Silica 1.0
 
 Column {
+    id: root
     anchors {
-        top: parent.top
         left: parent.left
         right: parent.right
         topMargin: Theme.paddingMedium
     }
     spacing: 0
-    visible: opacity > 0
-    opacity: singleStorage ? 0 : 1
-    Behavior on opacity { FadeAnimation {} }
+    y: needed ? Theme.paddingMedium : -height
+    property alias animationEnabled: yBehavior.enabled
 
+    Behavior on y {
+        id: yBehavior
+        enabled: false
+        NumberAnimation { duration: 200  }
+    }
+
+    property bool needed
     property bool removable
     property int count
     property bool showCount: true
 
+    property int _shownCount
+
+    signal clicked()
+
+    function updateShownCount() {
+        if (count > 0) {
+            _shownCount = count
+        }
+    }
+
+    onCountChanged: updateShownCount()
+
+    Component.onCompleted: updateShownCount()
+
     Item {
         width: parent.width
-        height: Math.max(left.height, right.height)
-        Row {
-            id: left
+        height: Math.max(storageLabel.height, bookCount.height)
+
+        BooksSDCardIcon {
+            id: icon
             anchors {
                 left: parent.left
+                leftMargin: Theme.paddingMedium
                 verticalCenter: parent.verticalCenter
             }
-            spacing: 0
-            Item {
-                width: Theme.paddingMedium
-                height: parent.height
-            }
-            BooksSDCardIcon {
-                visible: removableStorage
-                anchors.bottom: parent.bottom
-                height: storageLabel.height*3/4
-            }
-            Item {
-                visible: removableStorage
-                width: Theme.paddingMedium
-                height: parent.height
-            }
-            Label {
-                id: storageLabel
-                anchors.bottom: parent.bottom
-                color: Theme.highlightColor
-                text: removable ?
-                    //% "Memory card"
-                    qsTrId("storage-removable") :
-                    //% "Internal storage"
-                    qsTrId("storage-internal")
-            }
+            visible: removableStorage
+            height: storageLabel.height*3/4
         }
+
         Label {
-            id: right
+            id: storageLabel
+            anchors {
+                left: removableStorage ? icon.right : parent.left
+                right: bookCount.visible ? bookCount.left : parent.right
+                leftMargin: Theme.paddingMedium
+                rightMargin: Theme.paddingMedium
+                bottom: parent.bottom
+            }
+            color: (root.enabled && !mouseArea.pressed) ? Theme.primaryColor : Theme.highlightColor
+            text: removable ?
+                //% "Memory card"
+                qsTrId("storage-removable") :
+                //% "Internal storage"
+                qsTrId("storage-internal")
+
+            MouseArea {
+                id: mouseArea
+                anchors.fill: parent
+                onClicked: root.clicked()
+            }
+
+            Behavior on color { ColorAnimation { duration: 100 } }
+
+            // The label overlaps with the Sailfish 2.0 pulley menu which
+            // doesn't look great. Hide it when it's not needed. The book
+            // count can be left there, it doesn't overlap with anything
+            opacity: (needed) ? 1 : 0
+            visible: opacity > 0
+            Behavior on opacity { FadeAnimation {} }
+        }
+
+        Label {
+            id: bookCount
             anchors {
                 bottom: parent.bottom
                 right: parent.right
                 rightMargin: Theme.paddingMedium
             }
             //% "%0 book(s)"
-            text: qsTrId("storage-book-count",count).arg(count)
+            text: qsTrId("storage-book-count",_shownCount).arg(_shownCount)
             font.pixelSize: Theme.fontSizeExtraSmall
             color: Theme.highlightColor
             opacity: (showCount && count > 0) ? 1 : 0

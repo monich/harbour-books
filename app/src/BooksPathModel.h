@@ -31,29 +31,56 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BOOKS_ITEM_H
-#define BOOKS_ITEM_H
+#ifndef BOOKS_PATH_MODEL_H
+#define BOOKS_PATH_MODEL_H
 
 #include "BooksTypes.h"
 
-#include <QString>
-#include <QObject>
+#include <QHash>
+#include <QVariant>
+#include <QByteArray>
+#include <QAbstractListModel>
+#include <QtQml>
 
-class BooksItem
+class BooksPathModel: public QAbstractListModel
 {
+    Q_OBJECT
+    Q_PROPERTY(int count READ count NOTIFY countChanged)
+    Q_PROPERTY(QString path READ path WRITE setPath NOTIFY pathChanged)
+
 public:
-    virtual ~BooksItem() {}
+    explicit BooksPathModel(QObject* aParent = NULL);
 
-    virtual BooksItem* retain() = 0;
-    virtual void release() = 0;
+    int count() const { return iList.count(); }
+    QString path() const { return iPath; }
+    void setPath(QString aPath);
 
-    virtual QObject* object() = 0;
-    virtual BooksShelf* shelf() = 0;
-    virtual BooksBook* book() = 0;
-    virtual QString name() const = 0;
-    virtual QString fileName() const = 0;
-    virtual bool accessible() const = 0;
-    virtual void deleteFiles() = 0;
+    // QAbstractListModel
+    virtual QHash<int,QByteArray> roleNames() const;
+    virtual int rowCount(const QModelIndex& aParent) const;
+    virtual QVariant data(const QModelIndex& aIndex, int aRole) const;
+
+Q_SIGNALS:
+    void countChanged();
+    void pathChanged();
+
+private:
+    bool validIndex(int aIndex) const;
+
+private:
+    class Data {
+    public:
+        QString iName;
+        QString iPath;
+        Data(QString aName, QString aPath) : iName(aName), iPath(aPath) {}
+    };
+    QList<Data> iList;
+    QString iPath;
 };
 
-#endif // BOOKS_ITEM_H
+QML_DECLARE_TYPE(BooksPathModel)
+
+inline bool BooksPathModel::validIndex(int aIndex) const
+    { return aIndex >= 0 && aIndex < iList.count(); }
+
+#endif // BOOKS_PATH_MODEL_H

@@ -36,6 +36,7 @@ MouseArea {
     id: root
     parent: dragInProgress ? dragParent : gridView
     anchors.fill: parent
+    propagateComposedEvents: true
 
     signal deleteItemAt(var index)
     signal dropItem(var mouseX, var mouseY)
@@ -84,11 +85,21 @@ MouseArea {
             }
         } else {
             index = gridView.indexAt(mouseX + gridView.contentX, mouseY + currentShelfView.contentY)
-            if (index >= 0 && index === lastReleasedItemIndex) {
-                var item = shelf.get(index);
-                if (item.book && item.accessible) {
-                    shelfView.openBook(item.book)
+            if (index >= 0) {
+                if (index === lastReleasedItemIndex) {
+                    var item = shelf.get(index);
+                    if (item.accessible) {
+                        if (item.book) {
+                            shelfView.openBook(item.book)
+                        } else if (item.shelf) {
+                            var path = shelfView.shelf.relativePath
+                            shelfView.shelf.relativePath  = path ? (path + "/" + item.shelf.name) : item.shelf.name
+                        }
+                    }
                 }
+            } else if (mouseY + gridView.contentY < 0) {
+                // Let the header item handle it
+                mouse.accepted = false
             }
         }
         resetPressState()
@@ -105,9 +116,17 @@ MouseArea {
         } else {
             pressedDeleteItemIndex = -1
         }
+        if (mouseY + gridView.contentY < 0) {
+            // Let the header item handle it
+            mouse.accepted = false
+        }
     }
     onReleased: {
         stopDrag(mouseX, mouseY)
+        if (mouseY + gridView.contentY < 0) {
+            // Let the header item handle it
+            mouse.accepted = false
+        }
     }
     onPressAndHold: {
         if (!shelfView.editMode) {

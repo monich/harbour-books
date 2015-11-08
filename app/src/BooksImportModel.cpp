@@ -227,6 +227,7 @@ void BooksImportModel::Task::scanDir(QDir aDir)
     // Files first
     if (!isCanceled()) {
         HDEBUG("checking" << aDir.canonicalPath());
+        BooksStorage dummy;
         QFileInfoList fileList = aDir.entryInfoList(QDir::Files |
             QDir::Readable, QDir::Time);
         const int n = fileList.count();
@@ -238,7 +239,7 @@ void BooksImportModel::Task::scanDir(QDir aDir)
             if (!book.isNull()) {
                 if (!isDuplicate(filePath, iDestFiles) &&
                     !isDuplicate(filePath, iSrcFiles)) {
-                    BooksBook* newBook = new BooksBook(BooksStorage(), book);
+                    BooksBook* newBook = new BooksBook(dummy, QString(), book);
                     newBook->moveToThread(thread());
                     iBooks.append(newBook);
                     iSrcFiles.append(fileInfo);

@@ -39,6 +39,7 @@
 #include "BooksSaveTimer.h"
 #include "BooksTask.h"
 #include "BooksTaskQueue.h"
+#include "BooksLoadingProperty.h"
 
 #include <QHash>
 #include <QVariant>
@@ -46,11 +47,14 @@
 #include <QAbstractListModel>
 #include <QtQml>
 
-class BooksShelf: public QAbstractListModel, public BooksItem
+class BooksShelf: public QAbstractListModel, public BooksItem, public BooksLoadingProperty
 {
     Q_OBJECT
     Q_PROPERTY(int count READ count NOTIFY countChanged)
+    Q_PROPERTY(int bookCount READ bookCount NOTIFY bookCountChanged)
+    Q_PROPERTY(int shelfCount READ shelfCount NOTIFY shelfCountChanged)
     Q_PROPERTY(bool loading READ loading NOTIFY loadingChanged)
+    Q_PROPERTY(bool accessible READ accessible CONSTANT)
     Q_PROPERTY(QString path READ path NOTIFY pathChanged)
     Q_PROPERTY(QString name READ name NOTIFY nameChanged)
     Q_PROPERTY(QString device READ device WRITE setDevice NOTIFY deviceChanged)
@@ -59,10 +63,12 @@ class BooksShelf: public QAbstractListModel, public BooksItem
     Q_PROPERTY(bool hasDummyItem READ hasDummyItem WRITE setHasDummyItem NOTIFY hasDummyItemChanged)
     Q_PROPERTY(int dummyItemIndex READ dummyItemIndex WRITE setDummyItemIndex NOTIFY dummyItemIndexChanged)
     Q_PROPERTY(BooksBook* book READ book CONSTANT)
+    Q_PROPERTY(BooksShelf* shelf READ shelf CONSTANT)
     Q_PROPERTY(QObject* storage READ storage CONSTANT)
 
 public:
     explicit BooksShelf(QObject* aParent = NULL);
+    BooksShelf(BooksStorage aStorage, QString aRelativePath);
     ~BooksShelf();
 
     Q_INVOKABLE QObject* get(int aIndex) const;
@@ -77,6 +83,8 @@ public:
 
     bool loading() const { return iLoadTask != NULL; }
     int count() const;
+    int bookCount() const;
+    int shelfCount() const;
     QString path() const { return iPath; }
     QString relativePath() const { return iRelativePath; }
     void setRelativePath(QString aPath);
@@ -100,7 +108,7 @@ public:
     virtual int rowCount(const QModelIndex& aParent) const;
     virtual QVariant data(const QModelIndex& aIndex, int aRole) const;
 
-    // BooksListItem
+    // BooksItem
     virtual BooksItem* retain();
     virtual void release();
     virtual QObject* object();
@@ -108,10 +116,14 @@ public:
     virtual BooksBook* book();
     virtual QString name() const;
     virtual QString fileName() const;
+    virtual bool accessible() const;
+    virtual void deleteFiles();
 
 Q_SIGNALS:
     void loadingChanged();
     void countChanged();
+    void bookCountChanged();
+    void shelfCountChanged();
     void pathChanged();
     void nameChanged();
     void deviceChanged();
@@ -124,7 +136,6 @@ Q_SIGNALS:
 
 private Q_SLOTS:
     void onLoadTaskDone();
-    void onBookFound(BooksBook* aBook);
     void onBookAccessibleChanged();
     void onBookCopyingOutChanged();
     void onBookMovedAway();
@@ -134,6 +145,7 @@ private Q_SLOTS:
     void saveState();
 
 private:
+    void init();
     QString stateFileName() const;
     int bookIndex(BooksBook* aBook) const;
     int itemIndex(QString aFileName, int aStartIndex = 0) const;
@@ -142,19 +154,20 @@ private:
     void queueStateSave();
     void loadBookList();
     void updatePath();
-    void removeAllBooks();
-    BooksBook* removeBook(int aIndex);
+    void submitDeleteTask(int aIndex);
 
 private:
     class Data;
+    class Counts;
     class CopyTask;
     class LoadTask;
     class ImportTask;
     class DeleteTask;
+    friend class Counts;
+
     QList<Data*> iList;
     QList<DeleteTask*> iDeleteTasks;
     LoadTask* iLoadTask;
-    QString iName;
     QString iFileName;
     QString iPath;
     QString iRelativePath;

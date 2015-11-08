@@ -39,6 +39,7 @@
 #include "BooksConfig.h"
 #include "BooksSettings.h"
 #include "BooksImportModel.h"
+#include "BooksPathModel.h"
 #include "BooksStorageModel.h"
 #include "BooksPageWidget.h"
 #include "BooksListWatcher.h"
@@ -73,6 +74,7 @@ Q_DECL_EXPORT int main(int argc, char **argv)
     BOOKS_QML_REGISTER(BooksBookModel, "BookModel");
     BOOKS_QML_REGISTER(BooksCoverModel, "CoverModel");
     BOOKS_QML_REGISTER(BooksImportModel, "BooksImportModel");
+    BOOKS_QML_REGISTER(BooksPathModel, "BooksPathModel");
     BOOKS_QML_REGISTER(BooksStorageModel, "BookStorage");
     BOOKS_QML_REGISTER(BooksPageWidget, "PageWidget");
     BOOKS_QML_REGISTER(BooksListWatcher, "ListWatcher");
