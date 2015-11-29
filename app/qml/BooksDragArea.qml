@@ -130,10 +130,7 @@ MouseArea {
     }
     onPressAndHold: {
         if (!shelfView.editMode) {
-            var index = gridView.indexAt(mouseX + gridView.contentX, mouseY + currentShelfView.contentY)
-            if (index === pressedItemIndex) {
-                shelfView.startEditing()
-            }
+            shelfView.startEditing()
         }
     }
     onPositionChanged: {

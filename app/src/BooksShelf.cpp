@@ -519,6 +519,7 @@ void BooksShelf::Counts::emitSignals(BooksShelf* aShelf)
 
 BooksShelf::BooksShelf(QObject* aParent) :
     QAbstractListModel(aParent),
+    iLoadBookList(true),
     iLoadTask(NULL),
     iDummyItemIndex(-1),
     iEditMode(false),
@@ -531,6 +532,7 @@ BooksShelf::BooksShelf(QObject* aParent) :
 }
 
 BooksShelf::BooksShelf(BooksStorage aStorage, QString aRelativePath) :
+    iLoadBookList(false),
     iLoadTask(NULL),
     iRelativePath(aRelativePath),
     iStorage(aStorage),
@@ -614,7 +616,7 @@ void BooksShelf::updatePath()
             endRemoveRows();
         }
         iDummyItemIndex = -1;
-        if (!iPath.isEmpty()) loadBookList();
+        if (!iPath.isEmpty() && iLoadBookList) loadBookList();
         Q_EMIT pathChanged();
         if (oldDummyItemIndex != iDummyItemIndex) {
             Q_EMIT dummyItemIndexChanged();

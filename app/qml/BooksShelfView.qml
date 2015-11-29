@@ -175,10 +175,16 @@ SilicaFlickable {
                 BooksShelfTitle {
                     width: grid.width
                     text: model.name
-                    enabled: model.index < (pathModel.count-1)
+                    currentFolder: model.index === (pathModel.count-1)
                     onClicked: {
-                        console.log("switching to", model.path)
-                        shelfModel.relativePath = model.path
+                        if (currentFolder) {
+                            if (editMode) {
+                                console.log("how about renaming", model.name)
+                            }
+                        } else {
+                            console.log("switching to", model.path)
+                            shelfModel.relativePath = model.path
+                        }
                     }
                 }
             }

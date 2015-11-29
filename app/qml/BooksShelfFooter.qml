@@ -47,7 +47,7 @@ Item {
 
         //% "No books"
         text: qsTrId("shelf-view-no-books")
-        visible: footerState == 2
+        visible: footerState == 2 && !editMode
         anchors.centerIn: parent
     }
 

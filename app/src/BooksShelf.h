@@ -165,6 +165,7 @@ private:
     class DeleteTask;
     friend class Counts;
 
+    bool iLoadBookList;
     QList<Data*> iList;
     QList<DeleteTask*> iDeleteTasks;
     LoadTask* iLoadTask;

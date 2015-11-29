@@ -32,10 +32,14 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 
-BackgroundItem {
+MouseArea {
     id: root
     implicitHeight: column.implicitHeight
     property alias text: label.text
+    property bool currentFolder
+    property bool _highlighted: pressed
+    property color _highlightedColor: Theme.rgba(Theme.highlightBackgroundColor, Theme.highlightBackgroundOpacity)
+    property bool _showPress: !currentFolder && (_highlighted || pressTimer.running)
 
     Column {
         id: column
@@ -74,7 +78,7 @@ BackgroundItem {
                     leftMargin: Theme.paddingMedium
                     verticalCenter: parent.verticalCenter
                 }
-                color: (!root.enabled || pressed) ? Theme.highlightColor : Theme.primaryColor
+                color: (currentFolder || pressed) ? Theme.highlightColor : Theme.primaryColor
                 Behavior on color { ColorAnimation { duration: 100 } }
             }
         }
@@ -128,5 +132,18 @@ BackgroundItem {
             }
         }
         */
+    }
+
+    onPressed: pressTimer.start()
+    onCanceled: pressTimer.stop()
+
+    Rectangle {
+        anchors.fill: parent
+        color: _showPress ? _highlightedColor : "transparent"
+    }
+
+    Timer {
+        id: pressTimer
+        interval: 50
     }
 }
