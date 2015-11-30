@@ -43,6 +43,7 @@
 namespace BooksUtil {
     shared_ptr<Book> bookFromFile(std::string aPath);
     shared_ptr<Book> bookFromFile(QString aPath);
+    bool isValidFileName(QString aName);
 }
 
 inline shared_ptr<Book> BooksUtil::bookFromFile(QString aPath)

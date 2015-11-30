@@ -547,10 +547,6 @@ BooksShelf::BooksShelf(BooksStorage aStorage, QString aRelativePath) :
     // They also don't need to read the content of the directory -
     // only the objects allocated by QML do that.
     QQmlEngine::setObjectOwnership(this, QQmlEngine::CppOwnership);
-    int slashPos = aRelativePath.lastIndexOf('/');
-    iFileName = (slashPos >= 0) ?
-        aRelativePath.right(aRelativePath.length() - slashPos - 1) :
-        aRelativePath;
     updatePath();
 }
 
@@ -590,6 +586,60 @@ void BooksShelf::setDevice(QString aDevice)
     }
 }
 
+void BooksShelf::setName(QString aName)
+{
+    if (iStorage.isValid() &&
+        BooksUtil::isValidFileName(aName) &&
+        iFileName != aName) {
+        QString parentDir;
+        const int lastSlash = iRelativePath.lastIndexOf('/');
+        if (lastSlash > 0) {
+            parentDir = iRelativePath.left(lastSlash);
+        }
+
+        QString newRelativePath;
+        if (!parentDir.isEmpty()) {
+            newRelativePath = parentDir;
+            newRelativePath += '/';
+        }
+        newRelativePath += aName;
+
+        QString oldPath = iStorage.fullPath(iRelativePath);
+        QString newPath = iStorage.fullPath(newRelativePath);
+
+        HDEBUG("renaming" << qPrintable(oldPath) << "->" << qPrintable(newPath));
+        if (rename(qPrintable(oldPath), qPrintable(newPath)) == 0) {
+            const QString oldFileName(iFileName);
+            iRelativePath = newRelativePath;
+            iPath = iStorage.fullPath(iRelativePath);
+            updateFileName();
+            Q_EMIT pathChanged();
+            Q_EMIT relativePathChanged();
+
+            // Since this directiry has been renamed, we need to update the
+            // order of objects in the parent directory.
+            QVariantMap state;
+            const QString stateFile = stateFileName(parentDir);
+            if (HarbourJson::load(stateFile, state)) {
+                QVariantList order = state.value(SHELF_STATE_ORDER).toList();
+                int i, n = order.count();
+                for (i=0; i<n; i++) {
+                    if (order.at(i).toString() == oldFileName) {
+                        order[i] = iFileName;
+                        state.insert(SHELF_STATE_ORDER, order);
+                        if (HarbourJson::save(stateFile, state)) {
+                            HDEBUG("wrote" << qPrintable(stateFile));
+                        }
+                        break;
+                    }
+                }
+            }
+        } else {
+            HDEBUG(strerror(errno));
+        }
+    }
+}
+
 void BooksShelf::updatePath()
 {
     BooksLoadingSignalBlocker block(this);
@@ -598,6 +648,7 @@ void BooksShelf::updatePath()
     if (iStorage.isValid()) {
         iPath = iStorage.fullPath(iRelativePath);
     }
+    updateFileName();
     if (oldPath != iPath) {
         const int oldDummyItemIndex = iDummyItemIndex;
         Counts counts(this);
@@ -625,6 +676,18 @@ void BooksShelf::updatePath()
             }
         }
         counts.emitSignals(this);
+    }
+}
+
+void BooksShelf::updateFileName()
+{
+    const int slashPos = iRelativePath.lastIndexOf('/');
+    const QString fileName = (slashPos >= 0) ?
+        iRelativePath.right(iRelativePath.length() - slashPos - 1) :
+        iRelativePath;
+    if (iFileName != fileName) {
+        iFileName = fileName;
+        Q_EMIT nameChanged();
     }
 }
 
@@ -680,7 +743,7 @@ void BooksShelf::saveState()
     QVariantMap state;
     state.insert(SHELF_STATE_ORDER, order);
     if (HarbourJson::save(stateFileName(), state)) {
-        HDEBUG("wrote" << stateFileName());
+        HDEBUG("wrote" << qPrintable(stateFileName()));
     }
 }
 
@@ -691,10 +754,10 @@ void BooksShelf::queueStateSave()
     }
 }
 
-QString BooksShelf::stateFileName() const
+QString BooksShelf::stateFileName(QString aRelativePath) const
 {
     return iStorage.isValid() ?
-        iStorage.configDir().path() + "/" + iRelativePath + ("/" SHELF_STATE_FILE) :
+        iStorage.configDir().path() + "/" + aRelativePath + ("/" SHELF_STATE_FILE) :
         QString();
 }
 
@@ -745,8 +808,7 @@ void BooksShelf::setEditMode(bool aEditMode)
         iEditMode = aEditMode;
         HDEBUG(iEditMode);
         if (iSaveTimer && iSaveTimer->saveRequested()) {
-            iSaveTimer->cancelSave();
-            saveState();
+            iSaveTimer->saveNow();
         }
         setHasDummyItem(false);
         Q_EMIT editModeChanged();

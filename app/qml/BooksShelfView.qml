@@ -70,12 +70,12 @@ SilicaFlickable {
         onNeedDummyItemChanged: if (needDummyItem) hasDummyItem = true
         editMode: shelfView.editMode
         onRelativePathChanged: longStartTimer.restart()
+        onPathChanged: globalSettings.currentFolder = path
     }
 
     BooksPathModel {
         id: pathModel
         path: shelfModel.relativePath
-        storage: shelfModel.storage
     }
 
     onEditModeChanged: {
@@ -176,15 +176,10 @@ SilicaFlickable {
                 BooksShelfTitle {
                     width: grid.width
                     text: model.name
-                    editable: editMode
+                    editable: editMode && currentFolder
                     currentFolder: model.index === (pathModel.count-1)
                     onClicked: {
-                        if (currentFolder) {
-                            if (editMode) {
-                                console.log("editing", model.name)
-                                editName()
-                            }
-                        } else {
+                        if (!currentFolder) {
                             console.log("switching to", model.path)
                             shelfView.stopEditing()
                             shelfModel.relativePath = model.path
@@ -192,8 +187,9 @@ SilicaFlickable {
                     }
                     onRename: {
                         console.log(to)
-                        model.name = to
+                        shelfModel.name = to
                     }
+                    onStartEdit: shelfView.startEditing()
                 }
             }
         }

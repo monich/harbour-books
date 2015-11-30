@@ -35,7 +35,6 @@
 #define BOOKS_PATH_MODEL_H
 
 #include "BooksTypes.h"
-#include "BooksStorage.h"
 
 #include <QHash>
 #include <QVariant>
@@ -48,7 +47,6 @@ class BooksPathModel: public QAbstractListModel
     Q_OBJECT
     Q_PROPERTY(int count READ count NOTIFY countChanged)
     Q_PROPERTY(QString path READ path WRITE setPath NOTIFY pathChanged)
-    Q_PROPERTY(QObject* storage READ storage WRITE setStorage NOTIFY storageChanged)
 
 public:
     explicit BooksPathModel(QObject* aParent = NULL);
@@ -56,19 +54,15 @@ public:
     int count() const { return iList.count(); }
     QString path() const { return iPath; }
     void setPath(QString aPath);
-    QObject* storage() { return &iStorage; }
-    void setStorage(QObject* aStorage);
 
     // QAbstractListModel
     virtual QHash<int,QByteArray> roleNames() const;
     virtual int rowCount(const QModelIndex& aParent) const;
     virtual QVariant data(const QModelIndex& aIndex, int aRole) const;
-    virtual bool setData(const QModelIndex& aIndex, const QVariant& aValue, int aRole);
 
 Q_SIGNALS:
     void countChanged();
     void pathChanged();
-    void storageChanged();
 
 private:
     bool validIndex(int aIndex) const;
@@ -76,14 +70,11 @@ private:
 private:
     class Data {
     public:
-        QString iParentPath;
         QString iPath;
         QString iName;
-        Data(QString aParentPath, QString aPath, QString aName) :
-            iParentPath(aParentPath), iPath(aPath), iName(aName) {}
+        Data(QString aPath, QString aName) : iPath(aPath), iName(aName) {}
     };
 
-    BooksStorage iStorage;
     QList<Data> iList;
     QString iPath;
 };

@@ -77,3 +77,11 @@ shared_ptr<Book> BooksUtil::bookFromFile(std::string aPath)
     }
     return book;
 }
+
+bool BooksUtil::isValidFileName(QString aName)
+{
+    return !aName.isEmpty() &&
+        aName != QStringLiteral(".") &&
+        aName != QStringLiteral("..") &&
+        !aName.contains('/');
+}

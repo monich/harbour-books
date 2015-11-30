@@ -56,7 +56,7 @@ class BooksShelf: public QAbstractListModel, public BooksItem, public BooksLoadi
     Q_PROPERTY(bool loading READ loading NOTIFY loadingChanged)
     Q_PROPERTY(bool accessible READ accessible CONSTANT)
     Q_PROPERTY(QString path READ path NOTIFY pathChanged)
-    Q_PROPERTY(QString name READ name NOTIFY nameChanged)
+    Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged)
     Q_PROPERTY(QString device READ device WRITE setDevice NOTIFY deviceChanged)
     Q_PROPERTY(QString relativePath READ relativePath WRITE setRelativePath NOTIFY relativePathChanged)
     Q_PROPERTY(bool editMode READ editMode WRITE setEditMode NOTIFY editModeChanged)
@@ -90,6 +90,7 @@ public:
     void setRelativePath(QString aPath);
     BooksBook* bookAt(int aIndex) const;
     QObject* storage() { return &iStorage; }
+    void setName(QString aName);
 
     bool editMode() const { return iEditMode; }
     void setEditMode(bool aEditMode);
@@ -147,6 +148,7 @@ private Q_SLOTS:
 private:
     void init();
     QString stateFileName() const;
+    QString stateFileName(QString aRelativePath) const;
     int bookIndex(BooksBook* aBook) const;
     int itemIndex(QString aFileName, int aStartIndex = 0) const;
     bool validIndex(int aIndex) const;
@@ -154,6 +156,7 @@ private:
     void queueStateSave();
     void loadBookList();
     void updatePath();
+    void updateFileName();
     void submitDeleteTask(int aIndex);
 
 private:
@@ -184,5 +187,7 @@ QML_DECLARE_TYPE(BooksShelf)
 
 inline bool BooksShelf::validIndex(int aIndex) const
     { return aIndex >= 0 && aIndex < iList.count(); }
+inline QString BooksShelf::stateFileName() const
+    { return stateFileName(iRelativePath); }
 
 #endif // BOOKS_SHELF_MODEL_H

@@ -38,24 +38,16 @@ MouseArea {
     property alias text: label.text
     property bool currentFolder
     property bool editable
-    property bool _editing
     property bool _highlighted: pressed
     property color _highlightedColor: Theme.rgba(Theme.highlightBackgroundColor, Theme.highlightBackgroundOpacity)
     property bool _showPress: !currentFolder && (_highlighted || pressTimer.running)
 
     signal rename(var to)
-
-    function editName() {
-        if (editable && !_editing) {
-            editor.text = text
-            _editing = true
-        }
-    }
+    signal startEdit()
 
     onEditableChanged: {
-        if (!editable && _editing) {
-            _editing = false
-        }
+        // Sync edit field and the label
+        if (editable) editor.text = text
     }
 
     Column {
@@ -94,13 +86,14 @@ MouseArea {
                     verticalCenter: parent.verticalCenter
                 }
                 onTextChanged: {
-                    if (!_editing) {
+                    if (!editable) {
                         editor.text = text
                     }
                 }
                 color: (currentFolder || pressed) ? Theme.highlightColor : Theme.primaryColor
-                opacity: _editing ? 0 : 1
                 visible: opacity > 0
+                opacity: editable ? 0 : 1
+                Behavior on opacity { FadeAnimation {} }
                 Behavior on color { ColorAnimation { duration: 100 } }
             }
 
@@ -115,17 +108,17 @@ MouseArea {
                 textLeftMargin: 0
                 textRightMargin: 0
                 textTopMargin: 0
-                opacity: _editing ? 1 : 0
                 visible: opacity > 0
+                opacity: editable ? 1 : 0
+                Behavior on opacity { FadeAnimation {} }
                 //% "Enter folder name"
                 placeholderText: qsTrId("shelf-title-placeholder")
                 EnterKey.enabled: text.length > 0 && text !== "." && text !== ".." && text.indexOf("/") < 0
                 EnterKey.onClicked: {
-                    if (_editing) {
+                    if (editable) {
                         if (text) {
                             root.rename(text)
                         }
-                        _editing = false
                         parent.focus = true
                     }
                 }
@@ -140,6 +133,15 @@ MouseArea {
 
     onPressed: pressTimer.start()
     onCanceled: pressTimer.stop()
+
+    onPressAndHold: {
+        if (currentFolder && !editable) {
+            root.startEdit()
+            if (editable) {
+                editor.forceActiveFocus()
+            }
+        }
+    }
 
     Rectangle {
         anchors.fill: parent
