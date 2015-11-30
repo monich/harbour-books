@@ -37,9 +37,26 @@ MouseArea {
     implicitHeight: column.implicitHeight
     property alias text: label.text
     property bool currentFolder
+    property bool editable
+    property bool _editing
     property bool _highlighted: pressed
     property color _highlightedColor: Theme.rgba(Theme.highlightBackgroundColor, Theme.highlightBackgroundOpacity)
     property bool _showPress: !currentFolder && (_highlighted || pressTimer.running)
+
+    signal rename(var to)
+
+    function editName() {
+        if (editable && !_editing) {
+            editor.text = text
+            _editing = true
+        }
+    }
+
+    onEditableChanged: {
+        if (!editable && _editing) {
+            _editing = false
+        }
+    }
 
     Column {
         id: column
@@ -52,8 +69,7 @@ MouseArea {
         }
 
         Item {
-            id: labelItem
-            width: Math.min(label.implicitWidth + icon.width + 3*Theme.paddingMedium, parent.width)
+            width: parent.width
             height: label.implicitHeight
 
             Image {
@@ -72,14 +88,46 @@ MouseArea {
             Label {
                 id: label
                 truncationMode: TruncationMode.Fade
-                width: Math.min(parent.width - 2*Theme.paddingMedium, implicitWidth)
                 anchors {
                     left: icon.right
                     leftMargin: Theme.paddingMedium
                     verticalCenter: parent.verticalCenter
                 }
+                onTextChanged: {
+                    if (!_editing) {
+                        editor.text = text
+                    }
+                }
                 color: (currentFolder || pressed) ? Theme.highlightColor : Theme.primaryColor
+                opacity: _editing ? 0 : 1
+                visible: opacity > 0
                 Behavior on color { ColorAnimation { duration: 100 } }
+            }
+
+            TextField {
+                id: editor
+                width: parent.width - icon.width - 2*Theme.paddingMedium
+                y: 0
+                anchors {
+                    left: icon.right
+                    leftMargin: Theme.paddingMedium
+                }
+                textLeftMargin: 0
+                textRightMargin: 0
+                textTopMargin: 0
+                opacity: _editing ? 1 : 0
+                visible: opacity > 0
+                placeholderText: "Enter folder name"
+                onTextChanged: console.log(text)
+                EnterKey.onClicked: {
+                    if (_editing) {
+                        if (text) {
+                            root.rename(text)
+                        }
+                        _editing = false
+                        parent.focus = true
+                    }
+                }
             }
         }
 
@@ -87,51 +135,6 @@ MouseArea {
             height: Theme.paddingSmall
             width: parent.width
         }
-
-        /*
-        Item {
-            width: labelItem.width
-            height: 3*Math.floor(PointsPerInch/100)
-
-            Image {
-                id: shelfLeft
-                anchors {
-                    left: parent.left
-                    leftMargin: Theme.paddingMedium
-                    bottom: parent.bottom
-                }
-                height: parent.height
-                sourceSize.height: height
-                fillMode: Image.PreserveAspectFit
-                source: "images/shelf-left.svg"
-            }
-
-            Image {
-                id: shelfRight
-                anchors {
-                    right: parent.right
-                    rightMargin: Theme.paddingMedium
-                    bottom: parent.bottom
-                }
-                height: parent.height
-                sourceSize.height: height
-                fillMode: Image.PreserveAspectFit
-                source: "images/shelf-right.svg"
-            }
-
-            Image {
-                anchors {
-                    left: shelfLeft.right
-                    right: shelfRight.left
-                    bottom: parent.bottom
-                }
-                height: parent.height
-                sourceSize.height: height
-                sourceSize.width: width
-                source: "images/shelf-middle.svg"
-            }
-        }
-        */
     }
 
     onPressed: pressTimer.start()

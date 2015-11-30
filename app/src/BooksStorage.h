@@ -64,8 +64,10 @@ public:
     bool isInternal() const;
     bool isPresent() const;
     bool equal(const BooksStorage& aStorage) const;
+    void set(const BooksStorage& aStorage);
 
-    BooksStorage& operator = (const BooksStorage& aStorage);
+    BooksStorage& operator = (const BooksStorage& aStorage)
+        { set(aStorage); return *this; }
     bool operator == (const BooksStorage& aStorage) const
         { return equal(aStorage); }
 

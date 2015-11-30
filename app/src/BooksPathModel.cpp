@@ -35,6 +35,8 @@
 
 #include "HarbourDebug.h"
 
+#include <errno.h>
+
 enum BooksPathModelRole {
     BooksPathModelName = Qt::UserRole,
     BooksPathModelPath
@@ -60,17 +62,20 @@ void BooksPathModel::setPath(QString aPath)
 
         int i;
         QString path;
-        QStringList newPaths;
+        QStringList pathList;
+        QStringList parentList;
         for (i=0; i<newSize; i++) {
+            parentList.append(path);
             if (!path.isEmpty()) path += "/";
             path += newNames.at(i);
-            newPaths.append(path);
+            pathList.append(path);
         }
 
         if (oldSize < newSize) {
             beginInsertRows(QModelIndex(), oldSize, newSize-1);
             for (int i=oldSize; i<newSize; i++) {
-                iList.append(Data(newNames.at(i), newPaths.at(i)));
+                Data data(parentList.at(i), pathList.at(i), newNames.at(i));
+                iList.append(data);
             }
             endInsertRows();
             Q_EMIT countChanged();
@@ -86,8 +91,8 @@ void BooksPathModel::setPath(QString aPath)
                 iList[i].iName = newNames.at(i);
                 changed = true;
             }
-            if (iList.at(i).iPath != newPaths.at(i)) {
-                iList[i].iPath = newPaths.at(i);
+            if (iList.at(i).iPath != pathList.at(i)) {
+                iList[i].iPath = pathList.at(i);
                 changed = true;
             }
             if (changed) {
@@ -96,6 +101,20 @@ void BooksPathModel::setPath(QString aPath)
             }
         }
         Q_EMIT pathChanged();
+    }
+}
+
+void BooksPathModel::setStorage(QObject* aStorage)
+{
+    BooksStorage storage;
+    if (aStorage) {
+        BooksStorage* newStorage = qobject_cast<BooksStorage*>(aStorage);
+        if (newStorage) storage.set(*newStorage);
+    }
+    if (!iStorage.equal(storage)) {
+        HDEBUG(storage.booksDir());
+        iStorage.set(storage);
+        Q_EMIT storageChanged();
     }
 }
 
@@ -122,4 +141,31 @@ QVariant BooksPathModel::data(const QModelIndex& aIndex, int aRole) const
         }
     }
     return QVariant();
+}
+
+bool BooksPathModel::setData(const QModelIndex& aIndex, const QVariant& aValue, int aRole)
+{
+    const int i = aIndex.row();
+    if (validIndex(i) && aRole == BooksPathModelName && iStorage.isPresent()) {
+        QString newName(aValue.toString());
+        if (iList.at(i).iName != newName) {
+            const Data& data = iList.at(i);
+            QString oldPath = iStorage.fullPath(data.iPath);
+            QString newPath = iStorage.fullPath(data.iParentPath);
+            newPath += "/";
+            newPath += newName;
+
+            HDEBUG("renaming" << qPrintable(oldPath) << "->" << qPrintable(newPath));
+            if (rename(qPrintable(oldPath), qPrintable(newPath)) == 0) {
+                iList[i].iName = newName;
+                iList[i].iPath = newPath;
+                QModelIndex index = createIndex(i, 0);
+                Q_EMIT dataChanged(index, index);
+                return true;
+            } else {
+                HDEBUG(strerror(errno));
+            }
+        }
+    }
+    return false;
 }

@@ -75,6 +75,7 @@ SilicaFlickable {
     BooksPathModel {
         id: pathModel
         path: shelfModel.relativePath
+        storage: shelfModel.storage
     }
 
     onEditModeChanged: {
@@ -175,16 +176,23 @@ SilicaFlickable {
                 BooksShelfTitle {
                     width: grid.width
                     text: model.name
+                    editable: editMode
                     currentFolder: model.index === (pathModel.count-1)
                     onClicked: {
                         if (currentFolder) {
                             if (editMode) {
-                                console.log("how about renaming", model.name)
+                                console.log("editing", model.name)
+                                editName()
                             }
                         } else {
                             console.log("switching to", model.path)
+                            shelfView.stopEditing()
                             shelfModel.relativePath = model.path
                         }
+                    }
+                    onRename: {
+                        console.log(to)
+                        model.name = to
                     }
                 }
             }

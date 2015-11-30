@@ -227,14 +227,13 @@ bool BooksStorage::equal(const BooksStorage& aStorage) const
     }
 }
 
-BooksStorage& BooksStorage::operator = (const BooksStorage& aStorage)
+void BooksStorage::set(const BooksStorage& aStorage)
 {
     if (iPrivate != aStorage.iPrivate) {
         if (iPrivate && !iPrivate->iRef.deref()) delete iPrivate;
         iPrivate = aStorage.iPrivate;
         if (iPrivate) iPrivate->iRef.ref();
     }
-    return *this;
 }
 
 // ==========================================================================

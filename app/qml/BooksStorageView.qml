@@ -74,8 +74,8 @@ SilicaFlickable {
 
     function calculateCellWidth() {
         // At least 3 books in portrait, 5 in landscape
-        var result2 = calculateCellWidth2(Math.min(width, height), 3)
-        var result1 = calculateCellWidth2(Math.max(width, height), 5)
+        var result2 = calculateCellWidth2(Math.min(window.width, window.height), 3)
+        var result1 = calculateCellWidth2(Math.max(window.width, window.height), 5)
         var result = Math.min(result1, result2)
         return result
     }
