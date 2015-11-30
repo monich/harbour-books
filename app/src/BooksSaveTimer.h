@@ -48,6 +48,7 @@ public:
     void requestSave();
     void cancelSave();
     bool saveRequested() const;
+    void saveNow();
 
 Q_SIGNALS:
     void save();

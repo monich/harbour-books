@@ -70,6 +70,13 @@ void BooksSaveTimer::cancelSave()
     iInactivityTimer->stop();
 }
 
+void BooksSaveTimer::saveNow()
+{
+    iMandatarySaveTimer->stop();
+    iInactivityTimer->stop();
+    Q_EMIT save();
+}
+
 bool BooksSaveTimer::saveRequested() const
 {
     return iMandatarySaveTimer->isActive();
@@ -77,14 +84,12 @@ bool BooksSaveTimer::saveRequested() const
 
 void BooksSaveTimer::onTimeout()
 {
-    iMandatarySaveTimer->stop();
-    iInactivityTimer->stop();
-    Q_EMIT save();
+    saveNow();
 }
 
 void BooksSaveTimer::onAboutToQuit()
 {
     if (saveRequested()) {
-        onTimeout();
+        saveNow();
     }
 }
