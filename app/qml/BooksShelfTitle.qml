@@ -117,8 +117,10 @@ MouseArea {
                 textTopMargin: 0
                 opacity: _editing ? 1 : 0
                 visible: opacity > 0
-                placeholderText: "Enter folder name"
+                //% "Enter folder name"
+                placeholderText: qsTrId("shelf-title-placeholder")
                 onTextChanged: console.log(text)
+                EnterKey.enabled: text.length > 0 && text.indexOf("/") < 0
                 EnterKey.onClicked: {
                     if (_editing) {
                         if (text) {

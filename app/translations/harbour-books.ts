@@ -39,6 +39,10 @@
         <source>No books</source>
         <translation>No books</translation>
     </message>
+    <message id="shelf-title-placeholder">
+        <source>Enter folder name</source>
+        <translation>Enter folder name</translation>
+    </message>
     <message id="storage-removable">
         <source>Memory card</source>
         <translation>Memory card</translation>

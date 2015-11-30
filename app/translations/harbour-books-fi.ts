@@ -39,6 +39,10 @@
         <source>No books</source>
         <translation>Sinulla ei ole kirjoja</translation>
     </message>
+    <message id="shelf-title-placeholder">
+        <source>Enter folder name</source>
+        <translation type="unfinished">Anna kansion nimi</translation>
+    </message>
     <message id="storage-removable">
         <source>Memory card</source>
         <translation>Muistikortti</translation>

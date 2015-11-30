@@ -39,6 +39,10 @@
         <source>No books</source>
         <translation>Inga böcker</translation>
     </message>
+    <message id="shelf-title-placeholder">
+        <source>Enter folder name</source>
+        <translation type="unfinished">Ange mappnamn</translation>
+    </message>
     <message id="storage-removable">
         <source>Memory card</source>
         <translation>Minneskort</translation>

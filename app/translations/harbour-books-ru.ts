@@ -39,6 +39,10 @@
         <source>No books</source>
         <translation>Здесь пусто, нет ничего вообще</translation>
     </message>
+    <message id="shelf-title-placeholder">
+        <source>Enter folder name</source>
+        <translation>Введите имя папки</translation>
+    </message>
     <message id="storage-removable">
         <source>Memory card</source>
         <translation>Карта памяти</translation>
