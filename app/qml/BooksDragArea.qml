@@ -55,6 +55,7 @@ MouseArea {
     property bool dragCloseToTheRightEdge
     property real dragLastX
     property real dragLastY
+    property bool _ignorePress: true
 
     onDraggedItemIndexChanged: {
         draggedItem = (draggedItemIndex >= 0) ? shelf.get(draggedItemIndex) : null
@@ -118,6 +119,14 @@ MouseArea {
         }
         if (mouseY + gridView.contentY < 0) {
             // Let the header item handle it
+            mouse.accepted = false
+        } else if (_ignorePress) {
+            // If the first press isn't ignored here then the first flick
+            // won't work. The problem has something to do with this drag
+            // area as everything works fine if the drag area is removed.
+            // Couldn't figure out what exactly the problem was and what's
+            // wrong with the initial focus, but this hack makes things work.
+            _ignorePress = false
             mouse.accepted = false
         }
     }
