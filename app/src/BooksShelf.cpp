@@ -756,9 +756,17 @@ void BooksShelf::queueStateSave()
 
 QString BooksShelf::stateFileName(QString aRelativePath) const
 {
-    return iStorage.isValid() ?
-        iStorage.configDir().path() + "/" + aRelativePath + ("/" SHELF_STATE_FILE) :
-        QString();
+    if (iStorage.isValid()) {
+        QString path(iStorage.configDir().path());
+        if (!aRelativePath.isEmpty()) {
+            path += "/";
+            path += aRelativePath;
+        }
+        path += "/" SHELF_STATE_FILE;
+        return path;
+    } else {
+        return QString();
+    }
 }
 
 int BooksShelf::bookIndex(BooksBook* aBook) const
