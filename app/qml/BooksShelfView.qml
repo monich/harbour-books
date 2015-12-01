@@ -33,7 +33,7 @@ import QtQuick 2.0
 import Sailfish.Silica 1.0
 import harbour.books 1.0
 
-SilicaFlickable {
+Item {
     id: shelfView
 
     property int shelfIndex
@@ -254,22 +254,28 @@ SilicaFlickable {
             easing.type: Easing.OutCubic
         }
 
-        BooksDragArea {
-            id: dragArea
-            dragParent: storageView
-            gridView: grid
-            onDeleteItemAt: {
-                if (!shelfView.deleteAllRequest) {
-                    shelfView.shelf.setDeleteRequested(index, true);
-                }
-            }
-            onDropItem: shelfView.dropItem(mouseX, mouseY)
-        }
+        onActiveFocusChanged: console.log("BooksShelfView.grid", activeFocus)
 
         Behavior on y { SpringAnimation {} }
         VerticalScrollDecorator {}
     }
 
+    BooksDragArea {
+        id: dragArea
+        dragParent: storageView
+        gridView: grid
+        onDeleteItemAt: {
+            if (!shelfView.deleteAllRequest) {
+                shelfView.shelf.setDeleteRequested(index, true);
+            }
+        }
+        onDropItem: shelfView.dropItem(mouseX, mouseY)
+        onActiveFocusChanged: console.log("BooksShelfView.grid.dragArea", activeFocus)
+        Component.onCompleted: {
+            console.log("BooksDragArea created")
+            grid.focus = true
+        }
+    }
 
     Timer {
         id: longStartTimer
