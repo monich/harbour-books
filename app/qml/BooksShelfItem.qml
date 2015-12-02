@@ -46,6 +46,7 @@ Item {
     property alias book: cover.book
     property alias synchronous: cover.synchronous
     property alias remorseTimeout: deleteAnimation.duration
+    property alias copyProgress: progressIndicator.value
     property real margins: Theme.paddingMedium
     property real deleteAllOpacity: 1
     property bool editMode
@@ -62,8 +63,9 @@ Item {
     readonly property bool scaling: scaleUpAnimation.running || scaleDownAnimation.running || deleteAnimation.running
     readonly property bool moving: moveAnimationX.running || moveAnimationY.running
     readonly property bool animating: scaling || moving
+    readonly property bool copying: copyingIn || copyingOut
 
-    property bool _deleting: deleting && !deletingAll
+    readonly property bool _deleting: deleting && !deletingAll
     readonly property real _borderRadius: Theme.paddingSmall
     readonly property color _borderColor: Theme.primaryColor
     readonly property real _borderWidth: 2
@@ -134,11 +136,14 @@ Item {
         onClicked: root.deleteRequested()
     }
 
-    BusyIndicator {
-        id: busyIndicator
+    ProgressCircle {
+        id: progressIndicator
+        width: parent.width/2
+        height: width
         anchors.centerIn: parent
-        size: BusyIndicatorSize.Medium
-        running: copyingIn || copyingOut
+        opacity: (copying && !longCopyTimer.running && value > 0 && value < 1) ? 1 : 0
+        visible: opacity > 0
+        Behavior on opacity { FadeAnimation {} }
     }
 
     function withinDeleteButton(x, y) {
@@ -179,6 +184,19 @@ Item {
             deleteAnimation.stop()
             updateScaledDown()
         }
+    }
+
+    onCopyingChanged: {
+        if (copying) {
+            longCopyTimer.restart()
+        } else {
+            longCopyTimer.stop()
+        }
+    }
+
+    Timer {
+        id: longCopyTimer
+        interval: 500
     }
 
     NumberAnimation {

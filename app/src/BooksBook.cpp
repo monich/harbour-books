@@ -614,6 +614,7 @@ bool BooksBook::copyTo(QDir aDestDir, CopyOperation* aOperation)
                         }
                     }
                 }
+                aOperation->copyProgressChanged(PROGRESS_PRECISION);
                 delete [] buf;
                 dest.close();
                 if (copied == total) {

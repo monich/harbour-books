@@ -212,6 +212,7 @@ Item {
             name: model.name
             copyingIn: model.copyingIn
             copyingOut: model.copyingOut
+            copyProgress: model.copyProgress
             remorseTimeout: _remorseTimeout
             onScalingChanged: updateLastPressedItemScalingIndex()
             onPressedChanged: updateLastPressedItemScalingIndex()
