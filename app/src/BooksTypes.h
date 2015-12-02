@@ -35,6 +35,7 @@
 #define BOOKS_TYPES_H
 
 #include "shared_ptr.h"
+#include <QFile>
 
 class BooksBook;
 class BooksShelf;
@@ -46,5 +47,9 @@ struct BooksMargins {
     int iBottom;
     BooksMargins() : iLeft(0), iRight(0), iTop(0), iBottom(0) {}
 };
+
+#define BOOKS_FILE_PERMISSIONS \
+    (QFile::ReadOwner | QFile::WriteOwner | \
+     QFile::ReadGroup | QFile::ReadOther)
 
 #endif // BOOKS_TYPES_H

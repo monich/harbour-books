@@ -39,7 +39,6 @@
 #include "HarbourJson.h"
 #include "HarbourDebug.h"
 
-#include <unistd.h>
 #include <errno.h>
 
 enum BooksItemRole {
@@ -49,40 +48,38 @@ enum BooksItemRole {
     BooksItemAccessible,
     BooksItemCopyingOut,
     BooksItemCopyingIn,
-    BooksItemCopyPercent,
+    BooksItemCopyProgress,
     BooksItemDummy,
     BooksItemDeleteRequested
 };
 
-#define MIN_SIGNAL_DELAY    (100) /* ms */
-#define FILE_PERMISSIONS \
-    (QFile::ReadOwner | QFile::WriteOwner | \
-     QFile::ReadGroup | QFile::ReadOther)
-
 #define SHELF_STATE_FILE    BOOKS_STATE_FILE_SUFFIX
 #define SHELF_STATE_ORDER   "order"
 
-class BooksShelf::CopyTask : public BooksTask
+class BooksShelf::CopyTask : public BooksTask, BooksItem::CopyOperation
 {
     Q_OBJECT
 
 public:
-    CopyTask(BooksShelf::Data* aData, BooksBook* aBook);
+    CopyTask(BooksShelf::Data* aDestData, BooksItem* aSrcItem);
     ~CopyTask();
 
     void performTask();
+    QString srcPath() const;
+    QString destPath() const;
 
-    bool linkFiles();
+    // BooksItem::CopyOperation
+    virtual bool isCanceled() const;
+    virtual void copyProgressChanged(int aProgress);
 
 Q_SIGNALS:
-    void copyPercentChanged();
+    void copyProgressChanged();
 
 public:
-    BooksShelf::Data* iData;
-    int iCopyPercent;
+    BooksShelf::Data* iDestData;
+    BooksItem* iSrcItem;
+    int iCopyProgress;
     bool iSuccess;
-    QString iSource;
-    QString iDest;
 };
 
 // ==========================================================================
@@ -240,6 +237,7 @@ public:
 
     QString name() { return iItem ? iItem->name() : QString(); }
     QString fileName() { return iItem ? iItem->fileName() : QString(); }
+    QString path() { return iItem ? iItem->path() : QString(); }
     QObject* object() { return iItem ? iItem->object() : NULL; }
     BooksBook* book() { return iItem ? iItem->book() : NULL; }
     BooksShelf* shelf() { return iItem ? iItem->shelf() : NULL; }
@@ -248,7 +246,8 @@ public:
     bool isShelf() const { return iItem && iItem->shelf(); }
     bool copyingOut();
     bool copyingIn() { return iCopyTask != NULL; }
-    int copyPercent() { return iCopyTask ? iCopyTask->iCopyPercent : 0; }
+    double copyProgress() { return iCopyTask ? (iCopyTask->iCopyProgress/
+        ((double)PROGRESS_PRECISION)) : 0.0; }
 
     void setBook(BooksBook* aBook, bool aExternal);
     void connectSignals(BooksBook* aBook);
@@ -322,107 +321,53 @@ inline bool BooksShelf::Data::copyingOut()
 // BooksShelf::CopyTask
 // ==========================================================================
 
-BooksShelf::CopyTask::CopyTask(BooksShelf::Data* aData, BooksBook* aBook) :
-    iData(aData),
-    iCopyPercent(0),
-    iSuccess(false),
-    iSource(aBook->path()),
-    iDest(QFileInfo(aData->iShelf->path(),
-          QFileInfo(iSource).fileName()).absoluteFilePath())
+BooksShelf::CopyTask::CopyTask(BooksShelf::Data* aDestData, BooksItem* aSrcItem) :
+    iDestData(aDestData),
+    iSrcItem(aSrcItem->retain()),
+    iCopyProgress(0),
+    iSuccess(false)
 {
-    HDEBUG(qPrintable(iSource) << "->" << qPrintable(iDest));
-    if (iData->iCopyTask) {
-        iData->iCopyTask->release(iData->iShelf);
+    if (iDestData->iCopyTask) {
+        iDestData->iCopyTask->release(iDestData->iShelf);
     }
-    iData->iCopyTask = this;
-    iData->iShelf->connect(this, SIGNAL(done()), SLOT(onCopyTaskDone()));
-    iData->iShelf->connect(this, SIGNAL(copyPercentChanged()),
-        SLOT(onCopyTaskPercentChanged()), Qt::QueuedConnection);
+    iDestData->iCopyTask = this;
+    iDestData->iShelf->connect(this, SIGNAL(done()), SLOT(onCopyTaskDone()));
+    iDestData->iShelf->connect(this, SIGNAL(copyProgressChanged()),
+        SLOT(onCopyTaskProgressChanged()), Qt::QueuedConnection);
+    HDEBUG(qPrintable(aSrcItem->path()) << "->" << destPath());
 }
 
 BooksShelf::CopyTask::~CopyTask()
 {
-    HASSERT(!iData);
+    HASSERT(!iDestData);
+    iSrcItem->release();
 }
 
-bool BooksShelf::CopyTask::linkFiles()
+inline QString BooksShelf::CopyTask::srcPath() const
 {
-    QByteArray oldp(iSource.toLocal8Bit());
-    QByteArray newp(iDest.toLocal8Bit());
-    if (!oldp.isEmpty()) {
-        if (!newp.isEmpty()) {
-            int err = link(oldp.data(), newp.data());
-            if (!err) {
-                HDEBUG("linked" << newp << "->" << oldp);
-                iSuccess = true;
-            } else {
-                HDEBUG(newp << "->" << oldp << "error:" << strerror(errno));
-            }
-        } else {
-            HDEBUG("failed to convert" << newp << "to locale encoding");
-        }
-    } else {
-        HDEBUG("failed to convert" << oldp << "to locale encoding");
-    }
-    return iSuccess;
+    return iSrcItem->path();
+}
+
+inline QString BooksShelf::CopyTask::destPath() const
+{
+    return QFileInfo(iDestData->iShelf->path(),
+        iSrcItem->fileName()).absoluteFilePath();
 }
 
 void BooksShelf::CopyTask::performTask()
 {
-    if (!isCanceled() && !linkFiles()) {
-        QFile src(iSource);
-        const qint64 total = src.size();
-        qint64 copied = 0;
-        if (src.open(QIODevice::ReadOnly)) {
-            QFile dest(iDest);
-            QDir dir(QFileInfo(dest).dir());
-            dir.mkpath(dir.path());
-            if (dest.open(QIODevice::WriteOnly)) {
-                QDateTime lastSignal;
-                const qint64 bufsiz = 0x1000;
-                char* buf = new char[bufsiz];
-                qint64 len;
-                while (!isCanceled() && (len = src.read(buf, bufsiz)) > 0 &&
-                       !isCanceled() && dest.write(buf, len) == len) {
-                    copied += len;
-                    int percent = (int)(copied*100/total);
-                    if (iCopyPercent != percent) {
-                        // Don't fire signals too often
-                        QDateTime now(QDateTime::currentDateTimeUtc());
-                        if (!lastSignal.isValid() ||
-                            lastSignal.msecsTo(now) >= MIN_SIGNAL_DELAY) {
-                            lastSignal = now;
-                            iCopyPercent = percent;
-                            Q_EMIT copyPercentChanged();
-                        }
-                    }
-                }
-                delete [] buf;
-                dest.close();
-                if (copied == total) {
-                    dest.setPermissions(FILE_PERMISSIONS);
-                    iSuccess = true;
-                    HDEBUG(total << "bytes copied from"<< qPrintable(iSource) <<
-                        "to" << qPrintable(iDest));
-                } else {
-                    if (isCanceled()) {
-                        HDEBUG("copy" << qPrintable(iSource) <<  "to" <<
-                            qPrintable(iDest) << "cancelled");
-                    } else {
-                        HWARN(copied << "out of" << total <<
-                            "bytes copied from" << qPrintable(iSource) <<
-                            "to" << qPrintable(iDest));
-                    }
-                    dest.remove();
-                }
-            } else {
-                HWARN("failed to open" << qPrintable(iDest));
-            }
-            src.close();
-        } else {
-            HWARN("failed to open" << qPrintable(iSource));
-        }
-    }
+    iSuccess = iSrcItem->copyTo(QDir(iDestData->iShelf->path()), this);
+}
+
+bool BooksShelf::CopyTask::isCanceled() const
+{
+    return BooksTask::isCanceled();
+}
+
+void BooksShelf::CopyTask::copyProgressChanged(int aProgress)
+{
+    iCopyProgress = aProgress;
+    Q_EMIT copyProgressChanged();
 }
 
 // ==========================================================================
@@ -873,6 +818,11 @@ QString BooksShelf::fileName() const
     return iFileName;
 }
 
+QString BooksShelf::path() const
+{
+    return iPath;
+}
+
 bool BooksShelf::accessible() const
 {
     return true;
@@ -1115,20 +1065,19 @@ void BooksShelf::onBookMovedAway()
         const int row = bookIndex(book);
         HDEBUG(book->title() << row);
         if (row >= 0) {
-            HDEBUG(iList.at(row)->name());
             remove(row);
         }
     }
 }
 
-void BooksShelf::onCopyTaskPercentChanged()
+void BooksShelf::onCopyTaskProgressChanged()
 {
     CopyTask* task = qobject_cast<CopyTask*>(sender());
     HASSERT(task);
     if (task) {
-        HDEBUG(task->iDest << task->iCopyPercent);
-        const int row = iList.indexOf(task->iData);
-        emitDataChangedSignal(row, BooksItemCopyPercent);
+        HDEBUG(task->destPath() << task->iCopyProgress);
+        const int row = iList.indexOf(task->iDestData);
+        emitDataChangedSignal(row, BooksItemCopyProgress);
     }
 }
 
@@ -1137,10 +1086,11 @@ void BooksShelf::onCopyTaskDone()
     CopyTask* task = qobject_cast<CopyTask*>(sender());
     HASSERT(task);
     if (task) {
-        HDEBUG(qPrintable(task->iSource) << "->" << qPrintable(task->iDest) <<
+        QString dest = task->destPath();
+        HDEBUG(qPrintable(task->srcPath()) << "->" << qPrintable(dest) <<
             "copy" << (task->iSuccess ? "done" : "FAILED"));
 
-        Data* data = task->iData;
+        Data* data = task->iDestData;
         const int row = iList.indexOf(data);
         HASSERT(row >= 0);
 
@@ -1150,21 +1100,21 @@ void BooksShelf::onCopyTaskDone()
         if (src) {
             src->retain();
             if (task->iSuccess) {
-                shared_ptr<Book> book = BooksUtil::bookFromFile(task->iDest);
+                shared_ptr<Book> book = BooksUtil::bookFromFile(dest);
                 if (!book.isNull()) {
                     copy = new BooksBook(iStorage, iRelativePath, book);
                     copy->setLastPos(src->lastPos());
                     copy->setCoverImage(src->coverImage());
                     copy->requestCoverImage();
                 } else {
-                    HWARN("can't open copied book" << qPrintable(task->iDest));
+                    HWARN("can't open copied book" << qPrintable(dest));
                 }
             }
         }
 
         // Disassociate book data from the copy task
         data->iCopyTask = NULL;
-        task->iData = NULL;
+        task->iDestData = NULL;
         task->release(this);
 
         // Notify the source shelf. This will actually remove the source file.
@@ -1217,6 +1167,12 @@ void BooksShelf::deleteFiles()
     }
 }
 
+bool BooksShelf::copyTo(QDir aDestDir, CopyOperation* aOperation)
+{
+    HWARN("copying folders is not implemented!!");
+    return false;
+}
+
 QHash<int,QByteArray> BooksShelf::roleNames() const
 {
     QHash<int, QByteArray> roles;
@@ -1226,7 +1182,7 @@ QHash<int,QByteArray> BooksShelf::roleNames() const
     roles.insert(BooksItemAccessible, "accessible");
     roles.insert(BooksItemCopyingOut, "copyingOut");
     roles.insert(BooksItemCopyingIn, "copyingIn");
-    roles.insert(BooksItemCopyPercent, "copyPercent");
+    roles.insert(BooksItemCopyProgress, "copyProgress");
     roles.insert(BooksItemDummy, "dummy");
     roles.insert(BooksItemDeleteRequested, "deleteRequested");
     return roles;
@@ -1249,7 +1205,7 @@ QVariant BooksShelf::data(const QModelIndex& aIndex, int aRole) const
         case BooksItemAccessible: return data->accessible();
         case BooksItemCopyingOut: return data->copyingOut();
         case BooksItemCopyingIn: return data->copyingIn();
-        case BooksItemCopyPercent: return data->copyPercent();
+        case BooksItemCopyProgress: return data->copyProgress();
         case BooksItemDummy: return QVariant::fromValue(!data->iItem);
         case BooksItemDeleteRequested: return data->iDeleteRequested;
         }

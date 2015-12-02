@@ -52,6 +52,9 @@
 #include <QGuiApplication>
 #include <QScreen>
 
+#include <unistd.h>
+#include <errno.h>
+
 #define BOOK_STATE_POSITION  "position"
 #define BOOK_COVER_SUFFIX ".cover."
 
@@ -392,6 +395,11 @@ QString BooksBook::fileName() const
     return iFileName;
 }
 
+QString BooksBook::path() const
+{
+    return iPath;
+}
+
 bool BooksBook::accessible() const
 {
     return !iCopyingOut;
@@ -540,5 +548,97 @@ void BooksBook::deleteFiles()
                 }
             }
         }
+    }
+}
+
+// NOTE: below methods are invoked on the worker thread
+bool BooksBook::makeLink(QString aDestPath)
+{
+    QByteArray oldp(iPath.toLocal8Bit());
+    QByteArray newp(aDestPath.toLocal8Bit());
+    if (!oldp.isEmpty()) {
+        if (!newp.isEmpty()) {
+            int err = link(oldp.data(), newp.data());
+            if (!err) {
+                HDEBUG("linked" << newp << "->" << oldp);
+                return true;
+            } else {
+                HDEBUG(newp << "->" << oldp << "error:" << strerror(errno));
+            }
+        } else {
+            HDEBUG("failed to convert" << newp << "to locale encoding");
+        }
+    } else {
+        HDEBUG("failed to convert" << oldp << "to locale encoding");
+    }
+    return false;
+}
+
+bool BooksBook::copyTo(QDir aDestDir, CopyOperation* aOperation)
+{
+    QString destPath(QFileInfo(aDestDir, iFileName).absoluteFilePath());
+    aDestDir.mkpath(aDestDir.path());
+    if (!isCanceled(aOperation) && makeLink(destPath)) {
+        return true;
+    } else if (isCanceled(aOperation)) {
+        return true;
+    } else {
+        bool success = false;
+        QFile src(iPath);
+        const qint64 total = src.size();
+        qint64 copied = 0;
+        if (src.open(QIODevice::ReadOnly)) {
+            QFile dest(destPath);
+            if (dest.open(QIODevice::WriteOnly)) {
+                QDateTime lastTime;
+                const qint64 bufsiz = 0x1000;
+                char* buf = new char[bufsiz];
+                int progress = 0;
+                qint64 len;
+                while (!isCanceled(aOperation) &&
+                       (len = src.read(buf, bufsiz)) > 0 &&
+                       !isCanceled(aOperation) &&
+                       dest.write(buf, len) == len) {
+                    copied += len;
+                    if (aOperation) {
+                        int newProg = (int)(copied*PROGRESS_PRECISION/total);
+                        if (progress != newProg) {
+                            // Don't fire signals too often
+                            QDateTime now(QDateTime::currentDateTimeUtc());
+                            if (!lastTime.isValid() ||
+                                lastTime.msecsTo(now) >= MIN_PROGRESS_DELAY) {
+                                lastTime = now;
+                                progress = newProg;
+                                aOperation->copyProgressChanged(progress);
+                            }
+                        }
+                    }
+                }
+                delete [] buf;
+                dest.close();
+                if (copied == total) {
+                    dest.setPermissions(BOOKS_FILE_PERMISSIONS);
+                    success = true;
+                    HDEBUG(total << "bytes copied from"<< qPrintable(iPath) <<
+                        "to" << qPrintable(destPath));
+                } else {
+                    if (isCanceled(aOperation)) {
+                        HDEBUG("copy" << qPrintable(iPath) <<  "to" <<
+                            qPrintable(destPath) << "cancelled");
+                    } else {
+                        HWARN(copied << "out of" << total <<
+                            "bytes copied from" << qPrintable(iPath) <<
+                            "to" << qPrintable(destPath));
+                    }
+                    dest.remove();
+                }
+            } else {
+                HWARN("failed to open" << qPrintable(destPath));
+            }
+            src.close();
+        } else {
+            HWARN("failed to open" << qPrintable(iPath));
+        }
+        return success;
     }
 }

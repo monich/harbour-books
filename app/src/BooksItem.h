@@ -36,12 +36,22 @@
 
 #include "BooksTypes.h"
 
-#include <QString>
-#include <QObject>
+#include <QDir>
 
 class BooksItem
 {
 public:
+    enum {
+        PROGRESS_PRECISION = 1000,
+        MIN_PROGRESS_DELAY =  100 /* ms */
+    };
+
+    class CopyOperation {
+    public:
+        virtual bool isCanceled() const = 0;
+        virtual void copyProgressChanged(int aProgress) = 0;
+    };
+
     virtual ~BooksItem() {}
 
     virtual BooksItem* retain() = 0;
@@ -52,8 +62,10 @@ public:
     virtual BooksBook* book() = 0;
     virtual QString name() const = 0;
     virtual QString fileName() const = 0;
+    virtual QString path() const = 0;
     virtual bool accessible() const = 0;
     virtual void deleteFiles() = 0;
+    virtual bool copyTo(QDir aDestDir, CopyOperation* aOperation = NULL) = 0;
 };
 
 #endif // BOOKS_ITEM_H

@@ -41,6 +41,7 @@
 #include "BooksTaskQueue.h"
 #include "BooksLoadingProperty.h"
 
+#include <QDir>
 #include <QHash>
 #include <QVariant>
 #include <QByteArray>
@@ -85,7 +86,6 @@ public:
     int count() const;
     int bookCount() const;
     int shelfCount() const;
-    QString path() const { return iPath; }
     QString relativePath() const { return iRelativePath; }
     void setRelativePath(QString aPath);
     BooksBook* bookAt(int aIndex) const;
@@ -117,8 +117,10 @@ public:
     virtual BooksBook* book();
     virtual QString name() const;
     virtual QString fileName() const;
+    virtual QString path() const;
     virtual bool accessible() const;
     virtual void deleteFiles();
+    virtual bool copyTo(QDir aDestDir, CopyOperation* aOperation);
 
 Q_SIGNALS:
     void loadingChanged();
@@ -140,7 +142,7 @@ private Q_SLOTS:
     void onBookAccessibleChanged();
     void onBookCopyingOutChanged();
     void onBookMovedAway();
-    void onCopyTaskPercentChanged();
+    void onCopyTaskProgressChanged();
     void onCopyTaskDone();
     void onDeleteTaskDone();
     void saveState();

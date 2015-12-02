@@ -70,7 +70,6 @@ public:
         shared_ptr<Book> aBook);
     ~BooksBook();
 
-    QString path() const { return iPath; }
     QString title() const { return iTitle; }
     QString authors() const { return iAuthors; }
     BooksPos lastPos() const { return iLastPos; }
@@ -95,8 +94,10 @@ public:
     virtual BooksBook* book();
     virtual QString name() const;
     virtual QString fileName() const;
+    virtual QString path() const;
     virtual bool accessible() const;
     virtual void deleteFiles();
+    virtual bool copyTo(QDir aDestDir, CopyOperation* aObserver);
 
 Q_SIGNALS:
     void coverImageChanged();
@@ -113,6 +114,8 @@ private Q_SLOTS:
 private:
     void init();
     bool coverTaskDone();
+    bool makeLink(QString aDestPath);
+    static bool isCanceled(CopyOperation* aOperation);
 
 private:
     QAtomicInt iRef;
@@ -135,5 +138,8 @@ private:
 };
 
 QML_DECLARE_TYPE(BooksBook)
+
+inline bool BooksBook::isCanceled(CopyOperation* aObserver)
+    { return aObserver && aObserver->isCanceled(); }
 
 #endif // BOOKS_BOOK_H
