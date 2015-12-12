@@ -210,7 +210,7 @@ BooksBookModel::BooksBookModel(QObject* aParent) :
     iTask(NULL),
     iData(NULL),
     iData2(NULL),
-    iTaskQueue(BooksTaskQueue::instance()),
+    iTaskQueue(BooksTaskQueue::defaultQueue()),
     iTextStyle(BooksTextStyle::defaults())
 {
     HDEBUG("created");

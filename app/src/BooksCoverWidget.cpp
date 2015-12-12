@@ -198,7 +198,7 @@ void BooksCoverWidget::DefaultImage::release(QImage* aImage)
 
 BooksCoverWidget::BooksCoverWidget(QQuickItem* aParent) :
     QQuickPaintedItem(aParent),
-    iTaskQueue(BooksTaskQueue::instance()),
+    iTaskQueue(BooksTaskQueue::scaleQueue()),
     iScaleTask(NULL),
     iBook(NULL),
     iDefaultImage(NULL),
@@ -234,7 +234,6 @@ void BooksCoverWidget::setBook(BooksBook* aBook)
         if (aBook) {
             (iBook = aBook)->retain();
             iBook->requestCoverImage();
-            iBookRef = iBook->bookRef();
             iCoverImage = iBook->coverImage();
             iTitle = iBook->title();
             connect(iBook,
@@ -246,7 +245,6 @@ void BooksCoverWidget::setBook(BooksBook* aBook)
             HDEBUG(iTitle);
         } else {
             iBook = NULL;
-            iBookRef.reset();
             iCoverImage = QImage();
             iTitle.clear();
             HDEBUG("<none>");
@@ -333,7 +331,7 @@ void BooksCoverWidget::onSizeChanged()
 
 bool BooksCoverWidget::empty() const
 {
-    return !iBook || !iBook->hasCoverImage() || iScaledImage.isNull();
+    return iScaledImage.isNull();
 }
 
 bool BooksCoverWidget::loading() const
@@ -358,6 +356,7 @@ void BooksCoverWidget::scaleImage(bool aWasEmpty)
                 HWARN("Failed to load" << qPrintable(path));
             }
         }
+
         if (iCoverImage.isNull()) {
             if (!iDefaultImage) iDefaultImage = DefaultImage::retain();
             if (iDefaultImage) iCoverImage = *iDefaultImage;
@@ -380,6 +379,8 @@ void BooksCoverWidget::scaleImage(bool aWasEmpty)
         iScaledImage = QImage();
     }
 
+    updateCenter();
+
     if (aWasEmpty != empty()) {
         Q_EMIT emptyChanged();
     }
@@ -393,6 +394,7 @@ void BooksCoverWidget::onScaleTaskDone()
     iScaleTask->release(this);
     iScaleTask = NULL;
     update();
+    updateCenter();
     if (wasEmpty != empty()) {
         Q_EMIT emptyChanged();
     }
@@ -404,6 +406,8 @@ void BooksCoverWidget::paint(QPainter* aPainter)
     const qreal h = height();
     if (w > 0 && h > 0) {
         qreal sw, sh;
+
+        // This has to be consistent with updateCenter()
         if (!iScaledImage.isNull()) {
             sw = iScaledImage.width();
             sh = iScaledImage.height();
@@ -412,7 +416,7 @@ void BooksCoverWidget::paint(QPainter* aPainter)
             sh = h;
         }
 
-        const int x = (w - sw)/2;
+        const int x = floor((w - sw)/2);
         const int y = h - sh;
 
         QPainterPath path;
@@ -424,7 +428,7 @@ void BooksCoverWidget::paint(QPainter* aPainter)
             const qreal d = 2*iBorderRadius;
             w1 = qMin(w, qMax(sw, 2*d)) - iBorderWidth;
             h1 = qMin(h, qMax(sh, 3*d)) - iBorderWidth;
-            x1 = (w - w1)/2;
+            x1 = floor((w - w1)/2);
             y1 = h - h1 - iBorderWidth/2;
 
             const qreal x2 = x1 + w1 - d;
@@ -439,7 +443,7 @@ void BooksCoverWidget::paint(QPainter* aPainter)
         } else {
             w1 = sw - iBorderWidth;
             h1 = sh - iBorderWidth;
-            x1 = (w - w1)/2;
+            x1 = floor((w - w1)/2);
             y1 = h - h1 - iBorderWidth/2;
         }
 
@@ -458,6 +462,31 @@ void BooksCoverWidget::paint(QPainter* aPainter)
             } else {
                 aPainter->drawRect(x1, y1, w1, h1);
             }
+        }
+    }
+}
+
+void BooksCoverWidget::updateCenter()
+{
+    const QPoint oldCenter(iCenter);
+    const qreal w = width();
+    const qreal h = height();
+
+    // This has to be consistent with paint()
+    iCenter.setX(floor(w/2));
+    if (iScaledImage.isNull()) {
+        iCenter.setY(floor(h/2));
+    } else {
+        iCenter.setY(floor(h - iScaledImage.height()/2));
+    }
+
+    if (iCenter != oldCenter) {
+        Q_EMIT centerChanged();
+        if (iCenter.x() != oldCenter.x()) {
+            Q_EMIT centerXChanged();
+        }
+        if (iCenter.y() != oldCenter.y()) {
+            Q_EMIT centerYChanged();
         }
     }
 }

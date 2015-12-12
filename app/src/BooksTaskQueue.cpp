@@ -36,32 +36,61 @@
 
 #include "HarbourDebug.h"
 
-static weak_ptr<BooksTaskQueue> booksTaskQueueInstance;
+class BooksTaskQueue::Private {
+public:
+    static weak_ptr<BooksTaskQueue> gDefaultQueue;
+    static weak_ptr<BooksTaskQueue> gScaleQueue;
 
-shared_ptr<BooksTaskQueue> BooksTaskQueue::instance()
-{
-    shared_ptr<BooksTaskQueue> worker;
-    if (booksTaskQueueInstance.isNull()) {
-        booksTaskQueueInstance = (worker = new BooksTaskQueue());
-    } else {
-        worker = booksTaskQueueInstance;
+    static BooksTaskQueue* newDefaultQueue() { return new BooksTaskQueue(1); }
+    static BooksTaskQueue* newScaleQueue() { return new BooksTaskQueue(2); }
+
+    static void waitForDone(shared_ptr<BooksTaskQueue> aQueue, int aMsecs) {
+        if (!aQueue.isNull()) {
+            aQueue->iPool->waitForDone(aMsecs);
+        }
     }
-    return worker;
+
+    static void waitForDone(int aMsecs) {
+        waitForDone(gDefaultQueue, aMsecs);
+        waitForDone(gScaleQueue, aMsecs);
+    }
+
+    static shared_ptr<BooksTaskQueue> get(weak_ptr<BooksTaskQueue>* aQueue,
+        BooksTaskQueue* (*aNewFunc)())
+    {
+        shared_ptr<BooksTaskQueue> queue;
+        if (aQueue->isNull()) {
+            *aQueue = (queue = aNewFunc());
+        } else {
+            queue = *aQueue;
+        }
+        return queue;
+    }
+};
+
+weak_ptr<BooksTaskQueue> BooksTaskQueue::Private::gDefaultQueue;
+weak_ptr<BooksTaskQueue> BooksTaskQueue::Private::gScaleQueue;
+
+shared_ptr<BooksTaskQueue> BooksTaskQueue::defaultQueue()
+{
+    return Private::get(&Private::gDefaultQueue, Private::newDefaultQueue);
 }
 
-BooksTaskQueue::BooksTaskQueue() :
-    iPool(new QThreadPool)
+shared_ptr<BooksTaskQueue> BooksTaskQueue::scaleQueue()
 {
-    HDEBUG("created");
-    iPool->setMaxThreadCount(1);
+    return Private::get(&Private::gScaleQueue, Private::newScaleQueue);
 }
 
 void BooksTaskQueue::waitForDone(int aMsecs)
 {
-    shared_ptr<BooksTaskQueue> worker = booksTaskQueueInstance;
-    if (!worker.isNull()) {
-        worker->iPool->waitForDone(aMsecs);
-    }
+    Private::waitForDone(aMsecs);
+}
+
+BooksTaskQueue::BooksTaskQueue(int aMaxThreadCount) :
+    iPool(new QThreadPool)
+{
+    HDEBUG("created");
+    iPool->setMaxThreadCount(aMaxThreadCount);
 }
 
 BooksTaskQueue::~BooksTaskQueue()

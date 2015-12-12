@@ -138,12 +138,22 @@ Item {
 
     ProgressCircle {
         id: progressIndicator
-        width: parent.width/2
+        width: busyIndicator.width
         height: width
-        anchors.centerIn: parent
+        anchors.centerIn: busyIndicator
         opacity: (copying && !longCopyTimer.running && value > 0 && value < 1) ? 1 : 0
         visible: opacity > 0
         Behavior on opacity { FadeAnimation {} }
+    }
+
+    BusyIndicator {
+        id: busyIndicator
+        size: BusyIndicatorSize.Medium
+        x: cover.x + cover.centerX - width/2
+        y: cover.y + cover.centerY - height/2
+        visible: opacity > 0
+        running: copying && !longCopyTimer.running && (progressIndicator.value <= 0 || progressIndicator.value >= 1)
+        Behavior on opacity { enabled: false }
     }
 
     function withinDeleteButton(x, y) {

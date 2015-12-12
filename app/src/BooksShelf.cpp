@@ -77,9 +77,12 @@ Q_SIGNALS:
 
 public:
     BooksShelf::Data* iDestData;
+    BooksStorage iDestStorage;
+    QString iDestRelPath;
+    QString iDestAbsPath;
     BooksItem* iSrcItem;
+    BooksItem* iDestItem;
     int iCopyProgress;
-    bool iSuccess;
 };
 
 // ==========================================================================
@@ -323,9 +326,12 @@ inline bool BooksShelf::Data::copyingOut()
 
 BooksShelf::CopyTask::CopyTask(BooksShelf::Data* aDestData, BooksItem* aSrcItem) :
     iDestData(aDestData),
+    iDestStorage(aDestData->iShelf->storage()),
+    iDestRelPath(aDestData->iShelf->relativePath()),
+    iDestAbsPath(iDestStorage.fullPath(iDestRelPath + "/" + aSrcItem->fileName())),
     iSrcItem(aSrcItem->retain()),
-    iCopyProgress(0),
-    iSuccess(false)
+    iDestItem(NULL),
+    iCopyProgress(0)
 {
     if (iDestData->iCopyTask) {
         iDestData->iCopyTask->release(iDestData->iShelf);
@@ -341,6 +347,7 @@ BooksShelf::CopyTask::~CopyTask()
 {
     HASSERT(!iDestData);
     iSrcItem->release();
+    if (iDestItem) iDestItem->release();
 }
 
 inline QString BooksShelf::CopyTask::srcPath() const
@@ -350,13 +357,12 @@ inline QString BooksShelf::CopyTask::srcPath() const
 
 inline QString BooksShelf::CopyTask::destPath() const
 {
-    return QFileInfo(iDestData->iShelf->path(),
-        iSrcItem->fileName()).absoluteFilePath();
+    return iDestAbsPath;
 }
 
 void BooksShelf::CopyTask::performTask()
 {
-    iSuccess = iSrcItem->copyTo(QDir(iDestData->iShelf->path()), this);
+    iDestItem = iSrcItem->copyTo(iDestStorage, iDestRelPath, this);
 }
 
 bool BooksShelf::CopyTask::isCanceled() const
@@ -470,7 +476,7 @@ BooksShelf::BooksShelf(QObject* aParent) :
     iEditMode(false),
     iRef(-1),
     iSaveTimer(new BooksSaveTimer(this)),
-    iTaskQueue(BooksTaskQueue::instance())
+    iTaskQueue(BooksTaskQueue::defaultQueue())
 {
     init();
     connect(iSaveTimer, SIGNAL(save()), SLOT(saveState()));
@@ -485,7 +491,7 @@ BooksShelf::BooksShelf(BooksStorage aStorage, QString aRelativePath) :
     iEditMode(false),
     iRef(1),
     iSaveTimer(NULL),
-    iTaskQueue(BooksTaskQueue::instance())
+    iTaskQueue(BooksTaskQueue::defaultQueue())
 {
     init();
     // Refcounted BooksShelf objects are managed by C++ code
@@ -1088,7 +1094,7 @@ void BooksShelf::onCopyTaskDone()
     if (task) {
         QString dest = task->destPath();
         HDEBUG(qPrintable(task->srcPath()) << "->" << qPrintable(dest) <<
-            "copy" << (task->iSuccess ? "done" : "FAILED"));
+            "copy" << (task->iDestItem ? "done" : "FAILED"));
 
         Data* data = task->iDestData;
         const int row = iList.indexOf(data);
@@ -1099,15 +1105,15 @@ void BooksShelf::onCopyTaskDone()
         HASSERT(src);
         if (src) {
             src->retain();
-            if (task->iSuccess) {
-                shared_ptr<Book> book = BooksUtil::bookFromFile(dest);
-                if (!book.isNull()) {
-                    copy = new BooksBook(iStorage, iRelativePath, book);
+            if (task->iDestItem) {
+                copy = task->iDestItem->book();
+                if (copy) {
+                    copy->retain();
                     copy->setLastPos(src->lastPos());
                     copy->setCoverImage(src->coverImage());
                     copy->requestCoverImage();
                 } else {
-                    HWARN("can't open copied book" << qPrintable(dest));
+                    HWARN("not a book:" << qPrintable(dest));
                 }
             }
         }
@@ -1167,10 +1173,11 @@ void BooksShelf::deleteFiles()
     }
 }
 
-bool BooksShelf::copyTo(QDir aDestDir, CopyOperation* aOperation)
+BooksItem* BooksShelf::copyTo(const BooksStorage& aStorage, QString aRelPath,
+    CopyOperation* aObserver)
 {
     HWARN("copying folders is not implemented!!");
-    return false;
+    return NULL;
 }
 
 QHash<int,QByteArray> BooksShelf::roleNames() const

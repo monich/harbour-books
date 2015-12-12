@@ -57,6 +57,9 @@ class BooksCoverWidget: public QQuickPaintedItem
     Q_PROPERTY(QColor borderColor READ borderColor WRITE setBorderColor NOTIFY borderColorChanged)
     Q_PROPERTY(QUrl defaultCover READ defaultCover WRITE setDefaultCover NOTIFY defaultCoverChanged)
     Q_PROPERTY(BooksBook* book READ book WRITE setBook NOTIFY bookChanged)
+    Q_PROPERTY(qreal centerX READ centerX NOTIFY centerXChanged)
+    Q_PROPERTY(qreal centerY READ centerY NOTIFY centerYChanged)
+    Q_PROPERTY(QPoint center READ center NOTIFY centerChanged)
 
 public:
     BooksCoverWidget(QQuickItem* aParent = NULL);
@@ -86,6 +89,10 @@ public:
     bool synchronous() const { return iSynchronous; }
     void setSynchronous(bool aValue);
 
+    qreal centerX() const { return iCenter.x(); }
+    qreal centerY() const { return iCenter.y(); }
+    QPoint center() const { return iCenter; }
+
 Q_SIGNALS:
     void bookChanged();
     void emptyChanged();
@@ -96,6 +103,9 @@ Q_SIGNALS:
     void borderRadiusChanged();
     void borderColorChanged();
     void defaultCoverChanged();
+    void centerXChanged();
+    void centerYChanged();
+    void centerChanged();
 
 private Q_SLOTS:
     void onCoverImageChanged();
@@ -106,6 +116,7 @@ private:
     void paint(QPainter *painter);
     void scaleImage(bool aWasEmpty);
     void scaleImage() { scaleImage(empty()); }
+    void updateCenter();
 
 private:
     class ScaleTask;
@@ -114,7 +125,6 @@ private:
     ScaleTask* iScaleTask;
     QImage iScaledImage;
     QImage iCoverImage;
-    shared_ptr<Book> iBookRef;
     BooksBook* iBook;
     QImage* iDefaultImage;
     qreal iBorderWidth;
@@ -122,6 +132,7 @@ private:
     QColor iBorderColor;
     QUrl iDefaultCover;
     QString iTitle;
+    QPoint iCenter;
     bool iStretch;
     bool iSynchronous;
 };

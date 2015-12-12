@@ -158,7 +158,7 @@ void BooksPageWidget::RenderTask::performTask()
 
 BooksPageWidget::BooksPageWidget(QQuickItem* aParent) :
     QQuickPaintedItem(aParent),
-    iTaskQueue(BooksTaskQueue::instance()),
+    iTaskQueue(BooksTaskQueue::defaultQueue()),
     iTextStyle(BooksTextStyle::defaults()),
     iResizeTimer(new QTimer(this)),
     iModel(NULL),

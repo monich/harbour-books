@@ -45,17 +45,20 @@ class BooksTaskQueue
     friend class shared_ptr_storage<BooksTaskQueue>;
 
 public:
-    static shared_ptr<BooksTaskQueue> instance();
+    static shared_ptr<BooksTaskQueue> defaultQueue();
+    static shared_ptr<BooksTaskQueue> scaleQueue();
     static void waitForDone(int aMsecs = -1);
 
     void submit(BooksTask* aTask);
     void submit(BooksTask* aTask, QObject* aTarget, const char* aSlot);
 
 private:
-    BooksTaskQueue();
+    BooksTaskQueue(int aMaxThreadCount);
     ~BooksTaskQueue();
 
 private:
+    class Private;
+    friend class Private;
     QThreadPool* iPool;
 };
 

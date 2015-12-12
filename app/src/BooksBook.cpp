@@ -37,6 +37,7 @@
 #include "BooksTextView.h"
 #include "BooksTextStyle.h"
 #include "BooksPaintContext.h"
+#include "BooksUtil.h"
 
 #include "HarbourJson.h"
 #include "HarbourDebug.h"
@@ -46,6 +47,7 @@
 #include "bookmodel/BookModel.h"
 #include "library/Author.h"
 
+#include <QDir>
 #include <QFile>
 #include <QFileInfo>
 #include <QDirIterator>
@@ -132,15 +134,16 @@ bool BooksBook::CoverPaintContext::gotIt() const
 class BooksBook::CoverTask : public BooksTask
 {
 public:
-    CoverTask(QString aStateDir, shared_ptr<Book> aBook) :
-        iStateDir(aStateDir), iBook(aBook), iCoverMissing(false) {}
+    CoverTask(QString aStateDir, shared_ptr<Book> aBook, QString aImagePath) :
+        iStateDir(aStateDir), iBook(aBook), iImagePath(aImagePath),
+        iCoverMissing(false) {}
 
     bool hasImage() const;
-    QString cachedImagePath() const;
 
 public:
     QString iStateDir;
     shared_ptr<Book> iBook;
+    QString iImagePath;
     QImage iCoverImage;
     bool iCoverMissing;
 };
@@ -148,16 +151,6 @@ public:
 inline bool BooksBook::CoverTask::hasImage() const
 {
     return iCoverImage.width() > 0 && iCoverImage.height() > 0;
-}
-
-QString BooksBook::CoverTask::cachedImagePath() const
-{
-    if (!iStateDir.isEmpty()) {
-        return iStateDir + "/" +
-            QString::fromStdString(iBook->file().name(false)) +
-            BOOK_COVER_SUFFIX + "jpg";
-    }
-    return QString();
 }
 
 // ==========================================================================
@@ -168,8 +161,8 @@ class BooksBook::LoadCoverTask : public BooksBook::CoverTask
 {
 public:
     LoadCoverTask(QString aStateDir, shared_ptr<Book> aBook,
-        shared_ptr<FormatPlugin> aFormatPlugin) :
-        BooksBook::CoverTask(aStateDir, aBook),
+        shared_ptr<FormatPlugin> aFormatPlugin, QString aImagePath) :
+        BooksBook::CoverTask(aStateDir, aBook, aImagePath),
         iFormatPlugin(aFormatPlugin) {}
 
     virtual void performTask();
@@ -234,8 +227,8 @@ void BooksBook::LoadCoverTask::performTask()
 class BooksBook::GuessCoverTask : public BooksBook::CoverTask
 {
 public:
-    GuessCoverTask(QString aStateDir, shared_ptr<Book> aBook) :
-        BooksBook::CoverTask(aStateDir, aBook) {}
+    GuessCoverTask(QString aStateDir, shared_ptr<Book> aBook, QString aImagePath) :
+        BooksBook::CoverTask(aStateDir, aBook, aImagePath) {}
 
     virtual void performTask();
 };
@@ -264,17 +257,16 @@ void BooksBook::GuessCoverTask::performTask()
             iCoverImage.width() << "as cover for" << iBook->title().c_str());
 
         // Save the extracted image
-        QString coverPath(cachedImagePath());
-        if (!coverPath.isEmpty()) {
-            QFileInfo file(coverPath);
+        if (!iImagePath.isEmpty()) {
+            QFileInfo file(iImagePath);
             QDir dir(file.dir());
             if (!dir.mkpath(dir.absolutePath())) {
                 HWARN("failed to create" << qPrintable(dir.absolutePath()));
             }
-            if (iCoverImage.save(coverPath)) {
-                HDEBUG("saved cover to" << qPrintable(coverPath));
+            if (iCoverImage.save(iImagePath)) {
+                HDEBUG("saved cover to" << qPrintable(iImagePath));
             } else {
-                HWARN("failed to save" << qPrintable(coverPath));
+                HWARN("failed to save" << qPrintable(iImagePath));
             }
         }
     } else if (isCanceled()) {
@@ -285,12 +277,11 @@ void BooksBook::GuessCoverTask::performTask()
 
         // Create empty file. Guessing the cover image is an expensive task,
         // we don't want to do it every time the application is started.
-        QString coverPath(cachedImagePath());
-        if (!coverPath.isEmpty() &&
+        if (!iImagePath.isEmpty() &&
             // Check if the book file still exists - the failure could've
             // been caused by the SD-card removal.
             QFile::exists(QString::fromStdString(iBook->file().path()))) {
-            QFile(coverPath).open(QIODevice::WriteOnly);
+            QFile(iImagePath).open(QIODevice::WriteOnly);
         }
     }
 }
@@ -313,7 +304,7 @@ BooksBook::BooksBook(const BooksStorage& aStorage, QString aRelativePath,
     iRef(1),
     iStorage(aStorage),
     iBook(aBook),
-    iTaskQueue(BooksTaskQueue::instance())
+    iTaskQueue(BooksTaskQueue::defaultQueue())
 {
     init();
     HASSERT(!iBook.isNull());
@@ -328,8 +319,10 @@ BooksBook::BooksBook(const BooksStorage& aStorage, QString aRelativePath,
         iAuthors += QString::fromStdString(authors[i]->name());
     }
     if (iStorage.isValid()) {
-        iStateDir = iStorage.configDir().path() + "/" + aRelativePath;
-        iStateFilePath =  iStateDir + "/" + iFileName + BOOKS_STATE_FILE_SUFFIX;
+        iStateDir = QDir::cleanPath(iStorage.configDir().path() +
+            QDir::separator() + aRelativePath);
+        iStateFilePath =  QDir::cleanPath(iStateDir +
+            QDir::separator() + iFileName + BOOKS_STATE_FILE_SUFFIX);
         // Load the state
         QVariantMap state;
         if (HarbourJson::load(iStateFilePath, state)) {
@@ -430,11 +423,6 @@ void BooksBook::setCopyingOut(bool aValue)
     }
 }
 
-QImage BooksBook::coverImage()
-{
-    return iCoverImage;
-}
-
 bool BooksBook::hasCoverImage() const
 {
     return iCoverImage.width() > 0 && iCoverImage.height() > 0;
@@ -453,7 +441,8 @@ bool BooksBook::requestCoverImage()
     if (!iBook.isNull() && !iFormatPlugin.isNull() &&
         !iCoverTasksDone && !iCoverTask) {
         HDEBUG(iTitle);
-        iCoverTask = new LoadCoverTask(iStateDir, iBook, iFormatPlugin);
+        iCoverTask = new LoadCoverTask(iStateDir, iBook, iFormatPlugin,
+            cachedImagePath());
         connect(iCoverTask, SIGNAL(done()), SLOT(onLoadCoverTaskDone()));
         iTaskQueue->submit(iCoverTask);
         Q_EMIT loadingCoverChanged();
@@ -492,7 +481,7 @@ void BooksBook::onLoadCoverTaskDone()
         iCoverTasksDone = true;
         Q_EMIT loadingCoverChanged();
     } else {
-        iCoverTask = new GuessCoverTask(iStateDir, iBook);
+        iCoverTask = new GuessCoverTask(iStateDir, iBook, cachedImagePath());
         connect(iCoverTask, SIGNAL(done()), SLOT(onGuessCoverTaskDone()));
         iTaskQueue->submit(iCoverTask);
     }
@@ -501,20 +490,19 @@ void BooksBook::onLoadCoverTaskDone()
 void BooksBook::onGuessCoverTaskDone()
 {
     HDEBUG(iTitle);
-
-    if (iCoverTask->iCoverMissing && !iCoverImage.isNull()) {
-        // This may happen after the book with custom cover has been moved
-        // between SD-card and the internal storage. Store the custom cover
-        // so that it doesn't get lost. This is a fairly rare situation.
-        QString coverPath(iCoverTask->cachedImagePath());
-        if (!coverPath.isEmpty() && iCoverImage.save(coverPath)) {
-            HDEBUG("saved custom cover to" << qPrintable(coverPath));
-        }
-    }
-
     coverTaskDone();
     iCoverTasksDone = true;
     Q_EMIT loadingCoverChanged();
+}
+
+QString BooksBook::cachedImagePath() const
+{
+    if (!iStateDir.isEmpty() && !iBook.isNull()) {
+        return QDir::cleanPath(iStateDir + QDir::separator() +
+            QString::fromStdString(iBook->file().name(false)) +
+            BOOK_COVER_SUFFIX "jpg");
+    }
+    return QString();
 }
 
 void BooksBook::saveState()
@@ -551,6 +539,21 @@ void BooksBook::deleteFiles()
     }
 }
 
+BooksBook* BooksBook::newBook(const BooksStorage& aStorage, QString aRelPath,
+    QString aFileName)
+{
+    shared_ptr<Book> ref = BooksUtil::bookFromFile(
+        QFileInfo(QDir(aStorage.fullPath(aRelPath)), aFileName).
+        absoluteFilePath());
+    if (!ref.isNull()) {
+        BooksBook* book = new BooksBook(aStorage, aRelPath, ref);
+        book->moveToThread(qApp->thread());
+        return book;
+    } else {
+        return NULL;
+    }
+}
+
 // NOTE: below methods are invoked on the worker thread
 bool BooksBook::makeLink(QString aDestPath)
 {
@@ -574,21 +577,24 @@ bool BooksBook::makeLink(QString aDestPath)
     return false;
 }
 
-bool BooksBook::copyTo(QDir aDestDir, CopyOperation* aOperation)
+BooksItem* BooksBook::copyTo(const BooksStorage& aStorage, QString aRelPath,
+    CopyOperation* aOperation)
 {
-    QString destPath(QFileInfo(aDestDir, iFileName).absoluteFilePath());
-    aDestDir.mkpath(aDestDir.path());
-    if (!isCanceled(aOperation) && makeLink(destPath)) {
-        return true;
+    QDir destDir(aStorage.fullPath(aRelPath));
+    destDir.mkpath(destDir.path());
+    const QString absDestPath(QFileInfo(QDir(aStorage.fullPath(aRelPath)),
+        iFileName).absoluteFilePath());
+    if (!isCanceled(aOperation) && makeLink(absDestPath)) {
+        return newBook(aStorage, aRelPath, iFileName);
     } else if (isCanceled(aOperation)) {
-        return true;
+        return NULL;
     } else {
-        bool success = false;
+        BooksBook* copy = NULL;
         QFile src(iPath);
         const qint64 total = src.size();
         qint64 copied = 0;
         if (src.open(QIODevice::ReadOnly)) {
-            QFile dest(destPath);
+            QFile dest(absDestPath);
             if (dest.open(QIODevice::WriteOnly)) {
                 QDateTime lastTime;
                 const qint64 bufsiz = 0x1000;
@@ -614,32 +620,40 @@ bool BooksBook::copyTo(QDir aDestDir, CopyOperation* aOperation)
                         }
                     }
                 }
-                aOperation->copyProgressChanged(PROGRESS_PRECISION);
                 delete [] buf;
                 dest.close();
+                aOperation->copyProgressChanged(PROGRESS_PRECISION);
                 if (copied == total) {
                     dest.setPermissions(BOOKS_FILE_PERMISSIONS);
-                    success = true;
                     HDEBUG(total << "bytes copied from"<< qPrintable(iPath) <<
-                        "to" << qPrintable(destPath));
+                        "to" << qPrintable(absDestPath));
+                    copy = newBook(aStorage, aRelPath, iFileName);
+
+                    // Copy cover image too
+                    if (copy && !iCoverImage.isNull()) {
+                        QString cover(copy->cachedImagePath());
+                        if (!cover.isEmpty() && iCoverImage.save(cover)) {
+                            HDEBUG("copied cover to" << qPrintable(cover));
+                        }
+                    }
                 } else {
                     if (isCanceled(aOperation)) {
                         HDEBUG("copy" << qPrintable(iPath) <<  "to" <<
-                            qPrintable(destPath) << "cancelled");
+                            qPrintable(absDestPath) << "cancelled");
                     } else {
                         HWARN(copied << "out of" << total <<
                             "bytes copied from" << qPrintable(iPath) <<
-                            "to" << qPrintable(destPath));
+                            "to" << qPrintable(absDestPath));
                     }
                     dest.remove();
                 }
             } else {
-                HWARN("failed to open" << qPrintable(destPath));
+                HWARN("failed to open" << qPrintable(absDestPath));
             }
             src.close();
         } else {
             HWARN("failed to open" << qPrintable(iPath));
         }
-        return success;
+        return copy;
     }
 }

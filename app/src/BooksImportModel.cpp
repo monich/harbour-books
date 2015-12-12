@@ -278,7 +278,7 @@ BooksImportModel::BooksImportModel(QObject* aParent) :
     iProgress(0),
     iSelectedCount(0),
     iAutoRefresh(false),
-    iTaskQueue(BooksTaskQueue::instance()),
+    iTaskQueue(BooksTaskQueue::defaultQueue()),
     iTask(NULL)
 {
     iSelectedRole.append(BooksImportRoleSelected);

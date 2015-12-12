@@ -35,6 +35,7 @@
 #define BOOKS_ITEM_H
 
 #include "BooksTypes.h"
+#include "BooksStorage.h"
 
 #include <QDir>
 
@@ -65,7 +66,8 @@ public:
     virtual QString path() const = 0;
     virtual bool accessible() const = 0;
     virtual void deleteFiles() = 0;
-    virtual bool copyTo(QDir aDestDir, CopyOperation* aOperation = NULL) = 0;
+    virtual BooksItem* copyTo(const BooksStorage& aStorage, QString aRelPath,
+        CopyOperation* aOperation = NULL) = 0;
 };
 
 #endif // BOOKS_ITEM_H

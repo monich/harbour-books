@@ -65,7 +65,7 @@ class BooksShelf: public QAbstractListModel, public BooksItem, public BooksLoadi
     Q_PROPERTY(int dummyItemIndex READ dummyItemIndex WRITE setDummyItemIndex NOTIFY dummyItemIndexChanged)
     Q_PROPERTY(BooksBook* book READ book CONSTANT)
     Q_PROPERTY(BooksShelf* shelf READ shelf CONSTANT)
-    Q_PROPERTY(QObject* storage READ storage CONSTANT)
+    Q_PROPERTY(QObject* storage READ storageObject CONSTANT)
 
 public:
     explicit BooksShelf(QObject* aParent = NULL);
@@ -89,7 +89,8 @@ public:
     QString relativePath() const { return iRelativePath; }
     void setRelativePath(QString aPath);
     BooksBook* bookAt(int aIndex) const;
-    QObject* storage() { return &iStorage; }
+    QObject* storageObject() { return &iStorage; }
+    const BooksStorage& storage() const { return iStorage; }
     void setName(QString aName);
 
     bool editMode() const { return iEditMode; }
@@ -120,7 +121,8 @@ public:
     virtual QString path() const;
     virtual bool accessible() const;
     virtual void deleteFiles();
-    virtual bool copyTo(QDir aDestDir, CopyOperation* aOperation);
+    virtual BooksItem* copyTo(const BooksStorage& aStorage, QString aRelPath,
+        CopyOperation* aObserver);
 
 Q_SIGNALS:
     void loadingChanged();
