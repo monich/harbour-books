@@ -39,16 +39,19 @@ private:
 XHTMLImageFinder::XHTMLImageFinder(OEBCoverReader &coverReader) : myCoverReader(coverReader) {
 }
 
-static const std::string IMG = "img";
-
 void XHTMLImageFinder::startElementHandler(const char *tag, const char **attributes) {
+	static const std::string IMG = "img";
+	static const std::string IMAGE = "image";
+	const char *src = NULL;
 	if (IMG == tag) {
-		const char *src = attributeValue(attributes, "src");
-		if (src != 0) {
-			myCoverReader.myImage =
-				new ZLFileImage(ZLFile(myCoverReader.myPathPrefix + src), 0);
-			interrupt();
-		}
+		src = attributeValue(attributes, "src");
+	} else if (IMAGE == tag) {
+		src = attributeValue(attributes, "xlink:href");
+	}
+	if (src) {
+		myCoverReader.myImage =
+			new ZLFileImage(ZLFile(myCoverReader.myPathPrefix + src), 0);
+		interrupt();
 	}
 }
 
