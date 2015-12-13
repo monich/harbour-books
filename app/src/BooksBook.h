@@ -63,6 +63,7 @@ class BooksBook : public QObject, public BooksItem
     Q_PROPERTY(bool accessible READ accessible NOTIFY accessibleChanged)
     Q_PROPERTY(bool loadingCover READ loadingCover NOTIFY loadingCoverChanged)
     Q_PROPERTY(bool copyingOut READ copyingOut NOTIFY copyingOutChanged)
+    Q_PROPERTY(bool fontSizeAdjust READ fontSizeAdjust WRITE setFontSizeAdjust NOTIFY fontSizeAdjustChanged)
 
 public:
     explicit BooksBook(QObject* aParent = NULL);
@@ -75,6 +76,8 @@ public:
 
     QString title() const { return iTitle; }
     QString authors() const { return iAuthors; }
+    int fontSizeAdjust() const { return iFontSizeAdjust; }
+    bool setFontSizeAdjust(int aFontSizeAdjust);
     BooksPos lastPos() const { return iLastPos; }
     void setLastPos(const BooksPos& aPos);
     shared_ptr<Book> bookRef() const { return iBook; }
@@ -107,6 +110,7 @@ Q_SIGNALS:
     void loadingCoverChanged();
     void accessibleChanged();
     void copyingOutChanged();
+    void fontSizeAdjustChanged();
     void movedAway();
 
 private Q_SLOTS:
@@ -118,11 +122,13 @@ private:
     void init();
     bool coverTaskDone();
     bool makeLink(QString aDestPath);
+    void requestSave();
     QString cachedImagePath() const;
     static bool isCanceled(CopyOperation* aOperation);
 
 private:
     QAtomicInt iRef;
+    int iFontSizeAdjust;
     BooksPos iLastPos;
     BooksStorage iStorage;
     shared_ptr<Book> iBook;

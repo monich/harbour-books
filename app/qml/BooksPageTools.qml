@@ -42,6 +42,9 @@ Item {
     property real leftSpaceUsed: dayNightModeSwitch.x + dayNightModeSwitch.width
     property real rightSpaceUsed: width - decreaseFontSizeButton.x
 
+    signal increaseFontSize();
+    signal decreaseFontSize();
+
     property real _spacingBy2: Math.ceil(spacing/2)
 
     // Left side
@@ -104,7 +107,7 @@ Item {
             opacity: globalSettings.invertColors ? 1 : 0.5
             Behavior on opacity { FadeAnimation {} }
         }
-        onClicked: globalSettings.increaseFontSize()
+        onClicked: pageTools.increaseFontSize()
     }
 
     MouseArea {
@@ -128,6 +131,6 @@ Item {
             opacity: globalSettings.invertColors ? 1 : 0.5
             Behavior on opacity { FadeAnimation {} }
         }
-        onClicked: globalSettings.decreaseFontSize()
+        onClicked: pageTools.decreaseFontSize()
     }
 }

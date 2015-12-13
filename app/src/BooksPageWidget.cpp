@@ -187,10 +187,7 @@ BooksPageWidget::~BooksPageWidget()
 void BooksPageWidget::setModel(BooksBookModel* aModel)
 {
     if (iModel != aModel) {
-        if (iModel) {
-            iModel->disconnect(this);
-            iModel = NULL;
-        }
+        if (iModel) iModel->disconnect(this);
         iModel = aModel;
         if (iModel) {
 #if HARBOUR_DEBUG
@@ -200,6 +197,7 @@ void BooksPageWidget::setModel(BooksBookModel* aModel)
                 HDEBUG(iModel->title());
             }
 #endif // HARBOUR_DEBUG
+            iTextStyle = iModel->textStyle();
             iPageMark = iModel->pageMark(iPage);
             connect(iModel, SIGNAL(bookModelChanged()),
                 SLOT(onBookModelChanged()));
@@ -209,8 +207,11 @@ void BooksPageWidget::setModel(BooksBookModel* aModel)
                 SLOT(onBookModelPageMarksChanged()));
             connect(iModel, SIGNAL(loadingChanged()),
                 SLOT(onBookModelLoadingChanged()));
+            connect(iModel, SIGNAL(textStyleChanged()),
+                SLOT(onTextStyleChanged()));
         } else {
             iPageMark.invalidate();
+            iTextStyle = BooksTextStyle::defaults();
         }
         resetView();
         Q_EMIT modelChanged();
@@ -225,10 +226,6 @@ void BooksPageWidget::setSettings(BooksSettings* aSettings)
         if (iSettings) iSettings->disconnect(this);
         iSettings = aSettings;
         if (iSettings) {
-            iTextStyle = iSettings->textStyle();
-            connect(iSettings,
-                SIGNAL(textStyleChanged()),
-                SLOT(onTextStyleChanged()));
             connect(iSettings,
                 SIGNAL(invertColorsChanged()),
                 SLOT(onInvertColorsChanged()));
@@ -258,8 +255,8 @@ void BooksPageWidget::setSettings(BooksSettings* aSettings)
 void BooksPageWidget::onTextStyleChanged()
 {
     HDEBUG(iPage);
-    HASSERT(sender() == iSettings);
-    iTextStyle = iSettings->textStyle();
+    HASSERT(sender() == iModel);
+    iTextStyle = iModel->textStyle();
     resetView();
 }
 

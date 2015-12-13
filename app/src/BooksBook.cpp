@@ -37,6 +37,7 @@
 #include "BooksTextView.h"
 #include "BooksTextStyle.h"
 #include "BooksPaintContext.h"
+#include "BooksSettings.h"
 #include "BooksUtil.h"
 
 #include "HarbourJson.h"
@@ -57,8 +58,9 @@
 #include <unistd.h>
 #include <errno.h>
 
-#define BOOK_STATE_POSITION  "position"
-#define BOOK_COVER_SUFFIX ".cover."
+#define BOOK_STATE_FONT_SIZE_ADJUST "fontSizeAdjust"
+#define BOOK_STATE_POSITION         "position"
+#define BOOK_COVER_SUFFIX           ".cover."
 
 // ==========================================================================
 // BooksBook::CoverContext
@@ -327,6 +329,7 @@ BooksBook::BooksBook(const BooksStorage& aStorage, QString aRelativePath,
         QVariantMap state;
         if (HarbourJson::load(iStateFilePath, state)) {
             iLastPos = BooksPos::fromVariant(state.value(BOOK_STATE_POSITION));
+            iFontSizeAdjust = state.value(BOOK_STATE_FONT_SIZE_ADJUST).toInt();
         }
     }
     // Refcounted BooksBook objects are managed by C++ code
@@ -335,6 +338,7 @@ BooksBook::BooksBook(const BooksStorage& aStorage, QString aRelativePath,
 
 void BooksBook::init()
 {
+    iFontSizeAdjust = 0;
     iCoverTask = NULL;
     iCoverTasksDone = false;
     iCopyingOut = false;
@@ -398,17 +402,39 @@ bool BooksBook::accessible() const
     return !iCopyingOut;
 }
 
+bool BooksBook::setFontSizeAdjust(int aFontSizeAdjust)
+{
+    if (aFontSizeAdjust > BooksSettings::FontSizeSteps) {
+        aFontSizeAdjust = BooksSettings::FontSizeSteps;
+    } else if (aFontSizeAdjust < -BooksSettings::FontSizeSteps) {
+        aFontSizeAdjust = -BooksSettings::FontSizeSteps;
+    }
+    if (iFontSizeAdjust != aFontSizeAdjust) {
+        iFontSizeAdjust = aFontSizeAdjust;
+        requestSave();
+        Q_EMIT fontSizeAdjustChanged();
+        return true;
+    } else {
+        return false;
+    }
+}
+
 void BooksBook::setLastPos(const BooksPos& aPos)
 {
     if (iLastPos != aPos) {
         iLastPos = aPos;
-        // We only need save timer if we have the state file
-        if (!iSaveTimer && iStorage.isValid()) {
-            iSaveTimer = new BooksSaveTimer(this);
-            connect(iSaveTimer, SIGNAL(save()), SLOT(saveState()));
-        }
-        if (iSaveTimer) iSaveTimer->requestSave();
+        requestSave();
     }
+}
+
+void BooksBook::requestSave()
+{
+    // We only need save timer if we have the state file
+    if (!iSaveTimer && iStorage.isValid()) {
+        iSaveTimer = new BooksSaveTimer(this);
+        connect(iSaveTimer, SIGNAL(save()), SLOT(saveState()));
+    }
+    if (iSaveTimer) iSaveTimer->requestSave();
 }
 
 void BooksBook::setCopyingOut(bool aValue)
@@ -511,6 +537,7 @@ void BooksBook::saveState()
         QVariantMap state;
         HarbourJson::load(iStateFilePath, state);
         state.insert(BOOK_STATE_POSITION, iLastPos.toVariant());
+        state.insert(BOOK_STATE_FONT_SIZE_ADJUST, iFontSizeAdjust);
         if (HarbourJson::save(iStateFilePath, state)) {
             HDEBUG("wrote" << iStateFilePath);
         }

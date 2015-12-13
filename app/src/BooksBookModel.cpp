@@ -222,6 +222,11 @@ BooksBookModel::BooksBookModel(QObject* aParent) :
 BooksBookModel::~BooksBookModel()
 {
     if (iTask) iTask->release(this);
+    if (iBook) {
+        iBook->disconnect(this);
+        iBook->release();
+        iBook = NULL;
+    }
     delete iData;
     delete iData2;
     HDEBUG("destroyed");
@@ -233,11 +238,15 @@ void BooksBookModel::setBook(BooksBook* aBook)
     shared_ptr<Book> newBook;
     if (iBook != aBook) {
         const QString oldTitle(iTitle);
-        if (iBook) iBook->release();
+        if (iBook) {
+            iBook->disconnect(this);
+            iBook->release();
+        }
         if (aBook) {
             (iBook = aBook)->retain();
             iBookRef = newBook;
             iTitle = iBook->title();
+            connect(iBook, SIGNAL(fontSizeAdjustChanged()), SLOT(onTextStyleChanged()));
             HDEBUG(iTitle);
         } else {
             iBook = NULL;
@@ -245,10 +254,12 @@ void BooksBookModel::setBook(BooksBook* aBook)
             iTitle = QString();
             HDEBUG("<none>");
         }
+        updateTextStyle();
         startReset(ReasonLoading, true);
         if (oldTitle != iTitle) {
             Q_EMIT titleChanged();
         }
+        Q_EMIT textStyleChanged();
         Q_EMIT bookModelChanged();
         Q_EMIT bookChanged();
     }
@@ -266,16 +277,35 @@ void BooksBookModel::setSettings(BooksSettings* aSettings)
         if (iSettings) iSettings->disconnect(this);
         iSettings = aSettings;
         if (iSettings) {
-            iTextStyle = iSettings->textStyle();
             connect(iSettings, SIGNAL(textStyleChanged()), SLOT(onTextStyleChanged()));
-        } else {
-            iTextStyle = BooksTextStyle::defaults();
         }
-        if (!BooksTextStyle::equalLayout(oldTextStyle, iTextStyle)) {
+        if (updateTextStyle()) {
             startReset();
         }
+        Q_EMIT textStyleChanged();
         Q_EMIT settingsChanged();
     }
+}
+
+bool BooksBookModel::updateTextStyle()
+{
+    shared_ptr<ZLTextStyle> oldTextStyle(iTextStyle);
+    if (iSettings) {
+        iTextStyle = iSettings->textStyle(fontSizeAdjust());
+    } else {
+        iTextStyle = BooksTextStyle::defaults();
+    }
+    return !BooksTextStyle::equalLayout(oldTextStyle, iTextStyle);
+}
+
+bool BooksBookModel::increaseFontSize()
+{
+    return iBook && iBook->setFontSizeAdjust(iBook->fontSizeAdjust()+1);
+}
+
+bool BooksBookModel::decreaseFontSize()
+{
+    return iBook && iBook->setFontSizeAdjust(iBook->fontSizeAdjust()-1);
 }
 
 void BooksBookModel::setCurrentPage(int aPage)
@@ -302,6 +332,11 @@ int BooksBookModel::pageCount() const
 BooksPos::List BooksBookModel::pageMarks() const
 {
     return iData ? iData->iPageMarks : BooksPos::List();
+}
+
+int BooksBookModel::fontSizeAdjust() const
+{
+    return iBook ? iBook->fontSizeAdjust() : 0;
 }
 
 BooksPos BooksBookModel::pageMark(int aPage) const
@@ -445,7 +480,7 @@ void BooksBookModel::setSize(QSize aSize)
 void BooksBookModel::onTextStyleChanged()
 {
     HDEBUG(iTitle);
-    shared_ptr<ZLTextStyle> newStyle = iSettings->textStyle();
+    shared_ptr<ZLTextStyle> newStyle = iSettings->textStyle(fontSizeAdjust());
     const int newFontSize = newStyle->fontSize();
     const int oldFontSize = iTextStyle->fontSize();
     const ResetReason reason =
@@ -454,6 +489,7 @@ void BooksBookModel::onTextStyleChanged()
         ReasonUnknown;
     iTextStyle = newStyle;
     startReset(reason);
+    Q_EMIT textStyleChanged();
 }
 
 void BooksBookModel::startReset(ResetReason aResetReason, bool aFullReset)

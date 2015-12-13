@@ -88,7 +88,6 @@ public:
     void setBottomMargin(int aMargin);
 
     BooksMargins margins() const { return iMargins; }
-    shared_ptr<ZLTextStyle> textStyle() const { return iTextStyle; }
 
 Q_SIGNALS:
     void loadingChanged();

@@ -81,6 +81,9 @@ public:
         ReasonDecreasingFontSize
     };
 
+    Q_INVOKABLE bool increaseFontSize();
+    Q_INVOKABLE bool decreaseFontSize();
+
     explicit BooksBookModel(QObject* aParent = NULL);
     ~BooksBookModel();
 
@@ -122,6 +125,7 @@ public:
     shared_ptr<ZLTextModel> bookTextModel() const;
     shared_ptr<ZLTextModel> contentsModel() const;
     shared_ptr<ZLTextStyle> textStyle() const { return iTextStyle; }
+    int fontSizeAdjust() const;
 
     // QAbstractListModel
     virtual QHash<int,QByteArray> roleNames() const;
@@ -132,6 +136,7 @@ private:
     void updateSize();
     void updateModel(int aPrevPageCount);
     void startReset(ResetReason aReason = ReasonUnknown, bool aFull = true);
+    bool updateTextStyle();
 
 private Q_SLOTS:
     void onResetProgress(int aProgress);
@@ -154,6 +159,7 @@ Q_SIGNALS:
     void topMarginChanged();
     void bottomMarginChanged();
     void resetReasonChanged();
+    bool textStyleChanged();
     void jumpToPage(int index);
 
 private:

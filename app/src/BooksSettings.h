@@ -59,7 +59,8 @@ public:
     enum FontSize {
         MinFontSize = -5,
         DefaultFontSize = 0,
-        MaxFontSize = 10
+        MaxFontSize = 10,
+        FontSizeSteps = MaxFontSize - MinFontSize
     };
 
     explicit BooksSettings(QObject* aParent = NULL);
@@ -67,13 +68,13 @@ public:
     Q_INVOKABLE bool increaseFontSize();
     Q_INVOKABLE bool decreaseFontSize();
 
-    int fontSize() const;
+    int fontSize() const { return iFontSize; }
     void setFontSize(int aValue);
 
     int pageDetails() const;
     void setPageDetails(int aValue);
 
-    shared_ptr<ZLTextStyle> textStyle() const { return iTextStyle; }
+    shared_ptr<ZLTextStyle> textStyle(int aFontSizeAdjust) const;
 
     bool invertColors() const;
     void setInvertColors(bool aValue);
@@ -88,7 +89,7 @@ public:
     QColor primaryPageToolColor() const;
     QColor highlightPageToolColor() const;
 
-signals:
+Q_SIGNALS:
     void fontSizeChanged();
     void textStyleChanged();
     void pageDetailsChanged();
@@ -106,16 +107,19 @@ private:
     void updateRenderType();
     bool updateCurrentBook();
     bool updateCurrentStorage();
+    int currentFontSize() const;
+    int fontSize(int aFontSizeAdjust) const;
 
 private:
-    MGConfItem* iFontSize;
-    MGConfItem* iPageDetails;
-    MGConfItem* iInvertColors;
-    MGConfItem* iCurrentFolder;
-    MGConfItem* iCurrentBookPath;
-    shared_ptr<ZLTextStyle> iTextStyle;
+    MGConfItem* iFontSizeConf;
+    MGConfItem* iPageDetailsConf;
+    MGConfItem* iInvertColorsConf;
+    MGConfItem* iCurrentFolderConf;
+    MGConfItem* iCurrentBookPathConf;
+    mutable shared_ptr<ZLTextStyle> iTextStyle[FontSizeSteps+1];
     BooksBook* iCurrentBook;
     QString iCurrentStorageDevice;
+    int iFontSize;
 };
 
 QML_DECLARE_TYPE(BooksSettings)

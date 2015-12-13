@@ -172,6 +172,8 @@ SilicaFlickable {
             opacity: _currentState.tools ? 1 : 0
             visible: opacity > 0 && book && bookModel.pageCount && !_loading
             Behavior on opacity { FadeAnimation {} }
+            onIncreaseFontSize: bookModel.increaseFontSize()
+            onDecreaseFontSize: bookModel.decreaseFontSize()
         }
 
         BooksPager {

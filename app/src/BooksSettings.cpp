@@ -199,29 +199,28 @@ BooksSettings::TextStyle::allowHyphenations() const
 
 BooksSettings::BooksSettings(QObject* aParent) :
     QObject(aParent),
-    iFontSize(new MGConfItem(DCONF_PATH KEY_FONT_SIZE, this)),
-    iPageDetails(new MGConfItem(DCONF_PATH KEY_PAGE_DETAILS, this)),
-    iInvertColors(new MGConfItem(DCONF_PATH KEY_INVERT_COLORS, this)),
-    iCurrentFolder(new MGConfItem(DCONF_PATH KEY_CURRENT_FOLDER, this)),
-    iCurrentBookPath(new MGConfItem(DCONF_PATH KEY_CURRENT_BOOK, this)),
-    iCurrentBook(NULL)
+    iFontSizeConf(new MGConfItem(DCONF_PATH KEY_FONT_SIZE, this)),
+    iPageDetailsConf(new MGConfItem(DCONF_PATH KEY_PAGE_DETAILS, this)),
+    iInvertColorsConf(new MGConfItem(DCONF_PATH KEY_INVERT_COLORS, this)),
+    iCurrentFolderConf(new MGConfItem(DCONF_PATH KEY_CURRENT_FOLDER, this)),
+    iCurrentBookPathConf(new MGConfItem(DCONF_PATH KEY_CURRENT_BOOK, this)),
+    iCurrentBook(NULL),
+    iFontSize(currentFontSize())
 {
-    iTextStyle = new TextStyle(fontSize());
     updateCurrentBook();
     updateCurrentStorage();
-    connect(iFontSize, SIGNAL(valueChanged()), SLOT(onFontSizeValueChanged()));
-    connect(iPageDetails, SIGNAL(valueChanged()), SIGNAL(pageDetailsChanged()));
-    connect(iInvertColors, SIGNAL(valueChanged()), SIGNAL(invertColorsChanged()));
-    connect(iCurrentFolder, SIGNAL(valueChanged()), SLOT(onCurrentFolderChanged()));
-    connect(iCurrentBookPath, SIGNAL(valueChanged()), SLOT(onCurrentBookPathChanged()));
+    connect(iFontSizeConf, SIGNAL(valueChanged()), SLOT(onFontSizeValueChanged()));
+    connect(iPageDetailsConf, SIGNAL(valueChanged()), SIGNAL(pageDetailsChanged()));
+    connect(iInvertColorsConf, SIGNAL(valueChanged()), SIGNAL(invertColorsChanged()));
+    connect(iCurrentFolderConf, SIGNAL(valueChanged()), SLOT(onCurrentFolderChanged()));
+    connect(iCurrentBookPathConf, SIGNAL(valueChanged()), SLOT(onCurrentBookPathChanged()));
 }
 
 bool
 BooksSettings::increaseFontSize()
 {
-    int size = fontSize();
-    if (size < MaxFontSize) {
-        setFontSize(size+1);
+    if (iFontSize < MaxFontSize) {
+        setFontSize(iFontSize+1);
         return true;
     } else {
         return false;
@@ -231,9 +230,8 @@ BooksSettings::increaseFontSize()
 bool
 BooksSettings::decreaseFontSize()
 {
-    int size = fontSize();
-    if (size > MinFontSize) {
-        setFontSize(size-1);
+    if (iFontSize > MinFontSize) {
+        setFontSize(iFontSize-1);
         return true;
     } else {
         return false;
@@ -241,9 +239,30 @@ BooksSettings::decreaseFontSize()
 }
 
 int
-BooksSettings::fontSize() const
+BooksSettings::currentFontSize() const
 {
-    return iFontSize->value(DEFAULT_FONT_SIZE).toInt();
+    const int fontSize = iFontSizeConf->value(DEFAULT_FONT_SIZE).toInt();
+    if (fontSize < MinFontSize) {
+        return MinFontSize;
+    } else if (fontSize > MaxFontSize) {
+        return MaxFontSize;
+    } else {
+        return fontSize;
+    }
+}
+
+int
+BooksSettings::fontSize(
+    int aFontSizeAdjust) const
+{
+    const int fontSize = iFontSize + aFontSizeAdjust;
+    if (fontSize < MinFontSize) {
+        return MinFontSize;
+    } else if (fontSize > MaxFontSize) {
+        return MaxFontSize;
+    } else {
+        return fontSize;
+    }
 }
 
 void
@@ -251,23 +270,42 @@ BooksSettings::setFontSize(
     int aValue)
 {
     HDEBUG(aValue);
-    iFontSize->set(aValue);
+    iFontSizeConf->set(aValue);
 }
 
 void
 BooksSettings::onFontSizeValueChanged()
 {
-    const int newSize = fontSize();
+    const int newSize = currentFontSize();
     HDEBUG(newSize);
-    iTextStyle = new TextStyle(newSize);
-    Q_EMIT fontSizeChanged();
-    Q_EMIT textStyleChanged();
+    if (iFontSize != newSize) {
+        iFontSize = newSize;
+        for (int i=0; i<=FontSizeSteps; i++) {
+            iTextStyle[i].reset();
+        }
+        Q_EMIT fontSizeChanged();
+        Q_EMIT textStyleChanged();
+    }
+}
+
+shared_ptr<ZLTextStyle>
+BooksSettings::textStyle(
+    int aFontSizeAdjust) const
+{
+    const int size = fontSize(aFontSizeAdjust);
+    const int i = size - MinFontSize;
+    shared_ptr<ZLTextStyle> style = iTextStyle[i];
+    if (style.isNull()) {
+        style = new TextStyle(size);
+        iTextStyle[i] = style;
+    }
+    return style;
 }
 
 int
 BooksSettings::pageDetails() const
 {
-    return iPageDetails->value(DEFAULT_PAGE_DETAILS).toInt();
+    return iPageDetailsConf->value(DEFAULT_PAGE_DETAILS).toInt();
 }
 
 void
@@ -275,13 +313,13 @@ BooksSettings::setPageDetails(
     int aValue)
 {
     HDEBUG(aValue);
-    iPageDetails->set(aValue);
+    iPageDetailsConf->set(aValue);
 }
 
 bool
 BooksSettings::invertColors() const
 {
-    return iInvertColors->value(DEFAULT_INVERT_COLORS).toBool();
+    return iInvertColorsConf->value(DEFAULT_INVERT_COLORS).toBool();
 }
 
 void
@@ -289,13 +327,13 @@ BooksSettings::setInvertColors(
     bool aValue)
 {
     HDEBUG(aValue);
-    iInvertColors->set(aValue);
+    iInvertColorsConf->set(aValue);
 }
 
 QString
 BooksSettings::currentFolder() const
 {
-    return iCurrentFolder->value(DEFAULT_CURRENT_FOLDER).toString();
+    return iCurrentFolderConf->value(DEFAULT_CURRENT_FOLDER).toString();
 }
 
 void
@@ -303,7 +341,7 @@ BooksSettings::setCurrentFolder(
     QString aValue)
 {
     HDEBUG(aValue);
-    iCurrentFolder->set(aValue);
+    iCurrentFolderConf->set(aValue);
 }
 
 void
@@ -334,7 +372,8 @@ BooksSettings::currentBook() const
 }
 
 void
-BooksSettings::setCurrentBook(QObject* aBook)
+BooksSettings::setCurrentBook(
+    QObject* aBook)
 {
     BooksBook* book = qobject_cast<BooksBook*>(aBook);
     if (iCurrentBook != book) {
@@ -342,10 +381,10 @@ BooksSettings::setCurrentBook(QObject* aBook)
         if (book) {
             HDEBUG(book->path());
             (iCurrentBook = book)->retain();
-            iCurrentBookPath->set(book->path());
+            iCurrentBookPathConf->set(book->path());
         } else {
             iCurrentBook = NULL;
-            iCurrentBookPath->set(QString());
+            iCurrentBookPathConf->set(QString());
         }
         Q_EMIT currentBookChanged();
     }
@@ -354,7 +393,7 @@ BooksSettings::setCurrentBook(QObject* aBook)
 bool
 BooksSettings::updateCurrentBook()
 {
-    QString path = iCurrentBookPath->value(DEFAULT_CURRENT_BOOK).toString();
+    QString path = iCurrentBookPathConf->value(DEFAULT_CURRENT_BOOK).toString();
     if (path.isEmpty()) {
         if (iCurrentBook) {
             iCurrentBook->release();
