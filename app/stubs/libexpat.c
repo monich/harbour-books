@@ -66,6 +66,9 @@
     f(void, XML_ParserFree, \
      (XML_Parser parser), \
      (parser), (void)0) \
+    f(int, XML_SetHashSalt, \
+     (XML_Parser parser, unsigned long salt), \
+     (parser, salt), 0) \
     f(enum XML_Status, XML_Parse, \
      (XML_Parser parser, const char* s, int len, int isFinal), \
      (parser, s, len, isFinal), XML_STATUS_ERROR)
