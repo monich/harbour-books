@@ -107,6 +107,10 @@ static void parseDTD(XML_Parser parser, const std::string &fileName) {
 ZLXMLReaderInternal::ZLXMLReaderInternal(ZLXMLReader &reader, const char *encoding) : myReader(reader) {
 	myParser = XML_ParserCreate(encoding);
 	myInitialized = false;
+	// Set salt to anything non-zero. Otherwise this parser won't be able
+	// to use the entity cache filled by the child DTD parsers. For more
+	// details see CVE-2012-0876 and http://sourceforge.net/p/expat/bugs/496/
+	XML_SetHashSalt(myParser, 42);
 }
 
 ZLXMLReaderInternal::~ZLXMLReaderInternal() {
