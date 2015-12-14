@@ -118,7 +118,6 @@ bool ZLibrary::init(int& aArgc, char** &aArgv)
         if (slash) {
             slash[0] = 0;
             HDEBUG("app dir" << info.dli_fname);
-            ourApplicationDirectory = info.dli_fname;
             slash = (char*)strrchr(info.dli_fname, '/');
             if (slash) {
                 slash[0] = 0;
@@ -135,9 +134,9 @@ bool ZLibrary::init(int& aArgc, char** &aArgv)
     ((std::string&)BaseDirectory) = rootDir;
     ourApplicationName = BOOKS_APP_NAME;
     ourZLibraryDirectory = BaseDirectory + BOOKS_DATA_DIR;
-    ourApplicationDirectory = BaseDirectory + BOOKS_DATA_ROOT;
     ourImageDirectory = BaseDirectory + BOOKS_ICONS_DIR;
     ourDefaultFilesPathPrefix  = ourZLibraryDirectory + "/";
+    ourApplicationDirectory = ourZLibraryDirectory;
     ourApplicationImageDirectory = ourImageDirectory;
     ourApplicationWritableDirectory =
         (QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) +
