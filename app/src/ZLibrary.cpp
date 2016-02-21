@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Jolla Ltd.
+ * Copyright (C) 2015-2016 Jolla Ltd.
  * Contact: Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
@@ -41,6 +41,7 @@
 #include "ZLibrary.h"
 #include "ZLApplication.h"
 #include "ZLLanguageUtil.h"
+#include "ZLLogger.h"
 
 #include "filesystem/ZLQtFSManager.h"
 #include "time/ZLQtTime.h"
@@ -191,6 +192,14 @@ void ZLibrary::run(ZLApplication* aApp)
 
 void ZLibrary::parseArguments(int &argc, char **&argv)
 {
+    for (int i=1; i<argc; i++) {
+        if ((i+1)<argc && !strcmp(argv[i], "-d")) {
+            ZLLogger::Instance().registerClass(argv[i+1]);
+            memcpy(argv+i, argv+i+2, sizeof(char*)*(argc-i-2));
+            argc -= 2;
+            i -= i;
+        }
+    }
 }
 
 void ZLibrary::shutdown()
