@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2015 Jolla Ltd.
+  Copyright (C) 2015-2016 Jolla Ltd.
   Contact: Slava Monich <slava.monich@jolla.com>
 
   You may use this file under the terms of BSD license as follows:
@@ -219,21 +219,6 @@ SilicaFlickable {
         opacity: (_loading && bookModel.progress > 0) ? 1 : 0
     }
 
-    Label {
-        anchors {
-            bottom: busyIndicator.top
-            bottomMargin: Theme.paddingLarge
-            horizontalCenter: busyIndicator.horizontalCenter
-
-        }
-        horizontalAlignment: Text.AlignHCenter
-        color: Theme.highlightColor
-        opacity: _loading ? 1 : 0
-        visible: opacity > 0
-        Behavior on opacity { FadeAnimation {} }
-        text: bookModel ? _loadingTextLabel[bookModel.resetReason] : ""
-    }
-
     Button {
         //% "Cancel"
         text: qsTrId("book-view-cancel-loading")
@@ -247,5 +232,20 @@ SilicaFlickable {
         visible: opacity > 0
         opacity: enabled ? 1.0 : 0.0
         Behavior on opacity { FadeAnimation { } }
+    }
+
+    Label {
+        anchors {
+            top: busyIndicator.bottom
+            topMargin: Theme.paddingLarge
+            horizontalCenter: busyIndicator.horizontalCenter
+
+        }
+        horizontalAlignment: Text.AlignHCenter
+        color: Theme.highlightColor
+        opacity: _loading ? 1 : 0
+        visible: opacity > 0
+        Behavior on opacity { FadeAnimation {} }
+        text: bookModel ? _loadingTextLabel[bookModel.resetReason] : ""
     }
 }
