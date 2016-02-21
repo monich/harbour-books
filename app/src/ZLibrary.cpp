@@ -54,6 +54,7 @@
 #include <QStandardPaths>
 #include <QQuickView>
 #include <QQmlContext>
+#include <QScreen>
 
 #include <execinfo.h>
 #include <dlfcn.h>
