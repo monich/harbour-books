@@ -1,6 +1,6 @@
 Name:           harbour-books
 Summary:        E-book reader
-Version:        1.0.9
+Version:        1.0.10
 Release:        1
 License:        GPL
 Group:          Applications/File
@@ -56,6 +56,12 @@ desktop-file-install --delete-original \
 make -C test test
 
 %changelog
+* Sub Feb 21 2016 Slava Monich <slava.monich@jolla.com> 1.0.10
+- Per-book text size
+- Support for XML entities
+- Fixed the problem with styleless XHTML
+- Miscellaneous tweaks and UI improvements
+
 * Mon Nov 2 2015 Slava Monich <slava.monich@jolla.com> 1.0.9
 - Workaround for Qt crash
 
