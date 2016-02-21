@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2004-2010 Geometer Plus <contact@geometerplus.com>
+ * Copyright (C) 2016 Slava Monich <slava.monich@jolla.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -751,8 +752,9 @@ void XHTMLReader::characterDataHandler(const char *text, size_t len) {
 			}
 			break;
 		case READ_BODY:
-			if (myParseStack.back().opacity && !myStyleStack.empty() && !myStyleStack.back().DisplayNone) {
-				const StyleSheetTable::WhiteSpaceValue whiteSpace = myStyleStack.back().WhiteSpace;
+			if (myParseStack.back().opacity && (myStyleStack.empty() || !myStyleStack.back().DisplayNone)) {
+				const StyleSheetTable::WhiteSpaceValue whiteSpace = myStyleStack.empty() ?
+					StyleSheetTable::WS_UNDEFINED : myStyleStack.back().WhiteSpace;
 				if (myPreformatted || whiteSpace == StyleSheetTable::WS_PRE || whiteSpace == StyleSheetTable::WS_PRE_WRAP) {
 					size_t spaceCounter = 0;
 					while (len > 0 && isspace(*text)) {
