@@ -56,7 +56,7 @@ desktop-file-install --delete-original \
 make -C test test
 
 %changelog
-* Sub Feb 21 2016 Slava Monich <slava.monich@jolla.com> 1.0.10
+* Sun Feb 21 2016 Slava Monich <slava.monich@jolla.com> 1.0.10
 - Per-book text size
 - Support for XML entities
 - Fixed the problem with styleless XHTML
