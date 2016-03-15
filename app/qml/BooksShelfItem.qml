@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2015 Jolla Ltd.
+  Copyright (C) 2015-2016 Jolla Ltd.
   Contact: Slava Monich <slava.monich@jolla.com>
 
   You may use this file under the terms of BSD license as follows:
@@ -46,7 +46,7 @@ Item {
     property alias book: cover.book
     property alias synchronous: cover.synchronous
     property alias remorseTimeout: deleteAnimation.duration
-    property alias copyProgress: progressIndicator.value
+    property real copyProgress
     property real margins: Theme.paddingMedium
     property real deleteAllOpacity: 1
     property bool editMode
@@ -69,18 +69,26 @@ Item {
     readonly property real _borderRadius: Theme.paddingSmall
     readonly property color _borderColor: Theme.primaryColor
     readonly property real _borderWidth: 2
+    readonly property bool _haveProgress: copyProgress > 0 && copyProgress < 1
+    readonly property real _coverCenterX: cover.x + (cover.width - _deleteButtonSize)/2
+    readonly property real _coverCenterY: cover.y + cover.height - _deleteButtonSize/2
+    readonly property real _deleteButtonSize: 3*margins
+    readonly property real _deleteButtonMargin: Theme.paddingMedium
 
     property bool scaledDown: (editMode && !dragged && !pressed && !dropped)
 
-    Image {
+    Loader {
+        active: !cover.book
         anchors {
             margins: root.margins
             fill: parent
         }
-        visible: !cover.book
-        source: "images/bookshelf.svg"
-        sourceSize.width: width
-        sourceSize.height: height
+        sourceComponent: Image {
+            visible: !cover.book
+            source: "images/bookshelf.svg"
+            sourceSize.width: width
+            sourceSize.height: height
+        }
     }
 
     BookCover {
@@ -127,23 +135,28 @@ Item {
         onClicked: root.clicked()
     }
 
-    BooksDeleteButton {
+    Loader {
         id: deleteButton
-        x: cover.x + (cover.width - width)/2
-        y: cover.y + cover.height - height/2
-        size: 3*margins
-        enabled: editMode && !pressed && !deleting && !deletingAll && !copyingIn && !copyingOut
-        onClicked: root.deleteRequested()
+        active: editMode
+        sourceComponent: BooksDeleteButton {
+            x: _coverCenterX
+            y: _coverCenterY
+            size: _deleteButtonSize
+            margin: _deleteButtonMargin
+            visible: !pressed && !deleting && !deletingAll && !copyingIn && !copyingOut
+            onClicked: root.deleteRequested()
+        }
     }
 
-    ProgressCircle {
-        id: progressIndicator
-        width: busyIndicator.width
-        height: width
+    Loader {
+        active: copying && !longCopyTimer.running && _haveProgress
         anchors.centerIn: busyIndicator
-        opacity: (copying && !longCopyTimer.running && value > 0 && value < 1) ? 1 : 0
-        visible: opacity > 0
-        Behavior on opacity { FadeAnimation {} }
+        sourceComponent:  ProgressCircle {
+            value: copyProgress
+            width: busyIndicator.width
+            height: width
+            inAlternateCycle: true
+        }
     }
 
     BusyIndicator {
@@ -152,15 +165,15 @@ Item {
         x: cover.x + cover.centerX - width/2
         y: cover.y + cover.centerY - height/2
         visible: opacity > 0
-        running: copying && !longCopyTimer.running && (progressIndicator.value <= 0 || progressIndicator.value >= 1)
+        running: copying && !longCopyTimer.running && !_haveProgress
         Behavior on opacity { enabled: false }
     }
 
     function withinDeleteButton(x, y) {
-        return x >= deleteButton.x - deleteButton.margin &&
-               x < deleteButton.x + deleteButton.width + deleteButton.margin &&
-               y >= deleteButton.y - deleteButton.margin &&
-               y < deleteButton.y + deleteButton.height + deleteButton.margin;
+        return x >= _coverCenterX - _deleteButtonMargin &&
+           x < _coverCenterX + _deleteButtonSize + _deleteButtonMargin &&
+           y >= _coverCenterY - _deleteButtonMargin &&
+           y < _coverCenterY + _deleteButtonSize + _deleteButtonMargin
     }
 
     function updateScaledDown() {
