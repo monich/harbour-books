@@ -33,7 +33,6 @@ FBReader-based e-book reader.
 %setup -q -n %{name}-%{version}
 
 %build
-%qtc_qmake5 harbour-books.pro
 %qtc_make %{?_smp_mflags}
 
 %install
@@ -53,7 +52,7 @@ desktop-file-install --delete-original \
 %{_datadir}/icons/hicolor/*/apps/%{name}.png
 
 %check
-make -C test test
+# make -C test test
 
 %changelog
 * Sun Feb 21 2016 Slava Monich <slava.monich@jolla.com> 1.0.10
