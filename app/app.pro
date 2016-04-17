@@ -84,7 +84,7 @@ icon256.files = icons/256x256/harbour-books.png
 icon256.path = $$TARGET_ICON_ROOT/256x256/apps
 INSTALLS += icon256
 
-CONFIG += sailfishapp_i18n sailfishapp_i18n_idbased
+CONFIG += sailfishapp sailfishapp_i18n sailfishapp_i18n_idbased
 TRANSLATIONS += \
     translations/harbour-books.ts \
     translations/harbour-books-de.ts \
