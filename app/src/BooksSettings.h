@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Jolla Ltd.
+ * Copyright (C) 2015-2016 Jolla Ltd.
  * Contact: Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
@@ -14,7 +14,7 @@
  *     notice, this list of conditions and the following disclaimer in
  *     the documentation and/or other materials provided with the
  *     distribution.
- *   * Neither the name of Nemo Mobile nor the names of its contributors
+ *   * Neither the name of Jolla Ltd nor the names of its contributors
  *     may be used to endorse or promote products derived from this
  *     software without specific prior written permission.
  *
@@ -51,6 +51,7 @@ class BooksSettings : public QObject
     Q_PROPERTY(QObject* currentBook READ currentBook WRITE setCurrentBook NOTIFY currentBookChanged)
     Q_PROPERTY(QString currentFolder READ currentFolder WRITE setCurrentFolder NOTIFY currentFolderChanged)
     Q_PROPERTY(QString currentStorage READ currentStorage NOTIFY currentStorageChanged)
+    Q_PROPERTY(QString relativePath READ relativePath NOTIFY relativePathChanged)
     Q_PROPERTY(QColor primaryPageToolColor READ primaryPageToolColor CONSTANT)
     Q_PROPERTY(QColor highlightPageToolColor READ highlightPageToolColor NOTIFY invertColorsChanged)
     class TextStyle;
@@ -82,6 +83,7 @@ public:
     QObject* currentBook() const;
     void setCurrentBook(QObject* aBook);
 
+    QString relativePath() const;
     QString currentFolder() const;
     void setCurrentFolder(QString aValue);
 
@@ -97,6 +99,7 @@ Q_SIGNALS:
     void currentBookChanged();
     void currentFolderChanged();
     void currentStorageChanged();
+    void relativePathChanged();
 
 private Q_SLOTS:
     void onFontSizeValueChanged();

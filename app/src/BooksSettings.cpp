@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Jolla Ltd.
+ * Copyright (C) 2015-2016 Jolla Ltd.
  * Contact: Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
@@ -14,7 +14,7 @@
  *     notice, this list of conditions and the following disclaimer in
  *     the documentation and/or other materials provided with the
  *     distribution.
- *   * Neither the name of Nemo Mobile nor the names of its contributors
+ *   * Neither the name of Jolla Ltd nor the names of its contributors
  *     may be used to endorse or promote products derived from this
  *     software without specific prior written permission.
  *
@@ -331,6 +331,14 @@ BooksSettings::setInvertColors(
 }
 
 QString
+BooksSettings::relativePath() const
+{
+    QString rel;
+    BooksStorageManager::instance()->storageForPath(currentFolder(), &rel);
+    return rel;
+}
+
+QString
 BooksSettings::currentFolder() const
 {
     return iCurrentFolderConf->value(DEFAULT_CURRENT_FOLDER).toString();
@@ -351,6 +359,7 @@ BooksSettings::onCurrentFolderChanged()
         Q_EMIT currentStorageChanged();
     }
     Q_EMIT currentFolderChanged();
+    Q_EMIT relativePathChanged();
 }
 
 bool
