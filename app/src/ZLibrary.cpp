@@ -14,7 +14,7 @@
  *     notice, this list of conditions and the following disclaimer in
  *     the documentation and/or other materials provided with the
  *     distribution.
- *   * Neither the name of Nemo Mobile nor the names of its contributors
+ *   * Neither the name of Jolla Ltd nor the names of its contributors
  *     may be used to endorse or promote products derived from this
  *     software without specific prior written permission.
  *
@@ -49,6 +49,7 @@
 #include "iconv/IConvEncodingConverter.h"
 
 #include <sailfishapp.h>
+#include <MGConfItem>
 
 #include <QGuiApplication>
 #include <QStandardPaths>
@@ -76,7 +77,7 @@ const std::string ZLibrary::PathDelimiter(":");
 const std::string ZLibrary::EndOfLine("\n");
 const std::string ZLibrary::BaseDirectory;
 
-int booksPPI = 300;
+int booksPPI = 240;
 
 void ZLibrary::initLocale()
 {
@@ -148,6 +149,26 @@ bool ZLibrary::init(int& aArgc, char** &aArgv)
     HDEBUG("image dir" << ourImageDirectory.c_str());
     HDEBUG("writable dir" << ourApplicationWritableDirectory.c_str());
 
+    // Determine screen DPI.
+    MGConfItem dpiConfig("/lipstick/screen/primary/physicalDotsPerInch");
+    QVariant dpiValue(dpiConfig.value());
+    HDEBUG("physicalDotsPerInch" << dpiValue);
+    if (dpiValue.isValid() && dpiValue.toInt() > 0) {
+        booksPPI = dpiValue.toInt();
+    } else {
+        MGConfItem ratioConfig("/desktop/sailfish/silica/theme_pixel_ratio");
+        QVariant ratioValue(ratioConfig.value());
+        HDEBUG("theme_pixel_ratio" << ratioValue);
+        if (ratioValue.isValid()) {
+            const qreal ratio = ratioValue.toReal();
+            if (ratio > 0.0) {
+                booksPPI = (int)(ratio*booksPPI);
+                booksPPI -= booksPPI % 10;
+            }
+        }
+    }
+    HDEBUG("screen" << booksPPI << "dpi");
+
     BooksStorageManager::instance();
     ZLQtTimeManager::createInstance();
     ZLQtFSManager::createInstance();
@@ -170,16 +191,6 @@ void ZLibrary::run(ZLApplication* aApp)
 
     QQuickView* view = SailfishApp::createView();
     QQmlContext* root = view->rootContext();
-    QSize screenSize(view->screen()->size());
-    booksPPI =
-#if defined(__i386__)
-        (screenSize == QSize(1536,2048)) ? 330 : 300;
-#elif defined(__arm__)
-        (screenSize == QSize(540,960)) ? 245 : 290;
-#else
-#  error Unexpected architechture
-#endif
-    HDEBUG("screen" << screenSize << booksPPI << "dpi");
     root->setContextProperty("PointsPerInch", booksPPI);
     root->setContextProperty("MaximumHintCount", 1);
 
