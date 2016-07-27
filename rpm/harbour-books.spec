@@ -1,8 +1,8 @@
 Name:           harbour-books
 Summary:        E-book reader
-Version:        1.0.11
+Version:        1.0.12
 Release:        1
-License:        GPL
+License:        BSD
 Group:          Applications/File
 URL:            http://github.com/monich/harbour-books
 Source0:        %{name}-%{version}.tar.gz
@@ -56,6 +56,10 @@ desktop-file-install --delete-original \
 make -C test test
 
 %changelog
+* Wed Jul 28 2016 Slava Monich <slava.monich@jolla.com> 1.0.12
+- Minor UI tweaks (wrapping of "No books" label)
+- Fixed license in rpm spec
+
 * Wed Jul 27 2016 Slava Monich <slava.monich@jolla.com> 1.0.11
 - German translations
 - Current folder is restored at startup
