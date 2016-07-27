@@ -1,6 +1,6 @@
 Name:           harbour-books
 Summary:        E-book reader
-Version:        1.0.10
+Version:        1.0.11
 Release:        1
 License:        GPL
 Group:          Applications/File
@@ -56,6 +56,11 @@ desktop-file-install --delete-original \
 make -C test test
 
 %changelog
+* Wed Jul 27 2016 Slava Monich <slava.monich@jolla.com> 1.0.11
+- German translations
+- Current folder is restored at startup
+- Better support for devices with different screen DPI
+
 * Sun Feb 21 2016 Slava Monich <slava.monich@jolla.com> 1.0.10
 - Per-book text size
 - Support for XML entities
