@@ -35,8 +35,16 @@ import harbour.books 1.0
 
 ApplicationWindow {
     id: window
-    allowedOrientations: Orientation.All
+    allowedOrientations: {
+        switch (globalSettings.orientation) {
+        default:
+        case BooksSettings.OrientationAny: return Orientation.All
+        case BooksSettings.OrientationPortrait: return Orientation.Portrait
+        case BooksSettings.OrientationLandscape: return Orientation.Landscape
+        }
+    }
 
+    // Application title
     //% "Books"
     readonly property string title: qsTrId("harbour-books-app-name")
 

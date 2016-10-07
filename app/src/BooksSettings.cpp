@@ -47,11 +47,13 @@
 #define KEY_CURRENT_BOOK        "currentBook"
 #define KEY_CURRENT_FOLDER      "currentFolder"
 #define KEY_INVERT_COLORS       "invertColors"
+#define KEY_ORIENTATION         "orientation"
 #define DEFAULT_FONT_SIZE       0
 #define DEFAULT_PAGE_DETAILS    0
 #define DEFAULT_CURRENT_BOOK    QString()
 #define DEFAULT_CURRENT_FOLDER  QString()
 #define DEFAULT_INVERT_COLORS   false
+#define DEFAULT_ORIENTATION     (BooksSettings::OrientationAny)
 
 #define PAGETOOL_COLOR                      QColor(128,128,128) // any bg
 #define NORMAL_PAGETOOL_HIGHLIGHT_COLOR     QColor(64,64,64)    // on white
@@ -204,6 +206,7 @@ BooksSettings::BooksSettings(QObject* aParent) :
     iInvertColorsConf(new MGConfItem(DCONF_PATH KEY_INVERT_COLORS, this)),
     iCurrentFolderConf(new MGConfItem(DCONF_PATH KEY_CURRENT_FOLDER, this)),
     iCurrentBookPathConf(new MGConfItem(DCONF_PATH KEY_CURRENT_BOOK, this)),
+    iOrientationConf(new MGConfItem(DCONF_PATH KEY_ORIENTATION, this)),
     iCurrentBook(NULL),
     iFontSize(currentFontSize())
 {
@@ -214,6 +217,7 @@ BooksSettings::BooksSettings(QObject* aParent) :
     connect(iInvertColorsConf, SIGNAL(valueChanged()), SIGNAL(invertColorsChanged()));
     connect(iCurrentFolderConf, SIGNAL(valueChanged()), SLOT(onCurrentFolderChanged()));
     connect(iCurrentBookPathConf, SIGNAL(valueChanged()), SLOT(onCurrentBookPathChanged()));
+    connect(iOrientationConf, SIGNAL(valueChanged()), SIGNAL(orientationChanged()));
 }
 
 bool
@@ -452,4 +456,20 @@ BooksSettings::highlightPageToolColor() const
     return invertColors() ?
         INVERTED_PAGETOOL_HIGHLIGHT_COLOR :
         NORMAL_PAGETOOL_HIGHLIGHT_COLOR;
+}
+
+BooksSettings::Orientation
+BooksSettings::orientation() const
+{
+    // Need to cast int to enum right away to force "enumeration value not
+    // handled in switch" warning if we miss one of the Orientation:
+    Orientation value = (Orientation)
+        iOrientationConf->value(DEFAULT_ORIENTATION).toInt();
+    switch (value) {
+    case OrientationAny:
+    case OrientationPortrait:
+    case OrientationLandscape:
+        return value;
+    }
+    return DEFAULT_ORIENTATION;
 }

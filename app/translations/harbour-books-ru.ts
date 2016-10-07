@@ -116,5 +116,25 @@
         <extracomment>Slider value label for the standard font size</extracomment>
         <translation>Стандартный</translation>
     </message>
+    <message id="harbour-books-settings-page-orientation_label">
+        <source>Orientation</source>
+        <extracomment>Combo box label</extracomment>
+        <translation>Ориентация</translation>
+    </message>
+    <message id="harbour-books-settings-page-orientation-dynamic">
+        <source>Dynamic</source>
+        <extracomment>Combo box value for dynamic orientation</extracomment>
+        <translation>Динамическая</translation>
+    </message>
+    <message id="harbour-books-settings-page-orientation-portrait">
+        <source>Portrait</source>
+        <extracomment>Combo box value for portrait orientation</extracomment>
+        <translation>Портретная</translation>
+    </message>
+    <message id="harbour-books-settings-page-orientation-landscape">
+        <source>Landscape</source>
+        <extracomment>Combo box value for landscape orientation</extracomment>
+        <translation>Альбомная</translation>
+    </message>
 </context>
 </TS>

@@ -35,6 +35,7 @@ import org.nemomobile.configuration 1.0
 
 Page {
     id: page
+    property bool followOrientationChanges
     property alias title: pageHeader.title
     readonly property string rootPath: "/apps/" + appName() + "/"
 
@@ -43,11 +44,22 @@ Page {
         var parts = Qt.resolvedUrl("dummy").split('/')
         if (parts.length > 2) {
             var name = parts[parts.length-3]
-            if (name.indexOf("swissclock") >= 0) {
+            if (name.indexOf("-books") >= 0) {
                 return name
             }
         }
         return "harbour-books"
+    }
+
+    Loader {
+        active: followOrientationChanges
+        Connections {
+            target: orientation
+            onValueChanged: allowedOrientations =
+                (orientation.value === 1) ? Orientation.Portrait :
+                (orientation.value === 2) ? Orientation.Landscape :
+                                           Orientation.All
+        }
     }
 
     SilicaFlickable {
@@ -87,6 +99,64 @@ Page {
                     key: rootPath + "fontSize"
                     defaultValue: 0
                     onValueChanged: fontSizeSlider.value = value
+                }
+            }
+
+            ComboBox {
+                id: orientationComboBox
+                //: Combo box label
+                //% "Orientation"
+                label: qsTrId("harbour-books-settings-page-orientation_label")
+                value: currentItem ? currentItem.text : ""
+                property bool ready
+                menu: ContextMenu {
+                    id: orientationMenu
+                    readonly property int defaultIndex: 0
+                    MenuItem {
+                        //: Combo box value for dynamic orientation
+                        //% "Dynamic"
+                        text: qsTrId("harbour-books-settings-page-orientation-dynamic")
+                        readonly property int value: 0
+                    }
+                    MenuItem {
+                        //: Combo box value for portrait orientation
+                        //% "Portrait"
+                        text: qsTrId("harbour-books-settings-page-orientation-portrait")
+                        readonly property int value: 1
+                    }
+                    MenuItem {
+                        //: Combo box value for landscape orientation
+                        //% "Landscape"
+                        text: qsTrId("harbour-books-settings-page-orientation-landscape")
+                        readonly property int value: 2
+                    }
+                }
+                onCurrentItemChanged: {
+                    if (ready && currentItem) {
+                        orientation.value = currentItem.value
+                    }
+                }
+                Component.onCompleted: {
+                    orientation.updateControls()
+                    ready = true
+                }
+
+                ConfigurationValue {
+                    id: orientation
+                    key: rootPath + "orientation"
+                    defaultValue: 0
+                    onValueChanged: updateControls()
+                    function updateControls() {
+                        var n = orientationMenu.children.length
+                        var index = orientationMenu.defaultIndex
+                        for (var i=0; i<n; i++) {
+                            if (orientationMenu.children[i].value === value) {
+                                index = i
+                                break
+                            }
+                        }
+                        orientationComboBox.currentIndex = index
+                    }
                 }
             }
         }

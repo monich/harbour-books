@@ -104,7 +104,11 @@ SilicaFlickable {
                         console.log(_settingsComponent.errorString())
                     }
                 }
-                pageStack.push(_settingsComponent, {"title" : text })
+                pageStack.push(_settingsComponent, {
+                    "title" : text,
+                    "allowedOrientations": window.allowedOrientations,
+                    "followOrientationChanges": true
+                })
             }
         }
         MenuItem {

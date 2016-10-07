@@ -45,6 +45,7 @@ class BooksSettings : public QObject
 {
     Q_OBJECT
     Q_ENUMS(FontSize)
+    Q_ENUMS(Orientation)
     Q_PROPERTY(int fontSize READ fontSize WRITE setFontSize NOTIFY fontSizeChanged)
     Q_PROPERTY(int pageDetails READ pageDetails WRITE setPageDetails NOTIFY pageDetailsChanged)
     Q_PROPERTY(bool invertColors READ invertColors WRITE setInvertColors NOTIFY invertColorsChanged)
@@ -54,6 +55,7 @@ class BooksSettings : public QObject
     Q_PROPERTY(QString relativePath READ relativePath NOTIFY relativePathChanged)
     Q_PROPERTY(QColor primaryPageToolColor READ primaryPageToolColor CONSTANT)
     Q_PROPERTY(QColor highlightPageToolColor READ highlightPageToolColor NOTIFY invertColorsChanged)
+    Q_PROPERTY(int orientation READ orientation NOTIFY orientationChanged)
     class TextStyle;
 
 public:
@@ -64,12 +66,18 @@ public:
         FontSizeSteps = MaxFontSize - MinFontSize
     };
 
+    enum Orientation {
+        OrientationAny,
+        OrientationPortrait,
+        OrientationLandscape
+    };
+
     explicit BooksSettings(QObject* aParent = NULL);
 
     Q_INVOKABLE bool increaseFontSize();
     Q_INVOKABLE bool decreaseFontSize();
 
-    int fontSize() const { return iFontSize; }
+    int fontSize() const;
     void setFontSize(int aValue);
 
     int pageDetails() const;
@@ -87,9 +95,11 @@ public:
     QString currentFolder() const;
     void setCurrentFolder(QString aValue);
 
-    QString currentStorage() const { return iCurrentStorageDevice; }
+    QString currentStorage() const;
     QColor primaryPageToolColor() const;
     QColor highlightPageToolColor() const;
+
+    Orientation orientation() const;
 
 Q_SIGNALS:
     void fontSizeChanged();
@@ -100,6 +110,7 @@ Q_SIGNALS:
     void currentFolderChanged();
     void currentStorageChanged();
     void relativePathChanged();
+    void orientationChanged();
 
 private Q_SLOTS:
     void onFontSizeValueChanged();
@@ -119,6 +130,7 @@ private:
     MGConfItem* iInvertColorsConf;
     MGConfItem* iCurrentFolderConf;
     MGConfItem* iCurrentBookPathConf;
+    MGConfItem* iOrientationConf;
     mutable shared_ptr<ZLTextStyle> iTextStyle[FontSizeSteps+1];
     BooksBook* iCurrentBook;
     QString iCurrentStorageDevice;
@@ -126,5 +138,10 @@ private:
 };
 
 QML_DECLARE_TYPE(BooksSettings)
+
+inline int BooksSettings::fontSize() const
+    { return iFontSize; }
+inline QString BooksSettings::currentStorage() const
+    { return iCurrentStorageDevice; }
 
 #endif // BOOKS_SETTINGS_H

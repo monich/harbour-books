@@ -65,7 +65,7 @@
     <message id="harbour-books-storage-menu-settings">
         <source>Settings</source>
         <extracomment>Pulley menu item</extracomment>
-        <translation type="unfinished">Einstellungen</translation>
+        <translation>Einstellungen</translation>
     </message>
     <message id="harbour-books-storage-menu-scan_downloads">
         <source>Scan downloads</source>
@@ -113,6 +113,26 @@
         <source>Default</source>
         <extracomment>Slider value label for the standard font size</extracomment>
         <translation>Standard</translation>
+    </message>
+    <message id="harbour-books-settings-page-orientation_label">
+        <source>Orientation</source>
+        <extracomment>Combo box label</extracomment>
+        <translation>Orientierung</translation>
+    </message>
+    <message id="harbour-books-settings-page-orientation-dynamic">
+        <source>Dynamic</source>
+        <extracomment>Combo box value for dynamic orientation</extracomment>
+        <translation>Dynamisch</translation>
+    </message>
+    <message id="harbour-books-settings-page-orientation-portrait">
+        <source>Portrait</source>
+        <extracomment>Combo box value for portrait orientation</extracomment>
+        <translation>Hochformat</translation>
+    </message>
+    <message id="harbour-books-settings-page-orientation-landscape">
+        <source>Landscape</source>
+        <extracomment>Combo box value for landscape orientation</extracomment>
+        <translation>Querformat</translation>
     </message>
 </context>
 </TS>
