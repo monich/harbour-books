@@ -54,6 +54,7 @@ SilicaFlickable {
     readonly property real horizontalScrollThreshold: _cellWidth/2
 
     readonly property real _minGridCellWidth: 10*Theme.paddingMedium
+    property var _settingsComponent
 
     // Books in the library shouldn't be too small or too big.
     // At least 3 (or 5 in landscape) should fit in the horizontal direction.
@@ -90,12 +91,31 @@ SilicaFlickable {
 
     PullDownMenu {
         MenuItem {
+            //: Pulley menu item
+            //% "Settings"
+            text: qsTrId("storage-view-settings")
+            visible: !editMode && BooksSettingsMenu
+            onClicked: {
+                if (!_settingsComponent) {
+                    _settingsComponent = Qt.createComponent("../settings/BooksSettings.qml")
+                    if (_settingsComponent.status === Component.Ready) {
+                        _settingsComponent.createObject(storageView)
+                    } else {
+                        console.log(_settingsComponent.errorString())
+                    }
+                }
+                pageStack.push(_settingsComponent, {"title" : text })
+            }
+        }
+        MenuItem {
+            //: Pulley menu item
             //% "Scan downloads"
             text: qsTrId("storage-view-scan-downloads")
             visible: !editMode
             onClicked: pageStack.push(importComponent)
         }
         MenuItem {
+            //: Pulley menu item
             //% "Delete all books"
             text: qsTrId("storage-view-delete-everything")
             visible: editMode

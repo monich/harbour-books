@@ -1,7 +1,22 @@
-TARGET = harbour-books
+NAME = books
+
+openrepos {
+    PREFIX = openrepos
+    DEFINES += OPENREPOS
+} else {
+    PREFIX = harbour
+}
+
+TARGET = $${PREFIX}-$${NAME}
 CONFIG += sailfishapp link_pkgconfig
 PKGCONFIG += sailfishapp mlite5 glib-2.0
-#QT += dbus
+
+app_settings {
+    # This path is hardcoded in jolla-settings
+    TRANSLATIONS_PATH = /usr/share/translations
+} else {
+    TRANSLATIONS_PATH = /usr/share/$${TARGET}/translations
+}
 
 !include(../common.pri)
 
@@ -38,6 +53,7 @@ OTHER_FILES += \
   harbour-books.desktop \
   qml/*.qml \
   qml/images/* \
+  settings/*.qml \
   data/default/* \
   data/zlibrary/core/encodings/* \
   data/zlibrary/core/resources/* \
@@ -67,30 +83,6 @@ INSTALLS += defaults
 formats.files = data/formats/*
 formats.path = $$TARGET_DEFAULT_DATA_DIR/formats
 INSTALLS += formats
-
-icon86.files = icons/86x86/harbour-books.png
-icon86.path = $$TARGET_ICON_ROOT/86x86/apps
-INSTALLS += icon86
-
-icon108.files = icons/108x108/harbour-books.png
-icon108.path = $$TARGET_ICON_ROOT/108x108/apps
-INSTALLS += icon108
-
-icon128.files = icons/128x128/harbour-books.png
-icon128.path = $$TARGET_ICON_ROOT/128x128/apps
-INSTALLS += icon128
-
-icon256.files = icons/256x256/harbour-books.png
-icon256.path = $$TARGET_ICON_ROOT/256x256/apps
-INSTALLS += icon256
-
-CONFIG += sailfishapp_i18n sailfishapp_i18n_idbased
-TRANSLATIONS += \
-    translations/harbour-books.ts \
-    translations/harbour-books-de.ts \
-    translations/harbour-books-fi.ts \
-    translations/harbour-books-ru.ts \
-    translations/harbour-books-sv.ts
 
 INCLUDEPATH += \
   src \
@@ -133,11 +125,15 @@ SOURCES += \
   src/ZLApplication.cpp \
   src/ZLibrary.cpp
 
-# Stubs for the libraries not allowed in harbour
-SOURCES += \
-  stubs/libexpat.c \
-  stubs/libmagic.c \
-  stubs/libudev.c
+# Some libraries are not allowed in harbour
+openrepos {
+  LIBS += -lexpat -lmagic -ludev
+} else {
+  SOURCES += \
+    stubs/libexpat.c \
+    stubs/libmagic.c \
+    stubs/libudev.c
+}
 
 HEADERS += \
   src/BooksBook.h \
@@ -167,3 +163,83 @@ HEADERS += \
   src/BooksTextStyle.h \
   src/BooksTypes.h \
   src/BooksUtil.h
+
+# Icons
+ICON_SIZES = 86 108 128 256
+for(s, ICON_SIZES) {
+    icon_target = icon$${s}
+    icon_dir = icons/$${s}x$${s}
+    $${icon_target}.files = $${icon_dir}/$${TARGET}.png
+    $${icon_target}.path = /usr/share/icons/hicolor/$${s}x$${s}/apps
+    equals(PREFIX, "openrepos") {
+        $${icon_target}.extra = cp $${icon_dir}/harbour-$${NAME}.png $$eval($${icon_target}.files)
+        $${icon_target}.CONFIG += no_check_exist
+    }
+    INSTALLS += $${icon_target}
+}
+
+# Settings
+app_settings {
+    settings_json.files = settings/$${TARGET}.json
+    settings_json.path = /usr/share/jolla-settings/entries/
+    equals(PREFIX, "openrepos") {
+        settings_json.extra = sed s/harbour/openrepos/g settings/harbour-$${NAME}.json > $$eval(settings_json.files)
+        settings_json.CONFIG += no_check_exist
+    }
+    INSTALLS += settings_json
+}
+
+settings_qml.files = settings/*.qml
+settings_qml.path = /usr/share/$${TARGET}/settings/
+INSTALLS += settings_qml
+
+# Desktop file
+equals(PREFIX, "openrepos") {
+    desktop.extra = sed s/harbour/openrepos/g harbour-$${NAME}.desktop > $${TARGET}.desktop
+    desktop.CONFIG += no_check_exist
+}
+
+# Translations
+TRANSLATION_SOURCES = \
+  $${_PRO_FILE_PWD_}/qml \
+  $${_PRO_FILE_PWD_}/settings
+
+defineTest(addTrFile) {
+    in = $${_PRO_FILE_PWD_}/translations/harbour-$$1
+    out = $${OUT_PWD}/translations/$${PREFIX}-$$1
+
+    s = $$replace(1,-,_)
+    lupdate_target = lupdate_$$s
+    lrelease_target = lrelease_$$s
+
+    $${lupdate_target}.commands = lupdate -noobsolete $${TRANSLATION_SOURCES} -ts \"$${in}.ts\" && \
+        mkdir -p \"$${OUT_PWD}/translations\" &&  [ \"$${in}.ts\" != \"$${out}.ts\" ] && \
+        cp -af \"$${in}.ts\" \"$${out}.ts\" || :
+
+    $${lrelease_target}.target = \"$${out}.qm\"
+    $${lrelease_target}.depends = $${lupdate_target}
+    $${lrelease_target}.commands = lrelease -idbased \"$${out}.ts\"
+
+    QMAKE_EXTRA_TARGETS += $${lrelease_target} $${lupdate_target}
+    PRE_TARGETDEPS += \"$${out}.qm\"
+    qm.files += \"$${out}.qm\"
+
+    export($${lupdate_target}.commands)
+    export($${lrelease_target}.target)
+    export($${lrelease_target}.depends)
+    export($${lrelease_target}.commands)
+    export(QMAKE_EXTRA_TARGETS)
+    export(PRE_TARGETDEPS)
+    export(qm.files)
+}
+
+LANGUAGES = de fi ru sv
+
+addTrFile($${NAME})
+for(l, LANGUAGES) {
+    addTrFile($${NAME}-$$l)
+}
+
+qm.path = $$TRANSLATIONS_PATH
+qm.CONFIG += no_check_exist
+INSTALLS += qm

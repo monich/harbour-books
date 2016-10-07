@@ -193,6 +193,8 @@ void ZLibrary::run(ZLApplication* aApp)
     QQmlContext* root = view->rootContext();
     root->setContextProperty("PointsPerInch", booksPPI);
     root->setContextProperty("MaximumHintCount", 1);
+    root->setContextProperty("BooksSettingsMenu",
+        QVariant::fromValue(BOOKS_SETTINGS_MENU));
 
     view->setTitle(qtTrId("books-app-name"));
     view->setSource(QUrl::fromLocalFile(qml));

@@ -60,7 +60,7 @@ public:
     enum FontSize {
         MinFontSize = -5,
         DefaultFontSize = 0,
-        MaxFontSize = 10,
+        MaxFontSize = 15,
         FontSizeSteps = MaxFontSize - MinFontSize
     };
 

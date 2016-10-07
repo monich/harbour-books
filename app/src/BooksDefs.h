@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Jolla Ltd.
+ * Copyright (C) 2015-2016 Jolla Ltd.
  * Contact: Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
@@ -14,7 +14,7 @@
  *     notice, this list of conditions and the following disclaimer in
  *     the documentation and/or other materials provided with the
  *     distribution.
- *   * Neither the name of Nemo Mobile nor the names of its contributors
+ *   * Neither the name of Jolla Ltd nor the names of its contributors
  *     may be used to endorse or promote products derived from this
  *     software without specific prior written permission.
  *
@@ -36,7 +36,13 @@
 
 #include <QString>
 
-#define BOOKS_APP_NAME          "harbour-books"
+#ifdef OPENREPOS
+#  define BOOKS_APP_NAME        "openrepos-books"
+#  define BOOKS_SETTINGS_MENU    false
+#else
+#  define BOOKS_APP_NAME        "harbour-books"
+#  define BOOKS_SETTINGS_MENU    true
+#endif
 #define BOOKS_DCONF_ROOT        "/apps/" BOOKS_APP_NAME "/"
 #define BOOKS_DATA_ROOT         "usr/share/" BOOKS_APP_NAME
 #define BOOKS_QML_DIR           BOOKS_DATA_ROOT "/qml"

@@ -58,12 +58,19 @@
             <numerusform>%0 books</numerusform>
         </translation>
     </message>
+    <message id="storage-view-settings">
+        <source>Settings</source>
+        <extracomment>Pulley menu item</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
     <message id="storage-view-scan-downloads">
         <source>Scan downloads</source>
+        <extracomment>Pulley menu item</extracomment>
         <translation>Check downloads</translation>
     </message>
     <message id="storage-view-delete-everything">
         <source>Delete all books</source>
+        <extracomment>Pulley menu item</extracomment>
         <translation>Delete all books</translation>
     </message>
     <message id="storage-view-swipe-left-hint">
@@ -84,6 +91,21 @@
     <message id="import-view-no-new-books-found">
         <source>No new books found</source>
         <translation>No new books found</translation>
+    </message>
+    <message id="settings-page_header">
+        <source>Books</source>
+        <extracomment>Settings page header</extracomment>
+        <translation>Books</translation>
+    </message>
+    <message id="settings-font_size_label">
+        <source>Font size</source>
+        <extracomment>Slider label</extracomment>
+        <translation>Font size</translation>
+    </message>
+    <message id="settings-font_size_label-default">
+        <source>Default</source>
+        <extracomment>Slider value label for the standard font size</extracomment>
+        <translation>Default</translation>
     </message>
 </context>
 </TS>

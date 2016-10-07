@@ -4,6 +4,7 @@ Name=Books
 Name[fi]=Kirjat
 Name[ru]=Книги
 Name[sv]=Böcker
+Name[de]=Bücher
 Comment=E-Book Reader
 Exec=harbour-books
 Icon=harbour-books
