@@ -93,7 +93,7 @@ SilicaFlickable {
         MenuItem {
             //: Pulley menu item
             //% "Settings"
-            text: qsTrId("storage-view-settings")
+            text: qsTrId("harbour-books-storage-menu-settings")
             visible: !editMode && BooksSettingsMenu
             onClicked: {
                 if (!_settingsComponent) {
@@ -110,14 +110,14 @@ SilicaFlickable {
         MenuItem {
             //: Pulley menu item
             //% "Scan downloads"
-            text: qsTrId("storage-view-scan-downloads")
+            text: qsTrId("harbour-books-storage-menu-scan_downloads")
             visible: !editMode
             onClicked: pageStack.push(importComponent)
         }
         MenuItem {
             //: Pulley menu item
             //% "Delete all books"
-            text: qsTrId("storage-view-delete-everything")
+            text: qsTrId("harbour-books-storage-menu-delete_everything")
             visible: editMode
             enabled: currentShelf && (currentShelf.count > 0)
             onClicked: storageModel.setDeleteAllRequest(storageListWatcher.currentIndex, true)

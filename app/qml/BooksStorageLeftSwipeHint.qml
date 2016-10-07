@@ -26,7 +26,7 @@ Loader {
             Component.onCompleted: if (root.hintEnabled) showHint();
             InteractionHintLabel {
                 //% "Swipe left to see what's on the SD-card"
-                text: qsTrId("storage-view-swipe-left-hint")
+                text: qsTrId("harbour-books-storage-view-swipe_left_hint")
                 anchors.bottom: parent.bottom
                 opacity: touchInteractionHint.running ? 1.0 : 0.0
                 Behavior on opacity { FadeAnimation { duration: 1000 } }

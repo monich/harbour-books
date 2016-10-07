@@ -116,7 +116,7 @@ Item {
             if (!_remorse) _remorse = remorseComponent.createObject(shelfView)
             fadeAnimation.restart()
             //% "Deleting all books"
-            _remorse.execute(qsTrId("shelf-view-about-to-delete-all"),
+            _remorse.execute(qsTrId("harbour-books-shelf-view-about_to_delete_all"),
                 doDeleteAll, _remorseTimeout)
         } else if (_remorse) {
             fadeAnimation.stop()

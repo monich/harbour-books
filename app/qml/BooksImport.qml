@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2015 Jolla Ltd.
+  Copyright (C) 2015-2016 Jolla Ltd.
   Contact: Slava Monich <slava.monich@jolla.com>
 
   You may use this file under the terms of BSD license as follows:
@@ -56,10 +56,13 @@ Dialog {
             id: dialogHeader
             spacing: 0
             acceptText: ((_loading || !importModel.count) && !importModel.selectedCount) ? "" :
-                //% "Import %0 book(s)"
-                importModel.selectedCount ?  qsTrId("import-view-import-n-books",importModel.selectedCount).arg(importModel.selectedCount) :
-                //% "Select books"
-                qsTrId("import-view-select-books")
+                importModel.selectedCount ?
+                    //: Dialog header button
+                    //% "Import %0 book(s)"
+                    qsTrId("harbour-books-import-page-import_n_books",importModel.selectedCount).arg(importModel.selectedCount) :
+                    //: Dialog header button
+                    //% "Select books"
+                    qsTrId("harbour-books-import-page-select_books")
         }
 
         SilicaListView {
@@ -88,8 +91,9 @@ Dialog {
         }
 
         ViewPlaceholder {
+            //: Import page placeholder
             //% "No new books found"
-            text: qsTrId("import-view-no-new-books-found")
+            text: qsTrId("harbour-books-import-page-no_new_books_found")
             enabled: !_loading && !importModel.count
         }
     }

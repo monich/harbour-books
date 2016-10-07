@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2015 Jolla Ltd.
+  Copyright (C) 2015-2016 Jolla Ltd.
   Contact: Slava Monich <slava.monich@jolla.com>
 
   You may use this file under the terms of BSD license as follows:
@@ -38,7 +38,7 @@ ApplicationWindow {
     allowedOrientations: Orientation.All
 
     //% "Books"
-    readonly property string title: qsTrId("books-app-name")
+    readonly property string title: qsTrId("harbour-books-app-name")
 
     property variant currentShelf: mainPage.currentShelf
 

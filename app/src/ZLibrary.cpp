@@ -196,7 +196,7 @@ void ZLibrary::run(ZLApplication* aApp)
     root->setContextProperty("BooksSettingsMenu",
         QVariant::fromValue(BOOKS_SETTINGS_MENU));
 
-    view->setTitle(qtTrId("books-app-name"));
+    view->setTitle(qtTrId("harbour-books-app-name"));
     view->setSource(QUrl::fromLocalFile(qml));
     view->show();
     HDEBUG("started");

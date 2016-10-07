@@ -46,7 +46,7 @@ Item {
         id: noBooks
 
         //% "No books"
-        text: qsTrId("shelf-view-no-books")
+        text: qsTrId("harbour-books-shelf-view-no_books")
         visible: footerState == 2 && !editMode
         anchors.centerIn: parent
         width: parent.width - 2*Theme.horizontalPageMargin

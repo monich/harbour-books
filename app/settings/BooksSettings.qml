@@ -62,7 +62,7 @@ Page {
                 id: pageHeader
                 //: Settings page header
                 //% "Books"
-                title: qsTrId("settings-page_header")
+                title: qsTrId("harbour-books-settings-page-header")
             }
 
             Slider {
@@ -72,10 +72,10 @@ Page {
                 stepSize: 1
                 //: Slider value label for the standard font size
                 //% "Default"
-                readonly property string normal: qsTrId("settings-font_size_label-default")
+                readonly property string normal: qsTrId("harbour-books-settings-page-font_size_label-default")
                 //: Slider label
                 //% "Font size"
-                label: qsTrId("settings-font_size_label")
+                label: qsTrId("harbour-books-settings-page-font_size_label")
                 valueText: (value === 0) ? normal : ((value > 0) ? ("+" + value) : value)
                 width: page.width
                 anchors.horizontalCenter: parent.horizontalCenter

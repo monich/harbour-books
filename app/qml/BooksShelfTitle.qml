@@ -113,8 +113,9 @@ MouseArea {
                 visible: opacity > 0
                 opacity: editable ? 1 : 0
                 Behavior on opacity { FadeAnimation {} }
+                //: Placeholder for the bookshelf title
                 //% "Enter folder name"
-                placeholderText: qsTrId("shelf-title-placeholder")
+                placeholderText: qsTrId("harbour-books-shelf-title-placeholder")
                 EnterKey.enabled: text.length > 0 && text !== "." && text !== ".." && text.indexOf("/") < 0
                 EnterKey.onClicked: {
                     if (editable) {

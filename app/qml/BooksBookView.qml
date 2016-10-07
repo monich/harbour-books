@@ -53,19 +53,19 @@ SilicaFlickable {
     // NOTE: These have to match ResetReason in BooksBookModel
     readonly property var _loadingTextLabel: [
         //% "Formatting..."
-        qsTrId("book-view-formatting"),
+        qsTrId("harbour-books-book-view-formatting"),
         //% "Loading..."
-        qsTrId("book-view-loading"),
+        qsTrId("harbour-books-book-view-loading"),
         //% "Applying larger fonts..."
-        qsTrId("book-view-applying-larger-fonts"),
+        qsTrId("harbour-books-book-view-applying_larger_fonts"),
         //% "Applying smaller fonts..."
-        qsTrId("book-view-applying-smaller-fonts")
+        qsTrId("harbour-books-book-view-applying_smaller_fonts")
     ]
 
     PullDownMenu {
         MenuItem {
             //% "Back to library"
-            text: qsTrId("book-view-back")
+            text: qsTrId("harbour-books-book-view-back")
             onClicked: root.closeBook()
         }
     }
@@ -221,7 +221,7 @@ SilicaFlickable {
 
     Button {
         //% "Cancel"
-        text: qsTrId("book-view-cancel-loading")
+        text: qsTrId("harbour-books-book-view-cancel_loading")
         height: Theme.itemSizeLarge
         anchors {
             bottom: parent.bottom

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2015 Jolla Ltd.
+  Copyright (C) 2015-2016 Jolla Ltd.
   Contact: Slava Monich <slava.monich@jolla.com>
 
   You may use this file under the terms of BSD license as follows:
@@ -94,10 +94,12 @@ Column {
             }
             color: (root.enabled && !mouseArea.pressed) ? Theme.primaryColor : Theme.highlightColor
             text: removable ?
+                //: Header label for the memory card
                 //% "Memory card"
-                qsTrId("storage-removable") :
+                qsTrId("harbour-books-storage-removable") :
+                //: Header label for the internal storage
                 //% "Internal storage"
-                qsTrId("storage-internal")
+                qsTrId("harbour-books-storage-internal")
 
             MouseArea {
                 id: mouseArea
@@ -122,8 +124,9 @@ Column {
                 right: parent.right
                 rightMargin: Theme.paddingMedium
             }
+            //: Number of books in the storage header
             //% "%0 book(s)"
-            text: qsTrId("storage-book-count",_shownCount).arg(_shownCount)
+            text: qsTrId("harbour-books-storage-book_count",_shownCount).arg(_shownCount)
             font.pixelSize: Theme.fontSizeExtraSmall
             color: Theme.highlightColor
             opacity: (showCount && count > 0) ? 1 : 0
