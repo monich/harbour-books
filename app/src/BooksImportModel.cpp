@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Jolla Ltd.
+ * Copyright (C) 2015-2016 Jolla Ltd.
  * Contact: Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
@@ -219,6 +219,7 @@ void BooksImportModel::Task::performTask()
             iDestFiles = QDir(iDestDir).entryInfoList(QDir::Files);
         }
         scanDir(QDir(QDir::homePath() + "/Downloads"));
+        scanDir(QDir(QDir::homePath() + "/android_storage/Download"));
     }
 }
 
