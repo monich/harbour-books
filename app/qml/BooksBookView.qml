@@ -150,6 +150,7 @@ SilicaFlickable {
             if (page >=0 && page !== _currentPage) {
                 _jumpingTo = page
                 positionViewAtIndex(page, ListView.Center)
+                pager.currentPage = page
                 _jumpingTo = -1
                 if (_currentPage !== page) {
                     console.log("oops, still at", _currentPage)
