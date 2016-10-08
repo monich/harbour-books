@@ -55,6 +55,7 @@ class BooksSettings : public QObject
     Q_PROPERTY(QString relativePath READ relativePath NOTIFY relativePathChanged)
     Q_PROPERTY(QColor primaryPageToolColor READ primaryPageToolColor CONSTANT)
     Q_PROPERTY(QColor highlightPageToolColor READ highlightPageToolColor NOTIFY invertColorsChanged)
+    Q_PROPERTY(QColor pageBackgroundColor READ pageBackgroundColor NOTIFY pageBackgroundColorChanged)
     Q_PROPERTY(int orientation READ orientation NOTIFY orientationChanged)
     class TextStyle;
 
@@ -98,6 +99,7 @@ public:
     QString currentStorage() const;
     QColor primaryPageToolColor() const;
     QColor highlightPageToolColor() const;
+    QColor pageBackgroundColor() const;
 
     Orientation orientation() const;
 
@@ -110,6 +112,7 @@ Q_SIGNALS:
     void currentFolderChanged();
     void currentStorageChanged();
     void relativePathChanged();
+    void pageBackgroundColorChanged();
     void orientationChanged();
 
 private Q_SLOTS:

@@ -182,13 +182,15 @@ public:
 void BooksPageWidget::LongPressTask::performTask()
 {
     if (!isCanceled()) {
-        const ZLTextArea& area = iData->iView->textArea();
+        const BooksTextView& view = *iData->iView;
+        const ZLTextArea& area = view.textArea();
         const ZLTextElementRectangle* rect = area.elementByCoordinates(iX, iY);
         if (rect && !isCanceled()) {
             iRect.setLeft(rect->XStart);
             iRect.setRight(rect->XEnd);
             iRect.setTop(rect->YStart);
             iRect.setBottom(rect->YEnd);
+            iRect.translate(view.leftMargin(), view.topMargin());
             if (rect->Kind == ZLTextElement::WORD_ELEMENT) {
                 ZLTextWordCursor cursor = area.startCursor();
                 cursor.moveToParagraph(rect->ParagraphIndex);

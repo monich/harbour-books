@@ -77,6 +77,7 @@ SilicaFlickable {
     Component {
         id: imageViewComponent
         BooksImageView {
+            imageBackground: globalSettings.pageBackgroundColor
         }
     }
 
@@ -168,8 +169,7 @@ SilicaFlickable {
                     if (!imageView) {
                         imageView = imageViewComponent.createObject(root)
                     }
-                    imageView.source = url
-                    imageView.show()
+                    imageView.show(url,rect)
                 }
             }
             onBrowserLinkPressed: {

@@ -33,6 +33,7 @@
 
 #include "BooksSettings.h"
 #include "BooksTextStyle.h"
+#include "BooksTextView.h"
 #include "BooksBook.h"
 #include "BooksDefs.h"
 #include "BooksUtil.h"
@@ -215,6 +216,7 @@ BooksSettings::BooksSettings(QObject* aParent) :
     connect(iFontSizeConf, SIGNAL(valueChanged()), SLOT(onFontSizeValueChanged()));
     connect(iPageDetailsConf, SIGNAL(valueChanged()), SIGNAL(pageDetailsChanged()));
     connect(iInvertColorsConf, SIGNAL(valueChanged()), SIGNAL(invertColorsChanged()));
+    connect(iInvertColorsConf, SIGNAL(valueChanged()), SIGNAL(pageBackgroundColorChanged()));
     connect(iCurrentFolderConf, SIGNAL(valueChanged()), SLOT(onCurrentFolderChanged()));
     connect(iCurrentBookPathConf, SIGNAL(valueChanged()), SLOT(onCurrentBookPathChanged()));
     connect(iOrientationConf, SIGNAL(valueChanged()), SIGNAL(orientationChanged()));
@@ -456,6 +458,14 @@ BooksSettings::highlightPageToolColor() const
     return invertColors() ?
         INVERTED_PAGETOOL_HIGHLIGHT_COLOR :
         NORMAL_PAGETOOL_HIGHLIGHT_COLOR;
+}
+
+QColor
+BooksSettings::pageBackgroundColor() const
+{
+    return qtColor(invertColors() ?
+        BooksTextView::INVERTED_BACKGROUND :
+        BooksTextView::DEFAULT_BACKGROUND);
 }
 
 BooksSettings::Orientation

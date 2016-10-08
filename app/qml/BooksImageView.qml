@@ -37,37 +37,81 @@ Rectangle {
     id: root
     visible: opacity > 0.0
     opacity: 0.0
-    width: parent.width
-    height: parent.height
+    anchors.fill: parent
     color: Theme.rgba(Theme.highlightDimmerColor, 0.9)
 
-    property alias source: image.source
+    property alias imageBackground: background.color
     readonly property real maxImageWidth: width - 2*Theme.horizontalPageMargin
     readonly property real maxImageHeight: height - 2*Theme.paddingLarge
+    readonly property real finalImageWidth: Math.ceil(image.landscape ? maxImageWidth : (maxImageHeight * image.sourceSize.width / image.sourceSize.height))
+    readonly property real finalImageHeight: Math.ceil(image.landscape ? (maxImageWidth * image.sourceSize.height / image.sourceSize.width) : maxImageHeight)
+    readonly property real finalImageX: Math.floor((width - finalImageWidth)/2)
+    readonly property real finalImageY: Math.floor((height - finalImageHeight)/2)
 
-    Behavior on opacity { FadeAnimation {} }
+    property bool shown
+
+    Rectangle {
+        id: background
+        anchors.fill: image
+    }
 
     Image {
         id: image
-        anchors.centerIn: parent
         smooth: true
         readonly property bool landscape: sourceSize.width * parent.height > sourceSize.height * parent.width
-        width: landscape ? maxImageWidth : (maxImageHeight * sourceSize.width / sourceSize.height)
-        height: landscape ? (maxImageWidth * sourceSize.height / sourceSize.width) : maxImageHeight
     }
 
     MouseArea {
         anchors.fill: parent
-        onPressed: {
-            root.hide()
+        onPressed: root.hide()
+    }
+
+    function show(url,rect) {
+        image.source = url
+        if (!shown) {
+            image.x = rect.x
+            image.y = rect.y
+            image.width = rect.width
+            image.height = rect.height
+            shown = true
         }
     }
 
-    function show() {
-        opacity = 1.0
+    function hide() {
+        shown = false
     }
 
-    function hide() {
-        opacity = 0.0
-    }
+    states: [
+        State {
+            name: "shown"
+            when: shown
+            PropertyChanges {
+                target: root
+                opacity: 1
+            }
+            PropertyChanges {
+                target: background
+                opacity: 1
+            }
+            PropertyChanges {
+                target: image
+                x: finalImageX
+                y: finalImageY
+                width: finalImageWidth
+                height: finalImageHeight
+            }
+        }
+    ]
+
+    transitions: [
+        Transition {
+            from: "*"
+            to: "*"
+            NumberAnimation {
+                properties: "opacity,x,y,width,height"
+                duration: 200
+                easing.type: Easing.InOutQuad
+            }
+        }
+    ]
 }
