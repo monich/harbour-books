@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Jolla Ltd.
+ * Copyright (C) 2015-2016 Jolla Ltd.
  * Contact: Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
@@ -14,7 +14,7 @@
  *     notice, this list of conditions and the following disclaimer in
  *     the documentation and/or other materials provided with the
  *     distribution.
- *   * Neither the name of Nemo Mobile nor the names of its contributors
+ *   * Neither the name of Jolla Ltd nor the names of its contributors
  *     may be used to endorse or promote products derived from this
  *     software without specific prior written permission.
  *
@@ -31,6 +31,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "BooksImageProvider.h"
 #include "BooksPageWidget.h"
 #include "BooksTextStyle.h"
 #include "BooksDefs.h"
@@ -162,7 +163,7 @@ void BooksPageWidget::RenderTask::performTask()
 class BooksPageWidget::LongPressTask : public BooksTask {
 public:
     LongPressTask(shared_ptr<BooksPageWidget::Data> aData, int aX, int aY) :
-        iData(aData), iX(aX), iY(aY) {}
+        iData(aData), iX(aX), iY(aY), iKind(REGULAR) {}
 
     void performTask();
 
@@ -170,9 +171,12 @@ public:
     shared_ptr<BooksPageWidget::Data> iData;
     int iX;
     int iY;
+    QRect iRect;
     ZLTextKind iKind;
-    std::string iLinkText;
+    std::string iLink;
     std::string iLinkType;
+    std::string iImageId;
+    shared_ptr<ZLImageData> iImageData;
 };
 
 void BooksPageWidget::LongPressTask::performTask()
@@ -180,27 +184,47 @@ void BooksPageWidget::LongPressTask::performTask()
     if (!isCanceled()) {
         const ZLTextArea& area = iData->iView->textArea();
         const ZLTextElementRectangle* rect = area.elementByCoordinates(iX, iY);
-        if (rect && !isCanceled() &&
-           ((rect->Kind == ZLTextElement::WORD_ELEMENT) ||
-            (rect->Kind == ZLTextElement::IMAGE_ELEMENT))) {
-            ZLTextWordCursor cursor = area.startCursor();
-            cursor.moveToParagraph(rect->ParagraphIndex);
-            cursor.moveToParagraphStart();
-            for (int i=0; i<rect->ElementIndex && !isCanceled(); i++) {
-                const ZLTextElement& element = cursor.element();
-                if (element.kind() == ZLTextElement::CONTROL_ELEMENT) {
-                    const ZLTextControlEntry& controlEntry =
-                        ((const ZLTextControlElement&)element).entry();
-                    if (controlEntry.isHyperlink()) {
-                        const ZLTextHyperlinkControlEntry& hyperLinkEntry =
-                            ((const ZLTextHyperlinkControlEntry&)controlEntry);
-                        iKind = hyperLinkEntry.kind();
-                        iLinkText = hyperLinkEntry.label();
-                        iLinkType = hyperLinkEntry.hyperlinkType();
-                        return;
+        if (rect && !isCanceled()) {
+            iRect.setLeft(rect->XStart);
+            iRect.setRight(rect->XEnd);
+            iRect.setTop(rect->YStart);
+            iRect.setBottom(rect->YEnd);
+            if (rect->Kind == ZLTextElement::WORD_ELEMENT) {
+                ZLTextWordCursor cursor = area.startCursor();
+                cursor.moveToParagraph(rect->ParagraphIndex);
+                cursor.moveToParagraphStart();
+                for (int i=0; i<rect->ElementIndex && !isCanceled(); i++) {
+                    const ZLTextElement& element = cursor.element();
+                    if (element.kind() == ZLTextElement::CONTROL_ELEMENT) {
+                        const ZLTextControlEntry& controlEntry =
+                            ((const ZLTextControlElement&)element).entry();
+                        if (controlEntry.isHyperlink()) {
+                            const ZLTextHyperlinkControlEntry& hyperLinkEntry =
+                                ((const ZLTextHyperlinkControlEntry&)controlEntry);
+                            iKind = hyperLinkEntry.kind();
+                            iLink = hyperLinkEntry.label();
+                            iLinkType = hyperLinkEntry.hyperlinkType();
+                            HDEBUG("link" << iLink.c_str());
+                            return;
+                        }
                     }
+                    cursor.nextWord();
                 }
-                cursor.nextWord();
+            } else if (rect->Kind == ZLTextElement::IMAGE_ELEMENT) {
+                ZLTextWordCursor cursor = area.startCursor();
+                cursor.moveToParagraph(rect->ParagraphIndex);
+                cursor.moveTo(rect->ElementIndex, 0);
+                const ZLTextElement& element = cursor.element();
+                HASSERT(element.kind() == ZLTextElement::IMAGE_ELEMENT);
+                if (element.kind() == ZLTextElement::IMAGE_ELEMENT) {
+                    const ZLTextImageElement& imageElement =
+                        (const ZLTextImageElement&)element;
+                    iKind = IMAGE;
+                    iImageId = imageElement.id();
+                    iImageData = imageElement.image();
+                    HDEBUG("image element" << iImageId.c_str() <<
+                        iImageData->width() << iImageData->height());
+                }
             }
         }
     }
@@ -519,18 +543,24 @@ void BooksPageWidget::onRenderTaskDone()
 
 void BooksPageWidget::onLongPressTaskDone()
 {
-    static const std::string HTTP("http://");
-    static const std::string HTTPS("https://");
-
     HASSERT(sender() == iLongPressTask);
-    HDEBUG(iLongPressTask->iKind <<
-           iLongPressTask->iLinkType.c_str() <<
-           iLongPressTask->iLinkText.c_str());
+    HDEBUG(iLongPressTask->iKind);
 
-    if (iLongPressTask->iKind == EXTERNAL_HYPERLINK &&
-       (ZLStringUtil::stringStartsWith(iLongPressTask->iLinkText, HTTP) ||
-        ZLStringUtil::stringStartsWith(iLongPressTask->iLinkText, HTTPS))) {
-        Q_EMIT browserLinkPressed(QString::fromStdString(iLongPressTask->iLinkText));
+    if (iLongPressTask->iKind == EXTERNAL_HYPERLINK) {
+        static const std::string HTTP("http://");
+        static const std::string HTTPS("https://");
+        if (ZLStringUtil::stringStartsWith(iLongPressTask->iLink, HTTP) ||
+            ZLStringUtil::stringStartsWith(iLongPressTask->iLink, HTTPS)) {
+            QString url(QString::fromStdString(iLongPressTask->iLink));
+            Q_EMIT browserLinkPressed(url);
+        }
+    } else if (iLongPressTask->iKind == IMAGE) {
+        static const QString PREFIX("image://");
+        QString id(QString::fromStdString(iLongPressTask->iImageId));
+        QString url = PREFIX + BooksImageProvider::PROVIDER_ID + "/" + id;
+        BooksImageProvider::instance()->addImage(iModel, id,
+            iLongPressTask->iImageData);
+        Q_EMIT imagePressed(url, iLongPressTask->iRect);
     }
 
     iLongPressTask->release(this);
