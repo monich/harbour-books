@@ -1,6 +1,6 @@
 Name:           harbour-books
 Summary:        E-book reader
-Version:        1.0.13
+Version:        1.0.14
 Release:        1
 License:        BSD
 Group:          Applications/File
@@ -57,6 +57,9 @@ desktop-file-install --delete-original \
 make -C test test
 
 %changelog
+* Wed Oct 08 2016 Slava Monich <slava.monich@jolla.com> 1.0.14
+- Improved image zoom transitions
+
 * Wed Oct 08 2016 Slava Monich <slava.monich@jolla.com> 1.0.13
 - Implemented long press actions (open links in brower, zoom images)
 - Added settings page
