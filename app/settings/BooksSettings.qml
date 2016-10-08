@@ -7,6 +7,7 @@
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions
   are met:
+
     * Redistributions of source code must retain the above copyright
       notice, this list of conditions and the following disclaimer.
     * Redistributions in binary form must reproduce the above copyright
@@ -58,7 +59,7 @@ Page {
             onValueChanged: allowedOrientations =
                 (orientation.value === 1) ? Orientation.Portrait :
                 (orientation.value === 2) ? Orientation.Landscape :
-                                           Orientation.All
+                                            Orientation.All
         }
     }
 
