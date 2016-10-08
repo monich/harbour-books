@@ -134,5 +134,21 @@
         <extracomment>Combo box value for landscape orientation</extracomment>
         <translation>Liggande</translation>
     </message>
+    <message id="harbour-books-book-browser_link-title">
+        <source>Link</source>
+        <oldsource>External link</oldsource>
+        <extracomment>External link menu title</extracomment>
+        <translation type="unfinished">Länk</translation>
+    </message>
+    <message id="harbour-books-book-browser_link-open_in_browser">
+        <source>Open in browser</source>
+        <extracomment>Open link in browser</extracomment>
+        <translation type="unfinished">Öppna i webbläsaren</translation>
+    </message>
+    <message id="harbour-books-book-browser_link-copy_to_clipboard">
+        <source>Copy to clipboard</source>
+        <extracomment>Copy link to clipboard</extracomment>
+        <translation>Kopiera till urklipp</translation>
+    </message>
 </context>
 </TS>

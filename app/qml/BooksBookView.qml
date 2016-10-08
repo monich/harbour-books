@@ -7,14 +7,15 @@
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions
   are met:
+
     * Redistributions of source code must retain the above copyright
       notice, this list of conditions and the following disclaimer.
     * Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    * Neither the name of the Jolla Ltd nor the
-      names of its contributors may be used to endorse or promote products
-      derived from this software without specific prior written permission.
+    * Neither the name of Jolla Ltd nor the names of its contributors
+      may be used to endorse or promote products derived from this software
+      without specific prior written permission.
 
   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
   AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -62,6 +63,16 @@ SilicaFlickable {
         qsTrId("harbour-books-book-view-applying_smaller_fonts")
     ]
 
+    interactive: !linkMenu || !linkMenu.visible
+
+    property var linkMenu
+
+    Component {
+        id: linkMenuComponent
+        BooksLinkMenu {
+        }
+    }
+
     PullDownMenu {
         MenuItem {
             //% "Back to library"
@@ -98,6 +109,7 @@ SilicaFlickable {
         settings: globalSettings
         onJumpToPage: bookView.jumpTo(index)
         onCurrentPageChanged: {
+            if (linkMenu) linkMenu.hide()
             if (currentPage >= 0 && bookView._jumpingTo < 0) {
                 pager.currentPage = currentPage
             }
@@ -125,6 +137,7 @@ SilicaFlickable {
         spacing: Theme.paddingMedium
         opacity: _loading ? 0 : 1
         visible: opacity > 0
+        interactive: root.interactive
         delegate: BooksPageView {
             width: bookView.width
             height: bookView.height
@@ -142,6 +155,15 @@ SilicaFlickable {
             onPageClicked: {
                 root.pageClicked(index)
                 globalSettings.pageDetails = (globalSettings.pageDetails+ 1) % _visibilityStates.length
+            }
+            onBrowserLinkPressed: {
+                if (_currentPage == index) {
+                    if (!linkMenu) {
+                        linkMenu = linkMenuComponent.createObject(root)
+                    }
+                    linkMenu.url = url
+                    linkMenu.show()
+                }
             }
         }
 

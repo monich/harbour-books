@@ -89,6 +89,8 @@ public:
 
     BooksMargins margins() const { return iMargins; }
 
+    Q_INVOKABLE void handleLongPress(int aX, int aY);
+
 Q_SIGNALS:
     void loadingChanged();
     void pageChanged();
@@ -98,6 +100,7 @@ Q_SIGNALS:
     void rightMarginChanged();
     void topMarginChanged();
     void bottomMarginChanged();
+    void browserLinkPressed(QString url);
 
 private Q_SLOTS:
     void onWidthChanged();
@@ -111,6 +114,7 @@ private Q_SLOTS:
     void onInvertColorsChanged();
     void onResetTaskDone();
     void onRenderTaskDone();
+    void onLongPressTaskDone();
 
 private:
     void paint(QPainter *painter);
@@ -123,6 +127,7 @@ private:
 private:
     class ResetTask;
     class RenderTask;
+    class LongPressTask;
 
     shared_ptr<BooksTaskQueue> iTaskQueue;
     shared_ptr<ZLTextStyle> iTextStyle;
@@ -135,6 +140,7 @@ private:
     shared_ptr<QImage> iImage;
     ResetTask* iResetTask;
     RenderTask* iRenderTask;
+    LongPressTask* iLongPressTask;
     bool iEmpty;
     int iPage;
 };

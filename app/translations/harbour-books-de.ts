@@ -134,5 +134,21 @@
         <extracomment>Combo box value for landscape orientation</extracomment>
         <translation>Querformat</translation>
     </message>
+    <message id="harbour-books-book-browser_link-title">
+        <source>Link</source>
+        <oldsource>External link</oldsource>
+        <extracomment>External link menu title</extracomment>
+        <translation type="unfinished">Link</translation>
+    </message>
+    <message id="harbour-books-book-browser_link-open_in_browser">
+        <source>Open in browser</source>
+        <extracomment>Open link in browser</extracomment>
+        <translation type="unfinished">Im Browser öffnen</translation>
+    </message>
+    <message id="harbour-books-book-browser_link-copy_to_clipboard">
+        <source>Copy to clipboard</source>
+        <extracomment>Copy link to clipboard</extracomment>
+        <translation>In Zwischenablage kopieren</translation>
+    </message>
 </context>
 </TS>

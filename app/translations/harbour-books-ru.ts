@@ -136,5 +136,20 @@
         <extracomment>Combo box value for landscape orientation</extracomment>
         <translation>Альбомная</translation>
     </message>
+    <message id="harbour-books-book-browser_link-title">
+        <source>Link</source>
+        <extracomment>External link menu title</extracomment>
+        <translation>Ссылка</translation>
+    </message>
+    <message id="harbour-books-book-browser_link-open_in_browser">
+        <source>Open in browser</source>
+        <extracomment>Open link in browser</extracomment>
+        <translation>Открыть в браузере</translation>
+    </message>
+    <message id="harbour-books-book-browser_link-copy_to_clipboard">
+        <source>Copy to clipboard</source>
+        <extracomment>Copy link to clipboard</extracomment>
+        <translation>Скопировать</translation>
+    </message>
 </context>
 </TS>

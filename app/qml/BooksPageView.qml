@@ -49,12 +49,14 @@ Item {
     property bool pageNumberVisible
 
     signal pageClicked()
+    signal browserLinkPressed(var url)
 
     PageWidget {
         id: widget
         anchors.fill: parent
         settings: globalSettings
         model: bookModel
+        onBrowserLinkPressed: view.browserLinkPressed(url)
     }
 
     BooksTitleLabel {
@@ -99,5 +101,6 @@ Item {
     MouseArea {
         anchors.fill: parent
         onClicked: view.pageClicked()
+        onPressAndHold: widget.handleLongPress(mouseX, mouseY)
     }
 }

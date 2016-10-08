@@ -35,6 +35,9 @@
 #include "BooksTextStyle.h"
 #include "BooksDefs.h"
 
+#include "bookmodel/FBTextKind.h"
+#include "ZLStringUtil.h"
+
 #include "HarbourDebug.h"
 
 #include <QPainter>
@@ -153,6 +156,57 @@ void BooksPageWidget::RenderTask::performTask()
 }
 
 // ==========================================================================
+// BooksPageWidget::LongPressTask
+// ==========================================================================
+
+class BooksPageWidget::LongPressTask : public BooksTask {
+public:
+    LongPressTask(shared_ptr<BooksPageWidget::Data> aData, int aX, int aY) :
+        iData(aData), iX(aX), iY(aY) {}
+
+    void performTask();
+
+public:
+    shared_ptr<BooksPageWidget::Data> iData;
+    int iX;
+    int iY;
+    ZLTextKind iKind;
+    std::string iLinkText;
+    std::string iLinkType;
+};
+
+void BooksPageWidget::LongPressTask::performTask()
+{
+    if (!isCanceled()) {
+        const ZLTextArea& area = iData->iView->textArea();
+        const ZLTextElementRectangle* rect = area.elementByCoordinates(iX, iY);
+        if (rect && !isCanceled() &&
+           ((rect->Kind == ZLTextElement::WORD_ELEMENT) ||
+            (rect->Kind == ZLTextElement::IMAGE_ELEMENT))) {
+            ZLTextWordCursor cursor = area.startCursor();
+            cursor.moveToParagraph(rect->ParagraphIndex);
+            cursor.moveToParagraphStart();
+            for (int i=0; i<rect->ElementIndex && !isCanceled(); i++) {
+                const ZLTextElement& element = cursor.element();
+                if (element.kind() == ZLTextElement::CONTROL_ELEMENT) {
+                    const ZLTextControlEntry& controlEntry =
+                        ((const ZLTextControlElement&)element).entry();
+                    if (controlEntry.isHyperlink()) {
+                        const ZLTextHyperlinkControlEntry& hyperLinkEntry =
+                            ((const ZLTextHyperlinkControlEntry&)controlEntry);
+                        iKind = hyperLinkEntry.kind();
+                        iLinkText = hyperLinkEntry.label();
+                        iLinkType = hyperLinkEntry.hyperlinkType();
+                        return;
+                    }
+                }
+                cursor.nextWord();
+            }
+        }
+    }
+}
+
+// ==========================================================================
 // BooksPageWidget
 // ==========================================================================
 
@@ -165,6 +219,7 @@ BooksPageWidget::BooksPageWidget(QQuickItem* aParent) :
     iSettings(NULL),
     iResetTask(NULL),
     iRenderTask(NULL),
+    iLongPressTask(NULL),
     iEmpty(false),
     iPage(-1)
 {
@@ -182,6 +237,7 @@ BooksPageWidget::~BooksPageWidget()
     HDEBUG("page" << iPage);
     if (iResetTask) iResetTask->release(this);
     if (iRenderTask) iRenderTask->release(this);
+    if (iLongPressTask) iLongPressTask->release(this);
 }
 
 void BooksPageWidget::setModel(BooksBookModel* aModel)
@@ -461,6 +517,26 @@ void BooksPageWidget::onRenderTaskDone()
     update();
 }
 
+void BooksPageWidget::onLongPressTaskDone()
+{
+    static const std::string HTTP("http://");
+    static const std::string HTTPS("https://");
+
+    HASSERT(sender() == iLongPressTask);
+    HDEBUG(iLongPressTask->iKind <<
+           iLongPressTask->iLinkType.c_str() <<
+           iLongPressTask->iLinkText.c_str());
+
+    if (iLongPressTask->iKind == EXTERNAL_HYPERLINK &&
+       (ZLStringUtil::stringStartsWith(iLongPressTask->iLinkText, HTTP) ||
+        ZLStringUtil::stringStartsWith(iLongPressTask->iLinkText, HTTPS))) {
+        Q_EMIT browserLinkPressed(QString::fromStdString(iLongPressTask->iLinkText));
+    }
+
+    iLongPressTask->release(this);
+    iLongPressTask = NULL;
+}
+
 void BooksPageWidget::updateSize()
 {
     HDEBUG("page" << iPage << QSize(width(), height()));
@@ -493,4 +569,14 @@ void BooksPageWidget::onResizeTimeout()
     // width change is followed by height change and view is reset from the
     // setHeight() method
     updateSize();
+}
+
+void BooksPageWidget::handleLongPress(int aX, int aY)
+{
+    HDEBUG(aX << aY);
+    if (!iResetTask && !iRenderTask && !iData.isNull()) {
+        if (iLongPressTask) iLongPressTask->release(this);
+        iLongPressTask = new LongPressTask(iData, aX, aY);
+        iTaskQueue->submit(iLongPressTask, this, SLOT(onLongPressTaskDone()));
+    }
 }
