@@ -1,6 +1,6 @@
 Name:           harbour-books
 Summary:        E-book reader
-Version:        1.0.14
+Version:        1.0.15
 Release:        1
 License:        BSD
 Group:          Applications/File
@@ -57,6 +57,9 @@ desktop-file-install --delete-original \
 make -C test test
 
 %changelog
+* Sun Oct 09 2016 Slava Monich <slava.monich@jolla.com> 1.0.15
+- Fixed the problem with wrong images popping up in zoom view
+
 * Wed Oct 08 2016 Slava Monich <slava.monich@jolla.com> 1.0.14
 - Improved image zoom transitions
 
