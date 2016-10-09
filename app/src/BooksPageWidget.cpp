@@ -31,8 +31,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "BooksImageProvider.h"
 #include "BooksPageWidget.h"
+#include "BooksImageProvider.h"
 #include "BooksTextStyle.h"
 #include "BooksDefs.h"
 
@@ -557,9 +557,25 @@ void BooksPageWidget::onLongPressTaskDone()
             Q_EMIT browserLinkPressed(url);
         }
     } else if (iLongPressTask->iKind == IMAGE) {
-        static const QString PREFIX("image://");
-        QString id(QString::fromStdString(iLongPressTask->iImageId));
-        QString url = PREFIX + BooksImageProvider::PROVIDER_ID + "/" + id;
+        // Make sure that the book path is mixed into the image id to handle
+        // the case of different books having images with identical ids
+        QString id = QString::fromStdString(iLongPressTask->iImageId);
+        QString path;
+        if (iModel) {
+            BooksBook* book = iModel->book();
+            if (book) {
+                path = book->path();
+                if (!path.isEmpty()) {
+                    if (!id.contains(path)) {
+                        QString old = id;
+                        id = path + ":" + old;
+                        HDEBUG(old << "-> " << id);
+                    }
+                }
+            }
+        }
+        static const QString IMAGE_URL("image://%1/%2");
+        QString url = IMAGE_URL.arg(BooksImageProvider::PROVIDER_ID, id);
         BooksImageProvider::instance()->addImage(iModel, id,
             iLongPressTask->iImageData);
         Q_EMIT imagePressed(url, iLongPressTask->iRect);
