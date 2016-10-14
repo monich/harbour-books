@@ -63,7 +63,7 @@ SilicaFlickable {
         qsTrId("harbour-books-book-view-applying_smaller_fonts")
     ]
 
-    interactive: !linkMenu || !linkMenu.visible || !imageView || !imageView.visible
+    interactive: (!linkMenu || !linkMenu.visible) && (!imageView || !imageView.visible)
 
     property var linkMenu
     property var imageView
