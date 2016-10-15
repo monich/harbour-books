@@ -194,23 +194,39 @@ void BooksPageWidget::LongPressTask::performTask()
             if (rect->Kind == ZLTextElement::WORD_ELEMENT) {
                 ZLTextWordCursor cursor = area.startCursor();
                 cursor.moveToParagraph(rect->ParagraphIndex);
-                cursor.moveToParagraphStart();
-                for (int i=0; i<rect->ElementIndex && !isCanceled(); i++) {
+                cursor.moveTo(rect->ElementIndex, 0);
+
+                // Basically, the idea is that we are going backwards
+                // looking for the START of the link. If we have crossed
+                // the END of the linked element, it means that we have
+                // missed it. We are recording which stop control elements
+                // we have encountered, to avoid making assumptions which
+                // ones are links and which are not. We rely on isHyperlink()
+                // method to tell us the ultimate truth.
+                bool stopped[NUM_KINDS];
+                memset(stopped, 0, sizeof(stopped));
+                while (!cursor.isStartOfParagraph() && !isCanceled()) {
+                    cursor.previousWord();
                     const ZLTextElement& element = cursor.element();
                     if (element.kind() == ZLTextElement::CONTROL_ELEMENT) {
-                        const ZLTextControlEntry& controlEntry =
-                            ((const ZLTextControlElement&)element).entry();
-                        if (controlEntry.isHyperlink()) {
-                            const ZLTextHyperlinkControlEntry& hyperLinkEntry =
-                                ((const ZLTextHyperlinkControlEntry&)controlEntry);
-                            iKind = hyperLinkEntry.kind();
-                            iLink = hyperLinkEntry.label();
-                            iLinkType = hyperLinkEntry.hyperlinkType();
-                            HDEBUG("link" << iLink.c_str());
+                        const ZLTextControlEntry& entry =
+                            ((ZLTextControlElement&)element).entry();
+                        ZLTextKind kind = entry.kind();
+                        if (kind < NUM_KINDS && !entry.isStart()) {
+                            stopped[kind] = true;
+                        }
+                        if (entry.isHyperlink()) {
+                            if (entry.isStart() && !stopped[entry.kind()]) {
+                                const ZLTextHyperlinkControlEntry& link =
+                                    (ZLTextHyperlinkControlEntry&) entry;
+                                iKind = link.kind();
+                                iLink = link.label();
+                                iLinkType = link.hyperlinkType();
+                                HDEBUG("link" << iLink.c_str());
+                            }
                             return;
                         }
                     }
-                    cursor.nextWord();
                 }
             } else if (rect->Kind == ZLTextElement::IMAGE_ELEMENT) {
                 ZLTextWordCursor cursor = area.startCursor();
