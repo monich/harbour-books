@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2004-2010 Geometer Plus <contact@geometerplus.com>
+ * Copyright (C) 2016 Slava Monich <slava.monich@jolla.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -65,7 +66,8 @@ enum FBTextKind {
 	H6 = 36,
 	EXTERNAL_HYPERLINK = 37,
 	BOOK_HYPERLINK = 38,
-	BLOCKQUOTE = 39
+	BLOCKQUOTE = 39,
+	NUM_KINDS
 };
 
 #endif /* __FBTEXTKIND_H__ */
