@@ -57,7 +57,6 @@ MouseArea {
     property real leftMargin: Math.round(Screen.width/8)
     property real rightMargin: Math.round(Screen.width/8)
 
-    property bool _hasValueLabel: false
     property real _oldValue
     property bool _tracking: true
     property real _precFactor: 1.0
@@ -160,18 +159,6 @@ MouseArea {
     }
 
     onCanceled: value = _oldValue
-
-    onValueTextChanged: {
-        if (valueText && !_hasValueLabel) {
-            _hasValueLabel = true
-            var valueIndicatorComponent = Qt.createComponent("private/SliderValueLabel.qml")
-            if (valueIndicatorComponent.status === Component.Ready) {
-                valueIndicatorComponent.createObject(slider)
-            } else {
-                console.log(valueIndicatorComponent.errorString())
-            }
-        }
-    }
 
     onSliderValueChanged: {
         if (!slider.drag.active) {
