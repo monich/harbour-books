@@ -14,7 +14,7 @@
  *     notice, this list of conditions and the following disclaimer in
  *     the documentation and/or other materials provided with the
  *     distribution.
- *   * Neither the name of Nemo Mobile nor the names of its contributors
+ *   * Neither the name of Jolla Ltd nor the names of its contributors
  *     may be used to endorse or promote products derived from this
  *     software without specific prior written permission.
  *
@@ -322,7 +322,7 @@ void BooksImportModel::refresh()
             beginResetModel();
             qDeleteAll(iList);
             iList.clear();
-            endInsertRows();
+            endResetModel();
             Q_EMIT countChanged();
         }
 
