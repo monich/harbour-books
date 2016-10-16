@@ -69,7 +69,6 @@ class BooksBookModel: public QAbstractListModel, private BooksLoadingProperty
     Q_PROPERTY(int topMargin READ topMargin WRITE setTopMargin NOTIFY topMarginChanged)
     Q_PROPERTY(int bottomMargin READ bottomMargin WRITE setBottomMargin NOTIFY bottomMarginChanged)
     Q_PROPERTY(BooksBook* book READ book WRITE setBook NOTIFY bookChanged)
-    Q_PROPERTY(BooksSettings* settings READ settings WRITE setSettings NOTIFY settingsChanged)
     Q_PROPERTY(ResetReason resetReason READ resetReason NOTIFY resetReasonChanged)
 
 public:
@@ -104,9 +103,6 @@ public:
     BooksBook* book() const { return iBook; }
     void setBook(BooksBook* aBook);
 
-    BooksSettings* settings() const { return iSettings; }
-    void setSettings(BooksSettings* aModel);
-
     int leftMargin() const { return iMargins.iLeft; }
     int rightMargin() const { return iMargins.iRight; }
     int topMargin() const { return iMargins.iTop; }
@@ -137,7 +133,6 @@ private:
     void updateSize();
     void updateModel(int aPrevPageCount);
     void startReset(ResetReason aReason = ReasonUnknown, bool aFull = true);
-    bool updateTextStyle();
 
 private Q_SLOTS:
     void onResetProgress(int aProgress);
@@ -154,7 +149,6 @@ Q_SIGNALS:
     void pageMarksChanged();
     void progressChanged();
     void currentPageChanged();
-    void settingsChanged();
     void leftMarginChanged();
     void rightMarginChanged();
     void topMarginChanged();
@@ -175,10 +169,10 @@ private:
     BooksMargins iMargins;
     BooksBook* iBook;
     shared_ptr<Book> iBookRef;
-    BooksSettings* iSettings;
     Task* iTask;
     Data* iData;
     Data* iData2;
+    QSharedPointer<BooksSettings> iSettings;
     shared_ptr<BooksTaskQueue> iTaskQueue;
     shared_ptr<ZLTextStyle> iTextStyle;
 };

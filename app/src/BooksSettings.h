@@ -38,6 +38,7 @@
 #include "ZLTextStyle.h"
 #include <QColor>
 #include <QtQml>
+#include <QSharedPointer>
 
 class MGConfItem;
 
@@ -74,6 +75,8 @@ public:
     };
 
     explicit BooksSettings(QObject* aParent = NULL);
+
+    static QSharedPointer<BooksSettings> sharedInstance();
 
     Q_INVOKABLE bool increaseFontSize();
     Q_INVOKABLE bool decreaseFontSize();
@@ -128,6 +131,7 @@ private:
     int fontSize(int aFontSizeAdjust) const;
 
 private:
+    class Private;
     MGConfItem* iFontSizeConf;
     MGConfItem* iPageDetailsConf;
     MGConfItem* iInvertColorsConf;

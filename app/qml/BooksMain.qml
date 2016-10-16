@@ -7,14 +7,15 @@
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions
   are met:
+
     * Redistributions of source code must retain the above copyright
       notice, this list of conditions and the following disclaimer.
     * Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    * Neither the name of the Jolla Ltd nor the
-      names of its contributors may be used to endorse or promote products
-      derived from this software without specific prior written permission.
+    * Neither the name of Jolla Ltd nor the names of its contributors may
+      be used to endorse or promote products derived from this software
+      without specific prior written permission.
 
   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
   AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -36,7 +37,7 @@ import harbour.books 1.0
 ApplicationWindow {
     id: window
     allowedOrientations: {
-        switch (globalSettings.orientation) {
+        switch (Settings.orientation) {
         default:
         case BooksSettings.OrientationAny: return Orientation.All
         case BooksSettings.OrientationPortrait: return Orientation.Portrait
@@ -50,7 +51,6 @@ ApplicationWindow {
 
     property variant currentShelf: mainPage.currentShelf
 
-    BooksSettings { id: globalSettings }
     BooksHints { id: globalHints }
     SystemState { id: globalSystemState }
 
@@ -58,7 +58,7 @@ ApplicationWindow {
 
     cover: Component {
         BooksCoverPage {
-            book: globalSettings.currentBook
+            book: Settings.currentBook
             shelf: currentShelf
         }
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Jolla Ltd.
+ * Copyright (C) 2015-2016 Jolla Ltd.
  * Contact: Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
@@ -14,7 +14,7 @@
  *     notice, this list of conditions and the following disclaimer in
  *     the documentation and/or other materials provided with the
  *     distribution.
- *   * Neither the name of Nemo Mobile nor the names of its contributors
+ *   * Neither the name of Jolla Ltd nor the names of its contributors
  *     may be used to endorse or promote products derived from this
  *     software without specific prior written permission.
  *
@@ -206,13 +206,14 @@ BooksBookModel::BooksBookModel(QObject* aParent) :
     iCurrentPage(-1),
     iProgress(0),
     iBook(NULL),
-    iSettings(NULL),
     iTask(NULL),
     iData(NULL),
     iData2(NULL),
-    iTaskQueue(BooksTaskQueue::defaultQueue()),
-    iTextStyle(BooksTextStyle::defaults())
+    iSettings(BooksSettings::sharedInstance()),
+    iTaskQueue(BooksTaskQueue::defaultQueue())
 {
+    iTextStyle = iSettings->textStyle(fontSizeAdjust());
+    connect(iSettings.data(), SIGNAL(textStyleChanged()), SLOT(onTextStyleChanged()));
     HDEBUG("created");
 #if QT_VERSION < 0x050000
     setRoleNames(roleNames());
@@ -254,7 +255,6 @@ void BooksBookModel::setBook(BooksBook* aBook)
             iTitle = QString();
             HDEBUG("<none>");
         }
-        updateTextStyle();
         startReset(ReasonLoading, true);
         if (oldTitle != iTitle) {
             Q_EMIT titleChanged();
@@ -268,34 +268,6 @@ void BooksBookModel::setBook(BooksBook* aBook)
 bool BooksBookModel::loading() const
 {
     return (iTask != NULL);
-}
-
-void BooksBookModel::setSettings(BooksSettings* aSettings)
-{
-    if (iSettings != aSettings) {
-        shared_ptr<ZLTextStyle> oldTextStyle(iTextStyle);
-        if (iSettings) iSettings->disconnect(this);
-        iSettings = aSettings;
-        if (iSettings) {
-            connect(iSettings, SIGNAL(textStyleChanged()), SLOT(onTextStyleChanged()));
-        }
-        if (updateTextStyle()) {
-            startReset();
-        }
-        Q_EMIT textStyleChanged();
-        Q_EMIT settingsChanged();
-    }
-}
-
-bool BooksBookModel::updateTextStyle()
-{
-    shared_ptr<ZLTextStyle> oldTextStyle(iTextStyle);
-    if (iSettings) {
-        iTextStyle = iSettings->textStyle(fontSizeAdjust());
-    } else {
-        iTextStyle = BooksTextStyle::defaults();
-    }
-    return !BooksTextStyle::equalLayout(oldTextStyle, iTextStyle);
 }
 
 bool BooksBookModel::increaseFontSize()

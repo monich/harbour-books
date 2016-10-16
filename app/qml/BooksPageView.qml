@@ -57,7 +57,6 @@ Item {
     PageWidget {
         id: widget
         anchors.fill: parent
-        settings: globalSettings
         model: bookModel
         onBrowserLinkPressed: view.browserLinkPressed(url)
         onImagePressed: view.imagePressed(url, rect)
@@ -76,7 +75,7 @@ Item {
         }
         centerX: Math.floor(view.width/2) - anchors.leftMargin
         height: Theme.itemSizeExtraSmall
-        color: globalSettings.primaryPageToolColor
+        color: Settings.primaryPageToolColor
         opacity: titleVisible ? 1 : 0
     }
 
@@ -91,7 +90,7 @@ Item {
 
     Image {
         id: pressImage
-        source: globalSettings.invertColors ?  "images/press-invert.svg" : "images/press.svg"
+        source: Settings.invertColors ?  "images/press-invert.svg" : "images/press.svg"
         visible: opacity > 0
         opacity: 0
         readonly property int maxsize: Math.max(view.width, view.height)
@@ -146,7 +145,7 @@ Item {
         height: Theme.itemSizeExtraSmall
         font.pixelSize: Theme.fontSizeSmall
         verticalAlignment: Text.AlignVCenter
-        color: globalSettings.primaryPageToolColor
+        color: Settings.primaryPageToolColor
         opacity: pageNumberVisible ? 1 : 0
         visible: opacity > 0
         Behavior on opacity { FadeAnimation {} }

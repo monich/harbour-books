@@ -200,6 +200,13 @@ BooksSettings::TextStyle::allowHyphenations() const
 // BooksSettings
 // ==========================================================================
 
+class BooksSettings::Private {
+public:
+    static QWeakPointer<BooksSettings> sSharedInstance;
+};
+
+QWeakPointer<BooksSettings> BooksSettings::Private::sSharedInstance;
+
 BooksSettings::BooksSettings(QObject* aParent) :
     QObject(aParent),
     iFontSizeConf(new MGConfItem(DCONF_PATH KEY_FONT_SIZE, this)),
@@ -220,6 +227,19 @@ BooksSettings::BooksSettings(QObject* aParent) :
     connect(iCurrentFolderConf, SIGNAL(valueChanged()), SLOT(onCurrentFolderChanged()));
     connect(iCurrentBookPathConf, SIGNAL(valueChanged()), SLOT(onCurrentBookPathChanged()));
     connect(iOrientationConf, SIGNAL(valueChanged()), SIGNAL(orientationChanged()));
+}
+
+QSharedPointer<BooksSettings>
+BooksSettings::sharedInstance()
+{
+    QSharedPointer<BooksSettings> instance = Private::sSharedInstance;
+    if (instance.isNull()) {
+        // QObject::deleteLater protects against trouble in case if the
+        // recipient of the signal drops the last shared reference.
+        instance = QSharedPointer<BooksSettings>(new BooksSettings, &QObject::deleteLater);
+        Private::sSharedInstance = instance;
+    }
+    return instance;
 }
 
 bool

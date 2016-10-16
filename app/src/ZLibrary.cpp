@@ -36,6 +36,7 @@
 #include "BooksPaintContext.h"
 #include "BooksDialogManager.h"
 #include "BooksImageProvider.h"
+#include "BooksSettings.h"
 
 #include "HarbourDebug.h"
 
@@ -192,12 +193,14 @@ void ZLibrary::run(ZLApplication* aApp)
 
     QQuickView* view = SailfishApp::createView();
     QQmlContext* root = view->rootContext();
+    QSharedPointer<BooksSettings> settings = BooksSettings::sharedInstance();
     root->engine()->addImageProvider(BooksImageProvider::PROVIDER_ID,
         new BooksImageProvider(root));
     root->setContextProperty("PointsPerInch", booksPPI);
     root->setContextProperty("MaximumHintCount", 1);
     root->setContextProperty("BooksSettingsMenu",
         QVariant::fromValue(BOOKS_SETTINGS_MENU));
+    root->setContextProperty("Settings", settings.data());
 
     view->setTitle(qtTrId("harbour-books-app-name"));
     view->setSource(QUrl::fromLocalFile(qml));

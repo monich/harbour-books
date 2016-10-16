@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2015 Jolla Ltd.
+  Copyright (C) 2015-2016 Jolla Ltd.
   Contact: Slava Monich <slava.monich@jolla.com>
 
   You may use this file under the terms of BSD license as follows:
@@ -7,14 +7,15 @@
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions
   are met:
+
     * Redistributions of source code must retain the above copyright
       notice, this list of conditions and the following disclaimer.
     * Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    * Neither the name of the Jolla Ltd nor the
-      names of its contributors may be used to endorse or promote products
-      derived from this software without specific prior written permission.
+    * Neither the name of Jolla Ltd nor the names of its contributors may
+      be used to endorse or promote products derived from this software
+      without specific prior written permission.
 
   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
   AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -85,7 +86,7 @@ SilicaFlickable {
 
     onCurrentShelfChanged: {
         if (storageList.completed && currentShelf) {
-            globalSettings.currentFolder = currentShelf.path
+            Settings.currentFolder = currentShelf.path
         }
     }
 
@@ -187,14 +188,14 @@ SilicaFlickable {
         }
 
         Component.onCompleted: {
-            var index = model.deviceIndex(globalSettings.currentStorage)
+            var index = model.deviceIndex(Settings.currentStorage)
             // positionViewAtIndex doesn't work here, update contentX directly
             if (index >= 0) {
                 contentX = (width + spacing) * index
             } else {
                 // Most likely, removable storage is gone
-                console.log(globalSettings.currentFolder, "is gone")
-                globalSettings.currentFolder = currentShelf ? currentShelf.path : ""
+                console.log(Settings.currentFolder, "is gone")
+                Settings.currentFolder = currentShelf ? currentShelf.path : ""
             }
             completed = true
         }

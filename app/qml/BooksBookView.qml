@@ -44,7 +44,7 @@ SilicaFlickable {
 
     property int _currentPage: bookListWatcher.currentIndex
     property bool _loading: minLoadingDelay.running || bookModel.loading
-    property var _currentState: _visibilityStates[globalSettings.pageDetails % _visibilityStates.length]
+    property var _currentState: _visibilityStates[Settings.pageDetails % _visibilityStates.length]
     readonly property var _visibilityStates: [
         { pager: false, page: false, title: false, tools: false },
         { pager: false, page: true,  title: true,  tools: false },
@@ -77,7 +77,7 @@ SilicaFlickable {
     Component {
         id: imageViewComponent
         BooksImageView {
-            imageBackground: globalSettings.pageBackgroundColor
+            imageBackground: Settings.pageBackgroundColor
         }
     }
 
@@ -114,7 +114,6 @@ SilicaFlickable {
         rightMargin: Theme.horizontalPageMargin
         topMargin: Theme.itemSizeSmall
         bottomMargin: Theme.itemSizeSmall
-        settings: globalSettings
         onJumpToPage: bookView.jumpTo(index)
         onCurrentPageChanged: {
             if (linkMenu) linkMenu.hide()
@@ -163,7 +162,7 @@ SilicaFlickable {
             onJumpToPage: bookView.jumpTo(page)
             onPageClicked: {
                 root.pageClicked(index)
-                globalSettings.pageDetails = (globalSettings.pageDetails+ 1) % _visibilityStates.length
+                Settings.pageDetails = (Settings.pageDetails+ 1) % _visibilityStates.length
             }
             onImagePressed: {
                 if (_currentPage == index) {

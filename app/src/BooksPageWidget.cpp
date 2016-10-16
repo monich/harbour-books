@@ -254,11 +254,11 @@ void BooksPageWidget::PressTask::performTask()
 
 BooksPageWidget::BooksPageWidget(QQuickItem* aParent) :
     QQuickPaintedItem(aParent),
+    iSettings(BooksSettings::sharedInstance()),
     iTaskQueue(BooksTaskQueue::defaultQueue()),
     iTextStyle(BooksTextStyle::defaults()),
     iResizeTimer(new QTimer(this)),
     iModel(NULL),
-    iSettings(NULL),
     iResetTask(NULL),
     iRenderTask(NULL),
     iPressTask(NULL),
@@ -266,8 +266,13 @@ BooksPageWidget::BooksPageWidget(QQuickItem* aParent) :
     iEmpty(false),
     iPage(-1)
 {
+    connect(iSettings.data(),
+        SIGNAL(invertColorsChanged()),
+        SLOT(onInvertColorsChanged()));
+    setFillColor(qtColor(iSettings->invertColors() ?
+        BooksTextView::INVERTED_BACKGROUND :
+        BooksTextView::DEFAULT_BACKGROUND));
     setFlag(ItemHasContents, true);
-    setFillColor(qtColor(BooksTextView::DEFAULT_BACKGROUND));
     iResizeTimer->setSingleShot(true);
     iResizeTimer->setInterval(0);
     connect(iResizeTimer, SIGNAL(timeout()), SLOT(onResizeTimeout()));
@@ -315,40 +320,6 @@ void BooksPageWidget::setModel(BooksBookModel* aModel)
         }
         resetView();
         Q_EMIT modelChanged();
-    }
-}
-
-void BooksPageWidget::setSettings(BooksSettings* aSettings)
-{
-    if (iSettings != aSettings) {
-        const bool colorsWereInverted = invertColors();
-        shared_ptr<ZLTextStyle> oldTextStyle(iTextStyle);
-        if (iSettings) iSettings->disconnect(this);
-        iSettings = aSettings;
-        if (iSettings) {
-            connect(iSettings,
-                SIGNAL(invertColorsChanged()),
-                SLOT(onInvertColorsChanged()));
-        } else {
-            iTextStyle = BooksTextStyle::defaults();
-        }
-        const bool colorsAreInverted = invertColors();
-        if (colorsWereInverted != colorsAreInverted) {
-            setFillColor(qtColor(colorsAreInverted ?
-                BooksTextView::INVERTED_BACKGROUND :
-                BooksTextView::DEFAULT_BACKGROUND));
-        }
-        if (!BooksTextStyle::equalLayout(oldTextStyle, iTextStyle)) {
-            resetView();
-        } else if (colorsWereInverted != colorsAreInverted) {
-            if (!iData.isNull() && !iData->iView.isNull()) {
-                iData->iView->setInvertColors(colorsAreInverted);
-                scheduleRepaint();
-            } else {
-                update();
-            }
-        }
-        Q_EMIT settingsChanged();
     }
 }
 

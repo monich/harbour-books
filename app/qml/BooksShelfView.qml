@@ -74,13 +74,13 @@ Item {
         editMode: shelfView.editMode
         onRelativePathChanged: longStartTimer.restart()
         onPathChanged: {
-            if (globalSettings.currentStorage === device && _completed) {
-                globalSettings.currentFolder = path
+            if (Settings.currentStorage === device && _completed) {
+                Settings.currentFolder = path
             }
         }
         onDeviceChanged: {
-            if (device === globalSettings.currentStorage) {
-                relativePath = globalSettings.relativePath
+            if (device === Settings.currentStorage) {
+                relativePath = Settings.relativePath
             }
         }
         Component.onCompleted: _completed = true

@@ -58,7 +58,6 @@ class BooksPageWidget: public QQuickPaintedItem, private BooksLoadingProperty
     Q_PROPERTY(int topMargin READ topMargin WRITE setTopMargin NOTIFY topMarginChanged)
     Q_PROPERTY(int bottomMargin READ bottomMargin WRITE setBottomMargin NOTIFY bottomMarginChanged)
     Q_PROPERTY(BooksBookModel* model READ model WRITE setModel NOTIFY modelChanged)
-    Q_PROPERTY(BooksSettings* settings READ settings WRITE setSettings NOTIFY settingsChanged)
 
 public:
     class Data;
@@ -73,9 +72,6 @@ public:
 
     BooksBookModel* model() const { return iModel; }
     void setModel(BooksBookModel* aModel);
-
-    BooksSettings* settings() const { return iSettings; }
-    void setSettings(BooksSettings* aSettings);
 
     int leftMargin() const { return iMargins.iLeft; }
     int rightMargin() const { return iMargins.iRight; }
@@ -96,7 +92,6 @@ Q_SIGNALS:
     void loadingChanged();
     void pageChanged();
     void modelChanged();
-    void settingsChanged();
     void leftMarginChanged();
     void rightMarginChanged();
     void topMarginChanged();
@@ -134,12 +129,12 @@ private:
     class RenderTask;
     class PressTask;
 
+    QSharedPointer<BooksSettings> iSettings;
     shared_ptr<BooksTaskQueue> iTaskQueue;
     shared_ptr<ZLTextStyle> iTextStyle;
     BooksPos iPageMark;
     QTimer* iResizeTimer;
     BooksBookModel* iModel;
-    BooksSettings* iSettings;
     BooksMargins iMargins;
     shared_ptr<Data> iData;
     shared_ptr<QImage> iImage;

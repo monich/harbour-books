@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2015 Jolla Ltd.
+  Copyright (C) 2015-2016 Jolla Ltd.
   Contact: Slava Monich <slava.monich@jolla.com>
 
   You may use this file under the terms of BSD license as follows:
@@ -7,14 +7,15 @@
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions
   are met:
+
     * Redistributions of source code must retain the above copyright
       notice, this list of conditions and the following disclaimer.
     * Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    * Neither the name of the Jolla Ltd nor the
-      names of its contributors may be used to endorse or promote products
-      derived from this software without specific prior written permission.
+    * Neither the name of Jolla Ltd nor the names of its contributors may
+      be used to endorse or promote products derived from this software
+      without specific prior written permission.
 
   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
   AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -57,7 +58,7 @@ Item {
             left: parent.left
             verticalCenter: parent.verticalCenter
         }
-        onClicked: globalSettings.invertColors = !globalSettings.invertColors
+        onClicked: Settings.invertColors = !Settings.invertColors
 
         Image {
             id: dayModeImage
@@ -69,7 +70,7 @@ Item {
             }
             height: Math.ceil(parent.height/2)
             sourceSize.height: height
-            opacity: globalSettings.invertColors ? 0.5 : 0
+            opacity: Settings.invertColors ? 0.5 : 0
             visible: opacity > 0
             Behavior on opacity { FadeAnimation {} }
         }
@@ -78,7 +79,7 @@ Item {
             source: "images/night-mode.svg"
             anchors.fill: dayModeImage
             sourceSize.height: height
-            opacity: globalSettings.invertColors ? 0 : 0.25
+            opacity: Settings.invertColors ? 0 : 0.25
             visible: opacity > 0
             Behavior on opacity { FadeAnimation {} }
         }
@@ -104,7 +105,7 @@ Item {
             }
             height: Math.ceil(parent.height/2)
             sourceSize.height: height
-            opacity: globalSettings.invertColors ? 1 : 0.5
+            opacity: Settings.invertColors ? 1 : 0.5
             Behavior on opacity { FadeAnimation {} }
         }
         onClicked: pageTools.increaseFontSize()
@@ -128,7 +129,7 @@ Item {
             }
             height: Math.ceil(parent.height/2)
             sourceSize.height: height
-            opacity: globalSettings.invertColors ? 1 : 0.5
+            opacity: Settings.invertColors ? 1 : 0.5
             Behavior on opacity { FadeAnimation {} }
         }
         onClicked: pageTools.decreaseFontSize()
