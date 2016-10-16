@@ -40,8 +40,6 @@
 #include <QtQml>
 #include <QSharedPointer>
 
-class MGConfItem;
-
 class BooksSettings : public QObject
 {
     Q_OBJECT
@@ -118,37 +116,11 @@ Q_SIGNALS:
     void pageBackgroundColorChanged();
     void orientationChanged();
 
-private Q_SLOTS:
-    void onFontSizeValueChanged();
-    void onCurrentBookPathChanged();
-    void onCurrentFolderChanged();
-
-private:
-    void updateRenderType();
-    bool updateCurrentBook();
-    bool updateCurrentStorage();
-    int currentFontSize() const;
-    int fontSize(int aFontSizeAdjust) const;
-
 private:
     class Private;
-    MGConfItem* iFontSizeConf;
-    MGConfItem* iPageDetailsConf;
-    MGConfItem* iInvertColorsConf;
-    MGConfItem* iCurrentFolderConf;
-    MGConfItem* iCurrentBookPathConf;
-    MGConfItem* iOrientationConf;
-    mutable shared_ptr<ZLTextStyle> iTextStyle[FontSizeSteps+1];
-    BooksBook* iCurrentBook;
-    QString iCurrentStorageDevice;
-    int iFontSize;
+    Private* iPrivate;
 };
 
 QML_DECLARE_TYPE(BooksSettings)
-
-inline int BooksSettings::fontSize() const
-    { return iFontSize; }
-inline QString BooksSettings::currentStorage() const
-    { return iCurrentStorageDevice; }
 
 #endif // BOOKS_SETTINGS_H

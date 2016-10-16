@@ -197,75 +197,69 @@ BooksSettings::TextStyle::allowHyphenations() const
 }
 
 // ==========================================================================
-// BooksSettings
+// BooksSettings::Private
 // ==========================================================================
 
-class BooksSettings::Private {
+class BooksSettings::Private : public QObject {
+    Q_OBJECT
+public:
+    Private(BooksSettings* aParent);
+
+    bool updateCurrentBook();
+    bool updateCurrentStorage();
+    int currentFontSize() const;
+    int fontSize(int aFontSizeAdjust) const;
+    QString currentFolder() const;
+    shared_ptr<ZLTextStyle> textStyle(int aFontSizeAdjust) const;
+    void setCurrentBook(QObject* aBook);
+
+private Q_SLOTS:
+    void onFontSizeValueChanged();
+    void onCurrentBookPathChanged();
+    void onCurrentFolderChanged();
+
 public:
     static QWeakPointer<BooksSettings> sSharedInstance;
+    BooksSettings* iParent;
+    MGConfItem* iFontSizeConf;
+    MGConfItem* iPageDetailsConf;
+    MGConfItem* iInvertColorsConf;
+    MGConfItem* iCurrentFolderConf;
+    MGConfItem* iCurrentBookPathConf;
+    MGConfItem* iOrientationConf;
+    mutable shared_ptr<ZLTextStyle> iTextStyle[FontSizeSteps+1];
+    BooksBook* iCurrentBook;
+    QString iCurrentStorageDevice;
+    int iFontSize;
 };
 
 QWeakPointer<BooksSettings> BooksSettings::Private::sSharedInstance;
 
-BooksSettings::BooksSettings(QObject* aParent) :
+BooksSettings::Private::Private(BooksSettings* aParent) :
     QObject(aParent),
+    iParent(aParent),
     iFontSizeConf(new MGConfItem(DCONF_PATH KEY_FONT_SIZE, this)),
     iPageDetailsConf(new MGConfItem(DCONF_PATH KEY_PAGE_DETAILS, this)),
     iInvertColorsConf(new MGConfItem(DCONF_PATH KEY_INVERT_COLORS, this)),
     iCurrentFolderConf(new MGConfItem(DCONF_PATH KEY_CURRENT_FOLDER, this)),
     iCurrentBookPathConf(new MGConfItem(DCONF_PATH KEY_CURRENT_BOOK, this)),
     iOrientationConf(new MGConfItem(DCONF_PATH KEY_ORIENTATION, this)),
-    iCurrentBook(NULL),
-    iFontSize(currentFontSize())
+    iCurrentBook(NULL)
 {
+    iFontSize = currentFontSize();
     updateCurrentBook();
     updateCurrentStorage();
     connect(iFontSizeConf, SIGNAL(valueChanged()), SLOT(onFontSizeValueChanged()));
-    connect(iPageDetailsConf, SIGNAL(valueChanged()), SIGNAL(pageDetailsChanged()));
-    connect(iInvertColorsConf, SIGNAL(valueChanged()), SIGNAL(invertColorsChanged()));
-    connect(iInvertColorsConf, SIGNAL(valueChanged()), SIGNAL(pageBackgroundColorChanged()));
     connect(iCurrentFolderConf, SIGNAL(valueChanged()), SLOT(onCurrentFolderChanged()));
     connect(iCurrentBookPathConf, SIGNAL(valueChanged()), SLOT(onCurrentBookPathChanged()));
-    connect(iOrientationConf, SIGNAL(valueChanged()), SIGNAL(orientationChanged()));
-}
-
-QSharedPointer<BooksSettings>
-BooksSettings::sharedInstance()
-{
-    QSharedPointer<BooksSettings> instance = Private::sSharedInstance;
-    if (instance.isNull()) {
-        // QObject::deleteLater protects against trouble in case if the
-        // recipient of the signal drops the last shared reference.
-        instance = QSharedPointer<BooksSettings>(new BooksSettings, &QObject::deleteLater);
-        Private::sSharedInstance = instance;
-    }
-    return instance;
-}
-
-bool
-BooksSettings::increaseFontSize()
-{
-    if (iFontSize < MaxFontSize) {
-        setFontSize(iFontSize+1);
-        return true;
-    } else {
-        return false;
-    }
-}
-
-bool
-BooksSettings::decreaseFontSize()
-{
-    if (iFontSize > MinFontSize) {
-        setFontSize(iFontSize-1);
-        return true;
-    } else {
-        return false;
-    }
+    connect(iPageDetailsConf, SIGNAL(valueChanged()), iParent, SIGNAL(pageDetailsChanged()));
+    connect(iInvertColorsConf, SIGNAL(valueChanged()), iParent, SIGNAL(invertColorsChanged()));
+    connect(iInvertColorsConf, SIGNAL(valueChanged()), iParent, SIGNAL(pageBackgroundColorChanged()));
+    connect(iOrientationConf, SIGNAL(valueChanged()), iParent, SIGNAL(orientationChanged()));
 }
 
 int
-BooksSettings::currentFontSize() const
+BooksSettings::Private::currentFontSize() const
 {
     const int fontSize = iFontSizeConf->value(DEFAULT_FONT_SIZE).toInt();
     if (fontSize < MinFontSize) {
@@ -278,7 +272,7 @@ BooksSettings::currentFontSize() const
 }
 
 int
-BooksSettings::fontSize(
+BooksSettings::Private::fontSize(
     int aFontSizeAdjust) const
 {
     const int fontSize = iFontSize + aFontSizeAdjust;
@@ -291,31 +285,8 @@ BooksSettings::fontSize(
     }
 }
 
-void
-BooksSettings::setFontSize(
-    int aValue)
-{
-    HDEBUG(aValue);
-    iFontSizeConf->set(aValue);
-}
-
-void
-BooksSettings::onFontSizeValueChanged()
-{
-    const int newSize = currentFontSize();
-    HDEBUG(newSize);
-    if (iFontSize != newSize) {
-        iFontSize = newSize;
-        for (int i=0; i<=FontSizeSteps; i++) {
-            iTextStyle[i].reset();
-        }
-        Q_EMIT fontSizeChanged();
-        Q_EMIT textStyleChanged();
-    }
-}
-
 shared_ptr<ZLTextStyle>
-BooksSettings::textStyle(
+BooksSettings::Private::textStyle(
     int aFontSizeAdjust) const
 {
     const int size = fontSize(aFontSizeAdjust);
@@ -328,86 +299,14 @@ BooksSettings::textStyle(
     return style;
 }
 
-int
-BooksSettings::pageDetails() const
-{
-    return iPageDetailsConf->value(DEFAULT_PAGE_DETAILS).toInt();
-}
-
-void
-BooksSettings::setPageDetails(
-    int aValue)
-{
-    HDEBUG(aValue);
-    iPageDetailsConf->set(aValue);
-}
-
-bool
-BooksSettings::invertColors() const
-{
-    return iInvertColorsConf->value(DEFAULT_INVERT_COLORS).toBool();
-}
-
-void
-BooksSettings::setInvertColors(
-    bool aValue)
-{
-    HDEBUG(aValue);
-    iInvertColorsConf->set(aValue);
-}
-
 QString
-BooksSettings::relativePath() const
-{
-    QString rel;
-    BooksStorageManager::instance()->storageForPath(currentFolder(), &rel);
-    return rel;
-}
-
-QString
-BooksSettings::currentFolder() const
+BooksSettings::Private::currentFolder() const
 {
     return iCurrentFolderConf->value(DEFAULT_CURRENT_FOLDER).toString();
 }
 
 void
-BooksSettings::setCurrentFolder(
-    QString aValue)
-{
-    HDEBUG(aValue);
-    iCurrentFolderConf->set(aValue);
-}
-
-void
-BooksSettings::onCurrentFolderChanged()
-{
-    if (updateCurrentStorage()) {
-        Q_EMIT currentStorageChanged();
-    }
-    Q_EMIT currentFolderChanged();
-    Q_EMIT relativePathChanged();
-}
-
-bool
-BooksSettings::updateCurrentStorage()
-{
-    BooksStorageManager* mgr = BooksStorageManager::instance();
-    BooksStorage storage = mgr->storageForPath(currentFolder());
-    if (storage.isValid() && storage.device() != iCurrentStorageDevice) {
-        iCurrentStorageDevice = storage.device();
-        return true;
-    }
-    return false;
-}
-
-QObject*
-BooksSettings::currentBook() const
-{
-    return iCurrentBook;
-}
-
-void
-BooksSettings::setCurrentBook(
+BooksSettings::Private::setCurrentBook(
     QObject* aBook)
 {
     BooksBook* book = qobject_cast<BooksBook*>(aBook);
@@ -421,12 +320,12 @@ BooksSettings::setCurrentBook(
             iCurrentBook = NULL;
             iCurrentBookPathConf->set(QString());
         }
-        Q_EMIT currentBookChanged();
+        Q_EMIT iParent->currentBookChanged();
     }
 }
 
 bool
-BooksSettings::updateCurrentBook()
+BooksSettings::Private::updateCurrentBook()
 {
     QString path = iCurrentBookPathConf->value(DEFAULT_CURRENT_BOOK).toString();
     if (path.isEmpty()) {
@@ -458,12 +357,183 @@ BooksSettings::updateCurrentBook()
     return false;
 }
 
+bool
+BooksSettings::Private::updateCurrentStorage()
+{
+    BooksStorageManager* mgr = BooksStorageManager::instance();
+    BooksStorage storage = mgr->storageForPath(currentFolder());
+    if (storage.isValid() && storage.device() != iCurrentStorageDevice) {
+        iCurrentStorageDevice = storage.device();
+        return true;
+    }
+    return false;
+}
+
 void
-BooksSettings::onCurrentBookPathChanged()
+BooksSettings::Private::onFontSizeValueChanged()
+{
+    const int newSize = currentFontSize();
+    HDEBUG(newSize);
+    if (iFontSize != newSize) {
+        iFontSize = newSize;
+        for (int i=0; i<=FontSizeSteps; i++) {
+            iTextStyle[i].reset();
+        }
+        Q_EMIT iParent->fontSizeChanged();
+        Q_EMIT iParent->textStyleChanged();
+    }
+}
+
+void
+BooksSettings::Private::onCurrentFolderChanged()
+{
+    if (updateCurrentStorage()) {
+        Q_EMIT iParent->currentStorageChanged();
+    }
+    Q_EMIT iParent->currentFolderChanged();
+    Q_EMIT iParent->relativePathChanged();
+}
+
+void
+BooksSettings::Private::onCurrentBookPathChanged()
 {
     if (updateCurrentBook()) {
-        Q_EMIT currentBookChanged();
+        Q_EMIT iParent->currentBookChanged();
     }
+}
+
+// ==========================================================================
+// BooksSettings
+// ==========================================================================
+
+BooksSettings::BooksSettings(QObject* aParent) : QObject(aParent),
+    iPrivate(new Private(this))
+{
+}
+
+QSharedPointer<BooksSettings>
+BooksSettings::sharedInstance()
+{
+    QSharedPointer<BooksSettings> instance = Private::sSharedInstance;
+    if (instance.isNull()) {
+        // QObject::deleteLater protects against trouble in case if the
+        // recipient of the signal drops the last shared reference.
+        instance = QSharedPointer<BooksSettings>(new BooksSettings, &QObject::deleteLater);
+        Private::sSharedInstance = instance;
+    }
+    return instance;
+}
+
+bool
+BooksSettings::increaseFontSize()
+{
+    if (iPrivate->iFontSize < MaxFontSize) {
+        setFontSize(iPrivate->iFontSize+1);
+        return true;
+    } else {
+        return false;
+    }
+}
+
+bool
+BooksSettings::decreaseFontSize()
+{
+    if (iPrivate->iFontSize > MinFontSize) {
+        setFontSize(iPrivate->iFontSize-1);
+        return true;
+    } else {
+        return false;
+    }
+}
+
+void
+BooksSettings::setFontSize(
+    int aValue)
+{
+    HDEBUG(aValue);
+    iPrivate->iFontSizeConf->set(aValue);
+}
+
+int
+BooksSettings::fontSize() const
+{
+    return iPrivate->iFontSize;
+}
+
+QString
+BooksSettings::currentStorage() const
+{
+    return iPrivate->iCurrentStorageDevice;
+}
+
+shared_ptr<ZLTextStyle>
+BooksSettings::textStyle(
+    int aFontSizeAdjust) const
+{
+    return iPrivate->textStyle(aFontSizeAdjust);
+}
+
+int
+BooksSettings::pageDetails() const
+{
+    return iPrivate->iPageDetailsConf->value(DEFAULT_PAGE_DETAILS).toInt();
+}
+
+void
+BooksSettings::setPageDetails(
+    int aValue)
+{
+    HDEBUG(aValue);
+    iPrivate->iPageDetailsConf->set(aValue);
+}
+
+bool
+BooksSettings::invertColors() const
+{
+    return iPrivate->iInvertColorsConf->value(DEFAULT_INVERT_COLORS).toBool();
+}
+
+void
+BooksSettings::setInvertColors(
+    bool aValue)
+{
+    HDEBUG(aValue);
+    iPrivate->iInvertColorsConf->set(aValue);
+}
+
+QString
+BooksSettings::relativePath() const
+{
+    QString rel;
+    BooksStorageManager::instance()->storageForPath(currentFolder(), &rel);
+    return rel;
+}
+
+QString
+BooksSettings::currentFolder() const
+{
+    return iPrivate->currentFolder();
+}
+
+void
+BooksSettings::setCurrentFolder(
+    QString aValue)
+{
+    HDEBUG(aValue);
+    iPrivate->iCurrentFolderConf->set(aValue);
+}
+
+QObject*
+BooksSettings::currentBook() const
+{
+    return iPrivate->iCurrentBook;
+}
+
+void
+BooksSettings::setCurrentBook(
+    QObject* aBook)
+{
+    iPrivate->setCurrentBook(aBook);
 }
 
 QColor
@@ -494,7 +564,7 @@ BooksSettings::orientation() const
     // Need to cast int to enum right away to force "enumeration value not
     // handled in switch" warning if we miss one of the Orientation:
     Orientation value = (Orientation)
-        iOrientationConf->value(DEFAULT_ORIENTATION).toInt();
+        iPrivate->iOrientationConf->value(DEFAULT_ORIENTATION).toInt();
     switch (value) {
     case OrientationAny:
     case OrientationPortrait:
@@ -503,3 +573,5 @@ BooksSettings::orientation() const
     }
     return DEFAULT_ORIENTATION;
 }
+
+#include "BooksSettings.moc"
