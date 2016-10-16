@@ -52,6 +52,7 @@ Item {
     signal pageClicked()
     signal imagePressed(var url, var rect)
     signal browserLinkPressed(var url)
+    signal jumpToPage(var page)
 
     PageWidget {
         id: widget
@@ -60,6 +61,8 @@ Item {
         model: bookModel
         onBrowserLinkPressed: view.browserLinkPressed(url)
         onImagePressed: view.imagePressed(url, rect)
+        onActiveTouch: pressImage.animate(x, y)
+        onJumpToPage: view.jumpToPage(page)
     }
 
     BooksTitleLabel {
@@ -86,6 +89,54 @@ Item {
         Behavior on opacity {}
     }
 
+    Image {
+        id: pressImage
+        source: globalSettings.invertColors ?  "images/press-invert.svg" : "images/press.svg"
+        visible: opacity > 0
+        opacity: 0
+        readonly property int maxsize: Math.max(view.width, view.height)
+        ParallelAnimation {
+            id: pressAnimation
+            NumberAnimation {
+                target: pressImage
+                easing.type: Easing.InOutQuad
+                properties: "width,height"
+                from: pressImage.sourceSize.width
+                to: pressImage.maxsize
+            }
+            NumberAnimation {
+                id: pressAnimationX
+                target: pressImage
+                easing.type: Easing.InOutQuad
+                properties: "x"
+            }
+            NumberAnimation {
+                id: pressAnimationY
+                target: pressImage
+                easing.type: Easing.InOutQuad
+                properties: "y"
+            }
+            NumberAnimation {
+                target: pressImage
+                easing.type: Easing.InOutQuad
+                properties: "opacity"
+                from: 0.5
+                to: 0
+            }
+        }
+        function animate(x0, y0) {
+            pressAnimation.stop();
+            opacity = 0
+            width = pressImage.sourceSize.width
+            height = pressImage.sourceSize.height
+            pressAnimationX.from = x = x0 - Math.round(width/2)
+            pressAnimationY.from = y = y0 - Math.round(height/2)
+            pressAnimationX.to = x0 - maxsize/2
+            pressAnimationY.to = y0 - maxsize/2
+            pressAnimation.start()
+        }
+    }
+
     Label {
         anchors {
             horizontalCenter: parent.horizontalCenter
@@ -104,6 +155,7 @@ Item {
     MouseArea {
         anchors.fill: parent
         onClicked: view.pageClicked()
+        onPressed: widget.handlePress(mouseX, mouseY)
         onPressAndHold: widget.handleLongPress(mouseX, mouseY)
     }
 }

@@ -157,12 +157,12 @@ void BooksPageWidget::RenderTask::performTask()
 }
 
 // ==========================================================================
-// BooksPageWidget::LongPressTask
+// BooksPageWidget::PressTask
 // ==========================================================================
 
-class BooksPageWidget::LongPressTask : public BooksTask {
+class BooksPageWidget::PressTask : public BooksTask {
 public:
-    LongPressTask(shared_ptr<BooksPageWidget::Data> aData, int aX, int aY) :
+    PressTask(shared_ptr<BooksPageWidget::Data> aData, int aX, int aY) :
         iData(aData), iX(aX), iY(aY), iKind(REGULAR) {}
 
     void performTask();
@@ -179,7 +179,7 @@ public:
     shared_ptr<ZLImageData> iImageData;
 };
 
-void BooksPageWidget::LongPressTask::performTask()
+void BooksPageWidget::PressTask::performTask()
 {
     if (!isCanceled()) {
         const BooksTextView& view = *iData->iView;
@@ -222,7 +222,7 @@ void BooksPageWidget::LongPressTask::performTask()
                                 iKind = link.kind();
                                 iLink = link.label();
                                 iLinkType = link.hyperlinkType();
-                                HDEBUG("link" << iLink.c_str());
+                                HDEBUG("link" << kind << iLink.c_str());
                             }
                             return;
                         }
@@ -261,6 +261,7 @@ BooksPageWidget::BooksPageWidget(QQuickItem* aParent) :
     iSettings(NULL),
     iResetTask(NULL),
     iRenderTask(NULL),
+    iPressTask(NULL),
     iLongPressTask(NULL),
     iEmpty(false),
     iPage(-1)
@@ -279,6 +280,7 @@ BooksPageWidget::~BooksPageWidget()
     HDEBUG("page" << iPage);
     if (iResetTask) iResetTask->release(this);
     if (iRenderTask) iRenderTask->release(this);
+    if (iPressTask) iPressTask->release(this);
     if (iLongPressTask) iLongPressTask->release(this);
 }
 
@@ -559,23 +561,49 @@ void BooksPageWidget::onRenderTaskDone()
     update();
 }
 
+void BooksPageWidget::onPressTaskDone()
+{
+    HASSERT(sender() == iPressTask);
+    HDEBUG(iPressTask->iKind);
+
+    PressTask* task = iPressTask;
+    iPressTask = NULL;
+
+    if (task->iKind != REGULAR) {
+        Q_EMIT activeTouch(task->iX, task->iY);
+    }
+
+    task->release(this);
+}
+
 void BooksPageWidget::onLongPressTaskDone()
 {
     HASSERT(sender() == iLongPressTask);
     HDEBUG(iLongPressTask->iKind);
 
-    if (iLongPressTask->iKind == EXTERNAL_HYPERLINK) {
+    PressTask* task = iLongPressTask;
+    iLongPressTask = NULL;
+
+    if (task->iKind == EXTERNAL_HYPERLINK) {
         static const std::string HTTP("http://");
         static const std::string HTTPS("https://");
-        if (ZLStringUtil::stringStartsWith(iLongPressTask->iLink, HTTP) ||
-            ZLStringUtil::stringStartsWith(iLongPressTask->iLink, HTTPS)) {
-            QString url(QString::fromStdString(iLongPressTask->iLink));
+        if (ZLStringUtil::stringStartsWith(task->iLink, HTTP) ||
+            ZLStringUtil::stringStartsWith(task->iLink, HTTPS)) {
+            QString url(QString::fromStdString(task->iLink));
             Q_EMIT browserLinkPressed(url);
         }
-    } else if (iLongPressTask->iKind == IMAGE) {
+    } else if (task->iKind == INTERNAL_HYPERLINK) {
+        if (iModel) {
+            int page = iModel->linkToPage(task->iLink);
+            if (page >= 0) {
+                HDEBUG("link to page" << page);
+                Q_EMIT jumpToPage(page);
+            }
+        }
+    } else if (task->iKind == IMAGE) {
         // Make sure that the book path is mixed into the image id to handle
         // the case of different books having images with identical ids
-        QString id = QString::fromStdString(iLongPressTask->iImageId);
+        QString id = QString::fromStdString(task->iImageId);
         QString path;
         if (iModel) {
             BooksBook* book = iModel->book();
@@ -592,13 +620,11 @@ void BooksPageWidget::onLongPressTaskDone()
         }
         static const QString IMAGE_URL("image://%1/%2");
         QString url = IMAGE_URL.arg(BooksImageProvider::PROVIDER_ID, id);
-        BooksImageProvider::instance()->addImage(iModel, id,
-            iLongPressTask->iImageData);
-        Q_EMIT imagePressed(url, iLongPressTask->iRect);
+        BooksImageProvider::instance()->addImage(iModel, id, task->iImageData);
+        Q_EMIT imagePressed(url, task->iRect);
     }
 
-    iLongPressTask->release(this);
-    iLongPressTask = NULL;
+    task->release(this);
 }
 
 void BooksPageWidget::updateSize()
@@ -640,7 +666,17 @@ void BooksPageWidget::handleLongPress(int aX, int aY)
     HDEBUG(aX << aY);
     if (!iResetTask && !iRenderTask && !iData.isNull()) {
         if (iLongPressTask) iLongPressTask->release(this);
-        iLongPressTask = new LongPressTask(iData, aX, aY);
+        iLongPressTask = new PressTask(iData, aX, aY);
         iTaskQueue->submit(iLongPressTask, this, SLOT(onLongPressTaskDone()));
+    }
+}
+
+void BooksPageWidget::handlePress(int aX, int aY)
+{
+    HDEBUG(aX << aY);
+    if (!iResetTask && !iRenderTask && !iData.isNull()) {
+        if (iPressTask) iPressTask->release(this);
+        iPressTask = new PressTask(iData, aX, aY);
+        iTaskQueue->submit(iPressTask, this, SLOT(onPressTaskDone()));
     }
 }

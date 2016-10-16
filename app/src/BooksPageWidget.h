@@ -90,6 +90,7 @@ public:
     BooksMargins margins() const { return iMargins; }
 
     Q_INVOKABLE void handleLongPress(int aX, int aY);
+    Q_INVOKABLE void handlePress(int aX, int aY);
 
 Q_SIGNALS:
     void loadingChanged();
@@ -102,6 +103,8 @@ Q_SIGNALS:
     void bottomMarginChanged();
     void browserLinkPressed(QString url);
     void imagePressed(QString url, QRect rect);
+    void activeTouch(int x, int y);
+    void jumpToPage(int page);
 
 private Q_SLOTS:
     void onWidthChanged();
@@ -115,6 +118,7 @@ private Q_SLOTS:
     void onInvertColorsChanged();
     void onResetTaskDone();
     void onRenderTaskDone();
+    void onPressTaskDone();
     void onLongPressTaskDone();
 
 private:
@@ -128,7 +132,7 @@ private:
 private:
     class ResetTask;
     class RenderTask;
-    class LongPressTask;
+    class PressTask;
 
     shared_ptr<BooksTaskQueue> iTaskQueue;
     shared_ptr<ZLTextStyle> iTextStyle;
@@ -141,7 +145,8 @@ private:
     shared_ptr<QImage> iImage;
     ResetTask* iResetTask;
     RenderTask* iRenderTask;
-    LongPressTask* iLongPressTask;
+    PressTask* iPressTask;
+    PressTask* iLongPressTask;
     bool iEmpty;
     int iPage;
 };

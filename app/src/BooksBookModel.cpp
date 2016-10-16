@@ -350,6 +350,17 @@ BooksPos BooksBookModel::pageMark(int aPage) const
     return BooksPos();
 }
 
+int BooksBookModel::linkToPage(const std::string& aLink) const
+{
+    if (iData && !iData->iBookModel.isNull()) {
+        BookModel::Label label = iData->iBookModel->label(aLink);
+        if (label.ParagraphNumber >= 0) {
+            return iData->pickPage(BooksPos(label.ParagraphNumber, 0, 0));
+        }
+    }
+    return -1;
+}
+
 shared_ptr<BookModel> BooksBookModel::bookModel() const
 {
     return iData ? iData->iBookModel : NULL;

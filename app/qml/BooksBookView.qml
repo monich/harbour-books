@@ -160,6 +160,7 @@ SilicaFlickable {
             titleVisible: _currentState.title
             pageNumberVisible: _currentState.page
             title: bookModel.title
+            onJumpToPage: bookView.jumpTo(page)
             onPageClicked: {
                 root.pageClicked(index)
                 globalSettings.pageDetails = (globalSettings.pageDetails+ 1) % _visibilityStates.length
