@@ -39,9 +39,9 @@ ApplicationWindow {
     allowedOrientations: {
         switch (Settings.orientation) {
         default:
-        case BooksSettings.OrientationAny: return Orientation.All
-        case BooksSettings.OrientationPortrait: return Orientation.Portrait
-        case BooksSettings.OrientationLandscape: return Orientation.Landscape
+        case Settings.OrientationAny: return Orientation.All
+        case Settings.OrientationPortrait: return Orientation.Portrait
+        case Settings.OrientationLandscape: return Orientation.Landscape
         }
     }
 

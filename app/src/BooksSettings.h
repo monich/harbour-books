@@ -36,8 +36,8 @@
 
 #include "BooksTypes.h"
 #include "ZLTextStyle.h"
+#include <QObject>
 #include <QColor>
-#include <QtQml>
 #include <QSharedPointer>
 
 class BooksSettings : public QObject
@@ -52,11 +52,15 @@ class BooksSettings : public QObject
     Q_PROPERTY(QString currentFolder READ currentFolder WRITE setCurrentFolder NOTIFY currentFolderChanged)
     Q_PROPERTY(QString currentStorage READ currentStorage NOTIFY currentStorageChanged)
     Q_PROPERTY(QString relativePath READ relativePath NOTIFY relativePathChanged)
+    Q_PROPERTY(QString removableRoot READ removableRoot NOTIFY removableRootChanged)
     Q_PROPERTY(QColor primaryPageToolColor READ primaryPageToolColor CONSTANT)
     Q_PROPERTY(QColor highlightPageToolColor READ highlightPageToolColor NOTIFY invertColorsChanged)
     Q_PROPERTY(QColor pageBackgroundColor READ pageBackgroundColor NOTIFY pageBackgroundColorChanged)
     Q_PROPERTY(int orientation READ orientation NOTIFY orientationChanged)
     class TextStyle;
+
+    // Use sharedInstance() to instantiate this class
+    BooksSettings();
 
 public:
     enum FontSize {
@@ -71,8 +75,6 @@ public:
         OrientationPortrait,
         OrientationLandscape
     };
-
-    explicit BooksSettings(QObject* aParent = NULL);
 
     static QSharedPointer<BooksSettings> sharedInstance();
 
@@ -94,6 +96,7 @@ public:
     void setCurrentBook(QObject* aBook);
 
     QString relativePath() const;
+    QString removableRoot() const;
     QString currentFolder() const;
     void setCurrentFolder(QString aValue);
 
@@ -113,6 +116,7 @@ Q_SIGNALS:
     void currentFolderChanged();
     void currentStorageChanged();
     void relativePathChanged();
+    void removableRootChanged();
     void pageBackgroundColorChanged();
     void orientationChanged();
 
@@ -120,7 +124,5 @@ private:
     class Private;
     Private* iPrivate;
 };
-
-QML_DECLARE_TYPE(BooksSettings)
 
 #endif // BOOKS_SETTINGS_H

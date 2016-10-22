@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Jolla Ltd.
+ * Copyright (C) 2015-2016 Jolla Ltd.
  * Contact: Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
@@ -14,7 +14,7 @@
  *     notice, this list of conditions and the following disclaimer in
  *     the documentation and/or other materials provided with the
  *     distribution.
- *   * Neither the name of Nemo Mobile nor the names of its contributors
+ *   * Neither the name of Jolla Ltd nor the names of its contributors
  *     may be used to endorse or promote products derived from this
  *     software without specific prior written permission.
  *
@@ -32,6 +32,7 @@
  */
 
 #include "BooksStorage.h"
+#include "BooksSettings.h"
 #include "BooksDefs.h"
 
 #include "HarbourDebug.h"
@@ -62,7 +63,8 @@ class BooksStorage::Private: public QObject
     Q_OBJECT
 
 public:
-    Private(QString aDevice, QDir aBooksDir, bool aInternal);
+    Private(QString aDevice, QString aMountPoint, QString aBooksDir,
+        bool aInternal);
 
     bool isRemoved() const;
     bool equal(const Private& aData) const;
@@ -76,14 +78,23 @@ Q_SIGNALS:
 public:
     QAtomicInt iRef;
     QString iDevice;
+    QString iMountPoint;
     QDir iBooksDir;
     QDir iConfigDir;
     bool iInternal;
     bool iPresent;
 };
 
-BooksStorage::Private::Private(QString aDevice, QDir aBooksDir, bool aInternal) :
-    iRef(1), iDevice(aDevice), iBooksDir(aBooksDir), iInternal(aInternal),
+BooksStorage::Private::Private(
+    QString aDevice,
+    QString aMountPoint,
+    QString aBooksDir,
+    bool aInternal) :
+    iRef(1),
+    iDevice(aDevice),
+    iMountPoint(aMountPoint),
+    iBooksDir(aBooksDir),
+    iInternal(aInternal),
     iPresent(true)
 {
     QString cfgDir;
@@ -97,7 +108,7 @@ BooksStorage::Private::Private(QString aDevice, QDir aBooksDir, bool aInternal) 
         cfgDir += subDir;
     } else {
         cfgDir += REMOVABLE_STATE_DIR "/";
-        QString label = QDir(Private::mountPoint(aBooksDir.path())).dirName();
+        QString label = QDir(Private::mountPoint(aBooksDir)).dirName();
         if (label.isEmpty()) label = "sdcard";
         cfgDir += label;
     }
@@ -106,10 +117,12 @@ BooksStorage::Private::Private(QString aDevice, QDir aBooksDir, bool aInternal) 
 
 bool BooksStorage::Private::equal(const BooksStorage::Private& aData) const
 {
-    return iInternal == iInternal &&
-           iPresent == iPresent &&
+    return iInternal == aData.iInternal &&
+           iPresent == aData.iPresent &&
+           iMountPoint == aData.iMountPoint &&
            iDevice == aData.iDevice &&
-           iBooksDir == aData.iBooksDir;
+           iBooksDir == aData.iBooksDir &&
+           iConfigDir == aData.iConfigDir;
 }
 
 bool BooksStorage::Private::isMountPoint(QString aPath)
@@ -153,9 +166,9 @@ BooksStorage::BooksStorage(const BooksStorage& aStorage) :
     if (iPrivate) iPrivate->iRef.ref();
 }
 
-BooksStorage::BooksStorage(QString aDevice, QDir aBooksDir, bool aInternal) :
-    QObject(NULL),
-    iPrivate(new Private(aDevice, aBooksDir, aInternal)),
+BooksStorage::BooksStorage(QString aDevice, QString aMount, QString aBooksDir,
+    bool aInternal) : QObject(NULL),
+    iPrivate(new Private(aDevice, aMount, aBooksDir, aInternal)),
     iPassThrough(false)
 {
     HDEBUG("config dir" << qPrintable(configDir().path()));
@@ -253,17 +266,26 @@ void BooksStorage::set(const BooksStorage& aStorage)
 #define STORAGE_SCAN_INTERVAL   100
 #define STORAGE_SCAN_TIMEOUT    5000
 
-class BooksStorageManager::Private {
+class BooksStorageManager::Private : public QObject {
+    Q_OBJECT
 public:
     static BooksStorageManager* gInstance;
 
-    Private();
+    Private(BooksStorageManager* aParent);
     ~Private();
 
     int findDevice(QString aDevice) const;
     int findPath(QString aPath, QString* aRelPath) const;
+    bool scanMounts();
+
+public Q_SLOTS:
+    void onDeviceEvent(int);
+    void onRemovableRootChanged();
+    void onScanMounts();
 
 public:
+    BooksStorageManager* iParent;
+    QSharedPointer<BooksSettings> iSettings;
     QList<BooksStorage> iStorageList;
     struct udev* iUdev;
     struct udev_monitor* iMonitor;
@@ -275,7 +297,10 @@ public:
 
 BooksStorageManager* BooksStorageManager::Private::gInstance = NULL;
 
-BooksStorageManager::Private::Private() :
+BooksStorageManager::Private::Private(BooksStorageManager* aParent) :
+    QObject(aParent),
+    iParent(aParent),
+    iSettings(BooksSettings::sharedInstance()),
     iUdev(udev_new()),
     iMonitor(NULL),
     iDescriptor(-1),
@@ -303,21 +328,22 @@ BooksStorageManager::Private::Private() :
                 QString mount(entries.at(1));
                 if (mount == homeMount) {
                     homeDevice = entries.at(0);
-                    HDEBUG("home device" << homeDevice);
+                    HDEBUG("internal" << homeDevice);
                 } else if (mount.startsWith(mediaPrefix)) {
                     QString dev = entries.at(0);
-                    QString path = mount;
+                    QString path(mount);
                     if (!path.endsWith('/')) path += '/';
-                    path += QLatin1String(BOOKS_REMOVABLE_ROOT);
-                    HDEBUG("removable device" << dev << path);
-                    iStorageList.append(BooksStorage(dev, path, false));
+                    path += iSettings->removableRoot();
+                    BooksStorage bs(dev, mount, path, false);
+                    HDEBUG("removable" << dev << bs.booksDir().path());
+                    iStorageList.append(bs);
                 }
             }
         }
         mounts.close();
     }
 
-    iStorageList.insert(0, BooksStorage(homeDevice, homeBooks, true));
+    iStorageList.insert(0, BooksStorage(homeDevice, homeMount, homeBooks, true));
 
     if (iUdev) {
         iMonitor = udev_monitor_new_from_netlink(iUdev, "udev");
@@ -329,8 +355,27 @@ BooksStorageManager::Private::Private() :
             if (iDescriptor >= 0) {
                 iNotifier = new QSocketNotifier(iDescriptor,
                     QSocketNotifier::Read);
+                connect(iNotifier, SIGNAL(activated(int)),
+                    SLOT(onDeviceEvent(int)));
             }
         }
+    }
+
+    connect(iSettings.data(), SIGNAL(removableRootChanged()),
+        SLOT(onRemovableRootChanged()));
+}
+
+BooksStorageManager::Private::~Private()
+{
+    if (iUdev) {
+        if (iMonitor) {
+            if (iDescriptor >= 0) {
+                delete iNotifier;
+                close(iDescriptor);
+            }
+            udev_monitor_unref(iMonitor);
+        }
+        udev_unref(iUdev);
     }
 }
 
@@ -369,17 +414,127 @@ int BooksStorageManager::Private::findPath(QString aPath, QString* aRelPath) con
     return -1;
 }
 
-BooksStorageManager::Private::~Private()
+bool BooksStorageManager::Private::scanMounts()
 {
-    if (iUdev) {
-        if (iMonitor) {
-            if (iDescriptor >= 0) {
-                delete iNotifier;
-                close(iDescriptor);
+    bool newStorageFound = false;
+    QList<BooksStorage> newMounts;
+    QFile mounts(STORAGE_MOUNTS_FILE);
+    if (mounts.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        // For some reason QTextStream can't read /proc/mounts line by line
+        QByteArray contents = mounts.readAll();
+        QTextStream in(&contents);
+        QString mediaPrefix(STORAGE_MOUNT_PREFIX);
+        while (!in.atEnd()) {
+            QString line = in.readLine();
+            QStringList entries = line.split(' ', QString::SkipEmptyParts);
+            if (entries.count() > 2) {
+                QString mount(entries.at(1));
+                if (mount.startsWith(mediaPrefix)) {
+                    QString dev = entries.at(0);
+                    int index = findDevice(dev);
+                    if (index < 0) {
+                        QString path = mount;
+                        if (!path.endsWith('/')) path += '/';
+                        path += iSettings->removableRoot();
+                        HDEBUG("new removable device" << dev << path);
+                        BooksStorage storage(dev, mount, path, false);
+                        iStorageList.append(storage);
+                        Q_EMIT iParent->storageAdded(storage);
+                        newStorageFound = true;
+                    }
+                }
             }
-            udev_monitor_unref(iMonitor);
         }
-        udev_unref(iUdev);
+        mounts.close();
+    }
+    return newStorageFound;
+}
+
+void BooksStorageManager::Private::onScanMounts()
+{
+    if (scanMounts()) {
+        iScanMountsTimer->stop();
+    } else {
+        QDateTime now = QDateTime::currentDateTime();
+        if (now > iScanDeadline) {
+            HDEBUG("timeout waiting for new mount to appear");
+            iScanMountsTimer->stop();
+        } else {
+            HDEBUG("no new mounts found");
+        }
+    }
+}
+
+void BooksStorageManager::Private::onDeviceEvent(int)
+{
+    struct udev_device* dev = udev_monitor_receive_device(iMonitor);
+    if (dev) {
+        const char* devnode = udev_device_get_devnode(dev);
+        const char* action = udev_device_get_action(dev);
+        HDEBUG("got device");
+        HDEBUG("   node:" << devnode);
+        HDEBUG("   subsystem:" << udev_device_get_subsystem(dev));
+        HDEBUG("   devtype:" << udev_device_get_devtype(dev));
+        HDEBUG("   action:" << action);
+        if (devnode && action) {
+            if (!(strcmp(action, STORAGE_ACTION_ADD))) {
+                // Mount list isn't updated yet when we receive this
+                // notification. It takes hundreds of milliseconds until
+                // it gets mounted and becomes accessible.
+                if (!scanMounts()) {
+                    HDEBUG("no new mounts found");
+                    if (!iScanMountsTimer) {
+                        QTimer* timer = new QTimer(this);
+                        timer->setSingleShot(false);
+                        timer->setInterval(STORAGE_SCAN_INTERVAL);
+                        connect(timer, SIGNAL(timeout()), SLOT(onScanMounts()));
+                        iScanMountsTimer = timer;
+                    }
+                    iScanMountsTimer->start();
+                    iScanDeadline = QDateTime::currentDateTime().
+                        addMSecs(STORAGE_SCAN_TIMEOUT);
+                }
+            } else if (!(strcmp(action, STORAGE_ACTION_REMOVE))) {
+                int pos = findDevice(devnode);
+                if (pos >= 0) {
+                    HDEBUG("removable device is gone");
+                    BooksStorage storage = iStorageList.takeAt(pos);
+                    storage.iPrivate->iPresent = false;
+                    Q_EMIT storage.iPrivate->removed();
+                    Q_EMIT iParent->storageRemoved(storage);
+                }
+            }
+        }
+        udev_device_unref(dev);
+    } else {
+        HWARN("no device!");
+    }
+}
+
+void BooksStorageManager::Private::onRemovableRootChanged()
+{
+    int i;
+    HDEBUG(iSettings->removableRoot());
+    QList<BooksStorage> replaced; // old-new pairs
+    for (i=iStorageList.count()-1; i>=0; i--) {
+        BooksStorage storage = iStorageList.at(i);
+        if (!storage.isInternal()) {
+            QString path(storage.iPrivate->iMountPoint);
+            if (!path.endsWith('/')) path += '/';
+            path += iSettings->removableRoot();
+            BooksStorage updated(storage.iPrivate->iDevice,
+                storage.iPrivate->iMountPoint, path, false);
+            if (!storage.equal(updated)) {
+                replaced.append(storage);
+                replaced.append(updated);
+                iStorageList.replace(i, updated);
+            } else {
+                HWARN(storage.root() << "didn't change");
+            }
+        }
+    }
+    for (i=0; (i+1)<replaced.count(); i+=2) {
+        Q_EMIT iParent->storageReplaced(replaced.at(i), replaced.at(i+1));
     }
 }
 
@@ -402,12 +557,8 @@ void BooksStorageManager::deleteInstance()
 }
 
 BooksStorageManager::BooksStorageManager() :
-    iPrivate(new Private)
+    iPrivate(new Private(this))
 {
-    if (iPrivate->iNotifier) {
-        connect(iPrivate->iNotifier, SIGNAL(activated(int)),
-            SLOT(onDeviceEvent(int)));
-    }
 }
 
 BooksStorageManager::~BooksStorageManager()
@@ -415,7 +566,6 @@ BooksStorageManager::~BooksStorageManager()
     if (Private::gInstance == this) {
         Private::gInstance = NULL;
     }
-    delete iPrivate;
 }
 
 int BooksStorageManager::count() const
@@ -438,102 +588,6 @@ BooksStorage BooksStorageManager::storageForPath(QString aPath, QString* aRelPat
 {
     int index = iPrivate->findPath(aPath, aRelPath);
     return (index >= 0) ? iPrivate->iStorageList.at(index) : BooksStorage();
-}
-
-void BooksStorageManager::onDeviceEvent(int)
-{
-    struct udev_device* dev = udev_monitor_receive_device(iPrivate->iMonitor);
-    if (dev) {
-        const char* devnode = udev_device_get_devnode(dev);
-        const char* action = udev_device_get_action(dev);
-        HDEBUG("got device");
-        HDEBUG("   node:" << devnode);
-        HDEBUG("   subsystem:" << udev_device_get_subsystem(dev));
-        HDEBUG("   devtype:" << udev_device_get_devtype(dev));
-        HDEBUG("   action:" << action);
-        if (devnode && action) {
-            if (!(strcmp(action, STORAGE_ACTION_ADD))) {
-                // Mount list isn't updated yet when we receive this
-                // notification. It takes hundreds of milliseconds until
-                // it gets mounted and becomes accessible.
-                if (!scanMounts()) {
-                    HDEBUG("no new mounts found");
-                    if (!iPrivate->iScanMountsTimer) {
-                        QTimer* timer = new QTimer(this);
-                        timer->setSingleShot(false);
-                        timer->setInterval(STORAGE_SCAN_INTERVAL);
-                        connect(timer, SIGNAL(timeout()), SLOT(onScanMounts()));
-                        iPrivate->iScanMountsTimer = timer;
-                    }
-                    iPrivate->iScanMountsTimer->start();
-                    iPrivate->iScanDeadline = QDateTime::currentDateTime().
-                        addMSecs(STORAGE_SCAN_TIMEOUT);
-                }
-            } else if (!(strcmp(action, STORAGE_ACTION_REMOVE))) {
-                int pos = iPrivate->findDevice(devnode);
-                if (pos >= 0) {
-                    HDEBUG("removable device is gone");
-                    BooksStorage storage = iPrivate->iStorageList.takeAt(pos);
-                    storage.iPrivate->iPresent = false;
-                    Q_EMIT storage.iPrivate->removed();
-                    Q_EMIT storageRemoved(storage);
-                }
-            }
-        }
-        udev_device_unref(dev);
-    } else {
-        HWARN("no device!");
-    }
-}
-
-bool BooksStorageManager::scanMounts()
-{
-    bool newStorageFound = false;
-    QFile mounts(STORAGE_MOUNTS_FILE);
-    if (mounts.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        // For some reason QTextStream can't read /proc/mounts line by line
-        QByteArray contents = mounts.readAll();
-        QTextStream in(&contents);
-        QString mediaPrefix(STORAGE_MOUNT_PREFIX);
-        while (!in.atEnd()) {
-            QString line = in.readLine();
-            QStringList entries = line.split(' ', QString::SkipEmptyParts);
-            if (entries.count() > 2) {
-                QString mount(entries.at(1));
-                if (mount.startsWith(mediaPrefix)) {
-                    QString dev = entries.at(0);
-                    int index = iPrivate->findDevice(dev);
-                    if (index < 0) {
-                        QString path = mount;
-                        if (!path.endsWith('/')) path += '/';
-                        path += QLatin1String(BOOKS_REMOVABLE_ROOT);
-                        HDEBUG("new removable device" << dev << path);
-                        BooksStorage storage(dev, path, false);
-                        iPrivate->iStorageList.append(storage);
-                        Q_EMIT storageAdded(storage);
-                        newStorageFound = true;
-                    }
-                }
-            }
-        }
-        mounts.close();
-    }
-    return newStorageFound;
-}
-
-void BooksStorageManager::onScanMounts()
-{
-    if (scanMounts()) {
-        iPrivate->iScanMountsTimer->stop();
-    } else {
-        QDateTime now = QDateTime::currentDateTime();
-        if (now > iPrivate->iScanDeadline) {
-            HDEBUG("timeout waiting for new mount to appear");
-            iPrivate->iScanMountsTimer->stop();
-        } else {
-            HDEBUG("no new mounts found");
-        }
-    }
 }
 
 #include "BooksStorage.moc"

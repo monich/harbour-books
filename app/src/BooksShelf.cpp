@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Jolla Ltd.
+ * Copyright (C) 2015-2016 Jolla Ltd.
  * Contact: Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
@@ -14,7 +14,7 @@
  *     notice, this list of conditions and the following disclaimer in
  *     the documentation and/or other materials provided with the
  *     distribution.
- *   * Neither the name of Nemo Mobile nor the names of its contributors
+ *   * Neither the name of Jolla Ltd nor the names of its contributors
  *     may be used to endorse or promote products derived from this
  *     software without specific prior written permission.
  *
@@ -516,7 +516,9 @@ void BooksShelf::init()
 #if QT_VERSION < 0x050000
     setRoleNames(roleNames());
 #endif
-    QQmlEngine::setObjectOwnership(&iStorage, QQmlEngine::CppOwnership);
+    connect(BooksStorageManager::instance(),
+        SIGNAL(storageReplaced(BooksStorage,BooksStorage)),
+        SLOT(onStorageReplaced(BooksStorage,BooksStorage)));
 }
 
 void BooksShelf::setRelativePath(QString aPath)
@@ -534,6 +536,14 @@ void BooksShelf::setDevice(QString aDevice)
         iStorage = BooksStorageManager::instance()->storageForDevice(aDevice);
         updatePath();
         Q_EMIT deviceChanged();
+    }
+}
+
+void BooksShelf::onStorageReplaced(BooksStorage aOld, BooksStorage aNew)
+{
+    if (iStorage == aOld) {
+        iStorage = aNew;
+        updatePath();
     }
 }
 

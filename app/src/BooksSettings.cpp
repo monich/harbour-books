@@ -47,12 +47,14 @@
 #define KEY_PAGE_DETAILS        "pageDetails"
 #define KEY_CURRENT_BOOK        "currentBook"
 #define KEY_CURRENT_FOLDER      "currentFolder"
+#define KEY_REMOVABLE_ROOT      "removableRoot"
 #define KEY_INVERT_COLORS       "invertColors"
 #define KEY_ORIENTATION         "orientation"
 #define DEFAULT_FONT_SIZE       0
 #define DEFAULT_PAGE_DETAILS    0
 #define DEFAULT_CURRENT_BOOK    QString()
 #define DEFAULT_CURRENT_FOLDER  QString()
+#define DEFAULT_REMOVABLE_ROOT  "Books"
 #define DEFAULT_INVERT_COLORS   false
 #define DEFAULT_ORIENTATION     (BooksSettings::OrientationAny)
 
@@ -227,6 +229,7 @@ public:
     MGConfItem* iCurrentFolderConf;
     MGConfItem* iCurrentBookPathConf;
     MGConfItem* iOrientationConf;
+    MGConfItem* iRemovableRootConf;
     mutable shared_ptr<ZLTextStyle> iTextStyle[FontSizeSteps+1];
     BooksBook* iCurrentBook;
     QString iCurrentStorageDevice;
@@ -244,11 +247,10 @@ BooksSettings::Private::Private(BooksSettings* aParent) :
     iCurrentFolderConf(new MGConfItem(DCONF_PATH KEY_CURRENT_FOLDER, this)),
     iCurrentBookPathConf(new MGConfItem(DCONF_PATH KEY_CURRENT_BOOK, this)),
     iOrientationConf(new MGConfItem(DCONF_PATH KEY_ORIENTATION, this)),
+    iRemovableRootConf(new MGConfItem(DCONF_PATH KEY_REMOVABLE_ROOT, this)),
     iCurrentBook(NULL)
 {
     iFontSize = currentFontSize();
-    updateCurrentBook();
-    updateCurrentStorage();
     connect(iFontSizeConf, SIGNAL(valueChanged()), SLOT(onFontSizeValueChanged()));
     connect(iCurrentFolderConf, SIGNAL(valueChanged()), SLOT(onCurrentFolderChanged()));
     connect(iCurrentBookPathConf, SIGNAL(valueChanged()), SLOT(onCurrentBookPathChanged()));
@@ -256,6 +258,7 @@ BooksSettings::Private::Private(BooksSettings* aParent) :
     connect(iInvertColorsConf, SIGNAL(valueChanged()), iParent, SIGNAL(invertColorsChanged()));
     connect(iInvertColorsConf, SIGNAL(valueChanged()), iParent, SIGNAL(pageBackgroundColorChanged()));
     connect(iOrientationConf, SIGNAL(valueChanged()), iParent, SIGNAL(orientationChanged()));
+    connect(iRemovableRootConf, SIGNAL(valueChanged()), iParent, SIGNAL(removableRootChanged()));
 }
 
 int
@@ -406,7 +409,7 @@ BooksSettings::Private::onCurrentBookPathChanged()
 // BooksSettings
 // ==========================================================================
 
-BooksSettings::BooksSettings(QObject* aParent) : QObject(aParent),
+BooksSettings::BooksSettings() :
     iPrivate(new Private(this))
 {
 }
@@ -420,6 +423,15 @@ BooksSettings::sharedInstance()
         // recipient of the signal drops the last shared reference.
         instance = QSharedPointer<BooksSettings>(new BooksSettings, &QObject::deleteLater);
         Private::sSharedInstance = instance;
+        // Finish initialization. These invoke BooksStorageManager::instance()
+        // which in turn calls BooksSettings::sharedInstance() to call
+        // removableRoot(). Now that Private::sSharedInstance is set, it
+        // won't cause infinite recursion although the returned BooksSettings
+        // object will be slightly under-initialized, so to speak. But that's
+        // ok as long as BooksStorageManager::instance() doesn't need anything
+        // from BooksSettings other than removableRoot()
+        instance->iPrivate->updateCurrentBook();
+        instance->iPrivate->updateCurrentStorage();
     }
     return instance;
 }
@@ -499,6 +511,12 @@ BooksSettings::setInvertColors(
 {
     HDEBUG(aValue);
     iPrivate->iInvertColorsConf->set(aValue);
+}
+
+QString
+BooksSettings::removableRoot() const
+{
+    return iPrivate->iRemovableRootConf->value(DEFAULT_REMOVABLE_ROOT).toString();
 }
 
 QString

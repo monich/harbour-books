@@ -171,7 +171,6 @@ bool ZLibrary::init(int& aArgc, char** &aArgv)
     }
     HDEBUG("screen" << booksPPI << "dpi");
 
-    BooksStorageManager::instance();
     ZLQtTimeManager::createInstance();
     ZLQtFSManager::createInstance();
     BooksDialogManager::createInstance();
@@ -179,6 +178,13 @@ bool ZLibrary::init(int& aArgc, char** &aArgv)
     ZLEncodingCollection::Instance().registerProvider(new IConvEncodingConverterProvider());
     ZLApplication::Instance();
     ZLFile::initCache();
+
+    // Due to the weird inter-dependency between BooksSettings and
+    // BooksStorageManager, BooksSettings has to be created first.
+    // Doing it the other way around will result in two instances of
+    // BooksStorageManager being created :)
+    QSharedPointer<BooksSettings> settings = BooksSettings::sharedInstance();
+    BooksStorageManager::instance();
     return true;
 }
 

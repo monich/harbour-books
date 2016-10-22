@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Jolla Ltd.
+ * Copyright (C) 2015-2016 Jolla Ltd.
  * Contact: Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
@@ -14,7 +14,7 @@
  *     notice, this list of conditions and the following disclaimer in
  *     the documentation and/or other materials provided with the
  *     distribution.
- *   * Neither the name of Nemo Mobile nor the names of its contributors
+ *   * Neither the name of Jolla Ltd nor the names of its contributors
  *     may be used to endorse or promote products derived from this
  *     software without specific prior written permission.
  *
@@ -38,6 +38,7 @@
 #include <QList>
 #include <QDir>
 
+class BooksSettings;
 class BooksStorageManager;
 
 class BooksStorage: public QObject
@@ -76,7 +77,7 @@ Q_SIGNALS:
 
 private:
     friend class BooksStorageManager;
-    BooksStorage(QString, QDir, bool);
+    BooksStorage(QString, QString, QString, bool);
     void connectNotify(const QMetaMethod& aSignal);
 
 private:
@@ -102,14 +103,10 @@ public:
 Q_SIGNALS:
     void storageAdded(BooksStorage aStorage);
     void storageRemoved(BooksStorage aStorage);
+    void storageReplaced(BooksStorage aOldStorage, BooksStorage aNewStorage);
 
 private:
     BooksStorageManager();
-    bool scanMounts();
-
-private Q_SLOTS:
-    void onDeviceEvent(int);
-    void onScanMounts();
 
 private:
     class Private;

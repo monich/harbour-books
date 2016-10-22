@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Jolla Ltd.
+ * Copyright (C) 2015-2016 Jolla Ltd.
  * Contact: Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
@@ -14,7 +14,7 @@
  *     notice, this list of conditions and the following disclaimer in
  *     the documentation and/or other materials provided with the
  *     distribution.
- *   * Neither the name of Nemo Mobile nor the names of its contributors
+ *   * Neither the name of Jolla Ltd nor the names of its contributors
  *     may be used to endorse or promote products derived from this
  *     software without specific prior written permission.
  *
@@ -90,6 +90,9 @@ BooksStorageModel::BooksStorageModel(QObject* aParent) :
     connect(mgr,
         SIGNAL(storageRemoved(BooksStorage)),
         SLOT(onStorageRemoved(BooksStorage)));
+    connect(mgr,
+        SIGNAL(storageReplaced(BooksStorage,BooksStorage)),
+        SLOT(onStorageReplaced(BooksStorage,BooksStorage)));
 }
 
 BooksStorageModel::~BooksStorageModel()
@@ -210,6 +213,24 @@ void BooksStorageModel::onStorageRemoved(BooksStorage aStorage)
         endRemoveRows();
         Q_EMIT countChanged();
     } else {
-        HWARN("device not dfound on the list");
+        HWARN("device not found on the list");
+    }
+}
+
+void BooksStorageModel::onStorageReplaced(BooksStorage aOld, BooksStorage aNew)
+{
+    int index = find(aOld);
+    if (index >=0) {
+        QModelIndex modelIndex(createIndex(index, 0));
+        QVector<int> roles(4);
+        roles.append(BooksStorageRoot);
+        roles.append(BooksStorageDevice);
+        roles.append(BooksStorageRemovable);
+        roles.append(BooksStorageDeleteAllRequest);
+        HWARN(aOld.root() << "->" << aNew.root());
+        iList.at(index)->iStorage = aNew;
+        Q_EMIT dataChanged(modelIndex, modelIndex, roles);
+    } else {
+        HWARN("device not found on the list");
     }
 }

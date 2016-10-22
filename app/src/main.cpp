@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Jolla Ltd.
+ * Copyright (C) 2015-2016 Jolla Ltd.
  * Contact: Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
@@ -14,7 +14,7 @@
  *     notice, this list of conditions and the following disclaimer in
  *     the documentation and/or other materials provided with the
  *     distribution.
- *   * Neither the name of Nemo Mobile nor the names of its contributors
+ *   * Neither the name of Jolla Ltd nor the names of its contributors
  *     may be used to endorse or promote products derived from this
  *     software without specific prior written permission.
  *
@@ -37,7 +37,6 @@
 #include "BooksBookModel.h"
 #include "BooksCoverModel.h"
 #include "BooksConfig.h"
-#include "BooksSettings.h"
 #include "BooksImportModel.h"
 #include "BooksPathModel.h"
 #include "BooksStorageModel.h"
@@ -79,7 +78,6 @@ Q_DECL_EXPORT int main(int argc, char **argv)
     BOOKS_QML_REGISTER(BooksPageWidget, "PageWidget");
     BOOKS_QML_REGISTER(BooksListWatcher, "ListWatcher");
     BOOKS_QML_REGISTER(BooksCoverWidget, "BookCover");
-    BOOKS_QML_REGISTER(BooksSettings, "BooksSettings");
     BOOKS_QML_REGISTER(BooksHints, "BooksHints");
     HarbourLib::registerTypes(BOOKS_QML_PLUGIN,
         BOOKS_QML_PLUGIN_V1, BOOKS_QML_PLUGIN_V2);
