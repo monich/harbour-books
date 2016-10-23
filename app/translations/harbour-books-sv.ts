@@ -134,6 +134,21 @@
         <extracomment>Combo box value for landscape orientation</extracomment>
         <translation>Liggande</translation>
     </message>
+    <message id="harbour-books-settings-page-removable-section_header">
+        <source>Memory card</source>
+        <extracomment>Section header for memory card settings</extracomment>
+        <translation>Minneskort</translation>
+    </message>
+    <message id="harbour-books-settings-page-removable_root-label">
+        <source>Books folder</source>
+        <extracomment>Settings field label</extracomment>
+        <translation type="unfinished">Böcker mappnamn</translation>
+    </message>
+    <message id="harbour-books-settings-page-removable_root-description">
+        <source>Leave the folder name empty to scan the entire memory card for books.</source>
+        <extracomment>Settings field description</extracomment>
+        <translation type="unfinished">Lämna fältet tomt för att söka igenom hela minneskortet för böcker.</translation>
+    </message>
     <message id="harbour-books-book-browser_link-title">
         <source>Link</source>
         <oldsource>External link</oldsource>

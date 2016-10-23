@@ -134,6 +134,21 @@
         <extracomment>Combo box value for landscape orientation</extracomment>
         <translation>Landscape</translation>
     </message>
+    <message id="harbour-books-settings-page-removable-section_header">
+        <source>Memory card</source>
+        <extracomment>Section header for memory card settings</extracomment>
+        <translation>Memory card</translation>
+    </message>
+    <message id="harbour-books-settings-page-removable_root-label">
+        <source>Books folder</source>
+        <extracomment>Settings field label</extracomment>
+        <translation>Books folder</translation>
+    </message>
+    <message id="harbour-books-settings-page-removable_root-description">
+        <source>Leave the folder name empty to scan the entire memory card for books.</source>
+        <extracomment>Settings field description</extracomment>
+        <translation>Leave the folder name empty to scan the entire memory card for books.</translation>
+    </message>
     <message id="harbour-books-book-browser_link-title">
         <source>Link</source>
         <extracomment>External link menu title</extracomment>

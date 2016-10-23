@@ -136,6 +136,21 @@
         <extracomment>Combo box value for landscape orientation</extracomment>
         <translation>Альбомная</translation>
     </message>
+    <message id="harbour-books-settings-page-removable-section_header">
+        <source>Memory card</source>
+        <extracomment>Section header for memory card settings</extracomment>
+        <translation>Карта памяти</translation>
+    </message>
+    <message id="harbour-books-settings-page-removable_root-label">
+        <source>Books folder</source>
+        <extracomment>Settings field label</extracomment>
+        <translation>Книжная папка</translation>
+    </message>
+    <message id="harbour-books-settings-page-removable_root-description">
+        <source>Leave the folder name empty to scan the entire memory card for books.</source>
+        <extracomment>Settings field description</extracomment>
+        <translation>Если оставить имя папки пустым, то можно будет найти книгу в любой папке на карте памяти. Особого смысла в этой настройке нет, просто так исторически сложилось, что по умолчанию книги искались только в папке Books, а теперь можно вообще где угодно.</translation>
+    </message>
     <message id="harbour-books-book-browser_link-title">
         <source>Link</source>
         <extracomment>External link menu title</extracomment>

@@ -160,6 +160,61 @@ Page {
                     }
                 }
             }
+
+            SectionHeader {
+                //: Section header for memory card settings
+                //% "Memory card"
+                text: qsTrId("harbour-books-settings-page-removable-section_header")
+            }
+
+            TextField {
+                id: removableRootField
+                width: parent.width
+                labelVisible: false
+
+                Component.onCompleted: text = removableRoot.value
+                onActiveFocusChanged: removableRoot.value = text
+                EnterKey.onClicked: page.focus = true
+                EnterKey.iconSource: "image://theme/icon-m-enter-close"
+
+                ConfigurationValue {
+                    id: removableRoot
+                    key: rootPath + "removableRoot"
+                    defaultValue: "Books"
+                    onValueChanged: removableRootField.text = value
+                }
+            }
+
+            Label {
+                id: removableRootLabel
+                //: Settings field label
+                //% "Books folder"
+                text: qsTrId("harbour-books-settings-page-removable_root-label")
+                x: removableRootField.textLeftMargin
+                width: removableRootField.width - removableRootField.textLeftMargin - removableRootField.textRightMargin
+                height: text.length ? (implicitHeight + Theme.paddingMedium) : 0
+                anchors {
+                    topMargin: -Theme.paddingSmall
+                    bottomMargin: Theme.paddingMedium
+                }
+                color: removableRootField.activeFocus ? Theme.highlightColor : Theme.primaryColor
+                opacity: removableRootField.activeFocus ? 1.0 : 0.6
+                elide: Text.ElideRight
+                font.pixelSize: Theme.fontSizeSmall
+            }
+
+            Label {
+                //: Settings field description
+                //% "Leave the folder name empty to scan the entire memory card for books."
+                text: qsTrId("harbour-books-settings-page-removable_root-description")
+                height: text.length ? (implicitHeight + Theme.paddingMedium) : 0
+                width: removableRootLabel.width
+                x: removableRootLabel.x
+                font.pixelSize: Theme.fontSizeExtraSmall
+                color: Theme.secondaryColor
+                wrapMode: Text.Wrap
+            }
+
         }
     }
 }
