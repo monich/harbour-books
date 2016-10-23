@@ -29,7 +29,7 @@
     </message>
     <message id="harbour-books-book-view-cancel_loading">
         <source>Cancel</source>
-        <translation>Отставить</translation>
+        <translation>Отменить</translation>
     </message>
     <message id="harbour-books-shelf-view-about_to_delete_all">
         <source>Deleting all books</source>
