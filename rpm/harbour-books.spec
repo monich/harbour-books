@@ -1,6 +1,6 @@
 Name:           harbour-books
 Summary:        E-book reader
-Version:        1.0.15
+Version:        1.0.16
 Release:        1
 License:        BSD
 Group:          Applications/File
@@ -57,6 +57,11 @@ desktop-file-install --delete-original \
 make -C test test
 
 %changelog
+* Sun Oct 23 2016 Slava Monich <slava.monich@jolla.com> 1.0.16
+- Made books folder on the memory card configurable
+- Added support for internal hyperlinks
+- Improved link detection (on long press)
+
 * Sun Oct 09 2016 Slava Monich <slava.monich@jolla.com> 1.0.15
 - Fixed the problem with wrong images popping up in zoom view
 
