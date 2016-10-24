@@ -1,6 +1,6 @@
 Name:           harbour-books
 Summary:        E-book reader
-Version:        1.0.16
+Version:        1.0.17
 Release:        1
 License:        BSD
 Group:          Applications/File
@@ -57,6 +57,9 @@ desktop-file-install --delete-original \
 make -C test test
 
 %changelog
+* Mon Oct 24 2016 Slava Monich <slava.monich@jolla.com> 1.0.17
+- Updated Swedish translations
+
 * Sun Oct 23 2016 Slava Monich <slava.monich@jolla.com> 1.0.16
 - Made books folder on the memory card configurable
 - Added support for internal hyperlinks
