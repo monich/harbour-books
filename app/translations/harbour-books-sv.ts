@@ -17,7 +17,7 @@
     </message>
     <message id="harbour-books-book-view-formatting">
         <source>Formatting...</source>
-        <translation type="unfinished">Formatering...</translation>
+        <translation>Formaterar...</translation>
     </message>
     <message id="harbour-books-book-view-applying_larger_fonts">
         <source>Applying larger fonts...</source>
@@ -42,7 +42,7 @@
     <message id="harbour-books-shelf-title-placeholder">
         <source>Enter folder name</source>
         <extracomment>Placeholder for the bookshelf title</extracomment>
-        <translation type="unfinished">Ange mappnamn</translation>
+        <translation>Ange mappnamn</translation>
     </message>
     <message id="harbour-books-storage-removable">
         <source>Memory card</source>
@@ -65,7 +65,7 @@
     <message id="harbour-books-storage-menu-settings">
         <source>Settings</source>
         <extracomment>Pulley menu item</extracomment>
-        <translation type="unfinished">Inställningar</translation>
+        <translation>Inställningar</translation>
     </message>
     <message id="harbour-books-storage-menu-scan_downloads">
         <source>Scan downloads</source>
@@ -107,12 +107,12 @@
     <message id="harbour-books-settings-page-font_size_label">
         <source>Font size</source>
         <extracomment>Slider label</extracomment>
-        <translation type="unfinished">Textstorlek</translation>
+        <translation>Textstorlek</translation>
     </message>
     <message id="harbour-books-settings-page-font_size_label-default">
         <source>Default</source>
         <extracomment>Slider value label for the standard font size</extracomment>
-        <translation type="unfinished">Standard</translation>
+        <translation>Standard</translation>
     </message>
     <message id="harbour-books-settings-page-orientation_label">
         <source>Orientation</source>
@@ -142,23 +142,23 @@
     <message id="harbour-books-settings-page-removable_root-label">
         <source>Books folder</source>
         <extracomment>Settings field label</extracomment>
-        <translation type="unfinished">Böcker mappnamn</translation>
+        <translation>Bokmapp</translation>
     </message>
     <message id="harbour-books-settings-page-removable_root-description">
         <source>Leave the folder name empty to scan the entire memory card for books.</source>
         <extracomment>Settings field description</extracomment>
-        <translation type="unfinished">Lämna fältet tomt för att söka igenom hela minneskortet för böcker.</translation>
+        <translation>Lämna mappnamnet tomt för att söka igenom hela minneskortet efter böcker.</translation>
     </message>
     <message id="harbour-books-book-browser_link-title">
         <source>Link</source>
         <oldsource>External link</oldsource>
         <extracomment>External link menu title</extracomment>
-        <translation type="unfinished">Länk</translation>
+        <translation>Extern länk</translation>
     </message>
     <message id="harbour-books-book-browser_link-open_in_browser">
         <source>Open in browser</source>
         <extracomment>Open link in browser</extracomment>
-        <translation type="unfinished">Öppna i webbläsaren</translation>
+        <translation>Öppna i webbläsaren</translation>
     </message>
     <message id="harbour-books-book-browser_link-copy_to_clipboard">
         <source>Copy to clipboard</source>
