@@ -247,6 +247,7 @@ void BooksBookModel::setBook(BooksBook* aBook)
             (iBook = aBook)->retain();
             iBookRef = newBook;
             iTitle = iBook->title();
+            iTextStyle = iSettings->textStyle(fontSizeAdjust());
             connect(iBook, SIGNAL(fontSizeAdjustChanged()), SLOT(onTextStyleChanged()));
             HDEBUG(iTitle);
         } else {
