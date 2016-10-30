@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2004-2010 Geometer Plus <contact@geometerplus.com>
+ * Copyright (C) 2016 Slava Monich <slava.monich@jolla.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -81,14 +82,14 @@ ZLTextElementPool::~ZLTextElementPool() {
 
 ZLTextParagraphCursorPtr ZLTextParagraphCursorCache::cursor(const ZLTextModel &model, size_t index) {
 	const ZLTextParagraph *paragraph = model[index];
-	ZLTextParagraphCursorPtr result = get(paragraph);
+	ZLTextParagraphCursorPtr result = ourCache[paragraph];
 	if (result.isNull()) {
 		if (model.kind() == ZLTextModel::TREE_MODEL) {
 			result = new ZLTextTreeParagraphCursor((const ZLTextTreeModel&)model, index, this);
 		} else {
 			result = new ZLTextPlainParagraphCursor(model, index, this);
 		}
-		put(paragraph, result);
+		ourCache[paragraph] = result;
 	}
 	return result;
 }
@@ -256,17 +257,7 @@ void ZLTextParagraphCursor::clear() {
 	myElements.clear();
 }
 
-void ZLTextParagraphCursorCache::put(const ZLTextParagraph *paragraph, ZLTextParagraphCursorPtr cursor) {
-	ourCache[paragraph] = cursor;
-	ourLastAdded = cursor;
-}
-
-ZLTextParagraphCursorPtr ZLTextParagraphCursorCache::get(const ZLTextParagraph *paragraph) {
-	return ourCache[paragraph];
-}
-
 void ZLTextParagraphCursorCache::clear() {
-	ourLastAdded.reset();
 	ourCache.clear();
 }
 

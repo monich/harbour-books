@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2004-2010 Geometer Plus <contact@geometerplus.com>
+ * Copyright (C) 2016 Slava Monich <slava.monich@jolla.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -136,14 +137,11 @@ public:
 	void clear();
 	void cleanup();
 
-	void put(const ZLTextParagraph *paragraph, ZLTextParagraphCursorPtr cursor);
-	ZLTextParagraphCursorPtr get(const ZLTextParagraph *paragraph);
 	ZLTextParagraphCursorPtr cursor(const ZLTextModel &model, size_t index);
 	ZLTextElementPool *elementPool() { return &ourElementPool; }
 
 private:
 	std::map<const ZLTextParagraph*, weak_ptr<ZLTextParagraphCursor> > ourCache;
-	ZLTextParagraphCursorPtr ourLastAdded;
 	ZLTextElementPool ourElementPool;
 };
 
