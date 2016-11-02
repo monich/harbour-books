@@ -61,6 +61,7 @@ Page {
             anchors.fill: parent
             opacity: book ? 1 : 0
             visible: opacity > 0
+            orientation: root.orientation
             book: Settings.currentBook ? Settings.currentBook : null
             onCloseBook: Settings.currentBook = null
             Behavior on opacity { FadeAnimation {} }

@@ -34,8 +34,6 @@
 #ifndef BOOKS_IMAGE_PROVIDER_H
 #define BOOKS_IMAGE_PROVIDER_H
 
-#include "ZLImageManager.h"
-
 #include <QImage>
 #include <QMutex>
 #include <QQuickImageProvider>
@@ -51,7 +49,7 @@ public:
     BooksImageProvider(QObject* aParent = NULL);
     virtual ~BooksImageProvider();
 
-    void addImage(QObject* aOwner, QString aId, shared_ptr<ZLImageData> aData);
+    void addImage(QObject* aOwner, QString aId, QImage aImage);
     virtual QImage requestImage(const QString& aId, QSize* aSize,
         const QSize& aRequestedSize);
 
@@ -60,7 +58,7 @@ public Q_SLOTS:
 
 private:
     QMutex iMutex;
-    QHash<QString, shared_ptr<ZLImageData> > iImageMap;
+    QHash<QString, QImage> iImageMap;
     QHash<QObject*, QStringList> iOwnerMap;
     static BooksImageProvider* gInstance;
 };

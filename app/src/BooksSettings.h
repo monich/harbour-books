@@ -55,6 +55,7 @@ class BooksSettings : public QObject
     Q_PROPERTY(QString removableRoot READ removableRoot NOTIFY removableRootChanged)
     Q_PROPERTY(QColor primaryPageToolColor READ primaryPageToolColor CONSTANT)
     Q_PROPERTY(QColor highlightPageToolColor READ highlightPageToolColor NOTIFY invertColorsChanged)
+    Q_PROPERTY(QColor invertedPageBackgroundColor READ highlightPageToolColor NOTIFY invertColorsChanged)
     Q_PROPERTY(QColor pageBackgroundColor READ pageBackgroundColor NOTIFY pageBackgroundColorChanged)
     Q_PROPERTY(int orientation READ orientation NOTIFY orientationChanged)
     class TextStyle;

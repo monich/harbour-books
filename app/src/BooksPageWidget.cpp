@@ -37,11 +37,14 @@
 #include "BooksDefs.h"
 
 #include "bookmodel/FBTextKind.h"
+#include "image/ZLQtImageManager.h"
 #include "ZLStringUtil.h"
 
 #include "HarbourDebug.h"
 
 #include <QPainter>
+
+static const QString IMAGE_URL("image://%1/%2");
 
 // ==========================================================================
 // BooksPageWidget::Data
@@ -141,17 +144,106 @@ public:
     shared_ptr<BooksPageWidget::Data> iData;
     int iWidth;
     int iHeight;
-    shared_ptr<QImage> iImage;
+    QImage iImage;
 };
 
 void BooksPageWidget::RenderTask::performTask()
 {
     if (!isCanceled() && !iData.isNull() && !iData->iView.isNull() &&
         iWidth > 0 && iHeight > 0) {
-        iImage = new QImage(iWidth, iHeight, QImage::Format_RGB32);
+        iImage = QImage(iWidth, iHeight, QImage::Format_RGB32);
         if (!isCanceled()) {
-            QPainter painter(&*iImage);
+            QPainter painter(&iImage);
             iData->paint(&painter);
+        }
+    }
+}
+
+// ==========================================================================
+// BooksPageWidget::FootnoteTask
+// ==========================================================================
+
+class BooksPageWidget::FootnoteTask : public BooksTask, ZLTextArea::Properties {
+public:
+    FootnoteTask(int aX, int aY, int aMaxWidth, int aMaxHeight,
+        QString aPath, QString aLinkText, QString aRef,
+        shared_ptr<ZLTextModel> aTextModel, shared_ptr<ZLTextStyle> aTextStyle,
+        bool aInvertColors) :
+        iTextModel(aTextModel), iTextStyle(aTextStyle),
+        iInvertColors(aInvertColors), iX(aX), iY(aY),
+        iMaxWidth(aMaxWidth), iMaxHeight(aMaxHeight),
+        iRef(aRef), iLinkText(aLinkText), iPath(aPath) {}
+    ~FootnoteTask();
+
+    void performTask();
+
+    // ZLTextArea::Properties
+    shared_ptr<ZLTextStyle> baseStyle() const;
+    ZLColor color(const std::string& aStyle) const;
+    bool isSelectionEnabled() const;
+
+public:
+    shared_ptr<ZLTextModel> iTextModel;
+    shared_ptr<ZLTextStyle> iTextStyle;
+    bool iInvertColors;
+    int iX;
+    int iY;
+    int iMaxWidth;
+    int iMaxHeight;
+    QString iRef;
+    QString iLinkText;
+    QString iPath;
+    QImage iImage;
+};
+
+BooksPageWidget::FootnoteTask::~FootnoteTask()
+{
+}
+
+shared_ptr<ZLTextStyle> BooksPageWidget::FootnoteTask::baseStyle() const
+{
+    return iTextStyle;
+}
+
+ZLColor BooksPageWidget::FootnoteTask::color(const std::string& aStyle) const
+{
+    return BooksPaintContext::realColor(aStyle, iInvertColors);
+}
+
+bool BooksPageWidget::FootnoteTask::isSelectionEnabled() const
+{
+    return false;
+}
+
+void BooksPageWidget::FootnoteTask::performTask()
+{
+    if (!isCanceled()) {
+        // Determine the size of the footnote canvas
+        ZLTextParagraphCursorCache cache;
+        BooksPaintContext sizeContext(iMaxWidth, iMaxHeight);
+        ZLTextAreaController sizeController(sizeContext, *this, &cache);
+        ZLSize size;
+        sizeController.setModel(iTextModel);
+        sizeController.preparePaintInfo();
+        sizeController.area().paint(&size);
+        if (!size.isEmpty() && !isCanceled()) {
+            // Now actually paint it
+            size.myWidth = (size.myWidth + 3) & -4;
+            HDEBUG("footnote size:" << size.myWidth << "x" << size.myHeight);
+            cache.clear();
+            BooksPaintContext paintContext(size.myWidth, size.myHeight);
+            paintContext.setInvertColors(iInvertColors);
+            ZLTextAreaController paintController(paintContext, *this, &cache);
+            iImage = QImage(size.myWidth, size.myHeight, QImage::Format_RGB32);
+            QPainter painter(&iImage);
+            paintContext.beginPaint(&painter);
+            paintContext.clear(iInvertColors ?
+                BooksTextView::INVERTED_BACKGROUND :
+                BooksTextView::DEFAULT_BACKGROUND);
+            paintController.setModel(iTextModel);
+            paintController.preparePaintInfo();
+            paintController.area().paint();
+            paintContext.endPaint();
         }
     }
 }
@@ -166,6 +258,7 @@ public:
         iData(aData), iX(aX), iY(aY), iKind(REGULAR) {}
 
     void performTask();
+    QString getLinkText(ZLTextWordCursor& aCursor);
 
 public:
     shared_ptr<BooksPageWidget::Data> iData;
@@ -176,8 +269,26 @@ public:
     std::string iLink;
     std::string iLinkType;
     std::string iImageId;
-    shared_ptr<ZLImageData> iImageData;
+    QString iLinkText;
+    QImage iImage;
 };
+
+QString BooksPageWidget::PressTask::getLinkText(ZLTextWordCursor& aCursor)
+{
+    QString text;
+    while (!aCursor.isEndOfParagraph() && !isCanceled() &&
+           aCursor.element().kind() != ZLTextElement::WORD_ELEMENT) {
+        aCursor.nextWord();
+    }
+    while (!aCursor.isEndOfParagraph() && !isCanceled() &&
+           aCursor.element().kind() == ZLTextElement::WORD_ELEMENT) {
+        const ZLTextWord& word = (ZLTextWord&)aCursor.element();
+        if (!text.isEmpty()) text.append(' ');
+        text.append(QString::fromUtf8(word.Data, word.Size));
+        aCursor.nextWord();
+    }
+    return text;
+}
 
 void BooksPageWidget::PressTask::performTask()
 {
@@ -219,10 +330,12 @@ void BooksPageWidget::PressTask::performTask()
                             if (entry.isStart() && !stopped[entry.kind()]) {
                                 const ZLTextHyperlinkControlEntry& link =
                                     (ZLTextHyperlinkControlEntry&) entry;
-                                iKind = link.kind();
+                                iKind = kind;
                                 iLink = link.label();
                                 iLinkType = link.hyperlinkType();
-                                HDEBUG("link" << kind << iLink.c_str());
+                                iLinkText = getLinkText(cursor);
+                                HDEBUG("link" << kind << iLinkText <<
+                                    iLink.c_str());
                             }
                             return;
                         }
@@ -237,11 +350,17 @@ void BooksPageWidget::PressTask::performTask()
                 if (element.kind() == ZLTextElement::IMAGE_ELEMENT) {
                     const ZLTextImageElement& imageElement =
                         (const ZLTextImageElement&)element;
-                    iKind = IMAGE;
-                    iImageId = imageElement.id();
-                    iImageData = imageElement.image();
-                    HDEBUG("image element" << iImageId.c_str() <<
-                        iImageData->width() << iImageData->height());
+                    shared_ptr<ZLImageData> data = imageElement.image();
+                    if (!data.isNull()) {
+                        const QImage* image = ((ZLQtImageData&)(*data)).image();
+                        if (image && !image->isNull()) {
+                            iKind = IMAGE;
+                            iImage = *image;
+                            iImageId = imageElement.id();
+                            HDEBUG("image element" << iImageId.c_str() <<
+                                iImage.width() << iImage.height());
+                        }
+                    }
                 }
             }
         }
@@ -263,6 +382,7 @@ BooksPageWidget::BooksPageWidget(QQuickItem* aParent) :
     iRenderTask(NULL),
     iPressTask(NULL),
     iLongPressTask(NULL),
+    iFootnoteTask(NULL),
     iEmpty(false),
     iPage(-1)
 {
@@ -287,6 +407,7 @@ BooksPageWidget::~BooksPageWidget()
     if (iRenderTask) iRenderTask->release(this);
     if (iPressTask) iPressTask->release(this);
     if (iLongPressTask) iLongPressTask->release(this);
+    if (iFootnoteTask) iFootnoteTask->release(this);
 }
 
 void BooksPageWidget::setModel(BooksBookModel* aModel)
@@ -443,7 +564,7 @@ void BooksPageWidget::paint(QPainter* aPainter)
 {
     if (!iImage.isNull()) {
         HDEBUG("page" << iPage);
-        aPainter->drawImage(0, 0, *iImage);
+        aPainter->drawImage(0, 0, iImage);
         iEmpty = false;
     } else if (iPage >= 0 && iPageMark.valid() && !iData.isNull()) {
         if (!iRenderTask) {
@@ -470,6 +591,18 @@ void BooksPageWidget::resetView()
     if (iResetTask) {
         iResetTask->release(this);
         iResetTask = NULL;
+    }
+    if (iPressTask) {
+        iPressTask->release(this);
+        iPressTask = NULL;
+    }
+    if (iLongPressTask) {
+        iLongPressTask->release(this);
+        iLongPressTask = NULL;
+    }
+    if (iFootnoteTask) {
+        iFootnoteTask->release(this);
+        iFootnoteTask = NULL;
     }
     iData.reset();
     if (iPage >= 0 && iPageMark.valid() &&
@@ -547,6 +680,31 @@ void BooksPageWidget::onPressTaskDone()
     task->release(this);
 }
 
+void BooksPageWidget::onFootnoteTaskDone()
+{
+    HASSERT(sender() == iFootnoteTask);
+
+    FootnoteTask* task = iFootnoteTask;
+    iFootnoteTask = NULL;
+    if (!task->iImage.isNull()) {
+        // Footnotes with normal and inverted background need to
+        // have different ids so that the cached image with the wrong
+        // background doesn't show up after we invert the colors
+        static const QString NORMAL("n");
+        static const QString INVERTED("i");
+        static const QString FOOTNOTE_ID("footnote/%1#%2?p=%3&t=%4&s=%5x%6");
+        QString id = FOOTNOTE_ID.arg(task->iPath, task->iRef).
+            arg(iPage).arg(task->iInvertColors ? INVERTED : NORMAL).
+            arg(task->iImage.width()).arg(task->iImage.height());
+        QString url = IMAGE_URL.arg(BooksImageProvider::PROVIDER_ID, id);
+        HDEBUG(url);
+        BooksImageProvider::instance()->addImage(iModel, id, task->iImage);
+        Q_EMIT showFootnote(task->iX, task->iY, task->iLinkText, url);
+    }
+
+    task->release(this);
+}
+
 void BooksPageWidget::onLongPressTaskDone()
 {
     HASSERT(sender() == iLongPressTask);
@@ -571,28 +729,46 @@ void BooksPageWidget::onLongPressTaskDone()
                 Q_EMIT jumpToPage(page);
             }
         }
+    } else if (task->iKind == FOOTNOTE) {
+        if (iModel && task->iLink.length() > 0) {
+            std::string ref = task->iLink.substr(1);
+            shared_ptr<ZLTextModel> note = iModel->footnoteModel(ref);
+            BooksBook* book = iModel->book();
+            if (!note.isNull() && book) {
+                // Render the footnote
+                HDEBUG("footnote" << ref.c_str());
+                if (iFootnoteTask) iFootnoteTask->release(this);
+                iFootnoteTask = new FootnoteTask(task->iX, task->iY,
+                    width()*3/4, height()*10, book->path(), task->iLinkText,
+                    QString::fromStdString(ref), note, iTextStyle,
+                    iSettings->invertColors());
+                iTaskQueue->submit(iFootnoteTask, this,
+                    SLOT(onFootnoteTaskDone()));
+            }
+        }
     } else if (task->iKind == IMAGE) {
         // Make sure that the book path is mixed into the image id to handle
         // the case of different books having images with identical ids
-        QString id = QString::fromStdString(task->iImageId);
+        QString imageId = QString::fromStdString(task->iImageId);
         QString path;
         if (iModel) {
             BooksBook* book = iModel->book();
             if (book) {
                 path = book->path();
                 if (!path.isEmpty()) {
-                    if (!id.contains(path)) {
-                        QString old = id;
-                        id = path + ":" + old;
-                        HDEBUG(old << "-> " << id);
+                    if (!imageId.contains(path)) {
+                        QString old = imageId;
+                        imageId = path + ":" + old;
+                        HDEBUG(old << "-> " << imageId);
                     }
                 }
             }
         }
-        static const QString IMAGE_URL("image://%1/%2");
-        QString url = IMAGE_URL.arg(BooksImageProvider::PROVIDER_ID, id);
-        BooksImageProvider::instance()->addImage(iModel, id, task->iImageData);
-        Q_EMIT imagePressed(url, task->iRect);
+        static const QString IMAGE_ID("image/%1");
+        QString id = IMAGE_ID.arg(imageId);
+        BooksImageProvider::instance()->addImage(iModel, id, task->iImage);
+        Q_EMIT imagePressed(IMAGE_URL.arg(BooksImageProvider::PROVIDER_ID, id),
+            task->iRect);
     }
 
     task->release(this);
@@ -601,7 +777,7 @@ void BooksPageWidget::onLongPressTaskDone()
 void BooksPageWidget::updateSize()
 {
     HDEBUG("page" << iPage << QSize(width(), height()));
-    iImage.reset();
+    iImage = QImage();
     resetView();
 }
 

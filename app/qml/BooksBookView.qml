@@ -42,6 +42,7 @@ SilicaFlickable {
     signal closeBook()
     signal pageClicked(var page)
 
+    property int orientation: Orientation.Portrait
     property int _currentPage: bookListWatcher.currentIndex
     property bool _loading: minLoadingDelay.running || bookModel.loading
     property var _currentState: _visibilityStates[Settings.pageDetails % _visibilityStates.length]
@@ -63,22 +64,33 @@ SilicaFlickable {
         qsTrId("harbour-books-book-view-applying_smaller_fonts")
     ]
 
-    interactive: (!linkMenu || !linkMenu.visible) && (!imageView || !imageView.visible)
+    interactive: (!linkMenu || !linkMenu.visible) &&
+        (!imageView || !imageView.visible) &&
+        (!footnoteView || !footnoteView.visible)
 
     property var linkMenu
     property var imageView
+    property var footnoteView
 
-    Component {
-        id: linkMenuComponent
-        BooksLinkMenu {
+    onOrientationChanged: {
+        if (footnoteView) {
+            footnoteView.cancel()
         }
     }
 
     Component {
+        id: linkMenuComponent
+        BooksLinkMenu { }
+    }
+
+    Component {
         id: imageViewComponent
-        BooksImageView {
-            imageBackground: Settings.pageBackgroundColor
-        }
+        BooksImageView { }
+    }
+
+    Component {
+        id: footnoteViewComponent
+        BooksFootnoteView { }
     }
 
     PullDownMenu {
@@ -177,8 +189,15 @@ SilicaFlickable {
                     if (!linkMenu) {
                         linkMenu = linkMenuComponent.createObject(root)
                     }
-                    linkMenu.url = url
-                    linkMenu.show()
+                    linkMenu.show(url)
+                }
+            }
+            onFootnotePressed: {
+                if (_currentPage == index) {
+                    if (!footnoteView) {
+                        footnoteView = footnoteViewComponent.createObject(root)
+                    }
+                    footnoteView.show(touchX,touchY,text,url)
                 }
             }
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Jolla Ltd.
+ * Copyright (C) 2015-2016 Jolla Ltd.
  * Contact: Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
@@ -36,6 +36,8 @@
 #include "HarbourDebug.h"
 
 #include "ZLImage.h"
+#include "ZLTextStyle.h"
+#include "ZLStringUtil.h"
 #include "image/ZLQtImageManager.h"
 
 #include <QPainter>
@@ -255,9 +257,45 @@ int BooksPaintContext::height() const
     return iHeight;
 }
 
-ZLColor BooksPaintContext::realColor(quint8 aRed, quint8 aGreen, quint8 aBlue) const
+ZLColor BooksPaintContext::realColor(quint8 aRed, quint8 aGreen, quint8 aBlue, bool aInvert)
 {
-    return iInvertColors ?
+    return aInvert ?
         ZLColor(255-aRed, 255-aGreen, 255-aBlue) :
         ZLColor(aRed, aGreen, aBlue);
+}
+
+ZLColor BooksPaintContext::realColor(const std::string& aStyle, bool aInvert)
+{
+    static const std::string INTERNAL_HYPERLINK("internal");
+    static const std::string EXTERNAL_HYPERLINK("external");
+    static const std::string BOOK_HYPERLINK("book");
+
+    if (ZLStringUtil::startsWith(aStyle, '#')) {
+        if (aStyle.length() == 7) {
+            int i, value = 0;
+            for (i=1; i<7; i++) {
+                int nibble = ZLStringUtil::fromHex(aStyle[i]);
+                if (nibble >= 0) {
+                    value <<= 4;
+                    value |= nibble;
+                } else {
+                    break;
+                }
+            }
+            if (i == 7) {
+                return realColor(ZLColor(value), aInvert);
+            }
+        }
+    } else if (aStyle == INTERNAL_HYPERLINK) {
+        return realColor(33, 96, 180, aInvert);
+    } else if (aStyle == EXTERNAL_HYPERLINK) {
+        return realColor(33, 96, 180, aInvert);
+    } else if (aStyle == BOOK_HYPERLINK) {
+        return realColor(23, 68, 128, aInvert);
+    } else if (aStyle == ZLTextStyle::SELECTION_BACKGROUND) {
+        return realColor(82, 131, 194, aInvert);
+    } else if (aStyle == ZLTextStyle::HIGHLIGHTED_TEXT) {
+        return realColor(60, 139, 255, aInvert);
+    }
+    return realColor(0, 0, 0, aInvert);
 }

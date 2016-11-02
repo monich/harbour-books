@@ -32,7 +32,6 @@
  */
 
 #include "BooksImageProvider.h"
-#include "image/ZLQtImageManager.h"
 #include "HarbourDebug.h"
 
 const QString BooksImageProvider::PROVIDER_ID("bookImage");
@@ -66,21 +65,18 @@ void
 BooksImageProvider::addImage(
     QObject* aOwner,
     QString aId,
-    shared_ptr<ZLImageData> aData)
+    QImage aImage)
 {
-    if (aOwner && !aId.isEmpty() && !aData.isNull()) {
+    if (aOwner && !aId.isEmpty() && !aImage.isNull()) {
         QMutexLocker locker(&iMutex);
-        if (!iImageMap.contains(aId)) {
-            if (!iOwnerMap.contains(aOwner)) {
-                connect(aOwner, SIGNAL(destroyed(QObject*)),
-                    SLOT(releaseImages(QObject*)));
-            } else {
-                QStringList ids = iOwnerMap.value(aOwner);
-                ids.append(aId);
-                iOwnerMap.insert(aOwner, ids);
-            }
+        QStringList ids = iOwnerMap.value(aOwner);
+        if (ids.isEmpty()) {
+            connect(aOwner, SIGNAL(destroyed(QObject*)),
+                SLOT(releaseImages(QObject*)));
         }
-        iImageMap.insert(aId, aData);
+        ids.append(aId);
+        iOwnerMap.insert(aOwner, ids);
+        iImageMap.insert(aId, aImage);
     }
 }
 
@@ -104,21 +100,16 @@ BooksImageProvider::requestImage(
     const QSize& aRequestedSize)
 {
     QMutexLocker locker(&iMutex);
-    shared_ptr<ZLImageData> ptr = iImageMap.value(aId);
-    if (!ptr.isNull()) {
-        HDEBUG(aId);
-        const ZLQtImageData& data = (const ZLQtImageData&)*ptr;
-        const QImage* image = data.image();
-        HASSERT(image);
-        if (image) {
-            if (aRequestedSize.isEmpty() || image->size() == aRequestedSize) {
-                *aSize = image->size();
-                return *image;
-            } else {
-                *aSize = aRequestedSize;
-                return image->scaled(aRequestedSize, Qt::IgnoreAspectRatio,
-                    Qt::SmoothTransformation);
-            }
+    QImage image = iImageMap.value(aId);
+    if (!image.isNull()) {
+        HDEBUG(aId << image.size());
+        if (aRequestedSize.isEmpty() || image.size() == aRequestedSize) {
+            *aSize = image.size();
+            return image;
+        } else {
+            *aSize = aRequestedSize;
+            return image.scaled(aRequestedSize, Qt::IgnoreAspectRatio,
+                Qt::SmoothTransformation);
         }
     } else {
         HWARN("No such image:" << aId);

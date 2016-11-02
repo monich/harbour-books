@@ -120,6 +120,7 @@ public:
     shared_ptr<BookModel> bookModel() const;
     shared_ptr<ZLTextModel> bookTextModel() const;
     shared_ptr<ZLTextModel> contentsModel() const;
+    shared_ptr<ZLTextModel> footnoteModel(const std::string& aId) const;
     shared_ptr<ZLTextStyle> textStyle() const { return iTextStyle; }
     int linkToPage(const std::string& aLink) const;
     int fontSizeAdjust() const;

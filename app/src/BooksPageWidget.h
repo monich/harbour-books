@@ -97,9 +97,10 @@ Q_SIGNALS:
     void topMarginChanged();
     void bottomMarginChanged();
     void browserLinkPressed(QString url);
-    void imagePressed(QString url, QRect rect);
-    void activeTouch(int x, int y);
+    void imagePressed(QString imageId, QRect rect);
+    void activeTouch(int touchX, int touchY);
     void jumpToPage(int page);
+    void showFootnote(int touchX, int touchY, QString text, QString imageId);
 
 private Q_SLOTS:
     void onWidthChanged();
@@ -115,6 +116,7 @@ private Q_SLOTS:
     void onRenderTaskDone();
     void onPressTaskDone();
     void onLongPressTaskDone();
+    void onFootnoteTaskDone();
 
 private:
     void paint(QPainter *painter);
@@ -128,6 +130,7 @@ private:
     class ResetTask;
     class RenderTask;
     class PressTask;
+    class FootnoteTask;
 
     QSharedPointer<BooksSettings> iSettings;
     shared_ptr<BooksTaskQueue> iTaskQueue;
@@ -137,11 +140,12 @@ private:
     BooksBookModel* iModel;
     BooksMargins iMargins;
     shared_ptr<Data> iData;
-    shared_ptr<QImage> iImage;
+    QImage iImage;
     ResetTask* iResetTask;
     RenderTask* iRenderTask;
     PressTask* iPressTask;
     PressTask* iLongPressTask;
+    FootnoteTask* iFootnoteTask;
     bool iEmpty;
     int iPage;
 };

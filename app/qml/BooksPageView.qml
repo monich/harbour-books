@@ -51,6 +51,7 @@ Item {
 
     signal pageClicked()
     signal imagePressed(var url, var rect)
+    signal footnotePressed(var touchX, var touchY, var text, var url)
     signal browserLinkPressed(var url)
     signal jumpToPage(var page)
 
@@ -59,9 +60,10 @@ Item {
         anchors.fill: parent
         model: bookModel
         onBrowserLinkPressed: view.browserLinkPressed(url)
-        onImagePressed: view.imagePressed(url, rect)
-        onActiveTouch: pressImage.animate(x, y)
+        onImagePressed: view.imagePressed(imageId, rect)
+        onActiveTouch: pressImage.animate(touchX, touchY)
         onJumpToPage: view.jumpToPage(page)
+        onShowFootnote: view.footnotePressed(touchX,touchY,text,imageId)
     }
 
     BooksTitleLabel {

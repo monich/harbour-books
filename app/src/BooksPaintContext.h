@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Jolla Ltd.
+ * Copyright (C) 2015-2016 Jolla Ltd.
  * Contact: Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
@@ -88,6 +88,10 @@ public:
     void drawFilledCircle(int x, int y, int r);
 
     void setInvertColors(bool aInvertColors);
+    static ZLColor realColor(const std::string& aStyle, bool aInvertColors);
+    static ZLColor realColor(quint8 aRed, quint8 aGreen, quint8 aBlue, bool aInvert);
+    static ZLColor realColor(const ZLColor aColor, bool aInvert);
+    ZLColor realColor(const std::string& aStyle) const;
     ZLColor realColor(quint8 aRed, quint8 aGreen, quint8 aBlue) const;
     ZLColor realColor(const ZLColor aColor) const;
 
@@ -116,6 +120,12 @@ inline QColor qtColor(const ZLColor& aColor)
     { return QColor(aColor.Red, aColor.Green, aColor.Blue); }
 inline ZLColor BooksPaintContext::realColor(const ZLColor aColor) const
     { return realColor(aColor.Red, aColor.Green, aColor.Blue); }
+inline ZLColor BooksPaintContext::realColor(quint8 aRed, quint8 aGreen, quint8 aBlue) const
+    { return realColor(aRed, aGreen, aBlue, iInvertColors); }
+inline ZLColor BooksPaintContext::realColor(const ZLColor aColor, bool aInvert)
+    { return realColor(aColor.Red, aColor.Green, aColor.Blue, aInvert); }
+inline ZLColor BooksPaintContext::realColor(const std::string& aStyle) const
+    { return realColor(aStyle, iInvertColors); }
 inline void BooksPaintContext::setInvertColors(bool aInvertColors)
     { iInvertColors = aInvertColors; }
 

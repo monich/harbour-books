@@ -348,6 +348,15 @@ shared_ptr<ZLTextModel> BooksBookModel::bookTextModel() const
     return model;
 }
 
+shared_ptr<ZLTextModel> BooksBookModel::footnoteModel(const std::string& aId) const
+{
+    shared_ptr<ZLTextModel> model;
+    if (iData && !iData->iBookModel.isNull()) {
+        model = iData->iBookModel->footnoteModel(aId);
+    }
+    return model;
+}
+
 shared_ptr<ZLTextModel> BooksBookModel::contentsModel() const
 {
     shared_ptr<ZLTextModel> model;

@@ -40,7 +40,6 @@ Rectangle {
     anchors.fill: parent
     color: Theme.rgba(Theme.highlightDimmerColor, 0.9)
 
-    property alias imageBackground: background.color
     readonly property real maxImageWidth: width - 2*Theme.horizontalPageMargin
     readonly property real maxImageHeight: height - 2*Theme.paddingLarge
     readonly property real finalImageWidth: Math.ceil(image.landscape ? maxImageWidth : (maxImageHeight * image.sourceSize.width / image.sourceSize.height))
@@ -53,6 +52,7 @@ Rectangle {
     Rectangle {
         id: background
         anchors.fill: image
+        color: Settings.pageBackgroundColor
     }
 
     Image {

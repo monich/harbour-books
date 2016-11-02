@@ -45,7 +45,6 @@ Rectangle {
     }
 
     readonly property bool landscape: width > height
-    property alias url: linkLabel.text
 
     Behavior on opacity { FadeAnimation {} }
 
@@ -131,7 +130,8 @@ Rectangle {
         }
     }
 
-    function show() {
+    function show(url) {
+        linkLabel.text = url
         opacity = 1.0
     }
 
