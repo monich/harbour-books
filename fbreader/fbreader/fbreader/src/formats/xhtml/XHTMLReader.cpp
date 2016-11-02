@@ -173,6 +173,14 @@ private:
 	FBTextKind myControl;
 };
 
+class XHTMLTagFootnoteAction : public XHTMLTagAction {
+
+public:
+	XHTMLTagFootnoteAction();
+	void doAtStart(XHTMLReader &reader, const char **xmlattributes);
+	void doAtEnd(XHTMLReader &reader);
+};
+
 class XHTMLTagPreAction : public XHTMLTagAction {
 
 public:
@@ -327,13 +335,21 @@ void XHTMLTagControlAction::doAtStart(XHTMLReader &reader, const char**) {
 void XHTMLTagHyperlinkAction::doAtStart(XHTMLReader &reader, const char **xmlattributes) {
 	const char *href = reader.attributeValue(xmlattributes, "href");
 	if (href != 0 && href[0] != '\0') {
-		const FBTextKind hyperlinkType = MiscUtil::referenceType(href);
-		std::string link = MiscUtil::decodeHtmlURL(href);
-		if (hyperlinkType == INTERNAL_HYPERLINK) {
-			link = (link[0] == '#') ?
-				reader.myReferenceName + link :
-				reader.myReferenceDirName + link;
-			link = ZLFileUtil::normalizeUnixPath(link);
+		FBTextKind hyperlinkType;
+		const char *type = reader.attributeValue(xmlattributes, "epub:type");
+		std::string link;
+		if (type && !strcmp(type, "noteref")) {
+			hyperlinkType = FOOTNOTE;
+			link = href;
+		} else {
+			hyperlinkType = MiscUtil::referenceType(href);
+			link = MiscUtil::decodeHtmlURL(href);
+			if (hyperlinkType == INTERNAL_HYPERLINK) {
+				link = (link[0] == '#') ?
+					reader.myReferenceName + link :
+					reader.myReferenceDirName + link;
+				link = ZLFileUtil::normalizeUnixPath(link);
+			}
 		}
 		myHyperlinkStack.push(hyperlinkType);
 		bookReader(reader).addHyperlinkControl(hyperlinkType, link);
@@ -368,6 +384,20 @@ void XHTMLTagParagraphWithControlAction::doAtStart(XHTMLReader &reader, const ch
 
 void XHTMLTagParagraphWithControlAction::doAtEnd(XHTMLReader &reader) {
 	endParagraph(reader);
+}
+
+XHTMLTagFootnoteAction::XHTMLTagFootnoteAction() {
+}
+
+void XHTMLTagFootnoteAction::doAtStart(XHTMLReader &reader, const char **xmlattributes) {
+	const char *id = reader.attributeValue(xmlattributes, "id");
+	if (id) {
+		bookReader(reader).setFootnoteTextModel(id);
+	}
+}
+
+void XHTMLTagFootnoteAction::doAtEnd(XHTMLReader &reader) {
+	bookReader(reader).setMainTextModel();
 }
 
 void XHTMLTagPreAction::doAtStart(XHTMLReader &reader, const char**) {
@@ -431,6 +461,7 @@ void XHTMLReader::fillTagTable() {
 		addAction("dfn",	new XHTMLTagParagraphWithControlAction(DEFINITION));
 		addAction("strike",	new XHTMLTagControlAction(STRIKETHROUGH));
 		addAction("blockquote",	new XHTMLTagParagraphWithControlAction(BLOCKQUOTE));
+		addAction("aside", new XHTMLTagFootnoteAction());
 
 		addAction("a",	new XHTMLTagHyperlinkAction());
 

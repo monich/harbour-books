@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2004-2010 Geometer Plus <contact@geometerplus.com>
+ * Copyright (C) 2016 Slava Monich <slava.monich@jolla.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,6 +50,11 @@ BookModel::Label BookModel::label(const std::string &id) const {
 
 	std::map<std::string,Label>::const_iterator it = myInternalHyperlinks.find(id);
 	return (it != myInternalHyperlinks.end()) ? it->second : Label(0, -1);
+}
+
+shared_ptr<ZLTextModel> BookModel::footnoteModel(const std::string &id) const {
+	std::map<std::string,shared_ptr<ZLTextModel> >::const_iterator it = myFootnotes.find(id);
+	return (it != myFootnotes.end()) ? it->second : shared_ptr<ZLTextModel>();
 }
 
 ContentsModel::ContentsModel(const std::string &language) : ZLTextTreeModel(language) {

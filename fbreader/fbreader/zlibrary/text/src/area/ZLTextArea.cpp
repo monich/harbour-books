@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2004-2010 Geometer Plus <contact@geometerplus.com>
+ * Copyright (C) 2016 Slava Monich <slava.monich@jolla.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,10 +29,14 @@
 #include "ZLTextLineInfo.h"
 #include "ZLTextSelectionModel.h"
 
-ZLTextArea::ZLTextArea(ZLPaintContext &context, const Properties &properties, ZLTextParagraphCursorCache *cache) : myContext(context), myProperties(properties), myWidth(0), myHeight(0), myParagraphCursorCache(cache) {
+ZLTextArea::ZLTextArea(ZLPaintContext &context, const Properties &properties, ZLTextParagraphCursorCache *cache) :
+	myContext(context), myProperties(properties), myHOffset(0), myVOffset(0), myWidth(context.width()), myHeight(context.height()), myParagraphCursorCache(cache) {
 }
 
 ZLTextArea::~ZLTextArea() {
+}
+
+ZLTextArea::Properties::~Properties() {
 }
 
 int ZLTextArea::realX(int x) const {
@@ -161,7 +166,7 @@ ZLTextSelectionModel &ZLTextArea::selectionModel() {
 	return *mySelectionModel;
 }
 
-void ZLTextArea::paint() {
+void ZLTextArea::paint(ZLSize *size) {
 	myTextElementMap.clear();
 	myTreeNodeMap.clear();
 
@@ -188,12 +193,19 @@ void ZLTextArea::paint() {
 	}
 
 	y = 0;
-	int index = 0;
+	int index = 0, w = 0, lastSpaceAfter = 0;
 	for (std::vector<ZLTextLineInfoPtr>::const_iterator it = myLineInfos.begin(); it != myLineInfos.end(); ++it) {
 		const ZLTextLineInfo &info = **it;
 		drawTextLine(style, info, y, labels[index], labels[index + 1]);
 		y += info.Height + info.Descent + info.VSpaceAfter;
+		lastSpaceAfter = info.VSpaceAfter;
+		w = std::max(w, info.StartIndent + info.Width);
 		++index;
+	}
+
+	if (size) {
+		size->myWidth = w;
+		size->myHeight = y - lastSpaceAfter;
 	}
 }
 

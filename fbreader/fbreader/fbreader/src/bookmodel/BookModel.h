@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2004-2010 Geometer Plus <contact@geometerplus.com>
+ * Copyright (C) 2016 Slava Monich <slava.monich@jolla.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -67,6 +68,7 @@ public:
 
 	shared_ptr<ZLTextModel> bookTextModel() const;
 	shared_ptr<ZLTextModel> contentsModel() const;
+	shared_ptr<ZLTextModel> footnoteModel(const std::string &id) const;
 
 	const ZLImageMap &imageMap() const;
 	Label label(const std::string &id) const;
