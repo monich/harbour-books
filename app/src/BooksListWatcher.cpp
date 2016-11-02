@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Jolla Ltd.
+ * Copyright (C) 2015-2016 Jolla Ltd.
  * Contact: Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
@@ -14,7 +14,7 @@
  *     notice, this list of conditions and the following disclaimer in
  *     the documentation and/or other materials provided with the
  *     distribution.
- *   * Neither the name of Nemo Mobile nor the names of its contributors
+ *   * Neither the name of Jolla Ltd nor the names of its contributors
  *     may be used to endorse or promote products derived from this
  *     software without specific prior written permission.
  *
@@ -79,12 +79,13 @@ void BooksListWatcher::setListView(QQuickItem* aView)
                 SLOT(onContentSizeChanged()));
             iContentX = contentX();
             iContentY = contentY();
-            updateCurrentIndex();
+            iSize = QSize(iListView->width(), iListView->height());
         } else {
             iContentX = iContentY = 0;
             iSize = QSize(0,0);
         }
         Q_EMIT listViewChanged();
+        updateCurrentIndex();
         if (oldSize != iSize) {
             Q_EMIT sizeChanged();
         }
@@ -119,17 +120,26 @@ qreal BooksListWatcher::contentY()
     return getRealProperty(LISTVIEW_CONTENT_Y);
 }
 
+int BooksListWatcher::getCurrentIndex()
+{
+    if (iListView) {
+        int index = -1;
+        if (QMetaObject::invokeMethod(iListView, LISTVIEW_INDEX_AT,
+            Q_RETURN_ARG(int,index), Q_ARG(qreal,iContentX+width()/2),
+            Q_ARG(qreal,iContentY+height()/2))) {
+            return index;
+        }
+    }
+    return -1;
+}
+
 void BooksListWatcher::updateCurrentIndex()
 {
-    int index = -1;
-    if (QMetaObject::invokeMethod(iListView, LISTVIEW_INDEX_AT,
-        Q_RETURN_ARG(int,index), Q_ARG(qreal,iContentX+width()/2),
-        Q_ARG(qreal,iContentY+height()/2))) {
-        if (iCurrentIndex != index) {
-            HDEBUG(index);
-            iCurrentIndex = index;
-            Q_EMIT currentIndexChanged();
-        }
+    const int index = getCurrentIndex();
+    if (iCurrentIndex != index) {
+        HDEBUG(index);
+        iCurrentIndex = index;
+        Q_EMIT currentIndexChanged();
     }
 }
 
