@@ -220,16 +220,11 @@ void BooksStorageModel::onStorageRemoved(BooksStorage aStorage)
 void BooksStorageModel::onStorageReplaced(BooksStorage aOld, BooksStorage aNew)
 {
     int index = find(aOld);
-    if (index >=0) {
+    if (index >= 0) {
         QModelIndex modelIndex(createIndex(index, 0));
-        QVector<int> roles(4);
-        roles.append(BooksStorageRoot);
-        roles.append(BooksStorageDevice);
-        roles.append(BooksStorageRemovable);
-        roles.append(BooksStorageDeleteAllRequest);
         HWARN(aOld.root() << "->" << aNew.root());
         iList.at(index)->iStorage = aNew;
-        Q_EMIT dataChanged(modelIndex, modelIndex, roles);
+        Q_EMIT dataChanged(modelIndex, modelIndex);
     } else {
         HWARN("device not found on the list");
     }

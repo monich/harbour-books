@@ -61,6 +61,6 @@ Item {
         secondaryColor: Settings.primaryPageToolColor
         highlightColor: Settings.highlightPageToolColor
         secondaryHighlightColor: Settings.highlightPageToolColor
-        onValueChanged: root.pageChanged(value)
+        onSliderValueChanged: root.pageChanged(value)
     }
 }
