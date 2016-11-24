@@ -59,6 +59,8 @@ public:
     QQuickItem* listView() const { return iListView; }
     void setListView(QQuickItem* aView);
 
+    Q_INVOKABLE void positionViewAtIndex(int aIndex);
+
 private:
     qreal contentX();
     qreal contentY();
@@ -88,6 +90,8 @@ private:
     qreal iContentX;
     qreal iContentY;
     QQuickItem* iListView;
+    int iCenterMode;
+    bool iPositionIsChanging;
     QTimer* iResizeTimer;
 };
 

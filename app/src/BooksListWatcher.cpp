@@ -38,6 +38,7 @@
 #define LISTVIEW_CONTENT_X              "contentX"
 #define LISTVIEW_CONTENT_Y              "contentY"
 #define LISTVIEW_INDEX_AT               "indexAt"
+#define LISTVIEW_POSITION_VIEW_AT_INDEX "positionViewAtIndex"
 
 BooksListWatcher::BooksListWatcher(QObject* aParent) :
     QObject(aParent),
@@ -45,6 +46,8 @@ BooksListWatcher::BooksListWatcher(QObject* aParent) :
     iContentX(0),
     iContentY(0),
     iListView(NULL),
+    iCenterMode(-1),
+    iPositionIsChanging(false),
     iResizeTimer(new QTimer(this))
 {
     iResizeTimer->setSingleShot(true);
@@ -58,6 +61,7 @@ void BooksListWatcher::setListView(QQuickItem* aView)
         const QSize oldSize(iSize);
         if (iListView) iListView->disconnect(this);
         iListView = aView;
+        iCenterMode = -1;
         if (iListView) {
             connect(iListView,
                 SIGNAL(widthChanged()),
@@ -108,6 +112,38 @@ qreal BooksListWatcher::getRealProperty(const char *name, qreal defaultValue)
         if (ok) return r;
     }
     return defaultValue;
+}
+
+void BooksListWatcher::positionViewAtIndex(int aIndex)
+{
+    if (iListView) {
+        HDEBUG(aIndex);
+        if (iCenterMode < 0) {
+            bool ok = false;
+            const QMetaObject* metaObject = iListView->metaObject();
+            if (metaObject) {
+                int index = metaObject->indexOfEnumerator("PositionMode");
+                if (index >= 0) {
+                    QMetaEnum metaEnum = metaObject->enumerator(index);
+                    int value = metaEnum.keyToValue("Center", &ok);
+                    if (ok) {
+                        iCenterMode = value;
+                        HDEBUG("Center =" << iCenterMode);
+                    }
+                }
+            }
+            HASSERT(ok);
+            if (!ok) {
+                // This is what it normally is
+                iCenterMode = 1;
+            }
+        }
+        iPositionIsChanging = true;
+        QMetaObject::invokeMethod(iListView, LISTVIEW_POSITION_VIEW_AT_INDEX,
+            Q_ARG(int,aIndex), Q_ARG(int,iCenterMode));
+        iPositionIsChanging = false;
+        updateCurrentIndex();
+    }
 }
 
 qreal BooksListWatcher::contentX()
@@ -193,18 +229,24 @@ void BooksListWatcher::onContentXChanged()
 {
     HASSERT(sender() == iListView);
     iContentX = contentX();
-    updateCurrentIndex();
+    if (!iPositionIsChanging) {
+        updateCurrentIndex();
+    }
 }
 
 void BooksListWatcher::onContentYChanged()
 {
     HASSERT(sender() == iListView);
     iContentY = contentY();
-    updateCurrentIndex();
+    if (!iPositionIsChanging) {
+        updateCurrentIndex();
+    }
 }
 
 void BooksListWatcher::onContentSizeChanged()
 {
     HASSERT(sender() == iListView);
-    updateCurrentIndex();
+    if (!iPositionIsChanging) {
+        updateCurrentIndex();
+    }
 }
