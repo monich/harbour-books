@@ -48,6 +48,7 @@ BooksListWatcher::BooksListWatcher(QObject* aParent) :
     iListView(NULL),
     iCenterMode(-1),
     iPositionIsChanging(false),
+    iCanRetry(true),
     iResizeTimer(new QTimer(this))
 {
     iResizeTimer->setSingleShot(true);
@@ -62,6 +63,7 @@ void BooksListWatcher::setListView(QQuickItem* aView)
         if (iListView) iListView->disconnect(this);
         iListView = aView;
         iCenterMode = -1;
+        iCanRetry = true;
         if (iListView) {
             connect(iListView,
                 SIGNAL(widthChanged()),
@@ -139,10 +141,33 @@ void BooksListWatcher::positionViewAtIndex(int aIndex)
             }
         }
         iPositionIsChanging = true;
-        QMetaObject::invokeMethod(iListView, LISTVIEW_POSITION_VIEW_AT_INDEX,
-            Q_ARG(int,aIndex), Q_ARG(int,iCenterMode));
+        positionViewAtIndex(aIndex, iCenterMode);
+        if (iCanRetry) {
+            // This is probably a bug in QQuickListView - it first calculates
+            // the item position and then starts instantiating the delegates.
+            // The very first time the item position always turns out to be
+            // zero because the average item size isn't known yet. So if we
+            // are trying to position the list at a non-zero index and instead
+            // we got positioned at zero, try it again. It doesn't make sense
+            // to retry more than once though.
+            if (aIndex > 0 && getCurrentIndex() == 0) {
+                // Didn't work from the first try, give it another go
+                HDEBUG("retrying...");
+                positionViewAtIndex(aIndex, iCenterMode);
+            }
+            iCanRetry = false;
+        }
         iPositionIsChanging = false;
         updateCurrentIndex();
+    }
+}
+
+void BooksListWatcher::positionViewAtIndex(int aIndex, int aMode)
+{
+    if (iListView) {
+        QMetaObject::invokeMethod(iListView,
+            LISTVIEW_POSITION_VIEW_AT_INDEX,
+            Q_ARG(int,aIndex), Q_ARG(int,aMode));
     }
 }
 

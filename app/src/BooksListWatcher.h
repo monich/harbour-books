@@ -66,6 +66,7 @@ private:
     qreal contentY();
     qreal getRealProperty(const char *name, qreal defaultValue = 0.0);
     int getCurrentIndex();
+    void positionViewAtIndex(int aIndex, int aMode);
     void updateCurrentIndex();
     void updateSize();
 
@@ -92,6 +93,7 @@ private:
     QQuickItem* iListView;
     int iCenterMode;
     bool iPositionIsChanging;
+    bool iCanRetry;
     QTimer* iResizeTimer;
 };
 
