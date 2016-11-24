@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Jolla Ltd.
+ * Copyright (C) 2015-2016 Jolla Ltd.
  * Contact: Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
@@ -14,7 +14,7 @@
  *     notice, this list of conditions and the following disclaimer in
  *     the documentation and/or other materials provided with the
  *     distribution.
- *   * Neither the name of Nemo Mobile nor the names of its contributors
+ *   * Neither the name of Jolla Ltd nor the names of its contributors
  *     may be used to endorse or promote products derived from this
  *     software without specific prior written permission.
  *
@@ -37,7 +37,6 @@
 #include <QVariant>
 #include <QDebug>
 #include <QList>
-
 
 #include "ZLTextParagraphCursor.h"
 
@@ -157,11 +156,21 @@ struct BooksPos {
                iElementIndex != aPos.iElementIndex ||
                iCharIndex != aPos.iCharIndex;
     }
+
+    QString toString() const
+    {
+        return QString("BooksPos(%1,%2,%3)").arg(iParagraphIndex).
+            arg(iElementIndex).arg(iCharIndex);
+    }
+
+    static BooksPos posAt(BooksPos::List aList, int aPage)
+    {
+        return (aPage >=0 && aPage < aList.count()) ?
+            aList.at(aPage) : BooksPos();
+    }
 };
 
-inline QDebug& operator<<(QDebug& aDebug, const BooksPos& aPosition)
-    { aDebug << qPrintable(QString("BooksPos(%1,%2,%3)").
-      arg(aPosition.iParagraphIndex).arg(aPosition.iElementIndex).
-      arg(aPosition.iCharIndex)); return aDebug.maybeSpace(); }
+inline QDebug& operator<<(QDebug& aDebug, const BooksPos& aPos)
+    { aDebug << qPrintable(aPos.toString()); return aDebug; }
 
 #endif /* BOOKS_POSITION_H */
