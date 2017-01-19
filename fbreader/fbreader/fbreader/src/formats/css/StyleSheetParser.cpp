@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2004-2010 Geometer Plus <contact@geometerplus.com>
- * Copyright (C) 2015 Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2015-2017 Slava Monich <slava.monich@jolla.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -90,7 +90,7 @@ void StyleSheetParser::parse(ZLInputStream &stream) {
 void StyleSheetParser::parse(const char *text, int len, bool final) {
 	const char *start = text;
 	const char *end = text + len;
-	for (const char *ptr = start; ptr != end; ++ptr) {
+	for (const char *ptr = start; ptr != end && !myStateStack.empty(); ++ptr) {
 		processChar1(*ptr);
 	}
 }
@@ -219,6 +219,9 @@ void StyleSheetParser::processChar4(char c) {
 		case '\n':
 		case ';':
 			finishAttribute();
+			break;
+		case '{':
+			myStateStack.push(SKIP_BLOCK_CURLY);
 			break;
 		case '}':
 			finishRule();
