@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Jolla Ltd.
+ * Copyright (C) 2015-2017 Jolla Ltd.
  * Contact: Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
@@ -231,7 +231,6 @@ process(
                 fres.close();
                 if (buf.str() != out.str()) {
                     std::cerr << "Test output mismatch with " << res << std::endl;
-                    //std::cerr << out.str();
                     ret = RET_ERR_TEST;
                 }
             } else {
@@ -251,11 +250,14 @@ int main(int argc, char **argv)
     int ret;
     char* customDataDir = NULL;
     gboolean autoTest = FALSE;
+    char* inlineCSS = FALSE;
 
 #define DATA_DIR "data"
     GOptionEntry entries[] = {
         { "autotest", 'a', 0, G_OPTION_ARG_NONE, &autoTest,
           "Run auto-tests", NULL },
+        { "inline", 'i', 0, G_OPTION_ARG_STRING, &inlineCSS,
+          "Parse inline CSS", NULL },
         { "data", 'd', 0, G_OPTION_ARG_FILENAME, &customDataDir,
           "Data directory for autotest [" DATA_DIR "]", "DIR" },
         { NULL }
@@ -267,7 +269,7 @@ int main(int argc, char **argv)
     gboolean ok = g_option_context_parse(options, &argc, &argv, &error);
 
     if (ok) {
-        if (argc == 1 && !autoTest) {
+        if (argc == 1 && !autoTest && !inlineCSS) {
             ret = RET_CMD_LINE;
             char* help = g_option_context_get_help(options, FALSE, NULL);
             std::cout << help;
@@ -276,6 +278,10 @@ int main(int argc, char **argv)
             ret = RET_OK;
             ZLQtFSManager::createInstance();
             ZLFile::initCache();
+            if (inlineCSS) {
+                StyleSheetSingleStyleParser parser;
+                parser.parseString(inlineCSS);
+            }
             if (argc > 1) {
                 for (int i=1; i<argc; i++) {
                     const int ret2 = process(argv[i]);
@@ -305,6 +311,7 @@ int main(int argc, char **argv)
     }
 
     g_option_context_free(options);
+    g_free(inlineCSS);
     g_free(customDataDir);
     return ret;
 }
