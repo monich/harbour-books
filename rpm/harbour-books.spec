@@ -1,6 +1,6 @@
 Name:           harbour-books
 Summary:        E-book reader
-Version:        1.0.18
+Version:        1.0.19
 Release:        1
 License:        BSD
 Group:          Applications/File
@@ -57,6 +57,9 @@ desktop-file-install --delete-original \
 make -C test test
 
 %changelog
+* Fri Jan 20 2017 Slava Monich <slava.monich@jolla.com> 1.0.19
+- Fixed a crash in CSS parser
+
 * Wed Nov 02 2016 Slava Monich <slava.monich@jolla.com> 1.0.18
 - Added support for footnotes in epub books
 
