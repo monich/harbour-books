@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2004-2010 Geometer Plus <contact@geometerplus.com>
- * Copyright (C) 2016 Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2016-2017 Slava Monich <slava.monich@jolla.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -282,8 +282,8 @@ XHTMLTagImageAction::XHTMLTagImageAction(const std::string &attributeName) {
 }
 
 void XHTMLTagImageAction::doAtStart(XHTMLReader &reader, const char **xmlattributes) {
-	// Ignore transparent images
-	if (!reader.myParseStack.back().opacity) {
+	// Ignore transparent and hidden images
+	if (!reader.myParseStack.back().opacity || reader.myStyleStack.back().DisplayNone) {
 		return;
 	}
 
