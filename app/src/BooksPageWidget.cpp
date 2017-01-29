@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015-2016 Jolla Ltd.
+ * Copyright (C) 2015-2017 Jolla Ltd.
  * Contact: Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
@@ -524,7 +524,7 @@ void BooksPageWidget::setLeftMargin(int aMargin)
 {
     if (iMargins.iLeft != aMargin) {
         iMargins.iLeft = aMargin;
-        HDEBUG(aMargin);
+        HVERBOSE(aMargin);
         resetView();
         Q_EMIT leftMarginChanged();
     }
@@ -534,7 +534,7 @@ void BooksPageWidget::setRightMargin(int aMargin)
 {
     if (iMargins.iRight != aMargin) {
         iMargins.iRight = aMargin;
-        HDEBUG(aMargin);
+        HVERBOSE(aMargin);
         resetView();
         Q_EMIT rightMarginChanged();
     }
@@ -544,7 +544,7 @@ void BooksPageWidget::setTopMargin(int aMargin)
 {
     if (iMargins.iTop != aMargin) {
         iMargins.iTop = aMargin;
-        HDEBUG(aMargin);
+        HVERBOSE(aMargin);
         resetView();
         Q_EMIT topMarginChanged();
     }
@@ -554,7 +554,7 @@ void BooksPageWidget::setBottomMargin(int aMargin)
 {
     if (iMargins.iBottom != aMargin) {
         iMargins.iBottom = aMargin;
-        HDEBUG(aMargin);
+        HVERBOSE(aMargin);
         resetView();
         Q_EMIT bottomMarginChanged();
     }
@@ -783,14 +783,14 @@ void BooksPageWidget::updateSize()
 
 void BooksPageWidget::onWidthChanged()
 {
-    HDEBUG((int)width());
+    HVERBOSE((int)width());
     // Width change will probably be followed by height change
     iResizeTimer->start();
 }
 
 void BooksPageWidget::onHeightChanged()
 {
-    HDEBUG((int)height());
+    HVERBOSE((int)height());
     if (iResizeTimer->isActive()) {
         // Height is usually changed after width, repaint right away
         iResizeTimer->stop();
