@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015-2016 Jolla Ltd.
+ * Copyright (C) 2015-2017 Jolla Ltd.
  * Contact: Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
@@ -48,6 +48,8 @@
 #include <QTextStream>
 #include <QSocketNotifier>
 
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <unistd.h>
 #include <libudev.h>
 
