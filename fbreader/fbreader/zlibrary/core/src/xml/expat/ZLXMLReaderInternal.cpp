@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2004-2010 Geometer Plus <contact@geometerplus.com>
+ * Copyright (C) 2015-2017 Slava Monich <slava.monich@jolla.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +26,11 @@
 
 #include "ZLXMLReaderInternal.h"
 #include "../ZLXMLReader.h"
+
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <fcntl.h>
 
 void ZLXMLReaderInternal::fCharacterDataHandler(void *userData, const char *text, int len) {
 	ZLXMLReader &reader = *(ZLXMLReader*)userData;
@@ -107,10 +113,17 @@ static void parseDTD(XML_Parser parser, const std::string &fileName) {
 ZLXMLReaderInternal::ZLXMLReaderInternal(ZLXMLReader &reader, const char *encoding) : myReader(reader) {
 	myParser = XML_ParserCreate(encoding);
 	myInitialized = false;
-	// Set salt to anything non-zero. Otherwise this parser won't be able
-	// to use the entity cache filled by the child DTD parsers. For more
+	// Set salt to a random non-zero number. Otherwise this parser won't be
+	// able to use the entity cache filled by the child DTD parsers. For more
 	// details see CVE-2012-0876 and http://sourceforge.net/p/expat/bugs/496/
-	XML_SetHashSalt(myParser, 42);
+	unsigned long salt = 0;
+	int urandom = open("/dev/urandom", O_RDONLY);
+	if (urandom >= 0) {
+		read(urandom, &salt, sizeof(salt));
+		close(urandom);
+	}
+	if (!salt) salt = 42;
+	XML_SetHashSalt(myParser, salt);
 }
 
 ZLXMLReaderInternal::~ZLXMLReaderInternal() {
