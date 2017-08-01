@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2004-2010 Geometer Plus <contact@geometerplus.com>
- * Copyright (C) 2015 Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2015-2017 Slava Monich <slava.monich@jolla.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -187,7 +187,7 @@ void ZLTextModel::addText(const std::vector<std::string> &text) {
 			memcpy(myLastEntryStart + offset, it->data(), it->length());
 			offset += it->length();
 		}
-	} else {
+	} else if (!myParagraphs.empty()) {
 		myLastEntryStart = myAllocator.allocate(len + sizeof(size_t) + 1);
 		*myLastEntryStart = ZLTextParagraphEntry::TEXT_ENTRY;
 		memcpy(myLastEntryStart + 1, &len, sizeof(size_t));
