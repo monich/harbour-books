@@ -283,7 +283,8 @@ XHTMLTagImageAction::XHTMLTagImageAction(const std::string &attributeName) {
 
 void XHTMLTagImageAction::doAtStart(XHTMLReader &reader, const char **xmlattributes) {
 	// Ignore transparent and hidden images
-	if (!reader.myParseStack.back().opacity || reader.myStyleStack.back().DisplayNone) {
+	if (!reader.myParseStack.back().opacity ||
+	   (!reader.myStyleStack.empty() && reader.myStyleStack.back().DisplayNone)) {
 		return;
 	}
 
