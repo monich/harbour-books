@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015-2016 Jolla Ltd.
+ * Copyright (C) 2015-2017 Jolla Ltd.
  * Contact: Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
@@ -64,10 +64,14 @@ public:
 private:
     qreal contentX();
     qreal contentY();
+    qreal contentWidth();
+    qreal contentHeight();
     qreal getRealProperty(const char *name, qreal defaultValue = 0.0);
     int getCurrentIndex();
+    void doPositionViewAtIndex(int aIndex);
     void positionViewAtIndex(int aIndex, int aMode);
     void updateCurrentIndex();
+    void tryToRestoreCurrentIndex();
     void updateSize();
 
 private Q_SLOTS:
@@ -93,7 +97,6 @@ private:
     QQuickItem* iListView;
     int iCenterMode;
     bool iPositionIsChanging;
-    bool iCanRetry;
     QTimer* iResizeTimer;
 };
 

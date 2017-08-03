@@ -109,6 +109,7 @@ SOURCES += \
   src/BooksImportModel.cpp \
   src/BooksListWatcher.cpp \
   src/BooksLoadingProperty.cpp \
+  src/BooksPageStack.cpp \
   src/BooksPageWidget.cpp \
   src/BooksPaintContext.cpp \
   src/BooksPathModel.cpp \
@@ -150,6 +151,7 @@ HEADERS += \
   src/BooksItem.h \
   src/BooksListWatcher.h \
   src/BooksLoadingProperty.h \
+  src/BooksPageStack.h \
   src/BooksPageWidget.h \
   src/BooksPaintContext.h \
   src/BooksPathModel.h \

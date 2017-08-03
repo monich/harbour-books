@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015-2016 Jolla Ltd.
+ * Copyright (C) 2015-2017 Jolla Ltd.
  * Contact: Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
@@ -32,6 +32,7 @@
  */
 
 #include "BooksDefs.h"
+#include "BooksPos.h"
 #include "BooksShelf.h"
 #include "BooksBook.h"
 #include "BooksBookModel.h"
@@ -39,6 +40,7 @@
 #include "BooksConfig.h"
 #include "BooksImportModel.h"
 #include "BooksPathModel.h"
+#include "BooksPageStack.h"
 #include "BooksStorageModel.h"
 #include "BooksPageWidget.h"
 #include "BooksListWatcher.h"
@@ -68,12 +70,14 @@
 Q_DECL_EXPORT int main(int argc, char **argv)
 {
     QGuiApplication* app = SailfishApp::application(argc, argv);
+    qRegisterMetaType<BooksPos>();
     BOOKS_QML_REGISTER(BooksShelf, "Shelf");
     BOOKS_QML_REGISTER(BooksBook, "Book");
     BOOKS_QML_REGISTER(BooksBookModel, "BookModel");
     BOOKS_QML_REGISTER(BooksCoverModel, "CoverModel");
     BOOKS_QML_REGISTER(BooksImportModel, "BooksImportModel");
     BOOKS_QML_REGISTER(BooksPathModel, "BooksPathModel");
+    BOOKS_QML_REGISTER(BooksPageStack, "BooksPageStack");
     BOOKS_QML_REGISTER(BooksStorageModel, "BookStorage");
     BOOKS_QML_REGISTER(BooksPageWidget, "PageWidget");
     BOOKS_QML_REGISTER(BooksListWatcher, "ListWatcher");

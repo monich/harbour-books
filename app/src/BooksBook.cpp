@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Jolla Ltd.
+ * Copyright (C) 2015-2017 Jolla Ltd.
  * Contact: Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
@@ -14,7 +14,7 @@
  *     notice, this list of conditions and the following disclaimer in
  *     the documentation and/or other materials provided with the
  *     distribution.
- *   * Neither the name of Nemo Mobile nor the names of its contributors
+ *   * Neither the name of Jolla Ltd nor the names of its contributors
  *     may be used to endorse or promote products derived from this
  *     software without specific prior written permission.
  *
@@ -58,6 +58,7 @@
 #include <unistd.h>
 #include <errno.h>
 
+#define BOOK_STATE_PAGE_STACK_INDEX "pageStackIndex"
 #define BOOK_STATE_FONT_SIZE_ADJUST "fontSizeAdjust"
 #define BOOK_STATE_POSITION         "position"
 #define BOOK_COVER_SUFFIX           ".cover."
@@ -328,9 +329,39 @@ BooksBook::BooksBook(const BooksStorage& aStorage, QString aRelativePath,
         // Load the state
         QVariantMap state;
         if (HarbourJson::load(iStateFilePath, state)) {
-            iLastPos = BooksPos::fromVariant(state.value(BOOK_STATE_POSITION));
             iFontSizeAdjust = state.value(BOOK_STATE_FONT_SIZE_ADJUST).toInt();
+#ifdef BOOK_STATE_PAGE_STACK_INDEX
+            iPageStackPos = state.value(BOOK_STATE_PAGE_STACK_INDEX).toInt();
+#endif
+            // Current position can be stored in two formats - a single
+            // position (older format) or a list of position (newer one).
+            // We have to detect which one we are dealing with
+            QVariant position(state.value(BOOK_STATE_POSITION));
+            BooksPos bookPos(BooksPos::fromVariant(position));
+            if (bookPos.valid()) {
+                // Old format (single position)
+                iPageStack.append(bookPos);
+            } else {
+                // New format (list of positions)
+                QVariantList list(position.toList());
+                const int count = list.count();
+                for (int k=0; k<count; k++) {
+                    bookPos = BooksPos::fromVariant(list.at(k));
+                    if (bookPos.valid()) {
+                        iPageStack.append(bookPos);
+                    }
+                }
+            }
         }
+    }
+    // Validate the state
+    if (iPageStack.isEmpty()) {
+        iPageStack.append(BooksPos(0,0,0));
+    }
+    if (iPageStackPos < 0) {
+        iPageStackPos = 0;
+    } else if (iPageStackPos >= iPageStack.count()) {
+        iPageStackPos = iPageStack.count() - 1;
     }
     // Refcounted BooksBook objects are managed by C++ code
     QQmlEngine::setObjectOwnership(this, QQmlEngine::CppOwnership);
@@ -339,6 +370,7 @@ BooksBook::BooksBook(const BooksStorage& aStorage, QString aRelativePath,
 void BooksBook::init()
 {
     iFontSizeAdjust = 0;
+    iPageStackPos = 0;
     iCoverTask = NULL;
     iCoverTasksDone = false;
     iCopyingOut = false;
@@ -419,10 +451,23 @@ bool BooksBook::setFontSizeAdjust(int aFontSizeAdjust)
     }
 }
 
-void BooksBook::setLastPos(const BooksPos& aPos)
+void BooksBook::setPageStack(BooksPos::List aStack, int aStackPos)
 {
-    if (iLastPos != aPos) {
-        iLastPos = aPos;
+    if (aStackPos < 0) {
+        aStackPos = 0;
+    } else if (aStackPos >= aStack.count()) {
+        aStackPos = aStack.count() - 1;
+    }
+    bool changed = false;
+    if (iPageStack != aStack) {
+        iPageStack = aStack;
+        changed = true;
+    }
+    if (iPageStackPos != aStackPos) {
+        iPageStackPos = aStackPos;
+        changed = true;
+    }
+    if (changed) {
         requestSave();
     }
 }
@@ -536,8 +581,14 @@ void BooksBook::saveState()
     if (!iStateFilePath.isEmpty()) {
         QVariantMap state;
         HarbourJson::load(iStateFilePath, state);
-        state.insert(BOOK_STATE_POSITION, iLastPos.toVariant());
+        QVariantList positions;
+        const int n = iPageStack.count();
+        for (int i=0; i<n; i++) positions.append(iPageStack.at(i).toVariant());
+        state.insert(BOOK_STATE_POSITION, positions);
         state.insert(BOOK_STATE_FONT_SIZE_ADJUST, iFontSizeAdjust);
+#ifdef BOOK_STATE_PAGE_STACK_INDEX
+        state.insert(BOOK_STATE_PAGE_STACK_INDEX, iPageStackPos);
+#endif
         if (HarbourJson::save(iStateFilePath, state)) {
             HDEBUG("wrote" << iStateFilePath);
         }

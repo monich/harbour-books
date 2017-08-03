@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015-2016 Jolla Ltd.
+ * Copyright (C) 2015-2017 Jolla Ltd.
  * Contact: Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
@@ -45,10 +45,6 @@ class BooksBookModel::Data {
 public:
     Data(int aWidth, int aHeight) : iWidth(aWidth), iHeight(aHeight) {}
 
-    int pickPage(const BooksPos& aPagePos) const;
-    int pickPage(const BooksPos& aPagePos, const BooksPos& aNextPagePos,
-        int aPageCount) const;
-
 public:
     int iWidth;
     int iHeight;
@@ -56,65 +52,17 @@ public:
     BooksPos::List iPageMarks;
 };
 
-int BooksBookModel::Data::pickPage(const BooksPos& aPagePos) const
-{
-    int page = 0;
-    if (aPagePos.valid()) {
-        BooksPos::ConstIterator it = qFind(iPageMarks, aPagePos);
-        if (it == iPageMarks.end()) {
-            it = qUpperBound(iPageMarks, aPagePos);
-            page = (int)(it - iPageMarks.begin()) - 1;
-            HDEBUG("using page" << page << "for" << aPagePos);
-        } else {
-            page = it - iPageMarks.begin();
-            HDEBUG("found" << aPagePos << "at page" << page);
-        }
-    }
-    return page;
-}
-
-int BooksBookModel::Data::pickPage(const BooksPos& aPagePos,
-    const BooksPos& aNextPagePos, int aPageCount) const
-{
-    int page = 0;
-    if (aPagePos.valid()) {
-        if (!aNextPagePos.valid()) {
-            // Last page stays the last
-            page = iPageMarks.count() - 1;
-            HDEBUG("last page" << page);
-        } else {
-            BooksPos::ConstIterator it = qFind(iPageMarks, aPagePos);
-            if (it == iPageMarks.end()) {
-                // Two 90-degrees rotations should return the reader
-                // back to the same page. That's what this is about.
-                const BooksPos& pos = (iPageMarks.count() > aPageCount) ?
-                    aPagePos : aNextPagePos;
-                it = qUpperBound(iPageMarks, pos);
-                page = (int)(it - iPageMarks.begin());
-                if (page > 0) page--;
-                HDEBUG("using page" << page << "for" << pos);
-            } else {
-                page = it - iPageMarks.begin();
-                HDEBUG("found" << aPagePos << "at page" << page);
-            }
-        }
-    }
-    return page;
-}
-
 // ==========================================================================
-// BooksBookModel::Task
+// BooksBookModel::PagingTask
 // ==========================================================================
 
-class BooksBookModel::Task : public BooksTask
+class BooksBookModel::PagingTask : public BooksTask
 {
     Q_OBJECT
 
 public:
-    Task(BooksBookModel* aReceiver, shared_ptr<Book> aBook,
-        const BooksPos& aPagePos, const BooksPos& aNextPagePos,
-        const BooksPos& aLastPos, int aPageCount);
-    ~Task();
+    PagingTask(BooksBookModel* aReceiver, shared_ptr<Book> aBook);
+    ~PagingTask();
 
     void performTask();
 
@@ -127,38 +75,27 @@ public:
     BooksMargins iMargins;
     BooksPaintContext iPaint;
     BooksBookModel::Data* iData;
-    BooksPos iPagePos;
-    BooksPos iNextPagePos;
-    BooksPos iLastPos;
-    int iOldPageCount;
-    int iPage;
 };
 
-BooksBookModel::Task::Task(BooksBookModel* aModel,
-    shared_ptr<Book> aBook, const BooksPos& aPagePos,
-    const BooksPos& aNextPagePos, const BooksPos& aLastPos, int aPageCount) :
+BooksBookModel::PagingTask::PagingTask(BooksBookModel* aModel,
+    shared_ptr<Book> aBook) :
     iBook(aBook),
     iTextStyle(aModel->textStyle()),
     iMargins(aModel->margins()),
     iPaint(aModel->width(), aModel->height()),
-    iData(NULL),
-    iPagePos(aPagePos),
-    iNextPagePos(aNextPagePos),
-    iLastPos(aLastPos),
-    iOldPageCount(aPageCount),
-    iPage(-1)
+    iData(NULL)
 {
     aModel->connect(this, SIGNAL(done()), SLOT(onResetDone()));
     aModel->connect(this, SIGNAL(progress(int)), SLOT(onResetProgress(int)),
         Qt::QueuedConnection);
 }
 
-BooksBookModel::Task::~Task()
+BooksBookModel::PagingTask::~PagingTask()
 {
     delete iData;
 }
 
-void BooksBookModel::Task::performTask()
+void BooksBookModel::PagingTask::performTask()
 {
     if (!isCanceled()) {
         iData = new BooksBookModel::Data(iPaint.width(), iPaint.height());
@@ -183,9 +120,6 @@ void BooksBookModel::Task::performTask()
     if (!isCanceled()) {
         HDEBUG(iData->iPageMarks.count() << "page(s)" << qPrintable(
             QString("%1x%2").arg(iData->iWidth).arg(iData->iHeight)));
-        iPage = iPagePos.valid() ?
-            iData->pickPage(iPagePos, iNextPagePos, iOldPageCount) :
-            iData->pickPage(iLastPos);
     } else {
         HDEBUG("giving up" << qPrintable(QString("%1x%2").arg(iPaint.width()).
             arg(iPaint.height())) << "paging");
@@ -203,17 +137,19 @@ enum BooksBookModelRole {
 BooksBookModel::BooksBookModel(QObject* aParent) :
     QAbstractListModel(aParent),
     iResetReason(ReasonUnknown),
-    iCurrentPage(-1),
     iProgress(0),
     iBook(NULL),
-    iTask(NULL),
+    iPagingTask(NULL),
     iData(NULL),
     iData2(NULL),
     iSettings(BooksSettings::sharedInstance()),
-    iTaskQueue(BooksTaskQueue::defaultQueue())
+    iTaskQueue(BooksTaskQueue::defaultQueue()),
+    iPageStack(new BooksPageStack(this))
 {
     iTextStyle = iSettings->textStyle(fontSizeAdjust());
     connect(iSettings.data(), SIGNAL(textStyleChanged()), SLOT(onTextStyleChanged()));
+    connect(iPageStack, SIGNAL(changed()), SLOT(onPageStackChanged()));
+    connect(iPageStack, SIGNAL(currentIndexChanged()), SLOT(onPageStackChanged()));
     HDEBUG("created");
 #if QT_VERSION < 0x050000
     setRoleNames(roleNames());
@@ -222,7 +158,7 @@ BooksBookModel::BooksBookModel(QObject* aParent) :
 
 BooksBookModel::~BooksBookModel()
 {
-    if (iTask) iTask->release(this);
+    if (iPagingTask) iPagingTask->release(this);
     if (iBook) {
         iBook->disconnect(this);
         iBook->release();
@@ -235,7 +171,6 @@ BooksBookModel::~BooksBookModel()
 
 void BooksBookModel::setBook(BooksBook* aBook)
 {
-    shared_ptr<Book> oldBook;
     shared_ptr<Book> newBook;
     if (iBook != aBook) {
         const QString oldTitle(iTitle);
@@ -246,14 +181,16 @@ void BooksBookModel::setBook(BooksBook* aBook)
         if (aBook) {
             (iBook = aBook)->retain();
             iBookRef = newBook;
-            iTitle = iBook->title();
+            iTitle = aBook->title();
             iTextStyle = iSettings->textStyle(fontSizeAdjust());
-            connect(iBook, SIGNAL(fontSizeAdjustChanged()), SLOT(onTextStyleChanged()));
+            iPageStack->setStack(aBook->pageStack(), aBook->pageStackPos());
+            connect(aBook, SIGNAL(fontSizeAdjustChanged()), SLOT(onTextStyleChanged()));
             HDEBUG(iTitle);
         } else {
             iBook = NULL;
             iBookRef.reset();
             iTitle = QString();
+            iPageStack->clear();
             HDEBUG("<none>");
         }
         startReset(ReasonLoading, true);
@@ -268,7 +205,7 @@ void BooksBookModel::setBook(BooksBook* aBook)
 
 bool BooksBookModel::loading() const
 {
-    return (iTask != NULL);
+    return (iPagingTask != NULL);
 }
 
 bool BooksBookModel::increaseFontSize()
@@ -281,19 +218,12 @@ bool BooksBookModel::decreaseFontSize()
     return iBook && iBook->setFontSizeAdjust(iBook->fontSizeAdjust()-1);
 }
 
-void BooksBookModel::setCurrentPage(int aPage)
+void BooksBookModel::onPageStackChanged()
 {
-    if (iCurrentPage != aPage) {
-        iCurrentPage = aPage;
-        if (iData &&
-            iCurrentPage >= 0 &&
-            iCurrentPage < iData->iPageMarks.count()) {
-            iBook->setLastPos(iData->iPageMarks.at(iCurrentPage));
-            HDEBUG(aPage << iBook->lastPos());
-        } else {
-            HDEBUG(aPage);
-        }
-        Q_EMIT currentPageChanged();
+    if (iBook) {
+        BooksPos::Stack stack = iPageStack->getStack();
+        HDEBUG(stack.iList << stack.iPos);
+        iBook->setPageStack(stack.iList, stack.iPos);
     }
 }
 
@@ -314,24 +244,18 @@ int BooksBookModel::fontSizeAdjust() const
 
 BooksPos BooksBookModel::pageMark(int aPage) const
 {
-    if (aPage >= 0 && iData) {
-        const int n = iData->iPageMarks.count();
-        if (aPage < n) {
-            return iData->iPageMarks.at(aPage);
-        }
-    }
-    return BooksPos();
+    return iData ? BooksPos::posAt(iData->iPageMarks, aPage) : BooksPos();
 }
 
-int BooksBookModel::linkToPage(const std::string& aLink) const
+BooksPos BooksBookModel::linkPosition(const std::string& aLink) const
 {
     if (iData && !iData->iBookModel.isNull()) {
         BookModel::Label label = iData->iBookModel->label(aLink);
         if (label.ParagraphNumber >= 0) {
-            return iData->pickPage(BooksPos(label.ParagraphNumber, 0, 0));
+            return BooksPos(label.ParagraphNumber, 0, 0);
         }
     }
-    return -1;
+    return BooksPos();
 }
 
 shared_ptr<BookModel> BooksBookModel::bookModel() const
@@ -410,6 +334,7 @@ void BooksBookModel::updateModel(int aPrevPageCount)
 {
     const int newPageCount = pageCount();
     if (aPrevPageCount != newPageCount) {
+        HDEBUG(aPrevPageCount << "->" << newPageCount);
         if (newPageCount > aPrevPageCount) {
             beginInsertRows(QModelIndex(), aPrevPageCount, newPageCount-1);
             endInsertRows();
@@ -433,36 +358,20 @@ void BooksBookModel::setSize(QSize aSize)
         } else if (iData2 && iData2->iWidth == w && iData2->iHeight == h) {
             HDEBUG("switching to backup layout");
             const int oldModelPageCount = pageCount();
-            int oldPageCount;
-            BooksPos page1, page2;
-            if (iTask) {
-                // Layout has been switched back before the paging task
-                // has completed
-                HDEBUG("not so fast please...");
-                oldPageCount = iTask->iOldPageCount;
-                page1 = iTask->iPagePos;
-                page2 = iTask->iNextPagePos;
-            } else {
-                oldPageCount = oldModelPageCount;
-                page1 = pageMark(iCurrentPage);
-                page2 = pageMark(iCurrentPage+1);
-            }
             Data* tmp = iData;
             iData = iData2;
             iData2 = tmp;
-            if (iData) {
-                // Cancel unnecessary paging task
-                if (iTask) {
-                    BooksLoadingSignalBlocker block(this);
-                    iTask->release(this);
-                    iTask = NULL;
-                }
-                updateModel(oldModelPageCount);
-                Q_EMIT pageMarksChanged();
-                Q_EMIT jumpToPage(iData->pickPage(page1, page2, oldPageCount));
-            } else {
-                startReset(ReasonUnknown, false);
+            // Cancel unnecessary paging task
+            BooksLoadingSignalBlocker block(this);
+            if (iPagingTask) {
+                HDEBUG("not so fast please...");
+                iPagingTask->release(this);
+                iPagingTask = NULL;
             }
+            updateModel(oldModelPageCount);
+            iPageStack->setPageMarks(iData->iPageMarks);
+            Q_EMIT pageMarksChanged();
+            Q_EMIT jumpToPage(iPageStack->currentPage());
         } else {
             startReset(ReasonUnknown, false);
         }
@@ -487,9 +396,8 @@ void BooksBookModel::onTextStyleChanged()
 
 void BooksBookModel::startReset(ResetReason aResetReason, bool aFullReset)
 {
+    BooksPos dummy;
     BooksLoadingSignalBlocker block(this);
-    const BooksPos thisPage = pageMark(iCurrentPage);
-    const BooksPos nextPage = pageMark(iCurrentPage+1);
     if (aResetReason == ReasonUnknown) {
         if (iResetReason == ReasonUnknown) {
             if (!iData && !iData2) {
@@ -499,9 +407,9 @@ void BooksBookModel::startReset(ResetReason aResetReason, bool aFullReset)
             aResetReason = iResetReason;
         }
     }
-    if (iTask) {
-        iTask->release(this);
-        iTask = NULL;
+    if (iPagingTask) {
+        iPagingTask->release(this);
+        iPagingTask = NULL;
     }
     const int oldPageCount(pageCount());
     if (oldPageCount > 0) {
@@ -520,20 +428,14 @@ void BooksBookModel::startReset(ResetReason aResetReason, bool aFullReset)
     if (iBook && width() > 0 && height() > 0) {
         HDEBUG("starting" << qPrintable(QString("%1x%2").arg(width()).
             arg(height())) << "paging");
-        iTask = new Task(this, iBook->bookRef(), thisPage, nextPage,
-            iBook->lastPos(), oldPageCount);
-        iTaskQueue->submit(iTask);
+        iPagingTask = new PagingTask(this, iBook->bookRef());
+        iTaskQueue->submit(iPagingTask);
     }
 
     if (oldPageCount > 0) {
         endResetModel();
         Q_EMIT pageMarksChanged();
         Q_EMIT pageCountChanged();
-    }
-
-    if (iCurrentPage != 0) {
-        iCurrentPage = 0;
-        Q_EMIT currentPageChanged();
     }
 
     if (iProgress != 0) {
@@ -551,7 +453,7 @@ void BooksBookModel::onResetProgress(int aProgress)
 {
     // progress -> onResetProgress is a queued connection, we may received
     // this event from the task that has already been canceled.
-    if (iTask == sender() && aProgress > iProgress) {
+    if (iPagingTask == sender() && aProgress > iProgress) {
         iProgress = aProgress;
         Q_EMIT progressChanged();
     }
@@ -559,22 +461,22 @@ void BooksBookModel::onResetProgress(int aProgress)
 
 void BooksBookModel::onResetDone()
 {
-    HASSERT(sender() == iTask);
-    HASSERT(iTask->iData);
+    HASSERT(sender() == iPagingTask);
+    HASSERT(iPagingTask->iData);
     HASSERT(!iData);
 
     const int oldPageCount(pageCount());
     shared_ptr<BookModel> oldBookModel(bookModel());
     BooksLoadingSignalBlocker block(this);
-    int page = iTask->iPage;
 
-    iData = iTask->iData;
-    iTask->iData = NULL;
-    iTask->release(this);
-    iTask = NULL;
+    iData = iPagingTask->iData;
+    iPagingTask->iData = NULL;
+    iPagingTask->release(this);
+    iPagingTask = NULL;
 
     updateModel(oldPageCount);
-    Q_EMIT jumpToPage(page);
+    iPageStack->setPageMarks(iData->iPageMarks);
+    Q_EMIT jumpToPage(iPageStack->currentPage());
     Q_EMIT pageMarksChanged();
     if (oldBookModel != bookModel()) {
         Q_EMIT bookModelChanged();

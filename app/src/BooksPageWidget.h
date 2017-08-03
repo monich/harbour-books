@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015-2016 Jolla Ltd.
+ * Copyright (C) 2015-2017 Jolla Ltd.
  * Contact: Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
@@ -101,6 +101,7 @@ Q_SIGNALS:
     void activeTouch(int touchX, int touchY);
     void jumpToPage(int page);
     void showFootnote(int touchX, int touchY, QString text, QString imageId);
+    void pushPosition(BooksPos position);
 
 private Q_SLOTS:
     void onWidthChanged();

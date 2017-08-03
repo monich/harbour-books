@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2015-2016 Jolla Ltd.
+  Copyright (C) 2015-2017 Jolla Ltd.
   Contact: Slava Monich <slava.monich@jolla.com>
 
   You may use this file under the terms of BSD license as follows:
@@ -43,25 +43,13 @@ SilicaFlickable {
     signal pageClicked(var page)
 
     property int orientation: Orientation.Portrait
-    property int _currentPage: bookListWatcher.currentIndex
-    property bool _loading: minLoadingDelay.running || bookModel.loading
+    property alias stackModel: bookModel.pageStack
+    property bool loading: bookModel.loading
     property var _currentState: _visibilityStates[Settings.pageDetails % _visibilityStates.length]
     readonly property var _visibilityStates: [
         { pager: false, page: false, title: false, tools: false },
         { pager: false, page: true,  title: true,  tools: false },
         { pager: true,  page: true,  title: true,  tools: true  }
-    ]
-
-    // NOTE: These have to match ResetReason in BooksBookModel
-    readonly property var _loadingTextLabel: [
-        //% "Formatting..."
-        qsTrId("harbour-books-book-view-formatting"),
-        //% "Loading..."
-        qsTrId("harbour-books-book-view-loading"),
-        //% "Applying larger fonts..."
-        qsTrId("harbour-books-book-view-applying_larger_fonts"),
-        //% "Applying smaller fonts..."
-        qsTrId("harbour-books-book-view-applying_smaller_fonts")
     ]
 
     interactive: (!linkMenu || !linkMenu.visible) &&
@@ -101,49 +89,14 @@ SilicaFlickable {
         }
     }
 
-    Timer {
-        id: minLoadingDelay
-        interval: 1000
-    }
-
-    Timer {
-        id: resetPager
-        interval: 0
-        onTriggered: {
-            if (_currentPage >= 0) {
-                console.log("resetting pager to", _currentPage)
-                pager.currentPage = _currentPage
-            }
-        }
-    }
-
     BookModel {
         id: bookModel
         book: root.book ? root.book : null
-        size: bookListWatcher.size
-        currentPage: _currentPage
+        size: bookViewWatcher.size
         leftMargin: Theme.horizontalPageMargin
         rightMargin: Theme.horizontalPageMargin
         topMargin: Theme.itemSizeSmall
         bottomMargin: Theme.itemSizeSmall
-        onJumpToPage: bookView.jumpTo(index)
-        onCurrentPageChanged: {
-            if (linkMenu) linkMenu.hide()
-            if (currentPage >= 0 && bookView._jumpingTo < 0) {
-                pager.currentPage = currentPage
-            }
-        }
-        onLoadingChanged: {
-            if (loading && !pageCount) {
-                minLoadingDelay.start()
-                bookView._jumpingTo = -1
-            }
-        }
-    }
-
-    ListWatcher {
-        id: bookListWatcher
-        listView: bookView
     }
 
     SilicaListView {
@@ -154,9 +107,50 @@ SilicaFlickable {
         orientation: ListView.Horizontal
         snapMode: ListView.SnapOneItem
         spacing: Theme.paddingMedium
-        opacity: _loading ? 0 : 1
+        opacity: loading ? 0 : 1
         visible: opacity > 0
         interactive: root.interactive
+        readonly property int currentPage: stackModel.currentPage
+        property bool completed
+
+        Component.onCompleted: {
+            //console.log(currentPage)
+            bookViewWatcher.positionViewAtIndex(currentPage)
+            completed = true
+        }
+
+        onCurrentPageChanged: {
+            //console.log(currentPage, completed, flicking)
+            if (completed && !flicking) {
+                bookViewWatcher.positionViewAtIndex(currentPage)
+            }
+        }
+
+        onFlickingChanged: {
+            if (!flicking) {
+                bookViewWatcher.updateModel()
+            }
+        }
+
+        ListWatcher {
+            id: bookViewWatcher
+            listView: bookView
+            onCurrentIndexChanged: {
+                if (listView.completed && !listView.flicking && currentIndex >= 0) {
+                    //console.log(currentIndex, listView.completed, listView.flicking)
+                    updateModel()
+                }
+            }
+            function updateModel() {
+                if (linkMenu) linkMenu.hide()
+                //console.trace()
+                stackModel.currentPage = currentIndex
+                if (!pager.pressed) {
+                    pager.currentPage = currentIndex
+                }
+            }
+        }
+
         delegate: BooksPageView {
             width: bookView.width
             height: bookView.height
@@ -172,12 +166,13 @@ SilicaFlickable {
             pageNumberVisible: _currentState.page
             title: bookModel.title
             onJumpToPage: bookView.jumpTo(page)
+            onPushPosition: stackModel.pushPosition(position) // bookView.jumpTo(page)
             onPageClicked: {
                 root.pageClicked(index)
-                Settings.pageDetails = (Settings.pageDetails+ 1) % _visibilityStates.length
+                Settings.pageDetails = (Settings.pageDetails + 1) % _visibilityStates.length
             }
             onImagePressed: {
-                if (_currentPage == index) {
+                if (bookViewWatcher.currentIndex == index) {
                     if (!imageView) {
                         imageView = imageViewComponent.createObject(root)
                     }
@@ -185,7 +180,7 @@ SilicaFlickable {
                 }
             }
             onBrowserLinkPressed: {
-                if (_currentPage == index) {
+                if (bookViewWatcher.currentIndex == index) {
                     if (!linkMenu) {
                         linkMenu = linkMenuComponent.createObject(root)
                     }
@@ -193,7 +188,7 @@ SilicaFlickable {
                 }
             }
             onFootnotePressed: {
-                if (_currentPage == index) {
+                if (bookViewWatcher.currentIndex == index) {
                     if (!footnoteView) {
                         footnoteView = footnoteViewComponent.createObject(root)
                     }
@@ -202,21 +197,30 @@ SilicaFlickable {
             }
         }
 
-        property int _jumpingTo: -1
+        property int jumpingTo: -1
         function jumpTo(page) {
-            if (page >=0 && page !== _currentPage) {
-                _jumpingTo = page
-                positionViewAtIndex(page, ListView.Center)
+            if (page >=0 && page !== bookViewWatcher.currentIndex) {
+                jumpingTo = page
+                bookViewWatcher.positionViewAtIndex(page)
                 pager.currentPage = page
-                _jumpingTo = -1
-                if (_currentPage !== page) {
-                    console.log("oops, still at", _currentPage)
+                jumpingTo = -1
+                if (bookViewWatcher.currentIndex !== page) {
+                    console.log("oops, still at", currentPage)
                     resetPager.restart()
                 }
             }
         }
 
         Behavior on opacity { FadeAnimation {} }
+
+        Timer {
+            id: resetPager
+            interval: 0
+            onTriggered: {
+                console.log("resetting pager to", bookViewWatcher.currentIndex)
+                pager.currentPage = bookViewWatcher.currentIndex
+            }
+        }
 
         BooksPageTools {
             id: pageTools
@@ -228,7 +232,7 @@ SilicaFlickable {
             leftMargin: bookModel.leftMargin
             rightMargin: bookModel.rightMargin
             opacity: _currentState.tools ? 1 : 0
-            visible: opacity > 0 && book && bookModel.pageCount && !_loading
+            visible: opacity > 0 && book && bookModel.pageCount && !loading
             Behavior on opacity { FadeAnimation {} }
             onIncreaseFontSize: bookModel.increaseFontSize()
             onDecreaseFontSize: bookModel.decreaseFontSize()
@@ -237,9 +241,14 @@ SilicaFlickable {
         BooksPager {
             id: pager
             anchors {
+                left: parent.left
+                right: parent.right
                 bottom: parent.bottom
                 bottomMargin: (Theme.itemSizeExtraSmall + 2*(bookModel.bottomMargin - height))/4
             }
+            leftMargin: bookModel.leftMargin
+            rightMargin: bookModel.rightMargin
+            stack: stackModel
             pageCount: bookModel.pageCount
             width: parent.width
             opacity: (_currentState.pager && book && bookModel.pageCount) ? 0.75 : 0
@@ -261,20 +270,20 @@ SilicaFlickable {
         text: bookModel.title
         height: Theme.itemSizeExtraSmall
         color: Theme.highlightColor
-        opacity: _loading ? 0.6 : 0
+        opacity: loading ? 0.6 : 0
     }
 
     BusyIndicator {
         id: busyIndicator
         anchors.centerIn: parent
         size: BusyIndicatorSize.Large
-        running: _loading
+        running: loading
     }
 
     BooksFitLabel {
         anchors.fill: busyIndicator
         text: bookModel.progress > 0 ? bookModel.progress : ""
-        opacity: (_loading && bookModel.progress > 0) ? 1 : 0
+        opacity: (loading && bookModel.progress > 0) ? 1 : 0
     }
 
     Button {
@@ -286,7 +295,7 @@ SilicaFlickable {
             horizontalCenter: parent.horizontalCenter
         }
         onClicked: root.closeBook()
-        enabled: _loading && bookModel.resetReason === BookModel.ReasonLoading
+        enabled: loading && bookModel.resetReason === BookModel.ReasonLoading
         visible: opacity > 0
         opacity: enabled ? 1.0 : 0.0
         Behavior on opacity { FadeAnimation { } }
@@ -301,9 +310,19 @@ SilicaFlickable {
         }
         horizontalAlignment: Text.AlignHCenter
         color: Theme.highlightColor
-        opacity: _loading ? 1 : 0
+        opacity: loading ? 1 : 0
         visible: opacity > 0
         Behavior on opacity { FadeAnimation {} }
-        text: bookModel ? _loadingTextLabel[bookModel.resetReason] : ""
+        text: bookModel ? (bookModel.resetReason == BookModel.ReasonLoading ?
+            //% "Loading..."
+            qsTrId("harbour-books-book-view-loading") :
+            bookModel.resetReason == BookModel.ReasonIncreasingFontSize ?
+            //% "Applying larger fonts..."
+            qsTrId("harbour-books-book-view-applying_larger_fonts") :
+            bookModel.resetReason == BookModel.ReasonDecreasingFontSize ?
+            //% "Applying smaller fonts..."
+            qsTrId("harbour-books-book-view-applying_smaller_fonts") :
+            //% "Formatting..."
+            qsTrId("harbour-books-book-view-formatting")) : ""
     }
 }

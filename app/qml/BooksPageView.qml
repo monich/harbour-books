@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2015-2016 Jolla Ltd.
+  Copyright (C) 2015-2017 Jolla Ltd.
   Contact: Slava Monich <slava.monich@jolla.com>
 
   You may use this file under the terms of BSD license as follows:
@@ -54,6 +54,7 @@ Item {
     signal footnotePressed(var touchX, var touchY, var text, var url)
     signal browserLinkPressed(var url)
     signal jumpToPage(var page)
+    signal pushPosition(var position)
 
     PageWidget {
         id: widget
@@ -63,6 +64,7 @@ Item {
         onImagePressed: view.imagePressed(imageId, rect)
         onActiveTouch: pressImage.animate(touchX, touchY)
         onJumpToPage: view.jumpToPage(page)
+        onPushPosition: view.pushPosition(position)
         onShowFootnote: view.footnotePressed(touchX,touchY,text,imageId)
     }
 

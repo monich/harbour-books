@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2015-2016 Jolla Ltd.
+  Copyright (C) 2015-2017 Jolla Ltd.
   Contact: Slava Monich <slava.monich@jolla.com>
 
   You may use this file under the terms of BSD license as follows:
@@ -38,29 +38,82 @@ Item {
     id: root
     height: slider.height
 
-    property alias pageCount: slider.maximumValue
+    property var stack
+    property int pageCount
+    property real leftMargin: Theme.horizontalPageMargin
+    property real rightMargin: Theme.horizontalPageMargin
     property alias currentPage: slider.value
     property alias pressed: slider.pressed
-    property alias leftMargin: slider.leftMargin
-    property alias rightMargin: slider.rightMargin
 
     signal pageChanged(var page)
+
+    MouseArea {
+        id: navigateBackArea
+        property bool down: pressed && containsMouse
+        width: navigateBack.width + root.leftMargin
+        height: navigateBack.height
+        anchors {
+            left: parent.left
+            verticalCenter: parent.verticalCenter
+        }
+        onClicked: stack.back()
+    }
+
+
+    IconButton {
+        id: navigateBack
+        icon.source: "image://theme/icon-m-left?" + Settings.primaryPageToolColor
+        down: navigateBackArea.down || (pressed && containsMouse)
+        anchors {
+            left: parent.left
+            leftMargin: root.leftMargin
+            verticalCenter: parent.verticalCenter
+        }
+        onClicked: stack.back()
+    }
 
     BooksPageSlider {
         id: slider
         anchors {
-            left: parent.left
-            right: parent.right
+            left: navigateBack.right
+            right: navigateForwardArea.left
             bottom: parent.bottom
         }
         stepSize: 1
         minimumValue: 0
+        maximumValue: pageCount > 0 ? pageCount - 1 : 0
         valueText: ""
         label: ""
+        leftMargin: Theme.horizontalPageMargin
+        rightMargin: Theme.horizontalPageMargin
         primaryColor: Settings.primaryPageToolColor
         secondaryColor: Settings.primaryPageToolColor
         highlightColor: Settings.highlightPageToolColor
         secondaryHighlightColor: Settings.highlightPageToolColor
         onSliderValueChanged: root.pageChanged(value)
+    }
+
+    MouseArea {
+        id: navigateForwardArea
+        property bool down: pressed && containsMouse
+        width: navigateForward.width + root.rightMargin
+        height: navigateForward.height
+        anchors {
+            right: parent.right
+            verticalCenter: parent.verticalCenter
+        }
+        onClicked: stack.forward()
+    }
+
+    IconButton {
+        id: navigateForward
+        icon.source: "image://theme/icon-m-right?" + Settings.primaryPageToolColor
+        down: navigateForwardArea.down || (pressed && containsMouse)
+        anchors {
+            right: parent.right
+            rightMargin: root.rightMargin
+            verticalCenter: parent.verticalCenter
+        }
+        onClicked: stack.forward()
     }
 }

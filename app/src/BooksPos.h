@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015-2016 Jolla Ltd.
+ * Copyright (C) 2015-2017 Jolla Ltd.
  * Contact: Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
@@ -34,6 +34,7 @@
 #ifndef BOOKS_POSITION_H
 #define BOOKS_POSITION_H
 
+#include <QMetaType>
 #include <QVariant>
 #include <QDebug>
 #include <QList>
@@ -46,6 +47,7 @@ struct BooksPos {
     typedef QList<BooksPos> List;
     typedef QList<BooksPos>::iterator Iterator;
     typedef QList<BooksPos>::const_iterator ConstIterator;
+    struct Stack { List iList; int iPos; };
 
     BooksPos() :
         iParagraphIndex(-1),
@@ -78,6 +80,13 @@ struct BooksPos {
     bool valid() const
     {
         return iParagraphIndex >= 0 && iElementIndex >= 0 && iCharIndex >= 0;
+    }
+
+    void set(int aParagraphIndex, int aElementIndex, int aCharIndex)
+    {
+        iParagraphIndex = aParagraphIndex;
+        iElementIndex = aElementIndex;
+        iCharIndex = aCharIndex;
     }
 
     QVariant toVariant() const
@@ -124,8 +133,7 @@ struct BooksPos {
                (iParagraphIndex > aPos.iParagraphIndex) ?  false :
                (iElementIndex < aPos.iElementIndex) ? true :
                (iElementIndex > aPos.iElementIndex) ? false :
-               (iCharIndex < aPos.iCharIndex) ?  true :
-               (iCharIndex > aPos.iCharIndex) ?  false : true;
+               (iCharIndex < aPos.iCharIndex);
     }
 
     bool operator > (const BooksPos& aPos) const
@@ -159,7 +167,7 @@ struct BooksPos {
 
     QString toString() const
     {
-        return QString("BooksPos(%1,%2,%3)").arg(iParagraphIndex).
+        return QString("(%1,%2,%3)").arg(iParagraphIndex).
             arg(iElementIndex).arg(iCharIndex);
     }
 
@@ -172,5 +180,7 @@ struct BooksPos {
 
 inline QDebug& operator<<(QDebug& aDebug, const BooksPos& aPos)
     { aDebug << qPrintable(aPos.toString()); return aDebug; }
+
+Q_DECLARE_METATYPE(BooksPos)
 
 #endif /* BOOKS_POSITION_H */

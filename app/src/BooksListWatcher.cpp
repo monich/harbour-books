@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015-2016 Jolla Ltd.
+ * Copyright (C) 2015-2017 Jolla Ltd.
  * Contact: Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
@@ -37,6 +37,8 @@
 
 #define LISTVIEW_CONTENT_X              "contentX"
 #define LISTVIEW_CONTENT_Y              "contentY"
+#define LISTVIEW_CONTENT_WIDTH          "contentWidth"
+#define LISTVIEW_CONTENT_HEIGHT         "contentHeight"
 #define LISTVIEW_INDEX_AT               "indexAt"
 #define LISTVIEW_POSITION_VIEW_AT_INDEX "positionViewAtIndex"
 
@@ -48,7 +50,6 @@ BooksListWatcher::BooksListWatcher(QObject* aParent) :
     iListView(NULL),
     iCenterMode(-1),
     iPositionIsChanging(false),
-    iCanRetry(true),
     iResizeTimer(new QTimer(this))
 {
     iResizeTimer->setSingleShot(true);
@@ -63,7 +64,6 @@ void BooksListWatcher::setListView(QQuickItem* aView)
         if (iListView) iListView->disconnect(this);
         iListView = aView;
         iCenterMode = -1;
-        iCanRetry = true;
         if (iListView) {
             connect(iListView,
                 SIGNAL(widthChanged()),
@@ -120,46 +120,47 @@ void BooksListWatcher::positionViewAtIndex(int aIndex)
 {
     if (iListView) {
         HDEBUG(aIndex);
-        if (iCenterMode < 0) {
-            bool ok = false;
-            const QMetaObject* metaObject = iListView->metaObject();
-            if (metaObject) {
-                int index = metaObject->indexOfEnumerator("PositionMode");
-                if (index >= 0) {
-                    QMetaEnum metaEnum = metaObject->enumerator(index);
-                    int value = metaEnum.keyToValue("Center", &ok);
-                    if (ok) {
-                        iCenterMode = value;
-                        HDEBUG("Center =" << iCenterMode);
-                    }
+        doPositionViewAtIndex(aIndex);
+    }
+}
+
+void BooksListWatcher::doPositionViewAtIndex(int aIndex)
+{
+    if (iCenterMode < 0) {
+        bool ok = false;
+        const QMetaObject* metaObject = iListView->metaObject();
+        if (metaObject) {
+            int index = metaObject->indexOfEnumerator("PositionMode");
+            if (index >= 0) {
+                QMetaEnum metaEnum = metaObject->enumerator(index);
+                int value = metaEnum.keyToValue("Center", &ok);
+                if (ok) {
+                    iCenterMode = value;
+                    HDEBUG("Center =" << iCenterMode);
                 }
             }
-            HASSERT(ok);
-            if (!ok) {
-                // This is what it normally is
-                iCenterMode = 1;
-            }
         }
-        iPositionIsChanging = true;
-        positionViewAtIndex(aIndex, iCenterMode);
-        if (iCanRetry) {
-            // This is probably a bug in QQuickListView - it first calculates
-            // the item position and then starts instantiating the delegates.
-            // The very first time the item position always turns out to be
-            // zero because the average item size isn't known yet. So if we
-            // are trying to position the list at a non-zero index and instead
-            // we got positioned at zero, try it again. It doesn't make sense
-            // to retry more than once though.
-            if (aIndex > 0 && getCurrentIndex() == 0) {
-                // Didn't work from the first try, give it another go
-                HDEBUG("retrying...");
-                positionViewAtIndex(aIndex, iCenterMode);
-            }
-            iCanRetry = false;
+        HASSERT(ok);
+        if (!ok) {
+            // This is what it normally is
+            iCenterMode = 1;
         }
-        iPositionIsChanging = false;
-        updateCurrentIndex();
     }
+    iPositionIsChanging = true;
+    positionViewAtIndex(aIndex, iCenterMode);
+    // This is probably a bug in QQuickListView - it first calculates
+    // the item position and then starts instantiating the delegates.
+    // If there are no delegates yet, then the average item size is zero
+    // and the resulting item position will always turn out to be zero.
+    // So if we are trying to position the list at a non-zero index and
+    // instead we got positioned at zero, try it again.
+    if (aIndex > 0 && getCurrentIndex() == 0) {
+        // Didn't work from the first try, give it another go
+        HDEBUG("retrying...");
+        positionViewAtIndex(aIndex, iCenterMode);
+    }
+    iPositionIsChanging = false;
+    updateCurrentIndex();
 }
 
 void BooksListWatcher::positionViewAtIndex(int aIndex, int aMode)
@@ -181,6 +182,16 @@ qreal BooksListWatcher::contentY()
     return getRealProperty(LISTVIEW_CONTENT_Y);
 }
 
+qreal BooksListWatcher::contentWidth()
+{
+    return getRealProperty(LISTVIEW_CONTENT_WIDTH);
+}
+
+qreal BooksListWatcher::contentHeight()
+{
+    return getRealProperty(LISTVIEW_CONTENT_HEIGHT);
+}
+
 int BooksListWatcher::getCurrentIndex()
 {
     if (iListView) {
@@ -194,13 +205,29 @@ int BooksListWatcher::getCurrentIndex()
     return -1;
 }
 
-void BooksListWatcher::updateCurrentIndex()
+void BooksListWatcher::tryToRestoreCurrentIndex()
 {
+    HASSERT(!iPositionIsChanging);
     const int index = getCurrentIndex();
     if (iCurrentIndex != index) {
-        HDEBUG(index);
-        iCurrentIndex = index;
-        Q_EMIT currentIndexChanged();
+        if (iCurrentIndex >= 0) {
+            doPositionViewAtIndex(iCurrentIndex);
+        }
+    }
+}
+
+void BooksListWatcher::updateCurrentIndex()
+{
+    HASSERT(!iPositionIsChanging);
+    if (contentWidth() > 0 || contentHeight() > 0) {
+        const int index = getCurrentIndex();
+        if (iCurrentIndex != index) {
+            iCurrentIndex = index;
+            HDEBUG(index << contentWidth() << "x" << contentHeight());
+            Q_EMIT currentIndexChanged();
+        }
+    } else {
+        HDEBUG(contentWidth() << "x" << contentHeight());
     }
 }
 
@@ -211,6 +238,7 @@ void BooksListWatcher::updateSize()
     if (iSize != size) {
         const QSize oldSize(iSize);
         iSize = size;
+        tryToRestoreCurrentIndex();
         Q_EMIT sizeChanged();
         if (oldSize.width() != iSize.width()) {
             Q_EMIT widthChanged();
@@ -272,6 +300,7 @@ void BooksListWatcher::onContentSizeChanged()
 {
     HASSERT(sender() == iListView);
     if (!iPositionIsChanging) {
+        tryToRestoreCurrentIndex();
         updateCurrentIndex();
     }
 }

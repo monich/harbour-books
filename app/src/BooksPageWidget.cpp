@@ -723,10 +723,10 @@ void BooksPageWidget::onLongPressTaskDone()
         }
     } else if (task->iKind == INTERNAL_HYPERLINK) {
         if (iModel) {
-            int page = iModel->linkToPage(task->iLink);
-            if (page >= 0) {
-                HDEBUG("link to page" << page);
-                Q_EMIT jumpToPage(page);
+            BooksPos pos = iModel->linkPosition(task->iLink);
+            if (pos.valid()) {
+                HDEBUG("link to" << pos);
+                Q_EMIT pushPosition(pos);
             }
         }
     } else if (task->iKind == FOOTNOTE) {

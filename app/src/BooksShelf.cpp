@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015-2016 Jolla Ltd.
+ * Copyright (C) 2015-2017 Jolla Ltd.
  * Contact: Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
@@ -1119,7 +1119,7 @@ void BooksShelf::onCopyTaskDone()
                 copy = task->iDestItem->book();
                 if (copy) {
                     copy->retain();
-                    copy->setLastPos(src->lastPos());
+                    copy->setPageStack(src->pageStack(), src->pageStackPos());
                     copy->setCoverImage(src->coverImage());
                     copy->requestCoverImage();
                 } else {

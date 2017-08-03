@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Jolla Ltd.
+ * Copyright (C) 2015-2017 Jolla Ltd.
  * Contact: Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
@@ -14,7 +14,7 @@
  *     notice, this list of conditions and the following disclaimer in
  *     the documentation and/or other materials provided with the
  *     distribution.
- *   * Neither the name of Nemo Mobile nor the names of its contributors
+ *   * Neither the name of Jolla Ltd nor the names of its contributors
  *     may be used to endorse or promote products derived from this
  *     software without specific prior written permission.
  *
@@ -74,16 +74,17 @@ public:
     static BooksBook* newBook(const BooksStorage& aStorage, QString aRelPath,
         QString aFileName);
 
-    QString title() const { return iTitle; }
-    QString authors() const { return iAuthors; }
-    int fontSizeAdjust() const { return iFontSizeAdjust; }
+    QString title() const;
+    QString authors() const;
+    int fontSizeAdjust() const;
     bool setFontSizeAdjust(int aFontSizeAdjust);
-    BooksPos lastPos() const { return iLastPos; }
-    void setLastPos(const BooksPos& aPos);
-    shared_ptr<Book> bookRef() const { return iBook; }
+    int pageStackPos() const;
+    BooksPos::List pageStack() const;
+    void setPageStack(BooksPos::List aStack, int aStackPos);
+    shared_ptr<Book> bookRef() const;
 
-    bool copyingOut() const { return iCopyingOut; }
-    bool loadingCover() const { return !iCoverTasksDone; }
+    bool copyingOut() const;
+    bool loadingCover() const;
     bool hasCoverImage() const;
     bool requestCoverImage();
     void cancelCoverRequest();
@@ -129,7 +130,8 @@ private:
 private:
     QAtomicInt iRef;
     int iFontSizeAdjust;
-    BooksPos iLastPos;
+    int iPageStackPos;
+    BooksPos::List iPageStack;
     BooksStorage iStorage;
     shared_ptr<Book> iBook;
     QImage iCoverImage;
@@ -149,6 +151,22 @@ private:
 
 QML_DECLARE_TYPE(BooksBook)
 
+inline QString BooksBook::title() const
+    { return iTitle; }
+inline QString BooksBook::authors() const
+    { return iAuthors; }
+inline int BooksBook::fontSizeAdjust() const
+    { return iFontSizeAdjust; }
+inline int BooksBook::pageStackPos() const
+    { return iPageStackPos; }
+inline BooksPos::List BooksBook::pageStack() const
+    { return iPageStack; }
+inline shared_ptr<Book> BooksBook::bookRef() const
+    { return iBook; }
+inline bool BooksBook::copyingOut() const
+    { return iCopyingOut; }
+inline bool BooksBook::loadingCover() const
+    { return !iCoverTasksDone; }
 inline bool BooksBook::isCanceled(CopyOperation* aObserver)
     { return aObserver && aObserver->isCanceled(); }
 inline QImage BooksBook::coverImage() const
