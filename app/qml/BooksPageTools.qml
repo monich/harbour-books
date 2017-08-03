@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2015-2016 Jolla Ltd.
+  Copyright (C) 2015-2017 Jolla Ltd.
   Contact: Slava Monich <slava.monich@jolla.com>
 
   You may use this file under the terms of BSD license as follows:
@@ -46,8 +46,6 @@ Item {
     signal increaseFontSize();
     signal decreaseFontSize();
 
-    property real _spacingBy2: Math.ceil(spacing/2)
-
     // Left side
 
     MouseArea {
@@ -68,8 +66,7 @@ Item {
                 leftMargin: pageTools.leftMargin
                 verticalCenter: parent.verticalCenter
             }
-            height: Math.ceil(parent.height/2)
-            sourceSize.height: height
+            sourceSize.height: Theme.iconSizeMedium
             opacity: Settings.invertColors ? 0.5 : 0
             visible: opacity > 0
             Behavior on opacity { FadeAnimation {} }
@@ -89,7 +86,7 @@ Item {
 
     MouseArea {
         id: increaseFontSizeButton
-        width: leftMargin + increaseFontSizeButtonImage.width + _spacingBy2
+        width: rightMargin + increaseFontSizeButtonImage.width
         height: parent.height
         anchors {
             right: parent.right
@@ -100,11 +97,9 @@ Item {
             source: "images/font-larger.svg"
             anchors {
                 left: parent.left
-                leftMargin: _spacingBy2
                 verticalCenter: parent.verticalCenter
             }
-            height: Math.ceil(parent.height/2)
-            sourceSize.height: height
+            sourceSize.height: Theme.iconSizeSmall
             opacity: Settings.invertColors ? 1 : 0.5
             Behavior on opacity { FadeAnimation {} }
         }
@@ -113,7 +108,7 @@ Item {
 
     MouseArea {
         id: decreaseFontSizeButton
-        width: decreaseFontSizeButtonImage.width + spacing + _spacingBy2
+        width: decreaseFontSizeButtonImage.width + spacing
         height: parent.height
         anchors {
             right: increaseFontSizeButton.left
@@ -124,11 +119,9 @@ Item {
             source: "images/font-smaller.svg"
             anchors {
                 right: parent.right
-                rightMargin: _spacingBy2
                 verticalCenter: parent.verticalCenter
             }
-            height: Math.ceil(parent.height/2)
-            sourceSize.height: height
+            sourceSize.height: increaseFontSizeButtonImage.height
             opacity: Settings.invertColors ? 1 : 0.5
             Behavior on opacity { FadeAnimation {} }
         }

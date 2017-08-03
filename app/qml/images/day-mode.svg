@@ -9,8 +9,8 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="100"
-   height="100"
+   width="64"
+   height="64"
    id="svg3832"
    version="1.1"
    inkscape:version="0.48.4 r9939"
@@ -25,7 +25,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -33,9 +33,10 @@
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1"
-     transform="translate(0,-952.36218)">
+     transform="translate(0,-988.36218)">
     <g
-       transform="matrix(2.0833333,0,0,2.0833333,7.9999999e-7,952.36218)">
+       transform="translate(8,996.36218)"
+       id="g6">
       <rect
          id="rect3842"
          height="48"
