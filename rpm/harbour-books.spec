@@ -1,6 +1,6 @@
 Name:           harbour-books
 Summary:        E-book reader
-Version:        1.0.20
+Version:        1.0.21
 Release:        1
 License:        BSD
 Group:          Applications/File
@@ -57,6 +57,9 @@ desktop-file-install --delete-original \
 make -C test test
 
 %changelog
+* Thu Aug 03 2017 Slava Monich <slava.monich@jolla.com> 1.0.21
+- Implemented position stack (history)
+
 * Sat Jan 28 2017 Slava Monich <slava.monich@jolla.com> 1.0.20
 - Ignore images with display:none
 
