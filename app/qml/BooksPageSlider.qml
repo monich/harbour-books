@@ -204,7 +204,10 @@ MouseArea {
         color: slider.highlighted ? highlightColor : primaryColor
         Behavior on width {
             enabled: !_widthChanged
-            SmoothedAnimation { velocity: 1500 }
+            SmoothedAnimation {
+                velocity: 1500
+                duration: 500
+            }
         }
     }
 
@@ -235,7 +238,10 @@ MouseArea {
         color: slider.highlighted ? highlightColor : primaryColor
         Behavior on x {
             enabled: !_widthChanged
-            SmoothedAnimation { velocity: 1500 }
+            SmoothedAnimation {
+                velocity: 1500
+                duration: 500
+            }
         }
     }
 
