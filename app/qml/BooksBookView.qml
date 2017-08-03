@@ -49,6 +49,7 @@ SilicaFlickable {
     readonly property var _visibilityStates: [
         { pager: false, page: false, title: false, tools: false },
         { pager: false, page: true,  title: true,  tools: false },
+        { pager: true,  page: true,  title: true,  tools: false },
         { pager: true,  page: true,  title: true,  tools: true  }
     ]
 
