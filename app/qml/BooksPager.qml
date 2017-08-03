@@ -40,12 +40,34 @@ Item {
 
     property var stack
     property int pageCount
+    readonly property bool haveHistory: stack && stack.count > 1
+    readonly property bool canGoBack: haveHistory && stack.currentIndex > 0
+    readonly property bool canGoForward: haveHistory && (stack.currentIndex < (stack.count - 1))
     property real leftMargin: Theme.horizontalPageMargin
     property real rightMargin: Theme.horizontalPageMargin
     property alias currentPage: slider.value
     property alias pressed: slider.pressed
 
     signal pageChanged(var page)
+
+    states: [
+        State {
+            name: "history"
+            when:  haveHistory
+            PropertyChanges {
+                target: slider
+                x: navigateBack.x + navigateBack.width
+            }
+        },
+        State {
+            name: "default"
+            when: !haveHistory
+            PropertyChanges {
+                target: slider
+                x: 0
+            }
+        }
+    ]
 
     MouseArea {
         id: navigateBackArea
@@ -57,12 +79,15 @@ Item {
             verticalCenter: parent.verticalCenter
         }
         onClicked: stack.back()
+        onPressAndHold: stack.clear()
     }
-
 
     IconButton {
         id: navigateBack
         icon.source: "image://theme/icon-m-left?" + Settings.primaryPageToolColor
+        opacity: canGoBack ? 1 : 0
+        visible: opacity > 0
+        Behavior on opacity { FadeAnimation {} }
         down: navigateBackArea.down || (pressed && containsMouse)
         anchors {
             left: parent.left
@@ -70,15 +95,15 @@ Item {
             verticalCenter: parent.verticalCenter
         }
         onClicked: stack.back()
+        onPressAndHold: stack.clear()
     }
 
     BooksPageSlider {
         id: slider
         anchors {
-            left: navigateBack.right
-            right: navigateForwardArea.left
             bottom: parent.bottom
         }
+        width: parent.width - 2*x
         stepSize: 1
         minimumValue: 0
         maximumValue: pageCount > 0 ? pageCount - 1 : 0
@@ -91,6 +116,7 @@ Item {
         highlightColor: Settings.highlightPageToolColor
         secondaryHighlightColor: Settings.highlightPageToolColor
         onSliderValueChanged: root.pageChanged(value)
+        Behavior on x { SmoothedAnimation { duration: 250 } }
     }
 
     MouseArea {
@@ -103,17 +129,22 @@ Item {
             verticalCenter: parent.verticalCenter
         }
         onClicked: stack.forward()
+        onPressAndHold: stack.clear()
     }
 
     IconButton {
         id: navigateForward
         icon.source: "image://theme/icon-m-right?" + Settings.primaryPageToolColor
         down: navigateForwardArea.down || (pressed && containsMouse)
+        opacity: canGoForward ? 1 : 0
+        visible: opacity > 0
+        Behavior on opacity { FadeAnimation {} }
         anchors {
             right: parent.right
             rightMargin: root.rightMargin
             verticalCenter: parent.verticalCenter
         }
         onClicked: stack.forward()
+        onPressAndHold: stack.clear()
     }
 }
