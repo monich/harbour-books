@@ -109,10 +109,13 @@ SOURCES += \
   src/BooksImportModel.cpp \
   src/BooksListWatcher.cpp \
   src/BooksLoadingProperty.cpp \
+  src/BooksMediaPlugin.cpp \
   src/BooksPageStack.cpp \
   src/BooksPageWidget.cpp \
   src/BooksPaintContext.cpp \
   src/BooksPathModel.cpp \
+  src/BooksPluginLoader.cpp \
+  src/BooksPolicyPlugin.cpp \
   src/BooksSaveTimer.cpp \
   src/BooksSettings.cpp \
   src/BooksShelf.cpp \
@@ -151,10 +154,13 @@ HEADERS += \
   src/BooksItem.h \
   src/BooksListWatcher.h \
   src/BooksLoadingProperty.h \
+  src/BooksMediaPlugin.h \
   src/BooksPageStack.h \
   src/BooksPageWidget.h \
   src/BooksPaintContext.h \
   src/BooksPathModel.h \
+  src/BooksPluginLoader.h \
+  src/BooksPolicyPlugin.h \
   src/BooksPos.h \
   src/BooksSaveTimer.h \
   src/BooksSettings.h \

@@ -34,6 +34,9 @@ import QtQuick 2.0
 import Sailfish.Silica 1.0
 import harbour.books 1.0
 
+//import Sailfish.Media 1.0         // Not allowed
+//import org.nemomobile.policy 1.0  // Not allowed
+
 SilicaFlickable {
     id: root
 
@@ -57,9 +60,20 @@ SilicaFlickable {
         (!imageView || !imageView.visible) &&
         (!footnoteView || !footnoteView.visible)
 
+    readonly property bool viewActive: Qt.application.active && book
+    readonly property bool haveVolumeUpAction: Settings.volumeUpAction !== BooksSettings.ActionNone
+    readonly property bool haveVolumeDownAction: Settings.volumeDownAction !== BooksSettings.ActionNone
+    readonly property bool haveKeyAction: haveVolumeUpAction || haveVolumeDownAction
+
     property var linkMenu
     property var imageView
     property var footnoteView
+
+    function hideViews() {
+        if (linkMenu) linkMenu.hide()
+        if (imageView) imageView.hide()
+        if (footnoteView) footnoteView.hide()
+    }
 
     onOrientationChanged: {
         if (footnoteView) {
@@ -111,6 +125,7 @@ SilicaFlickable {
         opacity: loading ? 0 : 1
         visible: opacity > 0
         interactive: root.interactive
+        readonly property real maxContentX: Math.max(0, contentWidth - width)
         readonly property int currentPage: stackModel.currentPage
         property bool completed
 
@@ -143,7 +158,7 @@ SilicaFlickable {
                 }
             }
             function updateModel() {
-                if (linkMenu) linkMenu.hide()
+                hideViews()
                 //console.trace()
                 stackModel.currentPage = currentIndex
                 if (!pager.pressed) {
@@ -210,6 +225,32 @@ SilicaFlickable {
                     resetPager.restart()
                 }
             }
+        }
+
+        function prevPage() {
+            if (!scrollAnimation.running && contentX > 0) {
+                hideViews();
+                scrollAnimation.from = contentX
+                scrollAnimation.to = Math.max(0, contentX - width - spacing)
+                scrollAnimation.start()
+            }
+        }
+
+        function nextPage() {
+            if (!scrollAnimation.running && contentX < maxContentX) {
+                hideViews();
+                scrollAnimation.from = contentX
+                scrollAnimation.to = Math.min(maxContentX, contentX + width + spacing)
+                scrollAnimation.start()
+            }
+        }
+
+        NumberAnimation {
+            id: scrollAnimation
+            target: bookView
+            property: "contentX"
+            duration: 500
+            easing.type: Easing.InOutQuad
         }
 
         Behavior on opacity { FadeAnimation {} }
@@ -325,5 +366,49 @@ SilicaFlickable {
             qsTrId("harbour-books-book-view-applying_smaller_fonts") :
             //% "Formatting..."
             qsTrId("harbour-books-book-view-formatting")) : ""
+    }
+
+    function performAction(action)
+    {
+        switch (action) {
+        case BooksSettings.ActionPreviousPage:
+            bookView.prevPage()
+            return
+        case BooksSettings.ActionNextPage:
+            bookView.nextPage()
+            return
+        }
+    }
+
+    MediaKey {
+        enabled: viewActive && haveVolumeUpAction
+        key: Qt.Key_VolumeUp
+        onPressed: volumeUpAction()
+        onRepeat: volumeUpAction()
+        function volumeUpAction() {
+            performAction(Settings.volumeUpAction)
+        }
+    }
+
+    MediaKey {
+        enabled: viewActive && haveVolumeDownAction
+        key: Qt.Key_VolumeDown
+        onPressed: volumeDownAction()
+        onRepeat: volumeDownAction()
+        function volumeDownAction() {
+            performAction(Settings.volumeDownAction)
+        }
+    }
+
+    Permissions {
+        enabled: viewActive && haveKeyAction
+        autoRelease: true
+        applicationClass: "camera"
+
+        Resource {
+            id: volumeKeysResource
+            type: Resource.ScaleButton
+            optional: true
+        }
     }
 }

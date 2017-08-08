@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015-2016 Jolla Ltd.
+ * Copyright (C) 2015-2017 Jolla Ltd.
  * Contact: Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
@@ -42,21 +42,26 @@
 
 #include <MGConfItem>
 
-#define DCONF_PATH              BOOKS_DCONF_ROOT
-#define KEY_FONT_SIZE           "fontSize"
-#define KEY_PAGE_DETAILS        "pageDetails"
-#define KEY_CURRENT_BOOK        "currentBook"
-#define KEY_CURRENT_FOLDER      "currentFolder"
-#define KEY_REMOVABLE_ROOT      "removableRoot"
-#define KEY_INVERT_COLORS       "invertColors"
-#define KEY_ORIENTATION         "orientation"
-#define DEFAULT_FONT_SIZE       0
-#define DEFAULT_PAGE_DETAILS    0
-#define DEFAULT_CURRENT_BOOK    QString()
-#define DEFAULT_CURRENT_FOLDER  QString()
-#define DEFAULT_REMOVABLE_ROOT  "Books"
-#define DEFAULT_INVERT_COLORS   false
-#define DEFAULT_ORIENTATION     (BooksSettings::OrientationAny)
+#define DCONF_PATH                  BOOKS_DCONF_ROOT
+#define KEY_FONT_SIZE               "fontSize"
+#define KEY_PAGE_DETAILS            "pageDetails"
+#define KEY_CURRENT_BOOK            "currentBook"
+#define KEY_CURRENT_FOLDER          "currentFolder"
+#define KEY_REMOVABLE_ROOT          "removableRoot"
+#define KEY_INVERT_COLORS           "invertColors"
+#define KEY_VOLUME_UP_ACTION        "volumeUpAction"
+#define KEY_VOLUME_DOWN_ACTION      "volumeDownAction"
+#define KEY_ORIENTATION             "orientation"
+
+#define DEFAULT_FONT_SIZE           0
+#define DEFAULT_PAGE_DETAILS        0
+#define DEFAULT_CURRENT_BOOK        QString()
+#define DEFAULT_CURRENT_FOLDER      QString()
+#define DEFAULT_REMOVABLE_ROOT      "Books"
+#define DEFAULT_INVERT_COLORS       false
+#define DEFAULT_VOLUME_UP_ACTION    (BooksSettings::ActionNextPage)
+#define DEFAULT_VOLUME_DOWN_ACTION  (BooksSettings::ActionPreviousPage)
+#define DEFAULT_ORIENTATION         (BooksSettings::OrientationAny)
 
 #define PAGETOOL_COLOR                      QColor(128,128,128) // any bg
 #define NORMAL_PAGETOOL_HIGHLIGHT_COLOR     QColor(64,64,64)    // on white
@@ -214,6 +219,7 @@ public:
     QString currentFolder() const;
     shared_ptr<ZLTextStyle> textStyle(int aFontSizeAdjust) const;
     void setCurrentBook(QObject* aBook);
+    static Action getAction(MGConfItem* aItem, Action aDefault);
 
 private Q_SLOTS:
     void onFontSizeValueChanged();
@@ -226,6 +232,8 @@ public:
     MGConfItem* iFontSizeConf;
     MGConfItem* iPageDetailsConf;
     MGConfItem* iInvertColorsConf;
+    MGConfItem* iVolumeUpActionConf;
+    MGConfItem* iVolumeDownActionConf;
     MGConfItem* iCurrentFolderConf;
     MGConfItem* iCurrentBookPathConf;
     MGConfItem* iOrientationConf;
@@ -244,6 +252,8 @@ BooksSettings::Private::Private(BooksSettings* aParent) :
     iFontSizeConf(new MGConfItem(DCONF_PATH KEY_FONT_SIZE, this)),
     iPageDetailsConf(new MGConfItem(DCONF_PATH KEY_PAGE_DETAILS, this)),
     iInvertColorsConf(new MGConfItem(DCONF_PATH KEY_INVERT_COLORS, this)),
+    iVolumeUpActionConf(new MGConfItem(DCONF_PATH KEY_VOLUME_UP_ACTION, this)),
+    iVolumeDownActionConf(new MGConfItem(DCONF_PATH KEY_VOLUME_DOWN_ACTION, this)),
     iCurrentFolderConf(new MGConfItem(DCONF_PATH KEY_CURRENT_FOLDER, this)),
     iCurrentBookPathConf(new MGConfItem(DCONF_PATH KEY_CURRENT_BOOK, this)),
     iOrientationConf(new MGConfItem(DCONF_PATH KEY_ORIENTATION, this)),
@@ -257,6 +267,8 @@ BooksSettings::Private::Private(BooksSettings* aParent) :
     connect(iPageDetailsConf, SIGNAL(valueChanged()), iParent, SIGNAL(pageDetailsChanged()));
     connect(iInvertColorsConf, SIGNAL(valueChanged()), iParent, SIGNAL(invertColorsChanged()));
     connect(iInvertColorsConf, SIGNAL(valueChanged()), iParent, SIGNAL(pageBackgroundColorChanged()));
+    connect(iVolumeUpActionConf, SIGNAL(valueChanged()), iParent, SIGNAL(volumeUpActionChanged()));
+    connect(iVolumeDownActionConf, SIGNAL(valueChanged()), iParent, SIGNAL(volumeDownActionChanged()));
     connect(iOrientationConf, SIGNAL(valueChanged()), iParent, SIGNAL(orientationChanged()));
     connect(iRemovableRootConf, SIGNAL(valueChanged()), iParent, SIGNAL(removableRootChanged()));
 }
@@ -405,11 +417,29 @@ BooksSettings::Private::onCurrentBookPathChanged()
     }
 }
 
+BooksSettings::Action
+BooksSettings::Private::getAction(
+    MGConfItem* aItem,
+    Action aDefault)
+{
+    // Need to cast int to enum right away to force "enumeration value not
+    // handled in switch" warning if we miss one of the actions:
+    Action value = (Action)aItem->value(aDefault).toInt();
+    switch (value) {
+    case ActionNone:
+    case ActionPreviousPage:
+    case ActionNextPage:
+        return value;
+    }
+    return aDefault;
+}
+
 // ==========================================================================
 // BooksSettings
 // ==========================================================================
 
-BooksSettings::BooksSettings() :
+BooksSettings::BooksSettings(QObject* aParent) :
+    QObject(aParent),
     iPrivate(new Private(this))
 {
 }
@@ -511,6 +541,36 @@ BooksSettings::setInvertColors(
 {
     HDEBUG(aValue);
     iPrivate->iInvertColorsConf->set(aValue);
+}
+
+BooksSettings::Action
+BooksSettings::volumeUpAction() const
+{
+    return Private::getAction(iPrivate->iVolumeUpActionConf,
+        DEFAULT_VOLUME_UP_ACTION);
+}
+
+void
+BooksSettings::setVolumeUpAction(
+    int aValue)
+{
+    HDEBUG(aValue);
+    iPrivate->iVolumeUpActionConf->set(aValue);
+}
+
+BooksSettings::Action
+BooksSettings::volumeDownAction() const
+{
+    return Private::getAction(iPrivate->iVolumeDownActionConf,
+        DEFAULT_VOLUME_DOWN_ACTION);
+}
+
+void
+BooksSettings::setVolumeDownAction(
+    int aValue)
+{
+    HDEBUG(aValue);
+    iPrivate->iVolumeDownActionConf->set(aValue);
 }
 
 QString

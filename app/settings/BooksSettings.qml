@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2016 Jolla Ltd.
+  Copyright (C) 2016-2017 Jolla Ltd.
   Contact: Slava Monich <slava.monich@jolla.com>
 
   You may use this file under the terms of BSD license as follows:
@@ -76,6 +76,12 @@ Page {
                 //: Settings page header
                 //% "Books"
                 title: qsTrId("harbour-books-settings-page-header")
+            }
+
+            SectionHeader {
+                //: Section header for display settings
+                //% "Display"
+                text: qsTrId("harbour-books-settings-page-display-section_header")
             }
 
             Slider {
@@ -159,6 +165,28 @@ Page {
                         orientationComboBox.currentIndex = index
                     }
                 }
+            }
+
+            SectionHeader {
+                //: Section header for media keys
+                //% "Media keys"
+                text: qsTrId("harbour-books-settings-page-media-keys-section_header")
+            }
+
+            BooksActionSelector {
+                //: Combo box label
+                //% "Volume up"
+                label: qsTrId("harbour-books-settings-page-volume_up-label")
+                key: rootPath + "volumeUpAction"
+                defaultValue: 2 // BooksSettings.ActionNextPage
+            }
+
+            BooksActionSelector {
+                //: Combo box label
+                //% "Volume down"
+                label: qsTrId("harbour-books-settings-page-volume_down-label")
+                key: rootPath + "volumeDownAction"
+                defaultValue: 1 // BooksSettings.ActionPreviousPage
             }
 
             SectionHeader {

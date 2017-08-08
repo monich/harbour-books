@@ -99,10 +99,30 @@
         <extracomment>Import page placeholder</extracomment>
         <translation>Uusia kirjoja ei löytynyt</translation>
     </message>
+    <message id="harbour-books-book-browser_link-title">
+        <source>Link</source>
+        <extracomment>External link menu title</extracomment>
+        <translation type="unfinished">Linkki</translation>
+    </message>
+    <message id="harbour-books-book-browser_link-open_in_browser">
+        <source>Open in browser</source>
+        <extracomment>Open link in browser</extracomment>
+        <translation type="unfinished">Avaa selaimessa</translation>
+    </message>
+    <message id="harbour-books-book-browser_link-copy_to_clipboard">
+        <source>Copy to clipboard</source>
+        <extracomment>Copy link to clipboard</extracomment>
+        <translation>Kopioi leikepöydälle</translation>
+    </message>
     <message id="harbour-books-settings-page-header">
         <source>Books</source>
         <extracomment>Settings page header</extracomment>
         <translation>Kirjat</translation>
+    </message>
+    <message id="harbour-books-settings-page-display-section_header">
+        <source>Display</source>
+        <extracomment>Section header for display settings</extracomment>
+        <translation type="unfinished">Näyttö</translation>
     </message>
     <message id="harbour-books-settings-page-font_size_label">
         <source>Font size</source>
@@ -134,6 +154,36 @@
         <extracomment>Combo box value for landscape orientation</extracomment>
         <translation>Vaaka</translation>
     </message>
+    <message id="harbour-books-settings-page-action-none">
+        <source>No action</source>
+        <extracomment>Combo box value for no action</extracomment>
+        <translation type="unfinished">Ei käytössä</translation>
+    </message>
+    <message id="harbour-books-settings-page-action-previous_page">
+        <source>Previous page</source>
+        <extracomment>Combo box value for previous page action</extracomment>
+        <translation type="unfinished">Edelliselle sivulle</translation>
+    </message>
+    <message id="harbour-books-settings-page-action-next_page">
+        <source>Next page</source>
+        <extracomment>Combo box value for next page action</extracomment>
+        <translation type="unfinished">Seuraavalle sivulle</translation>
+    </message>
+    <message id="harbour-books-settings-page-media-keys-section_header">
+        <source>Media keys</source>
+        <extracomment>Section header for media keys</extracomment>
+        <translation type="unfinished">Media näppäimet</translation>
+    </message>
+    <message id="harbour-books-settings-page-volume_up-label">
+        <source>Volume up</source>
+        <extracomment>Combo box label</extracomment>
+        <translation type="unfinished">Äänenvoimakkuus ylös</translation>
+    </message>
+    <message id="harbour-books-settings-page-volume_down-label">
+        <source>Volume down</source>
+        <extracomment>Combo box label</extracomment>
+        <translation type="unfinished">Äänenvoimakkuus alas</translation>
+    </message>
     <message id="harbour-books-settings-page-removable-section_header">
         <source>Memory card</source>
         <extracomment>Section header for memory card settings</extracomment>
@@ -148,22 +198,6 @@
         <source>Leave the folder name empty to scan the entire memory card for books.</source>
         <extracomment>Settings field description</extracomment>
         <translation type="unfinished">Jätä kenttä tyhjäksi käyttää kokonaista muistikorttia.</translation>
-    </message>
-    <message id="harbour-books-book-browser_link-title">
-        <source>Link</source>
-        <oldsource>External link</oldsource>
-        <extracomment>External link menu title</extracomment>
-        <translation type="unfinished">Linkki</translation>
-    </message>
-    <message id="harbour-books-book-browser_link-open_in_browser">
-        <source>Open in browser</source>
-        <extracomment>Open link in browser</extracomment>
-        <translation type="unfinished">Avaa selaimessa</translation>
-    </message>
-    <message id="harbour-books-book-browser_link-copy_to_clipboard">
-        <source>Copy to clipboard</source>
-        <extracomment>Copy link to clipboard</extracomment>
-        <translation>Kopioi leikepöydälle</translation>
     </message>
 </context>
 </TS>

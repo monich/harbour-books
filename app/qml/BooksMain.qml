@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2015-2016 Jolla Ltd.
+  Copyright (C) 2015-2017 Jolla Ltd.
   Contact: Slava Monich <slava.monich@jolla.com>
 
   You may use this file under the terms of BSD license as follows:
@@ -39,9 +39,9 @@ ApplicationWindow {
     allowedOrientations: {
         switch (Settings.orientation) {
         default:
-        case Settings.OrientationAny: return Orientation.All
-        case Settings.OrientationPortrait: return Orientation.Portrait
-        case Settings.OrientationLandscape: return Orientation.Landscape
+        case BooksSettings.OrientationAny: return Orientation.All
+        case BooksSettings.OrientationPortrait: return Orientation.Portrait
+        case BooksSettings.OrientationLandscape: return Orientation.Landscape
         }
     }
 

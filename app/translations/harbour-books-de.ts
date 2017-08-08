@@ -99,10 +99,30 @@
         <extracomment>Import page placeholder</extracomment>
         <translation>Keine neuen Bücher gefunden</translation>
     </message>
+    <message id="harbour-books-book-browser_link-title">
+        <source>Link</source>
+        <extracomment>External link menu title</extracomment>
+        <translation type="unfinished">Link</translation>
+    </message>
+    <message id="harbour-books-book-browser_link-open_in_browser">
+        <source>Open in browser</source>
+        <extracomment>Open link in browser</extracomment>
+        <translation type="unfinished">Im Browser öffnen</translation>
+    </message>
+    <message id="harbour-books-book-browser_link-copy_to_clipboard">
+        <source>Copy to clipboard</source>
+        <extracomment>Copy link to clipboard</extracomment>
+        <translation>In Zwischenablage kopieren</translation>
+    </message>
     <message id="harbour-books-settings-page-header">
         <source>Books</source>
         <extracomment>Settings page header</extracomment>
         <translation>Bücher</translation>
+    </message>
+    <message id="harbour-books-settings-page-display-section_header">
+        <source>Display</source>
+        <extracomment>Section header for display settings</extracomment>
+        <translation type="unfinished">Display</translation>
     </message>
     <message id="harbour-books-settings-page-font_size_label">
         <source>Font size</source>
@@ -134,6 +154,36 @@
         <extracomment>Combo box value for landscape orientation</extracomment>
         <translation>Querformat</translation>
     </message>
+    <message id="harbour-books-settings-page-action-none">
+        <source>No action</source>
+        <extracomment>Combo box value for no action</extracomment>
+        <translation type="unfinished">Keine Aktion</translation>
+    </message>
+    <message id="harbour-books-settings-page-action-previous_page">
+        <source>Previous page</source>
+        <extracomment>Combo box value for previous page action</extracomment>
+        <translation type="unfinished">Vorherige Seite</translation>
+    </message>
+    <message id="harbour-books-settings-page-action-next_page">
+        <source>Next page</source>
+        <extracomment>Combo box value for next page action</extracomment>
+        <translation type="unfinished">Folge Seite</translation>
+    </message>
+    <message id="harbour-books-settings-page-media-keys-section_header">
+        <source>Media keys</source>
+        <extracomment>Section header for media keys</extracomment>
+        <translation type="unfinished">Medienschlüssel</translation>
+    </message>
+    <message id="harbour-books-settings-page-volume_up-label">
+        <source>Volume up</source>
+        <extracomment>Combo box label</extracomment>
+        <translation type="unfinished">Lautstärke erhöhen</translation>
+    </message>
+    <message id="harbour-books-settings-page-volume_down-label">
+        <source>Volume down</source>
+        <extracomment>Combo box label</extracomment>
+        <translation type="unfinished">Lautstärke runter</translation>
+    </message>
     <message id="harbour-books-settings-page-removable-section_header">
         <source>Memory card</source>
         <extracomment>Section header for memory card settings</extracomment>
@@ -148,22 +198,6 @@
         <source>Leave the folder name empty to scan the entire memory card for books.</source>
         <extracomment>Settings field description</extracomment>
         <translation type="unfinished">Lassen Sie den Verzeichnisnamen leer, um die gesamte Speicherkarte für Bücher zu scannen.</translation>
-    </message>
-    <message id="harbour-books-book-browser_link-title">
-        <source>Link</source>
-        <oldsource>External link</oldsource>
-        <extracomment>External link menu title</extracomment>
-        <translation type="unfinished">Link</translation>
-    </message>
-    <message id="harbour-books-book-browser_link-open_in_browser">
-        <source>Open in browser</source>
-        <extracomment>Open link in browser</extracomment>
-        <translation type="unfinished">Im Browser öffnen</translation>
-    </message>
-    <message id="harbour-books-book-browser_link-copy_to_clipboard">
-        <source>Copy to clipboard</source>
-        <extracomment>Copy link to clipboard</extracomment>
-        <translation>In Zwischenablage kopieren</translation>
     </message>
 </context>
 </TS>

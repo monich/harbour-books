@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015-2016 Jolla Ltd.
+ * Copyright (C) 2015-2017 Jolla Ltd.
  * Contact: Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
@@ -36,6 +36,8 @@
 #include "BooksPaintContext.h"
 #include "BooksDialogManager.h"
 #include "BooksImageProvider.h"
+#include "BooksMediaPlugin.h"
+#include "BooksPolicyPlugin.h"
 #include "BooksSettings.h"
 
 #include "HarbourDebug.h"
@@ -199,9 +201,15 @@ void ZLibrary::run(ZLApplication* aApp)
 
     QQuickView* view = SailfishApp::createView();
     QQmlContext* root = view->rootContext();
+    QQmlEngine* engine = root->engine();
     QSharedPointer<BooksSettings> settings = BooksSettings::sharedInstance();
-    root->engine()->addImageProvider(BooksImageProvider::PROVIDER_ID,
+    BooksPolicyPlugin::registerTypes(engine, BOOKS_QML_PLUGIN,
+        BOOKS_QML_PLUGIN_V1, BOOKS_QML_PLUGIN_V2);
+    BooksMediaPlugin::registerTypes(engine, BOOKS_QML_PLUGIN,
+        BOOKS_QML_PLUGIN_V1, BOOKS_QML_PLUGIN_V2);
+    engine->addImageProvider(BooksImageProvider::PROVIDER_ID,
         new BooksImageProvider(root));
+
     root->setContextProperty("PointsPerInch", booksPPI);
     root->setContextProperty("MaximumHintCount", 1);
     root->setContextProperty("BooksSettingsMenu",

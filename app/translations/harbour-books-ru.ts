@@ -101,10 +101,30 @@
         <extracomment>Import page placeholder</extracomment>
         <translation>Новых книг не найдено, вообще ни одной</translation>
     </message>
+    <message id="harbour-books-book-browser_link-title">
+        <source>Link</source>
+        <extracomment>External link menu title</extracomment>
+        <translation>Ссылка</translation>
+    </message>
+    <message id="harbour-books-book-browser_link-open_in_browser">
+        <source>Open in browser</source>
+        <extracomment>Open link in browser</extracomment>
+        <translation>Открыть в браузере</translation>
+    </message>
+    <message id="harbour-books-book-browser_link-copy_to_clipboard">
+        <source>Copy to clipboard</source>
+        <extracomment>Copy link to clipboard</extracomment>
+        <translation>Скопировать</translation>
+    </message>
     <message id="harbour-books-settings-page-header">
         <source>Books</source>
         <extracomment>Settings page header</extracomment>
         <translation>Книги</translation>
+    </message>
+    <message id="harbour-books-settings-page-display-section_header">
+        <source>Display</source>
+        <extracomment>Section header for display settings</extracomment>
+        <translation>Экран</translation>
     </message>
     <message id="harbour-books-settings-page-font_size_label">
         <source>Font size</source>
@@ -151,20 +171,35 @@
         <extracomment>Settings field description</extracomment>
         <translation>Если оставить имя папки пустым, то можно будет найти книгу в любой папке на карте памяти. Особого смысла в этой настройке нет, просто так исторически сложилось, что по умолчанию книги искались только в папке Books, а теперь можно вообще где угодно.</translation>
     </message>
-    <message id="harbour-books-book-browser_link-title">
-        <source>Link</source>
-        <extracomment>External link menu title</extracomment>
-        <translation>Ссылка</translation>
+    <message id="harbour-books-settings-page-media-keys-section_header">
+        <source>Media keys</source>
+        <extracomment>Section header for media keys</extracomment>
+        <translation>Кнопки</translation>
     </message>
-    <message id="harbour-books-book-browser_link-open_in_browser">
-        <source>Open in browser</source>
-        <extracomment>Open link in browser</extracomment>
-        <translation>Открыть в браузере</translation>
+    <message id="harbour-books-settings-page-action-none">
+        <source>No action</source>
+        <extracomment>Combo box value for no action</extracomment>
+        <translation>Ничего не делать</translation>
     </message>
-    <message id="harbour-books-book-browser_link-copy_to_clipboard">
-        <source>Copy to clipboard</source>
-        <extracomment>Copy link to clipboard</extracomment>
-        <translation>Скопировать</translation>
+    <message id="harbour-books-settings-page-action-previous_page">
+        <source>Previous page</source>
+        <extracomment>Combo box value for previous page action</extracomment>
+        <translation>Предыдущая страница</translation>
+    </message>
+    <message id="harbour-books-settings-page-action-next_page">
+        <source>Next page</source>
+        <extracomment>Combo box value for next page action</extracomment>
+        <translation>Следующая страница</translation>
+    </message>
+    <message id="harbour-books-settings-page-volume_up-label">
+        <source>Volume up</source>
+        <extracomment>Combo box label</extracomment>
+        <translation>Громкость вверх</translation>
+    </message>
+    <message id="harbour-books-settings-page-volume_down-label">
+        <source>Volume down</source>
+        <extracomment>Combo box label</extracomment>
+        <translation>Громкость вниз</translation>
     </message>
 </context>
 </TS>

@@ -65,7 +65,7 @@
     <message id="harbour-books-storage-menu-settings">
         <source>Settings</source>
         <extracomment>Pulley menu item</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Settings</translation>
     </message>
     <message id="harbour-books-storage-menu-scan_downloads">
         <source>Scan downloads</source>
@@ -99,10 +99,30 @@
         <extracomment>Import page placeholder</extracomment>
         <translation>No new books found</translation>
     </message>
+    <message id="harbour-books-book-browser_link-title">
+        <source>Link</source>
+        <extracomment>External link menu title</extracomment>
+        <translation>Link</translation>
+    </message>
+    <message id="harbour-books-book-browser_link-open_in_browser">
+        <source>Open in browser</source>
+        <extracomment>Open link in browser</extracomment>
+        <translation>Open in browser</translation>
+    </message>
+    <message id="harbour-books-book-browser_link-copy_to_clipboard">
+        <source>Copy to clipboard</source>
+        <extracomment>Copy link to clipboard</extracomment>
+        <translation>Copy to clipboard</translation>
+    </message>
     <message id="harbour-books-settings-page-header">
         <source>Books</source>
         <extracomment>Settings page header</extracomment>
         <translation>Books</translation>
+    </message>
+    <message id="harbour-books-settings-page-display-section_header">
+        <source>Display</source>
+        <extracomment>Section header for display settings</extracomment>
+        <translation>Display</translation>
     </message>
     <message id="harbour-books-settings-page-font_size_label">
         <source>Font size</source>
@@ -134,6 +154,36 @@
         <extracomment>Combo box value for landscape orientation</extracomment>
         <translation>Landscape</translation>
     </message>
+    <message id="harbour-books-settings-page-media-keys-section_header">
+        <source>Media keys</source>
+        <extracomment>Section header for media keys</extracomment>
+        <translation>Media keys</translation>
+    </message>
+    <message id="harbour-books-settings-page-volume_up-label">
+        <source>Volume up</source>
+        <extracomment>Combo box label</extracomment>
+        <translation>Volume up</translation>
+    </message>
+    <message id="harbour-books-settings-page-volume_down-label">
+        <source>Volume down</source>
+        <extracomment>Combo box label</extracomment>
+        <translation>Volume down</translation>
+    </message>
+    <message id="harbour-books-settings-page-action-none">
+        <source>No action</source>
+        <extracomment>Combo box value for no action</extracomment>
+        <translation>No action</translation>
+    </message>
+    <message id="harbour-books-settings-page-action-previous_page">
+        <source>Previous page</source>
+        <extracomment>Combo box value for previous page action</extracomment>
+        <translation>Previous page</translation>
+    </message>
+    <message id="harbour-books-settings-page-action-next_page">
+        <source>Next page</source>
+        <extracomment>Combo box value for next page action</extracomment>
+        <translation>Next page</translation>
+    </message>
     <message id="harbour-books-settings-page-removable-section_header">
         <source>Memory card</source>
         <extracomment>Section header for memory card settings</extracomment>
@@ -148,21 +198,6 @@
         <source>Leave the folder name empty to scan the entire memory card for books.</source>
         <extracomment>Settings field description</extracomment>
         <translation>Leave the folder name empty to scan the entire memory card for books.</translation>
-    </message>
-    <message id="harbour-books-book-browser_link-title">
-        <source>Link</source>
-        <extracomment>External link menu title</extracomment>
-        <translation>Link</translation>
-    </message>
-    <message id="harbour-books-book-browser_link-open_in_browser">
-        <source>Open in browser</source>
-        <extracomment>Open link in browser</extracomment>
-        <translation>Open in browser</translation>
-    </message>
-    <message id="harbour-books-book-browser_link-copy_to_clipboard">
-        <source>Copy to clipboard</source>
-        <extracomment>Copy link to clipboard</extracomment>
-        <translation>Copy to clipboard</translation>
     </message>
 </context>
 </TS>

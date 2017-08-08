@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015-2016 Jolla Ltd.
+ * Copyright (C) 2015-2017 Jolla Ltd.
  * Contact: Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
@@ -45,9 +45,12 @@ class BooksSettings : public QObject
     Q_OBJECT
     Q_ENUMS(FontSize)
     Q_ENUMS(Orientation)
+    Q_ENUMS(Action)
     Q_PROPERTY(int fontSize READ fontSize WRITE setFontSize NOTIFY fontSizeChanged)
     Q_PROPERTY(int pageDetails READ pageDetails WRITE setPageDetails NOTIFY pageDetailsChanged)
     Q_PROPERTY(bool invertColors READ invertColors WRITE setInvertColors NOTIFY invertColorsChanged)
+    Q_PROPERTY(int volumeUpAction READ volumeUpAction WRITE setVolumeUpAction NOTIFY volumeUpActionChanged)
+    Q_PROPERTY(int volumeDownAction READ volumeDownAction WRITE setVolumeDownAction NOTIFY volumeDownActionChanged)
     Q_PROPERTY(QObject* currentBook READ currentBook WRITE setCurrentBook NOTIFY currentBookChanged)
     Q_PROPERTY(QString currentFolder READ currentFolder WRITE setCurrentFolder NOTIFY currentFolderChanged)
     Q_PROPERTY(QString currentStorage READ currentStorage NOTIFY currentStorageChanged)
@@ -59,9 +62,6 @@ class BooksSettings : public QObject
     Q_PROPERTY(QColor pageBackgroundColor READ pageBackgroundColor NOTIFY pageBackgroundColorChanged)
     Q_PROPERTY(int orientation READ orientation NOTIFY orientationChanged)
     class TextStyle;
-
-    // Use sharedInstance() to instantiate this class
-    BooksSettings();
 
 public:
     enum FontSize {
@@ -77,6 +77,14 @@ public:
         OrientationLandscape
     };
 
+    enum Action {
+        ActionNone,
+        ActionPreviousPage,
+        ActionNextPage
+    };
+
+    // Use sharedInstance() to instantiate this class
+    explicit BooksSettings(QObject* aParent = Q_NULLPTR);
     static QSharedPointer<BooksSettings> sharedInstance();
 
     Q_INVOKABLE bool increaseFontSize();
@@ -92,6 +100,12 @@ public:
 
     bool invertColors() const;
     void setInvertColors(bool aValue);
+
+    Action volumeUpAction() const;
+    void setVolumeUpAction(int aValue);
+
+    Action volumeDownAction() const;
+    void setVolumeDownAction(int aValue);
 
     QObject* currentBook() const;
     void setCurrentBook(QObject* aBook);
@@ -113,6 +127,8 @@ Q_SIGNALS:
     void textStyleChanged();
     void pageDetailsChanged();
     void invertColorsChanged();
+    void volumeUpActionChanged();
+    void volumeDownActionChanged();
     void currentBookChanged();
     void currentFolderChanged();
     void currentStorageChanged();
