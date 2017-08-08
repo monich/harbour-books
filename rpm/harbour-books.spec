@@ -1,6 +1,6 @@
 Name:           harbour-books
 Summary:        E-book reader
-Version:        1.0.21
+Version:        1.0.22
 Release:        1
 License:        BSD
 Group:          Applications/File
@@ -57,6 +57,9 @@ desktop-file-install --delete-original \
 make -C test test
 
 %changelog
+* Tue Aug 08 2017 Slava Monich <slava.monich@jolla.com> 1.0.22
+- Turn pages with volume keys
+
 * Thu Aug 03 2017 Slava Monich <slava.monich@jolla.com> 1.0.21
 - Implemented position stack (history)
 
