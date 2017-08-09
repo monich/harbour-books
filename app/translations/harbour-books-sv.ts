@@ -157,17 +157,17 @@
     <message id="harbour-books-settings-page-action-none">
         <source>No action</source>
         <extracomment>Combo box value for no action</extracomment>
-        <translation type="unfinished">Ingen action</translation>
+        <translation>Ingen åtgärd</translation>
     </message>
     <message id="harbour-books-settings-page-action-previous_page">
         <source>Previous page</source>
         <extracomment>Combo box value for previous page action</extracomment>
-        <translation type="unfinished">Föregående sida</translation>
+        <translation>Föregående sida</translation>
     </message>
     <message id="harbour-books-settings-page-action-next_page">
         <source>Next page</source>
         <extracomment>Combo box value for next page action</extracomment>
-        <translation type="unfinished">Nästa sida</translation>
+        <translation>Nästa sida</translation>
     </message>
     <message id="harbour-books-settings-page-media-keys-section_header">
         <source>Media keys</source>
@@ -177,12 +177,12 @@
     <message id="harbour-books-settings-page-volume_up-label">
         <source>Volume up</source>
         <extracomment>Combo box label</extracomment>
-        <translation type="unfinished">Höj volymen</translation>
+        <translation>Höj volymen</translation>
     </message>
     <message id="harbour-books-settings-page-volume_down-label">
         <source>Volume down</source>
         <extracomment>Combo box label</extracomment>
-        <translation type="unfinished">Sänk volymen</translation>
+        <translation>Sänk volymen</translation>
     </message>
     <message id="harbour-books-settings-page-removable-section_header">
         <source>Memory card</source>
