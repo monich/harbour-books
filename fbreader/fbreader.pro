@@ -273,9 +273,6 @@ FBREADER_SRC = $$FBREADER_DIR/fbreader/src
 SOURCES += \
   $$FBREADER_SRC/migration/BookInfo.cpp \
   $$FBREADER_SRC/options/FBCategoryKey.cpp \
-  $$FBREADER_SRC/fbreader/SearchActions.cpp \
-  $$FBREADER_SRC/fbreader/ContentsView.cpp \
-  $$FBREADER_SRC/fbreader/BookTextView.cpp \
   $$FBREADER_SRC/library/Book.cpp \
   $$FBREADER_SRC/library/Comparators.cpp \
   $$FBREADER_SRC/library/Library.cpp \
@@ -370,12 +367,6 @@ SOURCES += \
 HEADERS += \
   $$FBREADER_SRC/migration/BookInfo.h \
   $$FBREADER_SRC/options/FBCategoryKey.h \
-  $$FBREADER_SRC/fbreader/FBView.h \
-  $$FBREADER_SRC/fbreader/ReadingState.h \
-  $$FBREADER_SRC/fbreader/FBReaderActions.h \
-  $$FBREADER_SRC/fbreader/ContentsView.h \
-  $$FBREADER_SRC/fbreader/FootnoteView.h \
-  $$FBREADER_SRC/fbreader/BookTextView.h \
   $$FBREADER_SRC/library/Author.h \
   $$FBREADER_SRC/library/Book.h \
   $$FBREADER_SRC/library/Lists.h \
