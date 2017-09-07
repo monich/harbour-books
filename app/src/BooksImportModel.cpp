@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015-2016 Jolla Ltd.
+ * Copyright (C) 2015-2017 Jolla Ltd.
  * Contact: Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
@@ -339,6 +339,24 @@ void BooksImportModel::refresh()
             Qt::QueuedConnection);
         iTaskQueue->submit(iTask);
         Q_EMIT busyChanged();
+    }
+}
+
+void BooksImportModel::selectAll()
+{
+    const int oldSelectedCount = iSelectedCount;
+    const int n = iList.count();
+    for (int i=0; i<n; i++) {
+        Data* data = iList.at(i);
+        if (!data->iSelected) {
+            data->iSelected = true;
+            iSelectedCount++;
+            QModelIndex index(createIndex(i, 0));
+            Q_EMIT dataChanged(index, index, iSelectedRole);
+        }
+    }
+    if (oldSelectedCount != iSelectedCount) {
+        Q_EMIT selectedCountChanged();
     }
 }
 

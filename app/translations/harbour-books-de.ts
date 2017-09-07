@@ -94,6 +94,11 @@
         <extracomment>Dialog header button</extracomment>
         <translation>Wähle Bücher</translation>
     </message>
+    <message id="harbour-books-import-page-select_all">
+        <source>Select all</source>
+        <extracomment>Pulley menu item</extracomment>
+        <translation>Alle auswählen</translation>
+    </message>
     <message id="harbour-books-import-page-no_new_books_found">
         <source>No new books found</source>
         <extracomment>Import page placeholder</extracomment>

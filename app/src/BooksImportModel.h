@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Jolla Ltd.
+ * Copyright (C) 2015-2017 Jolla Ltd.
  * Contact: Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
@@ -14,7 +14,7 @@
  *     notice, this list of conditions and the following disclaimer in
  *     the documentation and/or other materials provided with the
  *     distribution.
- *   * Neither the name of Nemo Mobile nor the names of its contributors
+ *   * Neither the name of Jolla Ltd nor the names of its contributors
  *     may be used to endorse or promote products derived from this
  *     software without specific prior written permission.
  *
@@ -56,14 +56,15 @@ public:
     explicit BooksImportModel(QObject* aParent = NULL);
     ~BooksImportModel();
 
-    bool busy() const { return iTask != NULL; }
-    int count() const { return iList.count(); }
-    int progress() const { return iProgress; }
-    int selectedCount() const { return iSelectedCount; }
-    QString destination() const { return iDestination; }
+    bool busy() const;
+    int count() const;
+    int progress() const;
+    int selectedCount() const;
+    QString destination() const;
     void setDestination(QString aDestination);
 
     Q_INVOKABLE void refresh();
+    Q_INVOKABLE void selectAll();
     Q_INVOKABLE void setSelected(int aIndex, bool aSelected);
     Q_INVOKABLE QObject* selectedBook(int aIndex);
 
@@ -102,6 +103,16 @@ private:
 
 QML_DECLARE_TYPE(BooksImportModel)
 
+inline bool BooksImportModel::busy() const
+    { return iTask != NULL; }
+inline int BooksImportModel::count() const
+    { return iList.count(); }
+inline int BooksImportModel::progress() const
+    { return iProgress; }
+inline int BooksImportModel::selectedCount() const
+    { return iSelectedCount; }
+inline QString BooksImportModel::destination() const
+    { return iDestination; }
 inline bool BooksImportModel::validIndex(int aIndex) const
     { return aIndex >= 0 && aIndex < iList.count(); }
 
