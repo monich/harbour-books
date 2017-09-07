@@ -396,40 +396,40 @@ void BooksPageStack::Private::push(BooksPos aPos, int aPage)
 {
     Entry last = iEntries.last();
     if (last.iPos != aPos || last.iPage != aPage) {
-        // We push on top of the current position. If we have reached
-        // the depth limit, we push the entire stack down
         const int n = iEntries.count();
-        if (n >= MAX_DEPTH) {
+        if (n >= iCurrentIndex+2) {
+            // Push on top of the current position.
+            if (n > iCurrentIndex+2) {
+                // Drop unnecessary entries
+                iModel->beginRemoveRows(QModelIndex(), iCurrentIndex+2, n-1);
+                while (iEntries.count() > iCurrentIndex+2) {
+                    iEntries.removeLast();
+                }
+                iModel->endRemoveRows();
+                Q_EMIT iModel->countChanged();
+                queueSignals(SignalCountChanged);
+            }
+            // And replace the next one
+            setPageAt(iCurrentIndex+1, aPage);
+            setCurrentIndex(iCurrentIndex+1);
+        } else if (n >= MAX_DEPTH) {
+            // We have reached the depth limit, push the entire stack down
+            const int oldCurrentPage = currentPage();
             for (int i=1; i<n; i++) {
                 iEntries[i-1] = iEntries[i];
                 pageChanged(i-1);
             }
             iEntries[n-1] = Entry(aPos, aPage);
             pageChanged(n-1);
+            checkCurrentPage(oldCurrentPage);
         } else {
-            if (n >= iCurrentIndex+2) {
-                if (n > iCurrentIndex+2) {
-                    // Drop unnecessary entries
-                    iModel->beginRemoveRows(QModelIndex(), iCurrentIndex+2, n-1);
-                    while (iEntries.count() > iCurrentIndex+2) {
-                        iEntries.removeLast();
-                    }
-                    iModel->endRemoveRows();
-                    Q_EMIT iModel->countChanged();
-                    queueSignals(SignalCountChanged);
-                }
-                // And replace the next one
-                setPageAt(iCurrentIndex+1, aPage);
-            } else {
-                // Just push the new one
-                const int i = iCurrentIndex+1;
-                iModel->beginInsertRows(QModelIndex(), i, i);
-                iEntries.append(Entry(aPos, aPage));
-                iModel->endInsertRows();
-                queueSignals(SignalCountChanged);
-            }
-            // Move the current index
-            setCurrentIndex(iCurrentIndex+1);
+            // Just push the new one
+            const int i = iCurrentIndex+1;
+            iModel->beginInsertRows(QModelIndex(), i, i);
+            iEntries.append(Entry(aPos, aPage));
+            iModel->endInsertRows();
+            queueSignals(SignalCountChanged);
+            setCurrentIndex(i);
         }
     }
 }
