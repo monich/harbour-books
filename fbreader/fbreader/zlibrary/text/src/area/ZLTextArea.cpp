@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2004-2010 Geometer Plus <contact@geometerplus.com>
- * Copyright (C) 2016 Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2016-2017 Slava Monich <slava.monich@jolla.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -69,6 +69,15 @@ void ZLTextArea::clear() {
 	myTextElementMap.clear();
 	myTreeNodeMap.clear();
 
+	clearSelection();
+}
+
+bool ZLTextArea::selectionIsEmpty() const
+{
+	return mySelectionModel.isNull() || mySelectionModel->isEmpty();
+}
+
+void ZLTextArea::clearSelection() const {
 	if (!mySelectionModel.isNull()) {
 		mySelectionModel->clear();
 	}

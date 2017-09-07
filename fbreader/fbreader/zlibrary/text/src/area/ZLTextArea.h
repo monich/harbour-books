@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2004-2010 Geometer Plus <contact@geometerplus.com>
- * Copyright (C) 2016 Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2016-2017 Slava Monich <slava.monich@jolla.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -89,6 +89,8 @@ public:
 	int paragraphIndexByCoordinates(int x, int y, bool absolute = true) const;
 
 	ZLTextSelectionModel &selectionModel();
+	bool selectionIsEmpty() const;
+	void clearSelection() const;
 
 	void paint(ZLSize *size = 0);
 
