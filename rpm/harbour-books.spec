@@ -1,6 +1,6 @@
 Name:           harbour-books
 Summary:        E-book reader
-Version:        1.0.22
+Version:        1.0.23
 Release:        1
 License:        BSD
 Group:          Applications/File
@@ -57,6 +57,12 @@ desktop-file-install --delete-original \
 make -C test test
 
 %changelog
+* Tue Sep 07 2017 Slava Monich <slava.monich@jolla.com> 1.0.23
+- Copy text to clipboard on long press
+- Added "Select all" function to the import view
+- Fixed the behavior of the position stack
+- Improved Swedish translations
+
 * Tue Aug 08 2017 Slava Monich <slava.monich@jolla.com> 1.0.22
 - Turn pages with volume keys
 
