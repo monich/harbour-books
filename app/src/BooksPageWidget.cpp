@@ -42,6 +42,8 @@
 
 #include "HarbourDebug.h"
 
+#include <QGuiApplication>
+#include <QClipboard>
 #include <QPainter>
 
 static const QString IMAGE_URL("image://%1/%2");
@@ -136,7 +138,7 @@ void BooksPageWidget::ResetTask::performTask()
 class BooksPageWidget::RenderTask : public BooksTask {
 public:
     RenderTask(shared_ptr<BooksPageWidget::Data> aData, int aWidth, int aHeight) :
-        iData(aData), iWidth(aWidth), iHeight(aHeight), iImage(NULL) {}
+        iData(aData), iWidth(aWidth), iHeight(aHeight) {}
 
     void performTask();
 
@@ -155,6 +157,119 @@ void BooksPageWidget::RenderTask::performTask()
         if (!isCanceled()) {
             QPainter painter(&iImage);
             iData->paint(&painter);
+        }
+    }
+}
+
+// ==========================================================================
+// BooksPageWidget::ClearSelectionTask
+// ==========================================================================
+
+class BooksPageWidget::ClearSelectionTask : public BooksTask {
+public:
+    ClearSelectionTask(shared_ptr<BooksPageWidget::Data> aData, int aWidth,
+        int aHeight) : iData(aData), iWidth(aWidth), iHeight(aHeight),
+        iImageUpdated(false) {}
+
+    void performTask();
+
+public:
+    shared_ptr<BooksPageWidget::Data> iData;
+    int iWidth;
+    int iHeight;
+    QImage iImage;
+    bool iImageUpdated;
+};
+
+void BooksPageWidget::ClearSelectionTask::performTask()
+{
+    iData->iView->endSelection();
+    if (!isCanceled() && iWidth > 0 && iHeight > 0) {
+        const ZLTextArea& area = iData->iView->textArea();
+        if (!area.selectionIsEmpty()) {
+            area.clearSelection();
+            iImage = QImage(iWidth, iHeight, QImage::Format_RGB32);
+            if (!isCanceled()) {
+                QPainter painter(&iImage);
+                iData->paint(&painter);
+                iImageUpdated = true;
+            }
+        }
+    }
+}
+
+// ==========================================================================
+// BooksPageWidget::StartSelectionTask
+// ==========================================================================
+
+class BooksPageWidget::StartSelectionTask : public BooksTask {
+public:
+    StartSelectionTask(shared_ptr<BooksPageWidget::Data> aData, int aX, int aY,
+        int aWidth, int aHeight) : iData(aData), iX(aX), iY(aY),
+        iWidth(aWidth), iHeight(aHeight), iSelectionEmpty(true) {}
+
+    void performTask();
+
+public:
+    shared_ptr<BooksPageWidget::Data> iData;
+    int iX;
+    int iY;
+    int iWidth;
+    int iHeight;
+    QImage iImage;
+    bool iSelectionEmpty;
+};
+
+void BooksPageWidget::StartSelectionTask::performTask()
+{
+    if (!isCanceled() && iWidth > 0 && iHeight > 0) {
+        iData->iView->startSelection(iX, iY);
+        iSelectionEmpty = iData->iView->textArea().selectionIsEmpty();
+        if (!isCanceled()) {
+            iImage = QImage(iWidth, iHeight, QImage::Format_RGB32);
+            if (!isCanceled()) {
+                QPainter painter(&iImage);
+                iData->paint(&painter);
+            }
+        }
+    }
+}
+
+// ==========================================================================
+// BooksPageWidget::ExtendSelectionTask
+// ==========================================================================
+
+class BooksPageWidget::ExtendSelectionTask : public BooksTask {
+public:
+    ExtendSelectionTask(shared_ptr<BooksPageWidget::Data> aData, int aX, int aY,
+        int aWidth, int aHeight) : iData(aData), iX(aX), iY(aY),
+        iWidth(aWidth), iHeight(aHeight), iSelectionChanged(false),
+        iSelectionEmpty(true) {}
+
+    void performTask();
+
+public:
+    shared_ptr<BooksPageWidget::Data> iData;
+    int iX;
+    int iY;
+    int iWidth;
+    int iHeight;
+    QImage iImage;
+    bool iSelectionChanged;
+    bool iSelectionEmpty;
+};
+
+void BooksPageWidget::ExtendSelectionTask::performTask()
+{
+    if (!isCanceled() && iWidth > 0 && iHeight > 0) {
+        iSelectionChanged = iData->iView->extendSelection(iX, iY);
+        iSelectionEmpty = iData->iView->textArea().selectionIsEmpty();
+        if (iSelectionChanged && !isCanceled()) {
+            iImage = QImage(iWidth, iHeight, QImage::Format_RGB32);
+            if (!isCanceled()) {
+                QPainter painter(&iImage);
+                iData->paint(&painter);
+            }
         }
     }
 }
@@ -380,10 +495,16 @@ BooksPageWidget::BooksPageWidget(QQuickItem* aParent) :
     iModel(NULL),
     iResetTask(NULL),
     iRenderTask(NULL),
+    iClearSelectionTask(NULL),
+    iStartSelectionTask(NULL),
     iPressTask(NULL),
     iLongPressTask(NULL),
     iFootnoteTask(NULL),
     iEmpty(false),
+    iPressed(false),
+    iSelecting(false),
+    iSelectionEmpty(true),
+    iCurrentPage(false),
     iPage(-1)
 {
     connect(iSettings.data(),
@@ -403,11 +524,46 @@ BooksPageWidget::BooksPageWidget(QQuickItem* aParent) :
 BooksPageWidget::~BooksPageWidget()
 {
     HDEBUG("page" << iPage);
+    releaseExtendSelectionTasks();
     if (iResetTask) iResetTask->release(this);
     if (iRenderTask) iRenderTask->release(this);
+    if (iClearSelectionTask) iClearSelectionTask->release(this);
+    if (iStartSelectionTask) iStartSelectionTask->release(this);
     if (iPressTask) iPressTask->release(this);
     if (iLongPressTask) iLongPressTask->release(this);
     if (iFootnoteTask) iFootnoteTask->release(this);
+}
+
+void BooksPageWidget::releaseExtendSelectionTasks()
+{
+    while (!iExtendSelectionTasks.isEmpty()) {
+        const int i = iExtendSelectionTasks.count()-1;
+        iExtendSelectionTasks.at(i)->release(this);
+        iExtendSelectionTasks.removeAt(i);
+    }
+}
+
+void BooksPageWidget::setPressed(bool aPressed)
+{
+    if (iPressed != aPressed) {
+        iPressed = aPressed;
+        if (!iPressed && iSelecting) {
+            HDEBUG("leaving selection mode");
+            iSelecting = false;
+            Q_EMIT selectingChanged();
+        }
+        Q_EMIT pressedChanged();
+    }
+}
+
+void BooksPageWidget::setCurrentPage(bool aCurrentPage)
+{
+    if (iCurrentPage != aCurrentPage) {
+        iCurrentPage = aCurrentPage;
+        HDEBUG(iCurrentPage);
+        if (!iCurrentPage) clearSelection();
+        Q_EMIT currentPageChanged();
+    }
 }
 
 void BooksPageWidget::setModel(BooksBookModel* aModel)
@@ -582,7 +738,7 @@ void BooksPageWidget::paint(QPainter* aPainter)
 
 bool BooksPageWidget::loading() const
 {
-    return iPage >= 0 && (iResetTask || iRenderTask);
+    return iPage >= 0 && iImage.isNull() && (iResetTask || iRenderTask);
 }
 
 void BooksPageWidget::resetView()
@@ -680,6 +836,75 @@ void BooksPageWidget::onPressTaskDone()
     task->release(this);
 }
 
+void BooksPageWidget::onClearSelectionTaskDone()
+{
+    HASSERT(sender() == iClearSelectionTask);
+    ClearSelectionTask* task = iClearSelectionTask;
+    iClearSelectionTask = NULL;
+
+    if (!iSelectionEmpty) {
+        iSelectionEmpty = true;
+        HDEBUG("selection cleared");
+        Q_EMIT selectionEmptyChanged();
+    }
+
+    if (task->iImageUpdated) {
+        iImage = task->iImage;
+        update();
+    }
+
+    task->release(this);
+}
+
+void BooksPageWidget::onStartSelectionTaskDone()
+{
+    HASSERT(sender() == iStartSelectionTask);
+    StartSelectionTask* task = iStartSelectionTask;
+    iStartSelectionTask = NULL;
+
+    if (iPressed) {
+        iImage = task->iImage;
+
+        // Emit signals when we are in a consistent state
+        bool emitSelectionEmpty;
+        if (iSelectionEmpty != task->iSelectionEmpty) {
+            iSelectionEmpty = task->iSelectionEmpty;
+            HDEBUG("selection" << iSelectionEmpty);
+            emitSelectionEmpty = true;
+        }
+        if (!iSelecting) {
+            iSelecting = true;
+            HDEBUG("entering selection mode");
+            Q_EMIT selectingChanged();
+        }
+        if (emitSelectionEmpty) {
+            Q_EMIT selectionEmptyChanged();
+        }
+        update();
+    }
+
+    task->release(this);
+}
+
+void BooksPageWidget::onExtendSelectionTaskDone()
+{
+    ExtendSelectionTask* task = (ExtendSelectionTask*)sender();
+    HASSERT(iExtendSelectionTasks.contains(task));
+    iExtendSelectionTasks.removeOne(task);
+
+    if (iSelecting && task->iSelectionChanged) {
+        iImage = task->iImage;
+        if (iSelectionEmpty != task->iSelectionEmpty) {
+            iSelectionEmpty = task->iSelectionEmpty;
+            HDEBUG("selection" << iSelectionEmpty);
+            Q_EMIT selectionEmptyChanged();
+        }
+        update();
+    }
+
+    task->release(this);
+}
+
 void BooksPageWidget::onFootnoteTaskDone()
 {
     HASSERT(sender() == iFootnoteTask);
@@ -769,6 +994,12 @@ void BooksPageWidget::onLongPressTaskDone()
         BooksImageProvider::instance()->addImage(iModel, id, task->iImage);
         Q_EMIT imagePressed(IMAGE_URL.arg(BooksImageProvider::PROVIDER_ID, id),
             task->iRect);
+    } else if (!iData.isNull()) {
+        if (iStartSelectionTask) iStartSelectionTask->release(this);
+        iStartSelectionTask = new StartSelectionTask(iData,
+            task->iX, task->iY, width(), height());
+        iTaskQueue->submit(iStartSelectionTask, this,
+            SLOT(onStartSelectionTaskDone()));
     }
 
     task->release(this);
@@ -813,8 +1044,8 @@ void BooksPageWidget::handleLongPress(int aX, int aY)
     HDEBUG(aX << aY);
     if (!iResetTask && !iRenderTask && !iData.isNull()) {
         if (iLongPressTask) iLongPressTask->release(this);
-        iLongPressTask = new PressTask(iData, aX, aY);
-        iTaskQueue->submit(iLongPressTask, this, SLOT(onLongPressTaskDone()));
+        iTaskQueue->submit(iLongPressTask = new PressTask(iData, aX, aY),
+            this, SLOT(onLongPressTaskDone()));
     }
 }
 
@@ -823,7 +1054,50 @@ void BooksPageWidget::handlePress(int aX, int aY)
     HDEBUG(aX << aY);
     if (!iResetTask && !iRenderTask && !iData.isNull()) {
         if (iPressTask) iPressTask->release(this);
-        iPressTask = new PressTask(iData, aX, aY);
-        iTaskQueue->submit(iPressTask, this, SLOT(onPressTaskDone()));
+        iTaskQueue->submit(iPressTask = new PressTask(iData, aX, aY),
+            this, SLOT(onPressTaskDone()));
+    }
+}
+
+void BooksPageWidget::handlePositionChanged(int aX, int aY)
+{
+    if (iSelecting && !iData.isNull()) {
+        HDEBUG(aX << aY);
+        // Drop the tasks which haven't been started yet
+        ExtendSelectionTask* task;
+        for (int i = iExtendSelectionTasks.count()-1; i>=0; i--) {
+            task = iExtendSelectionTasks.at(i);
+            if (task->isStarted()) {
+                break;
+            } else {
+                task->release(this);
+                iExtendSelectionTasks.removeAt(i);
+                HDEBUG("dropped queued task," << i << "left");
+            }
+        }
+        task = new ExtendSelectionTask(iData, aX, aY, width(), height());
+        iTaskQueue->submit(task, this, SLOT(onExtendSelectionTaskDone()));
+        iExtendSelectionTasks.append(task);
+    } else {
+        // Finger was moved before we entered selection mode
+        if (iStartSelectionTask) {
+            iStartSelectionTask->release(this);
+            iStartSelectionTask = NULL;
+            HDEBUG("oops");
+        }
+    }
+}
+
+void BooksPageWidget::clearSelection()
+{
+    if (!iData.isNull()) {
+        if (iClearSelectionTask) iClearSelectionTask->release(this);
+        iTaskQueue->submit(iClearSelectionTask =
+            new ClearSelectionTask(iData, width(), height()),
+            this, SLOT(onClearSelectionTaskDone()));
+    }
+    if (iSelecting) {
+        iSelecting = false;
+        Q_EMIT selectingChanged();
     }
 }

@@ -43,6 +43,8 @@ Item {
     property alias rightMargin: widget.rightMargin
     property alias topMargin: widget.topMargin
     property alias bottomMargin: widget.bottomMargin
+    property alias selecting: widget.selecting
+    property alias currentPage: widget.currentPage
     property alias title: titleLabel.text
     property real leftSpaceReserved
     property real rightSpaceReserved
@@ -60,6 +62,7 @@ Item {
         id: widget
         anchors.fill: parent
         model: bookModel
+        pressed: mouseArea.pressed
         onBrowserLinkPressed: view.browserLinkPressed(url)
         onImagePressed: view.imagePressed(imageId, rect)
         onActiveTouch: pressImage.animate(touchX, touchY)
@@ -156,9 +159,17 @@ Item {
     }
 
     MouseArea {
+        id: mouseArea
         anchors.fill: parent
-        onClicked: view.pageClicked()
+        onClicked: {
+            if (widget.selectionEmpty) {
+                view.pageClicked()
+            } else {
+                widget.clearSelection()
+            }
+        }
         onPressed: widget.handlePress(mouseX, mouseY)
         onPressAndHold: widget.handleLongPress(mouseX, mouseY)
+        onPositionChanged: widget.handlePositionChanged(mouseX, mouseY)
     }
 }

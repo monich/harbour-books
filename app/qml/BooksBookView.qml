@@ -41,6 +41,7 @@ SilicaFlickable {
     id: root
 
     property variant book
+    property bool selecting
 
     signal closeBook()
     signal pageClicked(var page)
@@ -56,7 +57,8 @@ SilicaFlickable {
         { pager: true,  page: true,  title: true,  tools: true  }
     ]
 
-    interactive: (!linkMenu || !linkMenu.visible) &&
+    interactive: !selecting &&
+        (!linkMenu || !linkMenu.visible) &&
         (!imageView || !imageView.visible) &&
         (!footnoteView || !footnoteView.visible)
 
@@ -168,6 +170,7 @@ SilicaFlickable {
         }
 
         delegate: BooksPageView {
+            id: pageView
             width: bookView.width
             height: bookView.height
             model: bookModel
@@ -180,15 +183,26 @@ SilicaFlickable {
             rightSpaceReserved: pageTools.visible ? pageTools.rightSpaceUsed: 0
             titleVisible: _currentState.title
             pageNumberVisible: _currentState.page
+            currentPage: bookViewWatcher.currentIndex == index
             title: bookModel.title
             onJumpToPage: bookView.jumpTo(page)
             onPushPosition: stackModel.pushPosition(position) // bookView.jumpTo(page)
+            onCurrentPageChanged: {
+                if (currentPage) {
+                    root.selecting = pageView.selecting
+                }
+            }
+            onSelectingChanged: {
+                if (currentPage) {
+                    root.selecting = pageView.selecting
+                }
+            }
             onPageClicked: {
                 root.pageClicked(index)
                 Settings.pageDetails = (Settings.pageDetails + 1) % _visibilityStates.length
             }
             onImagePressed: {
-                if (bookViewWatcher.currentIndex == index) {
+                if (currentPage) {
                     if (!imageView) {
                         imageView = imageViewComponent.createObject(root)
                     }
@@ -196,7 +210,7 @@ SilicaFlickable {
                 }
             }
             onBrowserLinkPressed: {
-                if (bookViewWatcher.currentIndex == index) {
+                if (currentPage) {
                     if (!linkMenu) {
                         linkMenu = linkMenuComponent.createObject(root)
                     }

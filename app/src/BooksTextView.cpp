@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015-2016 Jolla Ltd.
+ * Copyright (C) 2015-2017 Jolla Ltd.
  * Contact: Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
@@ -14,7 +14,7 @@
  *     notice, this list of conditions and the following disclaimer in
  *     the documentation and/or other materials provided with the
  *     distribution.
- *   * Neither the name of Nemo Mobile nor the names of its contributors
+ *   * Neither the name of Jolla Ltd nor the names of its contributors
  *     may be used to endorse or promote products derived from this
  *     software without specific prior written permission.
  *
@@ -33,6 +33,8 @@
 
 #include "BooksTextView.h"
 #include "BooksTextStyle.h"
+
+#include "ZLTextSelectionModel.h"
 
 #define SUPER ZLTextView
 
@@ -97,12 +99,12 @@ shared_ptr<ZLTextStyle> BooksTextView::baseStyle() const
 
 bool BooksTextView::isSelectionEnabled() const
 {
-    return false;
+    return true;
 }
 
 int BooksTextView::doubleClickDelay() const
 {
-    return isSelectionEnabled() ? 200 : 0;
+    return 0;
 }
 
 shared_ptr<ZLTextPositionIndicatorInfo> BooksTextView::indicatorInfo() const
@@ -139,4 +141,23 @@ void BooksTextView::gotoPosition(const BooksPos& aPos)
 {
     SUPER::gotoPosition(aPos.iParagraphIndex, aPos.iElementIndex,
         aPos.iCharIndex);
+}
+
+void BooksTextView::startSelection(int aX, int aY)
+{
+    if (!selectionModel().selectWord(textArea().realX(aX), aY, true)) {
+        // There's no text where we have clicked
+        activateSelection(aX, aY);
+    }
+}
+
+bool BooksTextView::extendSelection(int aX, int aY)
+{
+    return selectionModel().extendTo(textArea().realX(aX), aY, true) ==
+        ZLTextSelectionModel::BOUND_CHANGED;
+}
+
+void BooksTextView::endSelection()
+{
+    selectionModel().deactivate();
 }
