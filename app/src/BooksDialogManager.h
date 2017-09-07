@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Jolla Ltd.
+ * Copyright (C) 2015-2017 Jolla Ltd.
  * Contact: Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
@@ -14,7 +14,7 @@
  *     notice, this list of conditions and the following disclaimer in
  *     the documentation and/or other materials provided with the
  *     distribution.
- *   * Neither the name of Nemo Mobile nor the names of its contributors
+ *   * Neither the name of Jolla Ltd nor the names of its contributors
  *     may be used to endorse or promote products derived from this
  *     software without specific prior written permission.
  *
@@ -36,18 +36,29 @@
 
 #include <ZLDialogManager.h>
 
-class BooksDialogManager: public ZLDialogManager {
+#include <QObject>
+#include <QString>
+#include <QImage>
+
+class BooksDialogManager: public QObject, ZLDialogManager {
+    Q_OBJECT
 
 public:
-    static void createInstance() { ourInstance = new BooksDialogManager(); }
+    static void createInstance();
 
 private:
-    BooksDialogManager() {}
+    BooksDialogManager(QObject* aParent);
+    ~BooksDialogManager();
+
+Q_SIGNALS:
+    void copyTextToClipboard(QString aText) const;
+    void copyImageToClipboard(QImage aImage) const;
+
+private Q_SLOTS:
+    void onCopyTextToClipboard(QString aText);
+    void onCopyImageToClipboard(QImage aImage);
 
 public:
-    static const ZLResource& resource(const ZLResourceKey& aKey)
-        { return ZLDialogManager::resource()[aKey]; }
-
     void createApplicationWindow(ZLApplication *application) const;
 
     shared_ptr<ZLDialog> createDialog(const ZLResourceKey &key) const;

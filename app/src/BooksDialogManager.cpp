@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Jolla Ltd.
+ * Copyright (C) 2015-2017 Jolla Ltd.
  * Contact: Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
@@ -14,7 +14,7 @@
  *     notice, this list of conditions and the following disclaimer in
  *     the documentation and/or other materials provided with the
  *     distribution.
- *   * Neither the name of Nemo Mobile nor the names of its contributors
+ *   * Neither the name of Jolla Ltd nor the names of its contributors
  *     may be used to endorse or promote products derived from this
  *     software without specific prior written permission.
  *
@@ -43,7 +43,34 @@
 #include <QGuiApplication>
 #include <QClipboard>
 
-void BooksDialogManager::createApplicationWindow(ZLApplication* aApp) const
+void BooksDialogManager::createInstance()
+{
+    if (!ourInstance) {
+        ourInstance = new BooksDialogManager(qApp);
+    }
+}
+
+BooksDialogManager::BooksDialogManager(
+    QObject* aParent) :
+    QObject(aParent)
+{
+    connect(this,
+        SIGNAL(copyTextToClipboard(QString)),
+        SLOT(onCopyTextToClipboard(QString)));
+    connect(this,
+        SIGNAL(copyImageToClipboard(QImage)),
+        SLOT(onCopyImageToClipboard(QImage)));
+}
+
+BooksDialogManager::~BooksDialogManager()
+{
+    HASSERT(this == ourInstance);
+    ourInstance = NULL;
+}
+
+void
+BooksDialogManager::createApplicationWindow(
+    ZLApplication* aApp) const
 {
     HDEBUG("THIS IS NOT SUPPOSED TO HAPPEN!");
 }
@@ -125,9 +152,11 @@ BooksDialogManager::setClipboardText(
     const std::string& text,
     ClipboardType type) const
 {
+    // May be invoked on non-UI thread
     if (!text.empty()) {
-        QGuiApplication::clipboard()->setText(QString::fromStdString(text),
-            (type == CLIPBOARD_MAIN) ? QClipboard::Clipboard : QClipboard::Selection);
+        QString str(QString::fromStdString(text));
+        HDEBUG(str);
+        Q_EMIT copyTextToClipboard(str);
     }
 }
 
@@ -136,7 +165,24 @@ BooksDialogManager::setClipboardImage(
     const ZLImageData &imageData,
     ClipboardType type) const
 {
-    QGuiApplication::clipboard()->setImage(
-        *static_cast<const ZLQtImageData&>(imageData).image(),
-        (type == CLIPBOARD_MAIN) ? QClipboard::Clipboard : QClipboard::Selection);
+    // May be invoked on non-UI thread
+    QImage image(*((const ZLQtImageData&)imageData).image());
+    if (image.isNull()) {
+        HDEBUG(image.width() << "x" << image.height());
+        Q_EMIT copyImageToClipboard(image);
+    }
+}
+
+void
+BooksDialogManager::onCopyTextToClipboard(
+    QString aText)
+{
+    QGuiApplication::clipboard()->setText(aText);
+}
+
+void
+BooksDialogManager::onCopyImageToClipboard(
+    QImage aImage)
+{
+    QGuiApplication::clipboard()->setImage(aImage);
 }
