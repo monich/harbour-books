@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2004-2010 Geometer Plus <contact@geometerplus.com>
+ * Copyright (C) 2016-2017 Slava Monich <slava.monich@jolla.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -58,13 +59,13 @@ public:
 		BOUND_OVER_BEFORE,
 		BOUND_OVER_AFTER
 	};
-	ExtensionResult extendTo(int x, int y);
+	ExtensionResult extendTo(int x, int y, bool word = false);
 	void invalidate();
 	void update();
 	void deactivate();
 	void clear();
 
-	bool selectWord(int x, int y);
+	bool selectWord(int x, int y, bool activate = false);
 	void extendWordSelectionToParagraph();
 
 	const std::string &text() const;

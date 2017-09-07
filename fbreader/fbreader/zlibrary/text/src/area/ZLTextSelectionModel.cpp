@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2004-2010 Geometer Plus <contact@geometerplus.com>
+ * Copyright (C) 2016-2017 Slava Monich <slava.monich@jolla.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -144,7 +145,7 @@ bool ZLTextSelectionModel::BoundElement::operator != (const ZLTextSelectionModel
 	return !operator == (element);
 }
 
-ZLTextSelectionModel::ExtensionResult ZLTextSelectionModel::extendTo(int x, int y) {
+ZLTextSelectionModel::ExtensionResult ZLTextSelectionModel::extendTo(int x, int y, bool word) {
 	if (!myIsActive || myArea.myTextElementMap.empty()) {
 		return BOUND_NOT_CHANGED;
 	}
@@ -154,6 +155,25 @@ ZLTextSelectionModel::ExtensionResult ZLTextSelectionModel::extendTo(int x, int 
 	Range newRange = internalRange();
 	myStoredX = x;
 	myStoredY = y;
+
+	if (word) {
+		const bool swap = (mySecondBound < myFirstBound);
+		Bound &from = swap ? mySecondBound : myFirstBound;
+		Bound &to = swap ? myFirstBound : mySecondBound;
+		BoundElement &after = from.After;
+		BoundElement &before = to.Before;
+		ZLTextWordCursor cursor = myArea.startCursor();
+		cursor.moveToParagraph(before.ParagraphIndex);
+		cursor.moveTo(before.ElementIndex, before.CharIndex);
+		const ZLTextElement &element = cursor.element();
+		if (element.kind() == ZLTextElement::WORD_ELEMENT) {
+			const ZLTextWord &word = (const ZLTextWord&)element;
+			before.CharIndex = word.Length;
+		}
+		after.CharIndex = 0;
+		from.Before = after;
+		to.After = before;
+	}
 
 	ExtensionResult result = BOUND_NOT_CHANGED;
 	if ((oldRange.first != newRange.first) || (oldRange.second != newRange.second)) {
@@ -460,7 +480,7 @@ shared_ptr<ZLImageData> ZLTextSelectionModel::image() const {
 	return myImage;
 }
 
-bool ZLTextSelectionModel::selectWord(int x, int y) {
+bool ZLTextSelectionModel::selectWord(int x, int y, bool activate) {
 	clear();
 
 	const ZLTextElementRectangle *rectangle = myArea.elementByCoordinates(x, y);
@@ -517,6 +537,9 @@ bool ZLTextSelectionModel::selectWord(int x, int y) {
 	mySecondBound.Before.CharIndex = endIndex;
 	mySecondBound.After = mySecondBound.Before;
 
+	myStoredX = x;
+	myStoredY = y;
+	myIsActive = activate;
 	myIsEmpty = false;
 	myTextIsUpToDate = false;
 	myRangeVectorIsUpToDate = false;
