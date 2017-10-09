@@ -162,12 +162,12 @@ BooksDialogManager::setClipboardText(
 
 void
 BooksDialogManager::setClipboardImage(
-    const ZLImageData &imageData,
+    const ZLImageData& imageData,
     ClipboardType type) const
 {
     // May be invoked on non-UI thread
     QImage image(*((const ZLQtImageData&)imageData).image());
-    if (image.isNull()) {
+    if (!image.isNull()) {
         HDEBUG(image.width() << "x" << image.height());
         Q_EMIT copyImageToClipboard(image);
     }
