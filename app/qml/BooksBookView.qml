@@ -1,6 +1,6 @@
 /*
   Copyright (C) 2015-2017 Jolla Ltd.
-  Contact: Slava Monich <slava.monich@jolla.com>
+  Copyright (C) 2015-2017 Slava Monich <slava.monich@jolla.com>
 
   You may use this file under the terms of BSD license as follows:
 
@@ -193,6 +193,7 @@ SilicaFlickable {
                 }
             }
             onSelectingChanged: {
+                globalFeedback.start("push_gesture")
                 if (currentPage) {
                     root.selecting = pageView.selecting
                 }

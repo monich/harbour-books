@@ -52,6 +52,7 @@ ApplicationWindow {
     property variant currentShelf: mainPage.currentShelf
 
     BooksHints { id: globalHints }
+    BooksFeedback { id: globalFeedback }
     SystemState { id: globalSystemState }
 
     initialPage: BooksMainPage { id: mainPage }

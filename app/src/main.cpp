@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2015-2017 Jolla Ltd.
- * Contact: Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2015-2017 Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
  *
@@ -46,6 +46,7 @@
 #include "BooksListWatcher.h"
 #include "BooksCoverWidget.h"
 #include "BooksTaskQueue.h"
+#include "BooksFeedback.h"
 #include "BooksHints.h"
 
 #include "HarbourDebug.h"
@@ -82,6 +83,7 @@ Q_DECL_EXPORT int main(int argc, char **argv)
     BOOKS_QML_REGISTER(BooksPageWidget, "PageWidget");
     BOOKS_QML_REGISTER(BooksListWatcher, "ListWatcher");
     BOOKS_QML_REGISTER(BooksCoverWidget, "BookCover");
+    BOOKS_QML_REGISTER(BooksFeedback, "BooksFeedback");
     BOOKS_QML_REGISTER(BooksHints, "BooksHints");
     BOOKS_QML_REGISTER(BooksSettings, "BooksSettings");
     HarbourLib::registerTypes(BOOKS_QML_PLUGIN,
