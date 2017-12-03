@@ -115,7 +115,6 @@ SOURCES += \
   src/BooksPageWidget.cpp \
   src/BooksPaintContext.cpp \
   src/BooksPathModel.cpp \
-  src/BooksPluginLoader.cpp \
   src/BooksPolicyPlugin.cpp \
   src/BooksSaveTimer.cpp \
   src/BooksSettings.cpp \
@@ -161,7 +160,6 @@ HEADERS += \
   src/BooksPageWidget.h \
   src/BooksPaintContext.h \
   src/BooksPathModel.h \
-  src/BooksPluginLoader.h \
   src/BooksPolicyPlugin.h \
   src/BooksPos.h \
   src/BooksSaveTimer.h \

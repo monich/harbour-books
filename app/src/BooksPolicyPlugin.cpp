@@ -43,7 +43,7 @@ const char BooksPolicyPlugin::PERMISSIONS_QML_TYPE[] = "Permissions";
 
 BooksPolicyPlugin::BooksPolicyPlugin(
     QQmlEngine* aEngine) :
-    BooksPluginLoader(aEngine, "org.nemomobile.policy", 1, 0)
+    HarbourPluginLoader(aEngine, "org.nemomobile.policy", 1, 0)
 {
 }
 

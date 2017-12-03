@@ -34,11 +34,11 @@
 #ifndef BOOKS_POLICY_PLUGIN_H
 #define BOOKS_POLICY_PLUGIN_H
 
-#include "BooksPluginLoader.h"
+#include "HarbourPluginLoader.h"
 
 class QQmlEngine;
 
-class BooksPolicyPlugin : public BooksPluginLoader
+class BooksPolicyPlugin : public HarbourPluginLoader
 {
     static BooksPolicyPlugin* gInstance;
     static const char RESOURCE_QML_TYPE[];

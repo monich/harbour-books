@@ -34,9 +34,9 @@
 #ifndef BOOKS_MEDIA_PLUGIN_H
 #define BOOKS_MEDIA_PLUGIN_H
 
-#include "BooksPluginLoader.h"
+#include "HarbourPluginLoader.h"
 
-class BooksMediaPlugin : public BooksPluginLoader
+class BooksMediaPlugin : public HarbourPluginLoader
 {
     static BooksMediaPlugin* gInstance;
     static const char MEDIAKEY_QML_TYPE[];

@@ -42,7 +42,7 @@ const char BooksMediaPlugin::MEDIAKEY_QML_TYPE[] = "MediaKey";
 
 BooksMediaPlugin::BooksMediaPlugin(
     QQmlEngine* aEngine) :
-    BooksPluginLoader(aEngine, "Sailfish.Media", 1, 0)
+    HarbourPluginLoader(aEngine, "Sailfish.Media", 1, 0)
 {
 }
 
