@@ -32,6 +32,7 @@
 
 import QtQuick 2.0
 import Sailfish.Silica 1.0
+import org.nemomobile.notifications 1.0
 import harbour.books 1.0
 
 //import Sailfish.Media 1.0         // Not allowed
@@ -116,6 +117,15 @@ SilicaFlickable {
         bottomMargin: Theme.itemSizeSmall
     }
 
+    Notification {
+        id: notification
+        //: Pop-up notification
+        //% "Copied to clipboard"
+        previewBody: qsTrId("harbour-books-book-view-copied_to_clipboard")
+        icon: "icon-s-clipboard"
+        expireTimeout: 2000
+    }
+
     SilicaListView {
         id: bookView
         model: bookModel
@@ -193,8 +203,11 @@ SilicaFlickable {
                 }
             }
             onSelectingChanged: {
-                globalFeedback.start("push_gesture")
                 if (currentPage) {
+                    globalFeedback.start("push_gesture")
+                    if (!pageView.selecting) {
+                        notification.publish()
+                    }
                     root.selecting = pageView.selecting
                 }
             }

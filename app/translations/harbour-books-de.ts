@@ -35,6 +35,11 @@
         <source>Deleting all books</source>
         <translation>Alle Bücher löschen</translation>
     </message>
+    <message id="harbour-books-book-view-copied_to_clipboard">
+        <source>Copied to clipboard</source>
+        <extracomment>Pop-up notification</extracomment>
+        <translation>In Zwischenablage kopiert</translation>
+    </message>
     <message id="harbour-books-shelf-view-no_books">
         <source>No books</source>
         <translation>Keine Bücher</translation>

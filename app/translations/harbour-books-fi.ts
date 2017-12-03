@@ -31,6 +31,11 @@
         <source>Cancel</source>
         <translation>Peru</translation>
     </message>
+    <message id="harbour-books-book-view-copied_to_clipboard">
+        <source>Copied to clipboard</source>
+        <extracomment>Pop-up notification</extracomment>
+        <translation>Kopioitu leikepöydälle</translation>
+    </message>
     <message id="harbour-books-shelf-view-about_to_delete_all">
         <source>Deleting all books</source>
         <translation>Poistetaan kaikki kirjat</translation>
