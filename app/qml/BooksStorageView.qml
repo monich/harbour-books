@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2015-2016 Jolla Ltd.
+  Copyright (C) 2015-2018 Jolla Ltd.
   Contact: Slava Monich <slava.monich@jolla.com>
 
   You may use this file under the terms of BSD license as follows:
@@ -99,9 +99,7 @@ SilicaFlickable {
             onClicked: {
                 if (!_settingsComponent) {
                     _settingsComponent = Qt.createComponent("../settings/BooksSettings.qml")
-                    if (_settingsComponent.status === Component.Ready) {
-                        _settingsComponent.createObject(storageView)
-                    } else {
+                    if (_settingsComponent.status !== Component.Ready) {
                         console.log(_settingsComponent.errorString())
                     }
                 }
