@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015-2017 Jolla Ltd.
+ * Copyright (C) 2015-2018 Jolla Ltd.
  * Contact: Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
@@ -956,19 +956,20 @@ void BooksPageWidget::onLongPressTaskDone()
         }
     } else if (task->iKind == FOOTNOTE) {
         if (iModel && task->iLink.length() > 0) {
-            std::string ref = task->iLink.substr(1);
-            shared_ptr<ZLTextModel> note = iModel->footnoteModel(ref);
+            shared_ptr<ZLTextModel> note = iModel->footnoteModel(task->iLink);
             BooksBook* book = iModel->book();
             if (!note.isNull() && book) {
                 // Render the footnote
-                HDEBUG("footnote" << ref.c_str());
+                HDEBUG("footnote" << QString(task->iLink.c_str()));
                 if (iFootnoteTask) iFootnoteTask->release(this);
                 iFootnoteTask = new FootnoteTask(task->iX, task->iY,
                     width()*3/4, height()*10, book->path(), task->iLinkText,
-                    QString::fromStdString(ref), note, iTextStyle,
+                    QString::fromStdString(task->iLink), note, iTextStyle,
                     iSettings->invertColors());
                 iTaskQueue->submit(iFootnoteTask, this,
                     SLOT(onFootnoteTaskDone()));
+            } else {
+                HDEBUG("bad footnote" << QString(task->iLink.c_str()));
             }
         }
     } else if (task->iKind == IMAGE) {

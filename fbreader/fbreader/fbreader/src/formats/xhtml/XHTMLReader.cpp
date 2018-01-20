@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2004-2010 Geometer Plus <contact@geometerplus.com>
- * Copyright (C) 2016-2017 Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2016-2018 Slava Monich <slava.monich@jolla.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -341,7 +341,8 @@ void XHTMLTagHyperlinkAction::doAtStart(XHTMLReader &reader, const char **xmlatt
 		std::string link;
 		if (type && !strcmp(type, "noteref")) {
 			hyperlinkType = FOOTNOTE;
-			link = href;
+			link = MiscUtil::decodeHtmlURL(href);
+			if (link[0] == '#') link = link.substr(1);
 		} else {
 			hyperlinkType = MiscUtil::referenceType(href);
 			link = MiscUtil::decodeHtmlURL(href);
