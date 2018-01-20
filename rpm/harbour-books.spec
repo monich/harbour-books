@@ -1,6 +1,6 @@
 Name:           harbour-books
 Summary:        E-book reader
-Version:        1.0.23
+Version:        1.0.24
 Release:        1
 License:        BSD
 Group:          Applications/File
@@ -57,6 +57,12 @@ desktop-file-install --delete-original \
 make -C test test
 
 %changelog
+* Sat Jan 20 2018 Slava Monich <slava.monich@jolla.com> 1.0.24
+- Haptic feedback when entering/leaving selection mode
+- Added "Copied to clipboard" pop-up notification
+- Corrected page stack behaviour
+- Fixed FB2 footnotes
+
 * Tue Sep 07 2017 Slava Monich <slava.monich@jolla.com> 1.0.23
 - Copy text to clipboard on long press
 - Added "Select all" function to the import view
