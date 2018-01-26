@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2015-2017 Jolla Ltd.
- * Contact: Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2015-2018 Jolla Ltd.
+ * Copyright (C) 2015-2018 Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
  *
@@ -139,21 +139,29 @@ QByteArray BooksImportModel::Task::calculateFileHash(QString aPath)
     QByteArray result;
     QFile file(aPath);
     if (file.open(QIODevice::ReadOnly)) {
-        qint64 len = 0;
-        QCryptographicHash hash(DIGEST_TYPE);
-        hash.reset();
-        if (!iBuf) iBuf = new char[iBufSize];
-        while (!isCanceled() && (len = file.read(iBuf, iBufSize)) > 0) {
-            hash.addData(iBuf, len);
-        }
-        if (len == 0) {
+        const qint64 size = file.size();
+        uchar* map = file.map(0, size);
+        if (map) {
+            const char* ptr = (char*)map;
+            qint64 bytesLeft = size;
+            QCryptographicHash hash(DIGEST_TYPE);
+            hash.reset();
+            while (!isCanceled() && bytesLeft > DIGEST_SIZE) {
+                hash.addData(ptr, DIGEST_SIZE);
+                bytesLeft -= DIGEST_SIZE;
+                ptr += DIGEST_SIZE;
+            }
             if (!isCanceled()) {
+                if (bytesLeft) {
+                    hash.addData(ptr, bytesLeft);
+                }
                 result = hash.result();
                 HASSERT(result.size() == DIGEST_SIZE);
                 HDEBUG(qPrintable(aPath) << QString(result.toHex()));
             }
+            file.unmap(map);
         } else {
-            HWARN("error reading" << qPrintable(aPath));
+            HWARN("error mapping" << qPrintable(aPath));
         }
         file.close();
     }
