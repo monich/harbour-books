@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2015-2017 Jolla Ltd.
- * Contact: Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2015-2018 Jolla Ltd.
+ * Copyright (C) 2015-2018 Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
  *
@@ -44,7 +44,15 @@
 struct BooksPos {
     int iParagraphIndex, iElementIndex, iCharIndex;
 
-    typedef QList<BooksPos> List;
+    class List : public QList<BooksPos> {
+    public:
+        List() : QList<BooksPos>() {}
+        List(const List& aList) : QList<BooksPos>(aList) {}
+
+        QVariantList toVariantList() const;
+        static List fromVariant(QVariant aVariant, bool aStrict = true);
+    };
+
     typedef QList<BooksPos>::iterator Iterator;
     typedef QList<BooksPos>::const_iterator ConstIterator;
     struct Stack { List iList; int iPos; };
@@ -89,35 +97,8 @@ struct BooksPos {
         iCharIndex = aCharIndex;
     }
 
-    QVariant toVariant() const
-    {
-        QVariantList list;
-        list.append(iParagraphIndex);
-        list.append(iElementIndex);
-        list.append(iCharIndex);
-        return QVariant::fromValue(list);
-    }
-
-    static BooksPos fromVariant(QVariant aVariant)
-    {
-        if (aVariant.isValid()) {
-            QVariantList list = aVariant.toList();
-            if (list.count() == 3) {
-                bool ok = false;
-                int paraIndex = list.at(0).toInt(&ok);
-                if (ok) {
-                    int elemIndex = list.at(1).toInt(&ok);
-                    if (ok) {
-                        int charIndex = list.at(2).toInt(&ok);
-                        if (ok) {
-                            return BooksPos(paraIndex, elemIndex, charIndex);
-                        }
-                    }
-                }
-            }
-        }
-        return BooksPos();
-    }
+    QVariant toVariant() const;
+    static BooksPos fromVariant(QVariant aVariant);
 
     const BooksPos& operator = (const BooksPos& aPos)
     {

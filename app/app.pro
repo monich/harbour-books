@@ -116,6 +116,7 @@ SOURCES += \
   src/BooksPaintContext.cpp \
   src/BooksPathModel.cpp \
   src/BooksPolicyPlugin.cpp \
+  src/BooksPos.cpp \
   src/BooksSaveTimer.cpp \
   src/BooksSettings.cpp \
   src/BooksShelf.cpp \

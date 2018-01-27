@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2015-2017 Jolla Ltd.
- * Contact: Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2015-2018 Jolla Ltd.
+ * Copyright (C) 2015-2018 Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
  *
@@ -343,14 +343,7 @@ BooksBook::BooksBook(const BooksStorage& aStorage, QString aRelativePath,
                 iPageStack.append(bookPos);
             } else {
                 // New format (list of positions)
-                QVariantList list(position.toList());
-                const int count = list.count();
-                for (int k=0; k<count; k++) {
-                    bookPos = BooksPos::fromVariant(list.at(k));
-                    if (bookPos.valid()) {
-                        iPageStack.append(bookPos);
-                    }
-                }
+                iPageStack = BooksPos::List::fromVariant(position);
             }
         }
     }
@@ -581,10 +574,7 @@ void BooksBook::saveState()
     if (!iStateFilePath.isEmpty()) {
         QVariantMap state;
         HarbourJson::load(iStateFilePath, state);
-        QVariantList positions;
-        const int n = iPageStack.count();
-        for (int i=0; i<n; i++) positions.append(iPageStack.at(i).toVariant());
-        state.insert(BOOK_STATE_POSITION, positions);
+        state.insert(BOOK_STATE_POSITION, iPageStack.toVariantList());
         state.insert(BOOK_STATE_FONT_SIZE_ADJUST, iFontSizeAdjust);
 #ifdef BOOK_STATE_PAGE_STACK_INDEX
         state.insert(BOOK_STATE_PAGE_STACK_INDEX, iPageStackPos);
