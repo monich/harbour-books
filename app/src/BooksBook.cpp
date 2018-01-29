@@ -66,6 +66,7 @@
 // ==========================================================================
 // BooksBook::CoverContext
 // ==========================================================================
+
 class BooksBook::CoverPaintContext : public BooksPaintContext {
 public:
     CoverPaintContext();
@@ -290,6 +291,32 @@ void BooksBook::GuessCoverTask::performTask()
 }
 
 // ==========================================================================
+// BooksBook::HashTask
+// ==========================================================================
+
+class BooksBook::HashTask : public BooksTask
+{
+public:
+    HashTask(QString aPath, QThread* aThread);
+
+    virtual void performTask();
+
+public:
+    QString iPath;
+    QByteArray iHash;
+};
+
+BooksBook::HashTask::HashTask(QString aPath, QThread* aThread) :
+    BooksTask(aThread), iPath(aPath)
+{
+}
+
+void BooksBook::HashTask::performTask()
+{
+    iHash = BooksUtil::computeFileHashAndSetAttr(iPath, this);
+}
+
+// ==========================================================================
 // BooksBook
 // ==========================================================================
 
@@ -307,14 +334,14 @@ BooksBook::BooksBook(const BooksStorage& aStorage, QString aRelativePath,
     iRef(1),
     iStorage(aStorage),
     iBook(aBook),
-    iTaskQueue(BooksTaskQueue::defaultQueue())
+    iFormatPlugin(PluginCollection::Instance().plugin(*iBook)),
+    iTaskQueue(BooksTaskQueue::defaultQueue()),
+    iTitle(QString::fromStdString(iBook->title())),
+    iPath(QString::fromStdString(iBook->file().physicalFilePath())),
+    iFileName(QFileInfo(iPath).fileName()),
+    iHash(BooksUtil::fileHashAttr(iPath))
 {
     init();
-    HASSERT(!iBook.isNull());
-    iTitle = QString::fromStdString(iBook->title());
-    iPath = QString::fromStdString(iBook->file().physicalFilePath());
-    iFileName = QFileInfo(iPath).fileName();
-    iFormatPlugin = PluginCollection::Instance().plugin(*iBook);
     AuthorList authors(iBook->authors());
     const int n = authors.size();
     for (int i=0; i<n; i++) {
@@ -324,8 +351,9 @@ BooksBook::BooksBook(const BooksStorage& aStorage, QString aRelativePath,
     if (iStorage.isValid()) {
         iStateDir = QDir::cleanPath(iStorage.configDir().path() +
             QDir::separator() + aRelativePath);
-        iStateFilePath =  QDir::cleanPath(iStateDir +
-            QDir::separator() + iFileName + BOOKS_STATE_FILE_SUFFIX);
+        iStateFileBase = QDir::cleanPath(iStateDir +
+            QDir::separator() + iFileName);
+        iStateFilePath =  storageFile(BOOKS_STATE_FILE_SUFFIX);
         // Load the state
         QVariantMap state;
         if (HarbourJson::load(iStateFilePath, state)) {
@@ -356,6 +384,12 @@ BooksBook::BooksBook(const BooksStorage& aStorage, QString aRelativePath,
     } else if (iPageStackPos >= iPageStack.count()) {
         iPageStackPos = iPageStack.count() - 1;
     }
+    if (iHash.isEmpty()) {
+        HDEBUG("need to calculate hash for" << qPrintable(iPath));
+        iHashTask = new HashTask(iPath, thread());
+        connect(iHashTask, SIGNAL(done()), SLOT(onHashTaskDone()));
+        iTaskQueue->submit(iHashTask);
+    }
     // Refcounted BooksBook objects are managed by C++ code
     QQmlEngine::setObjectOwnership(this, QQmlEngine::CppOwnership);
 }
@@ -365,9 +399,11 @@ void BooksBook::init()
     iFontSizeAdjust = 0;
     iPageStackPos = 0;
     iCoverTask = NULL;
+    iHashTask = NULL;
     iCoverTasksDone = false;
     iCopyingOut = false;
     iSaveTimer = NULL;
+    moveToThread(qApp->thread());
 }
 
 BooksBook::~BooksBook()
@@ -375,6 +411,7 @@ BooksBook::~BooksBook()
     HDEBUG(qPrintable(iPath));
     HASSERT(!iRef.load());
     if (iCoverTask) iCoverTask->release(this);
+    if (iHashTask) iHashTask->release(this);
 }
 
 BooksItem* BooksBook::retain()
@@ -559,6 +596,15 @@ void BooksBook::onGuessCoverTaskDone()
     Q_EMIT loadingCoverChanged();
 }
 
+void BooksBook::onHashTaskDone()
+{
+    iHash = iHashTask->iHash;
+    HDEBUG(QString(iHash.toHex()));
+    iHashTask->release(this);
+    iHashTask = NULL;
+    Q_EMIT hashChanged();
+}
+
 QString BooksBook::cachedImagePath() const
 {
     if (!iStateDir.isEmpty() && !iBook.isNull()) {
@@ -614,9 +660,7 @@ BooksBook* BooksBook::newBook(const BooksStorage& aStorage, QString aRelPath,
         QFileInfo(QDir(aStorage.fullPath(aRelPath)), aFileName).
         absoluteFilePath());
     if (!ref.isNull()) {
-        BooksBook* book = new BooksBook(aStorage, aRelPath, ref);
-        book->moveToThread(qApp->thread());
-        return book;
+        return new BooksBook(aStorage, aRelPath, ref);
     } else {
         return NULL;
     }

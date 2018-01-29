@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2015-2017 Jolla Ltd.
- * Contact: Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2015-2018 Jolla Ltd.
+ * Copyright (C) 2015-2018 Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
  *
@@ -49,6 +49,7 @@
 
 class BooksBook : public QObject, public BooksItem
 {
+    class HashTask;
     class CoverTask;
     class LoadCoverTask;
     class GuessCoverTask;
@@ -76,12 +77,14 @@ public:
 
     QString title() const;
     QString authors() const;
+    QByteArray hash() const;
     int fontSizeAdjust() const;
     bool setFontSizeAdjust(int aFontSizeAdjust);
     int pageStackPos() const;
     BooksPos::List pageStack() const;
     void setPageStack(BooksPos::List aStack, int aStackPos);
     shared_ptr<Book> bookRef() const;
+    QString storageFile(QString aSuffix) const;
 
     bool copyingOut() const;
     bool loadingCover() const;
@@ -112,11 +115,13 @@ Q_SIGNALS:
     void accessibleChanged();
     void copyingOutChanged();
     void fontSizeAdjustChanged();
+    void hashChanged();
     void movedAway();
 
 private Q_SLOTS:
     void onLoadCoverTaskDone();
     void onGuessCoverTaskDone();
+    void onHashTaskDone();
     void saveState();
 
 private:
@@ -139,14 +144,17 @@ private:
     shared_ptr<BooksTaskQueue> iTaskQueue;
     BooksSaveTimer* iSaveTimer;
     CoverTask* iCoverTask;
+    HashTask* iHashTask;
     bool iCoverTasksDone;
     bool iCopyingOut;
     QString iTitle;
     QString iAuthors;
-    QString iFileName;
     QString iPath;
+    QString iFileName;
     QString iStateDir;
     QString iStateFilePath;
+    QString iStateFileBase;
+    QByteArray iHash;
 };
 
 QML_DECLARE_TYPE(BooksBook)
@@ -155,6 +163,8 @@ inline QString BooksBook::title() const
     { return iTitle; }
 inline QString BooksBook::authors() const
     { return iAuthors; }
+inline QByteArray BooksBook::hash() const
+    { return iHash; }
 inline int BooksBook::fontSizeAdjust() const
     { return iFontSizeAdjust; }
 inline int BooksBook::pageStackPos() const
@@ -171,5 +181,7 @@ inline bool BooksBook::isCanceled(CopyOperation* aObserver)
     { return aObserver && aObserver->isCanceled(); }
 inline QImage BooksBook::coverImage() const
     { return iCoverImage; }
+inline QString BooksBook::storageFile(QString aSuffix) const
+    { return iStateFileBase + aSuffix; }
 
 #endif // BOOKS_BOOK_H
