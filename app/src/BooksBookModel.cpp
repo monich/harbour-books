@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2015-2017 Jolla Ltd.
- * Contact: Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2015-2018 Jolla Ltd.
+ * Copyright (C) 2015-2018 Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
  *
@@ -41,6 +41,7 @@
 // ==========================================================================
 // BooksBookModel::Data
 // ==========================================================================
+
 class BooksBookModel::Data {
 public:
     Data(int aWidth, int aHeight) : iWidth(aWidth), iHeight(aHeight) {}
@@ -61,10 +62,28 @@ class BooksBookModel::PagingTask : public BooksTask
     Q_OBJECT
 
 public:
-    PagingTask(BooksBookModel* aReceiver, shared_ptr<Book> aBook);
+    static const quint32 MarksFileVersion = 1;
+    static const char MarksFileMagic[];
+    struct MarksHeader {
+        char magic[4];
+        quint32 version;
+        char hash[16];
+        qint32 fontSize;
+        qint32 leftMargin;
+        qint32 rightMargin;
+        qint32 topMargin;
+        qint32 bottomMargin;
+        quint32 count;
+    } __attribute__((packed));
+
+    PagingTask(BooksBookModel* aModel, shared_ptr<Book> aBook);
     ~PagingTask();
 
     void performTask();
+
+    static QString pageMarksFile(BooksBookModel* aModel);
+    BooksPos::List loadPageMarks();
+    void savePageMarks();
 
 Q_SIGNALS:
     void progress(int aProgress);
@@ -72,17 +91,23 @@ Q_SIGNALS:
 public:
     shared_ptr<Book> iBook;
     shared_ptr<ZLTextStyle> iTextStyle;
-    BooksMargins iMargins;
     BooksPaintContext iPaint;
+    const BooksMargins iMargins;
+    const QString iPageMarksFile;
+    const QByteArray iHash;
     BooksBookModel::Data* iData;
 };
+
+const char BooksBookModel::PagingTask::MarksFileMagic[] = "MARK";
 
 BooksBookModel::PagingTask::PagingTask(BooksBookModel* aModel,
     shared_ptr<Book> aBook) :
     iBook(aBook),
     iTextStyle(aModel->textStyle()),
-    iMargins(aModel->margins()),
     iPaint(aModel->width(), aModel->height()),
+    iMargins(aModel->margins()),
+    iPageMarksFile(pageMarksFile(aModel)),
+    iHash(aModel->book()->hash()),
     iData(NULL)
 {
     aModel->connect(this, SIGNAL(done()), SLOT(onResetDone()));
@@ -95,6 +120,106 @@ BooksBookModel::PagingTask::~PagingTask()
     delete iData;
 }
 
+QString BooksBookModel::PagingTask::pageMarksFile(BooksBookModel* aModel)
+{
+    return aModel->book()->storageFile(QString(".%1x%2.marks").
+        arg(aModel->width()).arg(aModel->height()));
+}
+
+BooksPos::List BooksBookModel::PagingTask::loadPageMarks()
+{
+    BooksPos::List list;
+    QFile file(iPageMarksFile);
+    if (!iHash.isEmpty() && file.open(QIODevice::ReadOnly)) {
+        const qint64 size = file.size();
+        uchar* map = file.map(0, size);
+        if (map) {
+            HWARN("reading" << qPrintable(iPageMarksFile));
+            if (size > sizeof(MarksHeader)) {
+                const qint64 dataSize = size - sizeof(MarksHeader);
+                const MarksHeader* hdr = (MarksHeader*)map;
+                if (!memcmp(hdr->magic, MarksFileMagic, sizeof(hdr->magic)) &&
+                    hdr->version == MarksFileVersion &&
+                    iHash.size() == sizeof(hdr->hash) &&
+                    !memcmp(iHash.constData(), hdr->hash, sizeof(hdr->hash)) &&
+                    hdr->fontSize == iTextStyle->fontSize() &&
+                    hdr->leftMargin == iMargins.iLeft &&
+                    hdr->rightMargin == iMargins.iRight &&
+                    hdr->topMargin == iMargins.iTop &&
+                    hdr->bottomMargin == iMargins.iBottom &&
+                    hdr->count > 0 && hdr->count * 12 == dataSize) {
+                    const quint32* ptr = (quint32*)(hdr + 1);
+                    for (quint32 i = 0; i < hdr->count; i++) {
+                        quint32 para = *ptr++;
+                        quint32 elem = *ptr++;
+                        quint32 charIndex = *ptr++;
+                        BooksPos pos(para, elem, charIndex);
+                        if (!list.isEmpty()) {
+                            const BooksPos& last = list.last();
+                            if (last >= pos) {
+                                HWARN(qPrintable(iPageMarksFile) <<
+                                    "broken order");
+                                list.clear();
+                                break;
+                            }
+                        }
+                        list.append(pos);
+                    }
+                } else {
+                    HWARN(qPrintable(iPageMarksFile) << "header mismatch");
+                }
+            } else {
+                HWARN(qPrintable(iPageMarksFile) << "too short");
+            }
+            file.unmap(map);
+        } else {
+            HWARN("error mapping" << qPrintable(iPageMarksFile));
+        }
+        file.close();
+        if (list.isEmpty()) {
+            HDEBUG("deleting" << qPrintable(iPageMarksFile));
+            QFile::remove(iPageMarksFile);
+        }
+    }
+    return list;
+}
+
+void BooksBookModel::PagingTask::savePageMarks()
+{
+    MarksHeader hdr;
+    HASSERT(iHash.size() == sizeof(hdr.hash));
+    if (iHash.size() == sizeof(hdr.hash) &&
+        !iData->iPageMarks.isEmpty()) {
+        QFile file(iPageMarksFile);
+        if (file.open(QIODevice::ReadWrite)) {
+            HWARN("writing" << qPrintable(iPageMarksFile));
+            const int n = iData->iPageMarks.count();
+            memset(&hdr, 0, sizeof(hdr));
+            memcpy(hdr.magic, MarksFileMagic, sizeof(hdr.magic));
+            hdr.version = MarksFileVersion;
+            memcpy(hdr.hash, iHash.constData(), sizeof(hdr.hash));
+            hdr.fontSize = iTextStyle->fontSize();
+            hdr.leftMargin = iMargins.iLeft;
+            hdr.rightMargin = iMargins.iRight;
+            hdr.topMargin = iMargins.iTop;
+            hdr.bottomMargin = iMargins.iBottom;
+            hdr.count = n;
+            file.write((char*)&hdr, sizeof(hdr));
+            for (int i = 0; i < n; i++) {
+                const BooksPos& pos = iData->iPageMarks.at(i);
+                quint32 data[3];
+                data[0] = pos.iParagraphIndex;
+                data[1] = pos.iElementIndex;
+                data[2] = pos.iCharIndex;
+                file.write((char*)data, sizeof(data));
+            }
+            file.close();
+        } else {
+            HWARN("can't open" << qPrintable(iPageMarksFile));
+        }
+    }
+}
+
 void BooksBookModel::PagingTask::performTask()
 {
     if (!isCanceled()) {
@@ -103,16 +228,27 @@ void BooksBookModel::PagingTask::performTask()
         shared_ptr<ZLTextModel> model(iData->iBookModel->bookTextModel());
         ZLTextHyphenator::Instance().load(iBook->language());
         if (!isCanceled()) {
-            BooksTextView view(iPaint, iTextStyle, iMargins);
-            view.setModel(model);
-            if (model->paragraphsNumber() > 0) {
-                BooksPos mark = view.rewind();
-                iData->iPageMarks.append(mark);
-                Q_EMIT progress(iData->iPageMarks.count());
-                while (!isCanceled() && view.nextPage()) {
-                    mark = view.position();
+            // Load the cached marks
+            iData->iPageMarks = loadPageMarks();
+            if (iData->iPageMarks.isEmpty() && !isCanceled()) {
+                // We have to do the hard way. This is going to take
+                // a bit of time (from tens of seconds to minutes for
+                // large books).
+                BooksTextView view(iPaint, iTextStyle, iMargins);
+                view.setModel(model);
+                if (model->paragraphsNumber() > 0) {
+                    BooksPos mark = view.rewind();
                     iData->iPageMarks.append(mark);
                     Q_EMIT progress(iData->iPageMarks.count());
+                    while (!isCanceled() && view.nextPage()) {
+                        mark = view.position();
+                        iData->iPageMarks.append(mark);
+                        Q_EMIT progress(iData->iPageMarks.count());
+                    }
+                }
+                if (!isCanceled()) {
+                    // Save it so that next time we won't have to do it again
+                    savePageMarks();
                 }
             }
         }
@@ -396,7 +532,6 @@ void BooksBookModel::onTextStyleChanged()
 
 void BooksBookModel::startReset(ResetReason aResetReason, bool aFullReset)
 {
-    BooksPos dummy;
     BooksLoadingSignalBlocker block(this);
     if (aResetReason == ReasonUnknown) {
         if (iResetReason == ReasonUnknown) {
