@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2015-2017 Jolla Ltd.
- * Contact: Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2015-2018 Jolla Ltd.
+ * Copyright (C) 2015-2018 Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
  *
@@ -184,14 +184,12 @@ void BooksShelf::LoadTask::performTask()
                 }
                 folderPath += info.fileName();
                 BooksShelf* newShelf = new BooksShelf(iStorage, folderPath);
-                newShelf->moveToThread(thread());
                 iItems.append(newShelf);
             } else {
                 shared_ptr<Book> book = BooksUtil::bookFromFile(path);
                 if (!book.isNull()) {
                     BooksBook* newBook = new BooksBook(iStorage,
                         iRelativePath, book);
-                    newBook->moveToThread(thread());
                     iItems.append(newBook);
                     HDEBUG("[" << iItems.size() << "]" <<
                         qPrintable(newBook->fileName()) <<
@@ -516,6 +514,7 @@ void BooksShelf::init()
 #if QT_VERSION < 0x050000
     setRoleNames(roleNames());
 #endif
+    moveToThread(qApp->thread());
     connect(BooksStorageManager::instance(),
         SIGNAL(storageReplaced(BooksStorage,BooksStorage)),
         SLOT(onStorageReplaced(BooksStorage,BooksStorage)));
