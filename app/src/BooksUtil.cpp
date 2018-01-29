@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2015 Jolla Ltd.
- * Contact: Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2015-2018 Jolla Ltd.
+ * Copyright (C) 2015-2018 Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
  *
@@ -14,7 +14,7 @@
  *     notice, this list of conditions and the following disclaimer in
  *     the documentation and/or other materials provided with the
  *     distribution.
- *   * Neither the name of Nemo Mobile nor the names of its contributors
+ *   * Neither the name of Jolla Ltd nor the names of its contributors
  *     may be used to endorse or promote products derived from this
  *     software without specific prior written permission.
  *
@@ -32,12 +32,24 @@
  */
 
 #include "BooksUtil.h"
+#include "BooksDefs.h"
+#include "BooksTask.h"
 #include "HarbourDebug.h"
 
 #include "ZLDir.h"
 #include "formats/FormatPlugin.h"
 
 #include <queue>
+
+#include <QCryptographicHash>
+
+#include <sys/xattr.h>
+#include <linux/xattr.h>
+#include <errno.h>
+
+#define DIGEST_XATTR    XATTR_USER_PREFIX BOOKS_APP_NAME ".md5-hash"
+#define DIGEST_TYPE     (QCryptographicHash::Md5)
+#define DIGEST_SIZE     (16)
 
 shared_ptr<Book> BooksUtil::bookFromFile(std::string aPath)
 {
@@ -76,6 +88,82 @@ shared_ptr<Book> BooksUtil::bookFromFile(std::string aPath)
         }
     }
     return book;
+}
+
+QByteArray BooksUtil::computeFileHash(QString aPath, BooksTask* aTask)
+{
+    QByteArray result;
+    QFile file(aPath);
+    if (file.open(QIODevice::ReadOnly)) {
+        const qint64 size = file.size();
+        uchar* map = file.map(0, size);
+        if (map) {
+            const char* ptr = (char*)map;
+            qint64 bytesLeft = size;
+            QCryptographicHash hash(DIGEST_TYPE);
+            hash.reset();
+            if (aTask) {
+                while (!aTask->isCanceled() && bytesLeft > DIGEST_SIZE) {
+                    hash.addData(ptr, DIGEST_SIZE);
+                    bytesLeft -= DIGEST_SIZE;
+                    ptr += DIGEST_SIZE;
+                }
+            } else {
+                while (bytesLeft > DIGEST_SIZE) {
+                    hash.addData(ptr, DIGEST_SIZE);
+                    bytesLeft -= DIGEST_SIZE;
+                    ptr += DIGEST_SIZE;
+                }
+            }
+            if (!aTask || !aTask->isCanceled()) {
+                if (bytesLeft) {
+                    hash.addData(ptr, bytesLeft);
+                }
+                result = hash.result();
+                HASSERT(result.size() == DIGEST_SIZE);
+                HDEBUG(qPrintable(aPath) << QString(result.toHex()));
+            }
+            file.unmap(map);
+        } else {
+            HWARN("error mapping" << qPrintable(aPath));
+        }
+        file.close();
+    }
+    return result;
+}
+
+QByteArray BooksUtil::fileHashAttr(QString aPath)
+{
+    QByteArray hash;
+    QByteArray fname(aPath.toLocal8Bit());
+    char attr[DIGEST_SIZE];
+    if (getxattr(fname, DIGEST_XATTR, attr, sizeof(attr)) == DIGEST_SIZE) {
+        hash = QByteArray(attr, sizeof(attr));
+        HDEBUG(qPrintable(aPath) << QString(hash.toHex()));
+    }
+    return hash;
+}
+
+bool BooksUtil::setFileHashAttr(QString aPath, QByteArray aHash)
+{
+    if (aHash.size() == DIGEST_SIZE) {
+        QByteArray fname(aPath.toLocal8Bit());
+        if (setxattr(fname, DIGEST_XATTR, aHash, aHash.size(), 0) == 0) {
+            return true;
+        }
+        HDEBUG("Failed to set " DIGEST_XATTR " xattr on" <<
+            fname.constData() << ":" << strerror(errno));
+    }
+    return false;
+}
+
+QByteArray BooksUtil::computeFileHashAndSetAttr(QString aPath, BooksTask* aTask)
+{
+    QByteArray hash = computeFileHash(aPath, aTask);
+    if (!hash.isEmpty()) {
+        BooksUtil::setFileHashAttr(aPath, hash);
+    }
+    return hash;
 }
 
 bool BooksUtil::isValidFileName(QString aName)

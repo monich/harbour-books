@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2015 Jolla Ltd.
- * Contact: Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2015-2018 Jolla Ltd.
+ * Copyright (C) 2015-2018 Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
  *
@@ -14,7 +14,7 @@
  *     notice, this list of conditions and the following disclaimer in
  *     the documentation and/or other materials provided with the
  *     distribution.
- *   * Neither the name of Nemo Mobile nor the names of its contributors
+ *   * Neither the name of Jolla Ltd nor the names of its contributors
  *     may be used to endorse or promote products derived from this
  *     software without specific prior written permission.
  *
@@ -40,10 +40,16 @@
 
 #include <QString>
 
+class BooksTask;
+
 namespace BooksUtil {
     shared_ptr<Book> bookFromFile(std::string aPath);
     shared_ptr<Book> bookFromFile(QString aPath);
     bool isValidFileName(QString aName);
+    QByteArray fileHashAttr(QString aPath);
+    bool setFileHashAttr(QString aPath, QByteArray aHash);
+    QByteArray computeFileHash(QString aPath, BooksTask* aTask = NULL);
+    QByteArray computeFileHashAndSetAttr(QString aPath, BooksTask* aTask = NULL);
 }
 
 inline shared_ptr<Book> BooksUtil::bookFromFile(QString aPath)

@@ -35,20 +35,10 @@
 #include "BooksStorage.h"
 #include "BooksTask.h"
 #include "BooksUtil.h"
-#include "BooksDefs.h"
 
 #include "HarbourDebug.h"
 
 #include <QDir>
-#include <QCryptographicHash>
-
-#include <sys/xattr.h>
-#include <linux/xattr.h>
-#include <errno.h>
-
-#define DIGEST_XATTR    XATTR_USER_PREFIX BOOKS_APP_NAME ".md5-hash"
-#define DIGEST_TYPE     (QCryptographicHash::Md5)
-#define DIGEST_SIZE     (16)
 
 enum BooksImportRole {
     BooksImportRoleTitle = Qt::UserRole,
@@ -103,7 +93,6 @@ public:
     void performTask();
     void scanDir(QDir aDir);
     bool isDuplicate(QString aPath, QFileInfoList aFileList);
-    QByteArray calculateFileHash(QString aPath);
     QByteArray getFileHash(QString aPath);
 
 Q_SIGNALS:
@@ -134,60 +123,16 @@ BooksImportModel::Task::~Task()
     delete [] iBuf;
 }
 
-QByteArray BooksImportModel::Task::calculateFileHash(QString aPath)
-{
-    QByteArray result;
-    QFile file(aPath);
-    if (file.open(QIODevice::ReadOnly)) {
-        const qint64 size = file.size();
-        uchar* map = file.map(0, size);
-        if (map) {
-            const char* ptr = (char*)map;
-            qint64 bytesLeft = size;
-            QCryptographicHash hash(DIGEST_TYPE);
-            hash.reset();
-            while (!isCanceled() && bytesLeft > DIGEST_SIZE) {
-                hash.addData(ptr, DIGEST_SIZE);
-                bytesLeft -= DIGEST_SIZE;
-                ptr += DIGEST_SIZE;
-            }
-            if (!isCanceled()) {
-                if (bytesLeft) {
-                    hash.addData(ptr, bytesLeft);
-                }
-                result = hash.result();
-                HASSERT(result.size() == DIGEST_SIZE);
-                HDEBUG(qPrintable(aPath) << QString(result.toHex()));
-            }
-            file.unmap(map);
-        } else {
-            HWARN("error mapping" << qPrintable(aPath));
-        }
-        file.close();
-    }
-    return result;
-}
-
 QByteArray BooksImportModel::Task::getFileHash(QString aPath)
 {
     if (iFileHash.contains(aPath)) {
         return iFileHash.value(aPath);
     } else {
-        QByteArray hash;
-        char attr[DIGEST_SIZE];
-        QByteArray fname = aPath.toLocal8Bit();
-        if (getxattr(fname, DIGEST_XATTR, attr, sizeof(attr)) == DIGEST_SIZE) {
-            hash = QByteArray(attr, sizeof(attr));
-            HDEBUG(qPrintable(aPath) << QString(hash.toHex()));
-        } else {
-            hash = calculateFileHash(aPath);
-            if (hash.size() == DIGEST_SIZE &&
-                setxattr(fname, DIGEST_XATTR, hash, hash.size(), 0)) {
-                HDEBUG("Failed to set " DIGEST_XATTR " xattr on" <<
-                    fname.constData() << ":" << strerror(errno));
-            }
+        QByteArray hash(BooksUtil::fileHashAttr(aPath));
+        if (hash.isEmpty()) {
+            hash = BooksUtil::computeFileHashAndSetAttr(aPath, this);
         }
-        if (hash.size() == DIGEST_SIZE) {
+        if (!hash.isEmpty()) {
             iFileHash.insert(aPath, hash);
             iHashFile.insert(hash, aPath);
         }
@@ -249,7 +194,6 @@ void BooksImportModel::Task::scanDir(QDir aDir)
                 if (!isDuplicate(filePath, iDestFiles) &&
                     !isDuplicate(filePath, iSrcFiles)) {
                     BooksBook* newBook = new BooksBook(dummy, QString(), book);
-                    newBook->moveToThread(thread());
                     iBooks.append(newBook);
                     iSrcFiles.append(fileInfo);
                     HDEBUG("found" << path.c_str() << newBook->title());
