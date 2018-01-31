@@ -134,7 +134,7 @@ BooksPos::List BooksBookModel::PagingTask::loadPageMarks()
         const qint64 size = file.size();
         uchar* map = file.map(0, size);
         if (map) {
-            HWARN("reading" << qPrintable(iPageMarksFile));
+            HDEBUG("reading" << qPrintable(iPageMarksFile));
             if (size > sizeof(MarksHeader)) {
                 const qint64 dataSize = size - sizeof(MarksHeader);
                 const MarksHeader* hdr = (MarksHeader*)map;
@@ -192,7 +192,7 @@ void BooksBookModel::PagingTask::savePageMarks()
         !iData->iPageMarks.isEmpty()) {
         QFile file(iPageMarksFile);
         if (file.open(QIODevice::ReadWrite)) {
-            HWARN("writing" << qPrintable(iPageMarksFile));
+            HDEBUG("writing" << qPrintable(iPageMarksFile));
             const int n = iData->iPageMarks.count();
             memset(&hdr, 0, sizeof(hdr));
             memcpy(hdr.magic, MarksFileMagic, sizeof(hdr.magic));
