@@ -90,7 +90,7 @@ shared_ptr<Book> BooksUtil::bookFromFile(std::string aPath)
     return book;
 }
 
-QByteArray BooksUtil::computeFileHash(QString aPath, BooksTask* aTask)
+QByteArray BooksUtil::computeFileHash(QString aPath, const BooksTask* aTask)
 {
     QByteArray result;
     QFile file(aPath);
@@ -157,7 +157,7 @@ bool BooksUtil::setFileHashAttr(QString aPath, QByteArray aHash)
     return false;
 }
 
-QByteArray BooksUtil::computeFileHashAndSetAttr(QString aPath, BooksTask* aTask)
+QByteArray BooksUtil::computeFileHashAndSetAttr(QString aPath, const BooksTask* aTask)
 {
     QByteArray hash = computeFileHash(aPath, aTask);
     if (!hash.isEmpty()) {

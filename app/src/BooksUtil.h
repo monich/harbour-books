@@ -48,8 +48,8 @@ namespace BooksUtil {
     bool isValidFileName(QString aName);
     QByteArray fileHashAttr(QString aPath);
     bool setFileHashAttr(QString aPath, QByteArray aHash);
-    QByteArray computeFileHash(QString aPath, BooksTask* aTask = NULL);
-    QByteArray computeFileHashAndSetAttr(QString aPath, BooksTask* aTask = NULL);
+    QByteArray computeFileHash(QString aPath, const BooksTask* aTask = NULL);
+    QByteArray computeFileHashAndSetAttr(QString aPath, const BooksTask* aTask = NULL);
 }
 
 inline shared_ptr<Book> BooksUtil::bookFromFile(QString aPath)
