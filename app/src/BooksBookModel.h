@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2015-2017 Jolla Ltd.
- * Contact: Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2015-2018 Jolla Ltd.
+ * Copyright (C) 2015-2018 Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
  *
@@ -139,6 +139,7 @@ private Q_SLOTS:
     void onResetDone();
     void onTextStyleChanged();
     void onPageStackChanged();
+    void onHashChanged();
 
 Q_SIGNALS:
     void sizeChanged();

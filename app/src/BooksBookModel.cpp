@@ -33,6 +33,7 @@
 
 #include "BooksBookModel.h"
 #include "BooksTextStyle.h"
+#include "BooksUtil.h"
 
 #include "HarbourDebug.h"
 
@@ -51,6 +52,7 @@ public:
     int iHeight;
     shared_ptr<BookModel> iBookModel;
     BooksPos::List iPageMarks;
+    QByteArray iHash;
 };
 
 // ==========================================================================
@@ -82,8 +84,9 @@ public:
     void performTask();
 
     static QString pageMarksFile(BooksBookModel* aModel);
-    BooksPos::List loadPageMarks();
-    void savePageMarks();
+    BooksPos::List loadPageMarks() const;
+    bool acceptHash(const MarksHeader* aHeader) const;
+    void savePageMarks() const;
 
 Q_SIGNALS:
     void progress(int aProgress);
@@ -95,7 +98,8 @@ public:
     const BooksMargins iMargins;
     const QString iPageMarksFile;
     const QByteArray iHash;
-    BooksBookModel::Data* iData;
+    const QString iPath;
+    Data* iData;
 };
 
 const char BooksBookModel::PagingTask::MarksFileMagic[] = "MARK";
@@ -108,6 +112,7 @@ BooksBookModel::PagingTask::PagingTask(BooksBookModel* aModel,
     iMargins(aModel->margins()),
     iPageMarksFile(pageMarksFile(aModel)),
     iHash(aModel->book()->hash()),
+    iPath(aModel->book()->path()),
     iData(NULL)
 {
     aModel->connect(this, SIGNAL(done()), SLOT(onResetDone()));
@@ -126,11 +131,20 @@ QString BooksBookModel::PagingTask::pageMarksFile(BooksBookModel* aModel)
         arg(aModel->width()).arg(aModel->height()));
 }
 
-BooksPos::List BooksBookModel::PagingTask::loadPageMarks()
+bool BooksBookModel::PagingTask::acceptHash(const MarksHeader* aHeader) const
+{
+    // If the real hash is unknown, we accept any. The real one will
+    // be later compared with the one we fetch from the .marks file
+    return iHash.isEmpty() ||
+        (iHash.size() == sizeof(aHeader->hash) &&
+        !memcmp(iHash.constData(), aHeader->hash, sizeof(aHeader->hash)));
+}
+
+BooksPos::List BooksBookModel::PagingTask::loadPageMarks() const
 {
     BooksPos::List list;
     QFile file(iPageMarksFile);
-    if (!iHash.isEmpty() && file.open(QIODevice::ReadOnly)) {
+    if (file.open(QIODevice::ReadOnly)) {
         const qint64 size = file.size();
         uchar* map = file.map(0, size);
         if (map) {
@@ -140,8 +154,7 @@ BooksPos::List BooksBookModel::PagingTask::loadPageMarks()
                 const MarksHeader* hdr = (MarksHeader*)map;
                 if (!memcmp(hdr->magic, MarksFileMagic, sizeof(hdr->magic)) &&
                     hdr->version == MarksFileVersion &&
-                    iHash.size() == sizeof(hdr->hash) &&
-                    !memcmp(iHash.constData(), hdr->hash, sizeof(hdr->hash)) &&
+                    acceptHash(hdr) &&
                     hdr->fontSize == iTextStyle->fontSize() &&
                     hdr->leftMargin == iMargins.iLeft &&
                     hdr->rightMargin == iMargins.iRight &&
@@ -184,20 +197,30 @@ BooksPos::List BooksBookModel::PagingTask::loadPageMarks()
     return list;
 }
 
-void BooksBookModel::PagingTask::savePageMarks()
+void BooksBookModel::PagingTask::savePageMarks() const
 {
     MarksHeader hdr;
-    HASSERT(iHash.size() == sizeof(hdr.hash));
-    if (iHash.size() == sizeof(hdr.hash) &&
-        !iData->iPageMarks.isEmpty()) {
+    QByteArray hash(iData->iHash);
+    if (hash.size() == sizeof(hdr.hash) &&
+        !iData->iPageMarks.isEmpty() &&
+        !isCanceled()) {
         QFile file(iPageMarksFile);
-        if (file.open(QIODevice::ReadWrite)) {
+        bool opened = file.open(QIODevice::ReadWrite);
+        if (!opened) {
+            // Most likely, the directory doesn't exist
+            QDir dir = QFileInfo(iPageMarksFile).dir();
+            if (dir.mkpath(dir.path())) {
+                HDEBUG("created" << qPrintable(dir.path()));
+                opened = file.open(QIODevice::ReadWrite);
+            }
+        }
+        if (opened) {
             HDEBUG("writing" << qPrintable(iPageMarksFile));
             const int n = iData->iPageMarks.count();
             memset(&hdr, 0, sizeof(hdr));
             memcpy(hdr.magic, MarksFileMagic, sizeof(hdr.magic));
             hdr.version = MarksFileVersion;
-            memcpy(hdr.hash, iHash.constData(), sizeof(hdr.hash));
+            memcpy(hdr.hash, hash.constData(), sizeof(hdr.hash));
             hdr.fontSize = iTextStyle->fontSize();
             hdr.leftMargin = iMargins.iLeft;
             hdr.rightMargin = iMargins.iRight;
@@ -223,11 +246,17 @@ void BooksBookModel::PagingTask::savePageMarks()
 void BooksBookModel::PagingTask::performTask()
 {
     if (!isCanceled()) {
-        iData = new BooksBookModel::Data(iPaint.width(), iPaint.height());
+        iData = new Data(iPaint.width(), iPaint.height());
         iData->iBookModel = new BookModel(iBook);
+        iData->iHash = iHash;
         shared_ptr<ZLTextModel> model(iData->iBookModel->bookTextModel());
         ZLTextHyphenator::Instance().load(iBook->language());
-        if (!isCanceled()) {
+        if (iData->iHash.isEmpty() && !isCanceled()) {
+            // If hash is unknown then we need to compute it here and now.
+            // It's a very rare occasion though.
+            iData->iHash = BooksUtil::computeFileHashAndSetAttr(iPath, this);
+        }
+        if (!iData->iHash.isEmpty() && !isCanceled()) {
             // Load the cached marks
             iData->iPageMarks = loadPageMarks();
             if (iData->iPageMarks.isEmpty() && !isCanceled()) {
@@ -321,6 +350,7 @@ void BooksBookModel::setBook(BooksBook* aBook)
             iTextStyle = iSettings->textStyle(fontSizeAdjust());
             iPageStack->setStack(aBook->pageStack(), aBook->pageStackPos());
             connect(aBook, SIGNAL(fontSizeAdjustChanged()), SLOT(onTextStyleChanged()));
+            connect(aBook, SIGNAL(hashChanged()), SLOT(onHashChanged()));
             HDEBUG(iTitle);
         } else {
             iBook = NULL;
@@ -360,6 +390,34 @@ void BooksBookModel::onPageStackChanged()
         BooksPos::Stack stack = iPageStack->getStack();
         HDEBUG(stack.iList << stack.iPos);
         iBook->setPageStack(stack.iList, stack.iPos);
+    }
+}
+
+void BooksBookModel::onHashChanged()
+{
+    const QByteArray hash(iBook->hash());
+    HDEBUG(QString(hash.toHex()));
+    if (!hash.isEmpty()) {
+        if (iData2 && iData2->iHash != hash) {
+            // There is no need to delete the stale file - it will be deleted
+            // by the paging task. Deleting files on the UI thread is not a
+            // very bright idea - the call may block for quite some time.
+            delete iData2;
+            iData2 = NULL;
+        }
+        if (iPagingTask &&
+            !iPagingTask->iHash.isEmpty() &&
+            iPagingTask->iHash != hash) {
+            iPagingTask->release(this);
+            iPagingTask = NULL;
+            startReset(iResetReason);
+        } else if (iData && iData->iHash != hash) {
+            delete iData;
+            iData = NULL;
+            startReset(ReasonLoading);
+        } else {
+            HDEBUG("we are all set!");
+        }
     }
 }
 
@@ -600,25 +658,32 @@ void BooksBookModel::onResetDone()
     HASSERT(iPagingTask->iData);
     HASSERT(!iData);
 
-    const int oldPageCount(pageCount());
-    shared_ptr<BookModel> oldBookModel(bookModel());
-    BooksLoadingSignalBlocker block(this);
+    const QByteArray hash(iBook->hash());
+    if (hash.isEmpty() || iPagingTask->iData->iHash == hash) {
+        const int oldPageCount(pageCount());
+        shared_ptr<BookModel> oldBookModel(bookModel());
+        BooksLoadingSignalBlocker block(this);
 
-    iData = iPagingTask->iData;
-    iPagingTask->iData = NULL;
-    iPagingTask->release(this);
-    iPagingTask = NULL;
+        iData = iPagingTask->iData;
+        iPagingTask->iData = NULL;
+        iPagingTask->release(this);
+        iPagingTask = NULL;
 
-    updateModel(oldPageCount);
-    iPageStack->setPageMarks(iData->iPageMarks);
-    Q_EMIT jumpToPage(iPageStack->currentPage());
-    Q_EMIT pageMarksChanged();
-    if (oldBookModel != bookModel()) {
-        Q_EMIT bookModelChanged();
-    }
-    if (iResetReason != ReasonUnknown) {
-        iResetReason = ReasonUnknown;
-        Q_EMIT resetReasonChanged();
+        updateModel(oldPageCount);
+        iPageStack->setPageMarks(iData->iPageMarks);
+        Q_EMIT jumpToPage(iPageStack->currentPage());
+        Q_EMIT pageMarksChanged();
+        if (oldBookModel != bookModel()) {
+            Q_EMIT bookModelChanged();
+        }
+        if (iResetReason != ReasonUnknown) {
+            iResetReason = ReasonUnknown;
+            Q_EMIT resetReasonChanged();
+        }
+    } else {
+        HDEBUG("oops");
+        iPagingTask->release(this);
+        iPagingTask = NULL;
     }
 }
 
