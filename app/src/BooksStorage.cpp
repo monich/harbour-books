@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2015-2017 Jolla Ltd.
- * Contact: Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2015-2018 Jolla Ltd.
+ * Copyright (C) 2015-2018 Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
  *
@@ -71,6 +71,7 @@ public:
     bool isRemoved() const;
     bool equal(const Private& aData) const;
 
+    static QString fullPath(QDir aDir, QString aRelativePath);
     static QString mountPoint(QString aPath);
     static bool isMountPoint(QString aPath);
 
@@ -149,6 +150,16 @@ QString BooksStorage::Private::mountPoint(QString aPath)
     return dir.path();
 }
 
+QString BooksStorage::Private::fullPath(QDir aDir, QString aRelativePath)
+{
+    QString path(aDir.path());
+    if (!aRelativePath.isEmpty()) {
+        if (!path.endsWith('/')) path += '/';
+        path += aRelativePath;
+    }
+    return QDir::cleanPath(path);
+}
+
 // ==========================================================================
 // BooksStorage
 // ==========================================================================
@@ -221,12 +232,15 @@ bool BooksStorage::isPresent() const
 QString BooksStorage::fullPath(QString aRelativePath) const
 {
     if (iPrivate) {
-        QString path(booksDir().path());
-        if (!aRelativePath.isEmpty()) {
-            if (!path.endsWith('/')) path += '/';
-            path += aRelativePath;
-        }
-        return QDir::cleanPath(path);
+        return Private::fullPath(iPrivate->iBooksDir, aRelativePath);
+    }
+    return QString();
+}
+
+QString BooksStorage::fullConfigPath(QString aRelativePath) const
+{
+    if (iPrivate) {
+        return Private::fullPath(iPrivate->iConfigDir, aRelativePath);
     }
     return QString();
 }
