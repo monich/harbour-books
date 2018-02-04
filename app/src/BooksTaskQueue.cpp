@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2015-2017 Jolla Ltd.
- * Contact: Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2015-2018 Jolla Ltd.
+ * Copyright (C) 2015-2018 Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
  *
@@ -40,9 +40,11 @@ class BooksTaskQueue::Private {
 public:
     static weak_ptr<BooksTaskQueue> gDefaultQueue;
     static weak_ptr<BooksTaskQueue> gScaleQueue;
+    static weak_ptr<BooksTaskQueue> gHashQueue;
 
     static BooksTaskQueue* newDefaultQueue() { return new BooksTaskQueue(1); }
     static BooksTaskQueue* newScaleQueue() { return new BooksTaskQueue(2); }
+    static BooksTaskQueue* newHashQueue() { return new BooksTaskQueue(1); }
 
     static void waitForDone(shared_ptr<BooksTaskQueue> aQueue, int aMsecs) {
         if (!aQueue.isNull()) {
@@ -53,6 +55,7 @@ public:
     static void waitForDone(int aMsecs) {
         waitForDone(gDefaultQueue, aMsecs);
         waitForDone(gScaleQueue, aMsecs);
+        waitForDone(gHashQueue, aMsecs);
     }
 
     static shared_ptr<BooksTaskQueue> get(weak_ptr<BooksTaskQueue>* aQueue,
@@ -70,6 +73,7 @@ public:
 
 weak_ptr<BooksTaskQueue> BooksTaskQueue::Private::gDefaultQueue;
 weak_ptr<BooksTaskQueue> BooksTaskQueue::Private::gScaleQueue;
+weak_ptr<BooksTaskQueue> BooksTaskQueue::Private::gHashQueue;
 
 shared_ptr<BooksTaskQueue> BooksTaskQueue::defaultQueue()
 {
@@ -79,6 +83,11 @@ shared_ptr<BooksTaskQueue> BooksTaskQueue::defaultQueue()
 shared_ptr<BooksTaskQueue> BooksTaskQueue::scaleQueue()
 {
     return Private::get(&Private::gScaleQueue, Private::newScaleQueue);
+}
+
+shared_ptr<BooksTaskQueue> BooksTaskQueue::hashQueue()
+{
+    return Private::get(&Private::gHashQueue, Private::newHashQueue);
 }
 
 void BooksTaskQueue::waitForDone(int aMsecs)

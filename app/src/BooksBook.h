@@ -142,6 +142,7 @@ private:
     QImage iCoverImage;
     shared_ptr<FormatPlugin> iFormatPlugin;
     shared_ptr<BooksTaskQueue> iTaskQueue;
+    shared_ptr<BooksTaskQueue> iHashTaskQueue;
     BooksSaveTimer* iSaveTimer;
     CoverTask* iCoverTask;
     HashTask* iHashTask;

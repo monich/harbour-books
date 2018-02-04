@@ -386,9 +386,10 @@ BooksBook::BooksBook(const BooksStorage& aStorage, QString aRelativePath,
     }
     if (iHash.isEmpty()) {
         HDEBUG("need to calculate hash for" << qPrintable(iPath));
+        iHashTaskQueue = BooksTaskQueue::hashQueue();
         iHashTask = new HashTask(iPath, thread());
         connect(iHashTask, SIGNAL(done()), SLOT(onHashTaskDone()));
-        iTaskQueue->submit(iHashTask);
+        iHashTaskQueue->submit(iHashTask);
     }
     // Refcounted BooksBook objects are managed by C++ code
     QQmlEngine::setObjectOwnership(this, QQmlEngine::CppOwnership);
@@ -602,6 +603,7 @@ void BooksBook::onHashTaskDone()
     HDEBUG(QString(iHash.toHex()));
     iHashTask->release(this);
     iHashTask = NULL;
+    iHashTaskQueue.reset();
     Q_EMIT hashChanged();
 }
 
