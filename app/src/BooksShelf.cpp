@@ -564,11 +564,19 @@ void BooksShelf::setName(QString aName)
         }
         newRelativePath += aName;
 
-        QString oldPath = iStorage.fullPath(iRelativePath);
-        QString newPath = iStorage.fullPath(newRelativePath);
-
+        const QString oldPath = iStorage.fullPath(iRelativePath);
+        const QString newPath = iStorage.fullPath(newRelativePath);
         HDEBUG("renaming" << qPrintable(oldPath) << "->" << qPrintable(newPath));
         if (rename(qPrintable(oldPath), qPrintable(newPath)) == 0) {
+
+            // Rename the config/cache directory too
+            const QString oldConfPath = iStorage.fullConfigPath(iRelativePath);
+            const QString newConfPath = iStorage.fullConfigPath(newRelativePath);
+            HDEBUG(qPrintable(oldConfPath) << "->" << qPrintable(newConfPath));
+            if (rename(qPrintable(oldConfPath), qPrintable(newConfPath))) {
+                HWARN(strerror(errno));
+            }
+
             const QString oldFileName(iFileName);
             iRelativePath = newRelativePath;
             iPath = iStorage.fullPath(iRelativePath);
@@ -595,7 +603,7 @@ void BooksShelf::setName(QString aName)
                 }
             }
         } else {
-            HDEBUG(strerror(errno));
+            HWARN(strerror(errno));
         }
     }
 }
