@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2016-2018 Jolla Ltd.
- * Contact: Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2015-2018 Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
  *
@@ -290,6 +290,9 @@ void BooksPageStack::Private::pageChanged(int aIndex)
     BooksPageStack* model = parentModel();
     QModelIndex modelIndex(model->createIndex(aIndex, 0));
     Q_EMIT model->dataChanged(modelIndex, modelIndex, roles);
+    if (aIndex == iCurrentIndex) {
+        queueSignals(SignalCurrentPageChanged);
+    }
 }
 
 void BooksPageStack::Private::setStack(BooksPos::List aStack, int aStackPos)
