@@ -1,10 +1,13 @@
 [Desktop Entry]
 Type=Application
 Name=Books
+Name[de]=Bücher
+Name[es]=Libros
 Name[fi]=Kirjat
+Name[hu]=Könyvek
+Name[nl]=Boeken
 Name[ru]=Книги
 Name[sv]=Böcker
-Name[de]=Bücher
 Comment=E-Book Reader
 Exec=harbour-books
 Icon=harbour-books
