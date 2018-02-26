@@ -1,6 +1,6 @@
 /*
-  Copyright (C) 2015-2017 Jolla Ltd.
-  Copyright (C) 2015-2017 Slava Monich <slava.monich@jolla.com>
+  Copyright (C) 2015-2018 Jolla Ltd.
+  Copyright (C) 2015-2018 Slava Monich <slava.monich@jolla.com>
 
   You may use this file under the terms of BSD license as follows:
 
@@ -122,8 +122,12 @@ SilicaFlickable {
         //: Pop-up notification
         //% "Copied to clipboard"
         previewBody: qsTrId("harbour-books-book-view-copied_to_clipboard")
-        icon: "icon-s-clipboard"
         expireTimeout: 2000
+        Component.onCompleted: {
+            if ("icon" in notification) {
+                notification.icon = "icon-s-clipboard"
+            }
+        }
     }
 
     SilicaListView {
