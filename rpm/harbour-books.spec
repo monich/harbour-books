@@ -1,6 +1,6 @@
 Name:           harbour-books
 Summary:        E-book reader
-Version:        1.0.25
+Version:        1.0.26
 Release:        1
 License:        BSD
 Group:          Applications/File
@@ -57,6 +57,10 @@ desktop-file-install --delete-original \
 make -C test test
 
 %changelog
+* Sun Feb 26 2018 Slava Monich <slava.monich@jolla.com> 1.0.26
+- Fixed compatibility with Sailfish OS < 2.1.0
+- Added Hungarian translations
+
 * Sun Feb 4 2018 Slava Monich <slava.monich@jolla.com> 1.0.25
 - Speed up book loading by caching page marks
 - Added Dutch and Spanish translations
