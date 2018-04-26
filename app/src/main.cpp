@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2015-2017 Jolla Ltd.
- * Copyright (C) 2015-2017 Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2015-2018 Jolla Ltd.
+ * Copyright (C) 2015-2018 Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
  *
@@ -91,7 +91,11 @@ Q_DECL_EXPORT int main(int argc, char **argv)
 
     QLocale locale;
     QTranslator* translator = new QTranslator(app);
+#ifdef OPENREPOS
+    QString transDir("/usr/share/translations");
+#else
     QString transDir = SailfishApp::pathTo("translations").toLocalFile();
+#endif
     QString transFile(BOOKS_APP_NAME);
     if (translator->load(locale, transFile, "-", transDir) ||
         translator->load(transFile, transDir)) {

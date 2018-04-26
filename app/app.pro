@@ -54,12 +54,13 @@ OTHER_FILES += \
   qml/*.qml \
   qml/images/* \
   settings/*.qml \
+  settings/*.json \
   data/default/* \
   data/zlibrary/core/encodings/* \
   data/zlibrary/core/resources/* \
   translations/*.ts
 
-TARGET_DATA_DIR = /usr/share/harbour-books
+TARGET_DATA_DIR = /usr/share/$$TARGET
 TARGET_DEFAULT_DATA_DIR = $$TARGET_DATA_DIR/data
 TARGET_ZLIBRARY_DATA_DIR = $$TARGET_DEFAULT_DATA_DIR
 TARGET_ICON_ROOT = /usr/share/icons/hicolor
