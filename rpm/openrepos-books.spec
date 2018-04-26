@@ -1,6 +1,6 @@
 Name:           openrepos-books
 Summary:        E-book reader
-Version:        1.0.26
+Version:        1.0.27
 Release:        1
 License:        BSD
 Vendor:         slava
@@ -58,3 +58,7 @@ desktop-file-install --delete-original \
 
 %check
 make -C test test
+
+%changelog
+* Fri Apr 27 2018 Slava Monich <slava.monich@jolla.com> 1.0.27
+- Added openrepos variant
