@@ -143,15 +143,14 @@ MyOneByteEncodingConverter::MyOneByteEncodingConverter(const std::string &encodi
 	myEncodingMap = new char[1024];
 	memset(myEncodingMap, '\0', 1024);
 	for (int i = 0; i < 256; ++i) {
-		ZLUnicodeUtil::ucs4ToUtf8(myEncodingMap + 4 * i, i);
-	}
-	if (encodingMap != 0) {
-		for (int i = 0; i < 256; ++i) {
-			if (encodingMap[i] != 0) {
-				strcpy(myEncodingMap + 4 * i, encodingMap[i]);
-			}
+		if (encodingMap[i]) {
+			strcpy(myEncodingMap + 4 * i, encodingMap[i]);
+			delete[] encodingMap[i];
+		} else {
+			ZLUnicodeUtil::ucs4ToUtf8(myEncodingMap + 4 * i, i);
 		}
 	}
+	delete[] encodingMap;
 }
 
 MyOneByteEncodingConverter::~MyOneByteEncodingConverter() {

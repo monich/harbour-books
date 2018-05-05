@@ -422,6 +422,14 @@ XHTMLTagAction *XHTMLReader::addAction(const std::string &tag, XHTMLTagAction *a
 	return old;
 }
 
+void XHTMLReader::clearTagTable() {
+	ActionMap::iterator it = ourTagActions.begin();
+	while (it != ourTagActions.end()) {
+		delete it->second;
+		ourTagActions.erase(it++);
+	}
+}
+
 void XHTMLReader::fillTagTable() {
 	if (ourTagActions.empty()) {
 		//addAction("html",	new XHTMLTagAction());
@@ -480,7 +488,6 @@ void XHTMLReader::fillTagTable() {
 		addAction("br",	new XHTMLTagLineBreakAction());
 		//addAction("center",	new XHTMLTagAction());
 		addAction("div", new XHTMLTagParagraphAction());
-		addAction("dt", new XHTMLTagParagraphAction());
 		//addAction("head",	new XHTMLTagAction());
 		//addAction("hr",	new XHTMLTagAction());
 		addAction("link",	new XHTMLTagLinkAction());

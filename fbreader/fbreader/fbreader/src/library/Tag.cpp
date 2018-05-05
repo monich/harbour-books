@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2009-2010 Geometer Plus <contact@geometerplus.com>
+ * Copyright (C) 2016-2018 Slava Monich <slava.monich@jolla.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -136,4 +137,10 @@ void Tag::setTagId(shared_ptr<Tag> tag, int tagId) {
 	}
 	tag->myTagId = tagId;
 	ourTagsById[tagId] = tag;
+}
+
+void Tag::clearTags()
+{
+	ourRootTags.clear();
+	ourTagsById.clear();
 }

@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2004-2010 Geometer Plus <contact@geometerplus.com>
+ * Copyright (C) 2016-2018 Slava Monich <slava.monich@jolla.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -56,9 +57,11 @@ class XHTMLReader : public ZLXMLReader {
 public:
 	static XHTMLTagAction *addAction(const std::string &tag, XHTMLTagAction *action);
 	static void fillTagTable();
+	static void clearTagTable();
 
 private:
-	static std::map<std::string,XHTMLTagAction*> ourTagActions;
+	typedef std::map<std::string,XHTMLTagAction*> ActionMap;
+	static ActionMap ourTagActions;
 
 public:
 	XHTMLReader(BookReader &modelReader);
