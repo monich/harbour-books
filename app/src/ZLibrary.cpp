@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015-2017 Jolla Ltd.
+ * Copyright (C) 2015-2018 Jolla Ltd.
  * Contact: Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
@@ -51,6 +51,8 @@
 #include "time/ZLQtTime.h"
 #include "image/ZLQtImageManager.h"
 #include "iconv/IConvEncodingConverter.h"
+#include "formats/xhtml/XHTMLReader.h"
+#include "library/Tag.h"
 
 #include <sailfishapp.h>
 #include <MGConfItem>
@@ -244,6 +246,8 @@ void ZLibrary::shutdown()
     ZLFSManager::deleteInstance();
     ZLTimeManager::deleteInstance();
     BooksStorageManager::deleteInstance();
+    XHTMLReader::clearTagTable();
+    Tag::clearTags();
 }
 
 void ZLibrary::initApplication(const std::string& aName)

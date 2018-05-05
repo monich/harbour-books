@@ -123,11 +123,11 @@ void BooksPageWidget::ResetTask::performTask()
                 view->gotoPosition(iPosition);
                 if (!isCanceled()) {
                     iData->iView = view;
-                } else {
-                    delete view;
+                    return;
                 }
             }
         }
+        delete view;
     }
 }
 
