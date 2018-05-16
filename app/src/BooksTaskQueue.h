@@ -50,8 +50,7 @@ public:
     static shared_ptr<BooksTaskQueue> hashQueue();
     static void waitForDone(int aMsecs = -1);
 
-    void submit(BooksTask* aTask);
-    void submit(BooksTask* aTask, QObject* aTarget, const char* aSlot);
+    QThreadPool* pool() const;
 
 private:
     BooksTaskQueue(int aMaxThreadCount);
@@ -62,5 +61,8 @@ private:
     friend class Private;
     QThreadPool* iPool;
 };
+
+inline QThreadPool* BooksTaskQueue::pool() const
+    { return iPool; }
 
 #endif // BOOKS_TASK_QUEUE_H

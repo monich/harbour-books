@@ -33,7 +33,6 @@
 
 #include "BooksBook.h"
 #include "BooksDefs.h"
-#include "BooksTask.h"
 #include "BooksTextView.h"
 #include "BooksTextStyle.h"
 #include "BooksPaintContext.h"
@@ -42,6 +41,7 @@
 
 #include "HarbourJson.h"
 #include "HarbourDebug.h"
+#include "HarbourTask.h"
 
 #include "ZLImage.h"
 #include "image/ZLQtImageManager.h"
@@ -135,10 +135,11 @@ bool BooksBook::CoverPaintContext::gotIt() const
 // BooksBook::CoverTask
 // ==========================================================================
 
-class BooksBook::CoverTask : public BooksTask
+class BooksBook::CoverTask : public HarbourTask
 {
 public:
-    CoverTask(QString aStateDir, shared_ptr<Book> aBook, QString aImagePath) :
+    CoverTask(QThreadPool* aPool, QString aStateDir, shared_ptr<Book> aBook,
+        QString aImagePath) : HarbourTask(aPool),
         iStateDir(aStateDir), iBook(aBook), iImagePath(aImagePath),
         iCoverMissing(false) {}
 
@@ -164,9 +165,10 @@ inline bool BooksBook::CoverTask::hasImage() const
 class BooksBook::LoadCoverTask : public BooksBook::CoverTask
 {
 public:
-    LoadCoverTask(QString aStateDir, shared_ptr<Book> aBook,
-        shared_ptr<FormatPlugin> aFormatPlugin, QString aImagePath) :
-        BooksBook::CoverTask(aStateDir, aBook, aImagePath),
+    LoadCoverTask(QThreadPool* aPool, QString aStateDir,
+        shared_ptr<Book> aBook, shared_ptr<FormatPlugin> aFormatPlugin,
+        QString aImagePath) :
+        BooksBook::CoverTask(aPool, aStateDir, aBook, aImagePath),
         iFormatPlugin(aFormatPlugin) {}
 
     virtual void performTask();
@@ -231,8 +233,9 @@ void BooksBook::LoadCoverTask::performTask()
 class BooksBook::GuessCoverTask : public BooksBook::CoverTask
 {
 public:
-    GuessCoverTask(QString aStateDir, shared_ptr<Book> aBook, QString aImagePath) :
-        BooksBook::CoverTask(aStateDir, aBook, aImagePath) {}
+    GuessCoverTask(QThreadPool* aPool, QString aStateDir,
+        shared_ptr<Book> aBook, QString aImagePath) :
+        BooksBook::CoverTask(aPool, aStateDir, aBook, aImagePath) {}
 
     virtual void performTask();
 };
@@ -294,10 +297,10 @@ void BooksBook::GuessCoverTask::performTask()
 // BooksBook::HashTask
 // ==========================================================================
 
-class BooksBook::HashTask : public BooksTask
+class BooksBook::HashTask : public HarbourTask
 {
 public:
-    HashTask(QString aPath, QThread* aThread);
+    HashTask(QThreadPool* aPool, QString aPath);
 
     virtual void performTask();
 
@@ -306,8 +309,8 @@ public:
     QByteArray iHash;
 };
 
-BooksBook::HashTask::HashTask(QString aPath, QThread* aThread) :
-    BooksTask(aThread), iPath(aPath)
+BooksBook::HashTask::HashTask(QThreadPool* aPool, QString aPath) :
+    HarbourTask(aPool), iPath(aPath)
 {
 }
 
@@ -387,9 +390,9 @@ BooksBook::BooksBook(const BooksStorage& aStorage, QString aRelativePath,
     if (iHash.isEmpty()) {
         HDEBUG("need to calculate hash for" << qPrintable(iPath));
         iHashTaskQueue = BooksTaskQueue::hashQueue();
-        iHashTask = new HashTask(iPath, thread());
-        connect(iHashTask, SIGNAL(done()), SLOT(onHashTaskDone()));
-        iHashTaskQueue->submit(iHashTask);
+        iHashTask = new HashTask(iHashTaskQueue->pool(), iPath);
+        iHashTask->moveToThread(thread());
+        iHashTask->submit(this, SLOT(onHashTaskDone()));
     }
     // Refcounted BooksBook objects are managed by C++ code
     QQmlEngine::setObjectOwnership(this, QQmlEngine::CppOwnership);
@@ -543,10 +546,9 @@ bool BooksBook::requestCoverImage()
     if (!iBook.isNull() && !iFormatPlugin.isNull() &&
         !iCoverTasksDone && !iCoverTask) {
         HDEBUG(iTitle);
-        iCoverTask = new LoadCoverTask(iStateDir, iBook, iFormatPlugin,
-            cachedImagePath());
-        connect(iCoverTask, SIGNAL(done()), SLOT(onLoadCoverTaskDone()));
-        iTaskQueue->submit(iCoverTask);
+        (iCoverTask = new LoadCoverTask(iTaskQueue->pool(), iStateDir, iBook,
+            iFormatPlugin, cachedImagePath()))->submit(this,
+            SLOT(onLoadCoverTaskDone()));
         Q_EMIT loadingCoverChanged();
     }
     return iCoverTask != NULL;
@@ -583,9 +585,9 @@ void BooksBook::onLoadCoverTaskDone()
         iCoverTasksDone = true;
         Q_EMIT loadingCoverChanged();
     } else {
-        iCoverTask = new GuessCoverTask(iStateDir, iBook, cachedImagePath());
-        connect(iCoverTask, SIGNAL(done()), SLOT(onGuessCoverTaskDone()));
-        iTaskQueue->submit(iCoverTask);
+        (iCoverTask = new GuessCoverTask(iTaskQueue->pool(), iStateDir,
+            iBook, cachedImagePath()))->submit(this,
+            SLOT(onGuessCoverTaskDone()));
     }
 }
 

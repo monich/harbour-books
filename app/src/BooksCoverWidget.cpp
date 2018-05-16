@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2015 Jolla Ltd.
- * Contact: Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2015-2018 Jolla Ltd.
+ * Copyright (C) 2015-2018 Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
  *
@@ -34,6 +34,7 @@
 #include "BooksCoverWidget.h"
 
 #include "HarbourDebug.h"
+#include "HarbourTask.h"
 
 #include "ZLibrary.h"
 
@@ -43,10 +44,11 @@
 // BooksCoverWidget::ScaleTask
 // ==========================================================================
 
-class BooksCoverWidget::ScaleTask : public BooksTask
+class BooksCoverWidget::ScaleTask : public HarbourTask
 {
 public:
-    ScaleTask(QImage aImage, int aWidth, int aHeight, bool aStretch);
+    ScaleTask(QThreadPool* aPool, QImage aImage, int aWidth, int aHeight,
+        bool aStretch);
     static QImage scale(QImage aImage, int aWidth, int aHeight, bool aStretch);
     void performTask();
 
@@ -58,12 +60,9 @@ public:
     bool iStretch;
 };
 
-BooksCoverWidget::ScaleTask::ScaleTask(QImage aImage, int aWidth, int aHeight,
-    bool aStretch) :
-    iImage(aImage),
-    iWidth(aWidth),
-    iHeight(aHeight),
-    iStretch(aStretch)
+BooksCoverWidget::ScaleTask::ScaleTask(QThreadPool* aPool, QImage aImage,
+    int aWidth, int aHeight, bool aStretch) : HarbourTask(aPool),
+    iImage(aImage), iWidth(aWidth), iHeight(aHeight), iStretch(aStretch)
 {
 }
 
@@ -367,9 +366,8 @@ void BooksCoverWidget::scaleImage(bool aWasEmpty)
                 iScaledImage = ScaleTask::scale(iCoverImage, w, h, iStretch);
                 update();
             } else {
-                iScaleTask = new ScaleTask(iCoverImage, w, h, iStretch);
-                connect(iScaleTask, SIGNAL(done()), SLOT(onScaleTaskDone()));
-                iTaskQueue->submit(iScaleTask);
+                (iScaleTask = new ScaleTask(iTaskQueue->pool(), iCoverImage, w, h,
+                    iStretch))->submit(this, SLOT(onScaleTaskDone()));
             }
         } else {
             iScaledImage = QImage();

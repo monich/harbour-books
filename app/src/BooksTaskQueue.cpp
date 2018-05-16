@@ -32,7 +32,6 @@
  */
 
 #include "BooksTaskQueue.h"
-#include "BooksTask.h"
 
 #include "HarbourDebug.h"
 
@@ -108,18 +107,4 @@ BooksTaskQueue::~BooksTaskQueue()
     iPool->waitForDone();
     delete iPool;
     HDEBUG("deleted");
-}
-
-void BooksTaskQueue::submit(BooksTask* aTask)
-{
-    HASSERT(!aTask->iSubmitted);
-    aTask->iSubmitted = true;
-    iPool->start(aTask);
-}
-
-void BooksTaskQueue::submit(BooksTask* aTask, QObject* aTarget,
-    const char* aSlot)
-{
-    QObject::connect(aTask, SIGNAL(done()), aTarget, aSlot);
-    submit(aTask);
 }

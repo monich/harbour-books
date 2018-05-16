@@ -123,7 +123,6 @@ SOURCES += \
   src/BooksShelf.cpp \
   src/BooksStorage.cpp \
   src/BooksStorageModel.cpp \
-  src/BooksTask.cpp \
   src/BooksTextStyle.cpp \
   src/BooksTaskQueue.cpp \
   src/BooksTextView.cpp \
@@ -169,7 +168,6 @@ HEADERS += \
   src/BooksShelf.h \
   src/BooksStorage.h \
   src/BooksStorageModel.h \
-  src/BooksTask.h \
   src/BooksTaskQueue.h \
   src/BooksTextView.h \
   src/BooksTextStyle.h \

@@ -33,10 +33,10 @@
 
 #include "BooksImportModel.h"
 #include "BooksStorage.h"
-#include "BooksTask.h"
 #include "BooksUtil.h"
 
 #include "HarbourDebug.h"
+#include "HarbourTask.h"
 
 #include <QDir>
 
@@ -82,12 +82,11 @@ BooksImportModel::Data::~Data()
 // BooksImportModel::Task
 // ==========================================================================
 
-class BooksImportModel::Task : public BooksTask
-{
+class BooksImportModel::Task : public HarbourTask {
     Q_OBJECT
 
 public:
-    Task(QString aDest);
+    Task(QThreadPool* aPool, QString aDest);
     ~Task();
 
     void performTask();
@@ -111,7 +110,8 @@ public:
     int iProgress;
 };
 
-BooksImportModel::Task::Task(QString aDest) :
+BooksImportModel::Task::Task(QThreadPool* aPool, QString aDest) :
+    HarbourTask(aPool),
     iDestDir(aDest), iBufSize(0x1000), iBuf(NULL), iProgress(0)
 {
 }
@@ -283,13 +283,13 @@ void BooksImportModel::refresh()
             Q_EMIT progressChanged();
         }
 
-        iTask = new Task(iDestination);
+        iTask = new Task(iTaskQueue->pool(), iDestination);
         connect(iTask, SIGNAL(bookFound(BooksBook*)),
             SLOT(onBookFound(BooksBook*)), Qt::QueuedConnection);
         connect(iTask, SIGNAL(done()), SLOT(onTaskDone()));
         connect(iTask, SIGNAL(progress(int)), SLOT(onScanProgress(int)),
             Qt::QueuedConnection);
-        iTaskQueue->submit(iTask);
+        iTask->submit();
         Q_EMIT busyChanged();
     }
 }

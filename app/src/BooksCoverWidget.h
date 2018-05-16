@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2015 Jolla Ltd.
- * Contact: Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2015-2018 Jolla Ltd.
+ * Copyright (C) 2015-2018 Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
  *
@@ -35,7 +35,6 @@
 #define BOOKS_COVER_WIDGET_H
 
 #include "BooksTypes.h"
-#include "BooksTask.h"
 #include "BooksTaskQueue.h"
 #include "BooksBook.h"
 

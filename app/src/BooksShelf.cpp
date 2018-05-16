@@ -36,8 +36,9 @@
 #include "BooksBook.h"
 #include "BooksUtil.h"
 
-#include "HarbourJson.h"
 #include "HarbourDebug.h"
+#include "HarbourJson.h"
+#include "HarbourTask.h"
 
 #include <errno.h>
 
@@ -56,12 +57,12 @@ enum BooksItemRole {
 #define SHELF_STATE_FILE    BOOKS_STATE_FILE_SUFFIX
 #define SHELF_STATE_ORDER   "order"
 
-class BooksShelf::CopyTask : public BooksTask, BooksItem::CopyOperation
-{
+class BooksShelf::CopyTask : public HarbourTask, BooksItem::CopyOperation {
     Q_OBJECT
 
 public:
-    CopyTask(BooksShelf::Data* aDestData, BooksItem* aSrcItem);
+    CopyTask(QThreadPool* aPool, BooksShelf::Data* aDestData,
+        BooksItem* aSrcItem);
     ~CopyTask();
 
     void performTask();
@@ -89,10 +90,10 @@ public:
 // BooksShelf::LoadTask
 // ==========================================================================
 
-class BooksShelf::LoadTask : public BooksTask
-{
+class BooksShelf::LoadTask : public HarbourTask {
 public:
-    LoadTask(BooksStorage aStorage, QString aRelPath, QString aStateFile) :
+    LoadTask(QThreadPool* aPool, BooksStorage aStorage, QString aRelPath,
+        QString aStateFile) : HarbourTask(aPool),
         iStorage(aStorage), iRelativePath(aRelPath),
         iStateFilePath(aStateFile) {}
     ~LoadTask();
@@ -322,7 +323,9 @@ inline bool BooksShelf::Data::copyingOut()
 // BooksShelf::CopyTask
 // ==========================================================================
 
-BooksShelf::CopyTask::CopyTask(BooksShelf::Data* aDestData, BooksItem* aSrcItem) :
+BooksShelf::CopyTask::CopyTask(QThreadPool* aPool, BooksShelf::Data* aDestData,
+    BooksItem* aSrcItem) :
+    HarbourTask(aPool),
     iDestData(aDestData),
     iDestStorage(aDestData->iShelf->storage()),
     iDestRelPath(aDestData->iShelf->relativePath()),
@@ -365,7 +368,7 @@ void BooksShelf::CopyTask::performTask()
 
 bool BooksShelf::CopyTask::isCanceled() const
 {
-    return BooksTask::isCanceled();
+    return HarbourTask::isCanceled();
 }
 
 void BooksShelf::CopyTask::copyProgressChanged(int aProgress)
@@ -378,11 +381,10 @@ void BooksShelf::CopyTask::copyProgressChanged(int aProgress)
 // BooksShelf::DeleteTask
 // ==========================================================================
 
-class BooksShelf::DeleteTask : public BooksTask
-{
+class BooksShelf::DeleteTask : public HarbourTask {
     Q_OBJECT
 public:
-    DeleteTask(BooksItem* aItem);
+    DeleteTask(QThreadPool* aPool, BooksItem* aItem);
     ~DeleteTask();
     void performTask();
 
@@ -390,7 +392,8 @@ public:
     BooksItem* iItem;
 };
 
-BooksShelf::DeleteTask::DeleteTask(BooksItem* aItem) :
+BooksShelf::DeleteTask::DeleteTask(QThreadPool* aPool, BooksItem* aItem) :
+    HarbourTask(aPool),
     iItem(aItem)
 {
     iItem->retain();
@@ -695,9 +698,8 @@ void BooksShelf::loadBookList()
         iLoadTask = NULL;
     } else {
         HDEBUG(iPath);
-        iLoadTask = new LoadTask(iStorage, iRelativePath, stateFileName());
-        connect(iLoadTask, SIGNAL(done()), SLOT(onLoadTaskDone()));
-        iTaskQueue->submit(iLoadTask);
+        (iLoadTask = new LoadTask(iTaskQueue->pool(), iStorage, iRelativePath,
+            stateFileName()))->submit(this, SLOT(onLoadTaskDone()));
     }
 }
 
@@ -912,7 +914,7 @@ bool BooksShelf::drop(QObject* aItem)
             // Don't connect signals since it's not our item
             data->setBook(book, true);
             // Start copying the data
-            iTaskQueue->submit(new CopyTask(data, book));
+            (new CopyTask(iTaskQueue->pool(), data, book))->submit();
             Q_EMIT hasDummyItemChanged();
             Q_EMIT dummyItemIndexChanged();
             Q_EMIT dataChanged(index, index);
@@ -944,9 +946,9 @@ void BooksShelf::submitDeleteTask(int aIndex)
 {
     BooksItem* item = iList.at(aIndex)->iItem;
     if (item) {
-        DeleteTask* task = new DeleteTask(item);
+        DeleteTask* task = new DeleteTask(iTaskQueue->pool(), item);
         iDeleteTasks.append(task);
-        iTaskQueue->submit(task);
+        task->submit();
         BooksBook* book = item->book();
         if (book) {
             book->cancelCoverRequest();
@@ -1045,7 +1047,7 @@ void BooksShelf::importBook(QObject* aBook)
         Counts counts(this);
         Data* data = new Data(this, book->retain(), true);
         iList.insert(0, data);
-        iTaskQueue->submit(new CopyTask(data, book));
+        (new CopyTask(iTaskQueue->pool(), data, book))->submit();
         counts.emitSignals(this);
         endInsertRows();
         saveState();

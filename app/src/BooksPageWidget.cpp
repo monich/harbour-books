@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2015-2018 Jolla Ltd.
- * Contact: Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2015-2018 Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
  *
@@ -41,6 +41,7 @@
 #include "ZLStringUtil.h"
 
 #include "HarbourDebug.h"
+#include "HarbourTask.h"
 
 #include <QGuiApplication>
 #include <QClipboard>
@@ -54,6 +55,8 @@ static const QString IMAGE_URL("image://%1/%2");
 
 class BooksPageWidget::Data {
 public:
+    typedef shared_ptr<Data> Ptr;
+
     Data(shared_ptr<ZLTextModel> aModel, int aWidth, int aHeight) :
         iModel(aModel), iPaintContext(aWidth, aHeight) {}
 
@@ -80,10 +83,9 @@ bool BooksPageWidget::Data::paint(QPainter* aPainter)
 // BooksPageWidget::ResetTask
 // ==========================================================================
 
-class BooksPageWidget::ResetTask : public BooksTask
-{
+class BooksPageWidget::ResetTask : public HarbourTask {
 public:
-    ResetTask(shared_ptr<ZLTextModel> aModel,
+    ResetTask(QThreadPool* aPool, shared_ptr<ZLTextModel> aModel,
         shared_ptr<ZLTextStyle> aTextStyle, int aWidth, int aHeight,
         const BooksMargins& aMargins, const BooksPos& aPosition);
     ~ResetTask();
@@ -97,9 +99,10 @@ public:
     BooksPos iPosition;
 };
 
-BooksPageWidget::ResetTask::ResetTask(shared_ptr<ZLTextModel> aModel,
-    shared_ptr<ZLTextStyle> aTextStyle, int aWidth, int aHeight,
-    const BooksMargins& aMargins, const BooksPos& aPosition) :
+BooksPageWidget::ResetTask::ResetTask(QThreadPool* aPool,
+    shared_ptr<ZLTextModel> aModel, shared_ptr<ZLTextStyle> aTextStyle,
+    int aWidth, int aHeight, const BooksMargins& aMargins,
+    const BooksPos& aPosition) : HarbourTask(aPool),
     iData(new BooksPageWidget::Data(aModel, aWidth, aHeight)),
     iTextStyle(aTextStyle),
     iMargins(aMargins),
@@ -135,15 +138,16 @@ void BooksPageWidget::ResetTask::performTask()
 // BooksPageWidget::RenderTask
 // ==========================================================================
 
-class BooksPageWidget::RenderTask : public BooksTask {
+class BooksPageWidget::RenderTask : public HarbourTask {
 public:
-    RenderTask(shared_ptr<BooksPageWidget::Data> aData, int aWidth, int aHeight) :
+    RenderTask(QThreadPool* aPool, Data::Ptr aData,
+        int aWidth, int aHeight) : HarbourTask(aPool),
         iData(aData), iWidth(aWidth), iHeight(aHeight) {}
 
     void performTask();
 
 public:
-    shared_ptr<BooksPageWidget::Data> iData;
+    Data::Ptr iData;
     int iWidth;
     int iHeight;
     QImage iImage;
@@ -165,16 +169,16 @@ void BooksPageWidget::RenderTask::performTask()
 // BooksPageWidget::ClearSelectionTask
 // ==========================================================================
 
-class BooksPageWidget::ClearSelectionTask : public BooksTask {
+class BooksPageWidget::ClearSelectionTask : public HarbourTask {
 public:
-    ClearSelectionTask(shared_ptr<BooksPageWidget::Data> aData, int aWidth,
-        int aHeight) : iData(aData), iWidth(aWidth), iHeight(aHeight),
-        iImageUpdated(false) {}
+    ClearSelectionTask(QThreadPool* aPool, Data::Ptr aData, int aWidth,
+        int aHeight) : HarbourTask(aPool),
+        iData(aData), iWidth(aWidth), iHeight(aHeight), iImageUpdated(false) {}
 
     void performTask();
 
 public:
-    shared_ptr<BooksPageWidget::Data> iData;
+    Data::Ptr iData;
     int iWidth;
     int iHeight;
     QImage iImage;
@@ -202,16 +206,17 @@ void BooksPageWidget::ClearSelectionTask::performTask()
 // BooksPageWidget::StartSelectionTask
 // ==========================================================================
 
-class BooksPageWidget::StartSelectionTask : public BooksTask {
+class BooksPageWidget::StartSelectionTask : public HarbourTask {
 public:
-    StartSelectionTask(shared_ptr<BooksPageWidget::Data> aData, int aX, int aY,
-        int aWidth, int aHeight) : iData(aData), iX(aX), iY(aY),
-        iWidth(aWidth), iHeight(aHeight), iSelectionEmpty(true) {}
+    StartSelectionTask(QThreadPool* aPool, Data::Ptr aData, int aX, int aY,
+        int aWidth, int aHeight) : HarbourTask(aPool),
+        iData(aData), iX(aX), iY(aY), iWidth(aWidth), iHeight(aHeight),
+        iSelectionEmpty(true) {}
 
     void performTask();
 
 public:
-    shared_ptr<BooksPageWidget::Data> iData;
+    Data::Ptr iData;
     int iX;
     int iY;
     int iWidth;
@@ -239,17 +244,17 @@ void BooksPageWidget::StartSelectionTask::performTask()
 // BooksPageWidget::ExtendSelectionTask
 // ==========================================================================
 
-class BooksPageWidget::ExtendSelectionTask : public BooksTask {
+class BooksPageWidget::ExtendSelectionTask : public HarbourTask {
 public:
-    ExtendSelectionTask(shared_ptr<BooksPageWidget::Data> aData, int aX, int aY,
-        int aWidth, int aHeight) : iData(aData), iX(aX), iY(aY),
-        iWidth(aWidth), iHeight(aHeight), iSelectionChanged(false),
-        iSelectionEmpty(true) {}
+    ExtendSelectionTask(QThreadPool* aPool, Data::Ptr aData, int aX, int aY,
+        int aWidth, int aHeight) : HarbourTask(aPool),
+        iData(aData), iX(aX), iY(aY), iWidth(aWidth), iHeight(aHeight),
+        iSelectionChanged(false), iSelectionEmpty(true) {}
 
     void performTask();
 
 public:
-    shared_ptr<BooksPageWidget::Data> iData;
+    Data::Ptr iData;
     int iX;
     int iY;
     int iWidth;
@@ -278,12 +283,12 @@ void BooksPageWidget::ExtendSelectionTask::performTask()
 // BooksPageWidget::FootnoteTask
 // ==========================================================================
 
-class BooksPageWidget::FootnoteTask : public BooksTask, ZLTextArea::Properties {
+class BooksPageWidget::FootnoteTask : public HarbourTask, ZLTextArea::Properties {
 public:
-    FootnoteTask(int aX, int aY, int aMaxWidth, int aMaxHeight,
+    FootnoteTask(QThreadPool* aPool, int aX, int aY, int aMaxWidth, int aMaxHeight,
         QString aPath, QString aLinkText, QString aRef,
         shared_ptr<ZLTextModel> aTextModel, shared_ptr<ZLTextStyle> aTextStyle,
-        bool aInvertColors) :
+        bool aInvertColors) : HarbourTask(aPool),
         iTextModel(aTextModel), iTextStyle(aTextStyle),
         iInvertColors(aInvertColors), iX(aX), iY(aY),
         iMaxWidth(aMaxWidth), iMaxHeight(aMaxHeight),
@@ -367,16 +372,16 @@ void BooksPageWidget::FootnoteTask::performTask()
 // BooksPageWidget::PressTask
 // ==========================================================================
 
-class BooksPageWidget::PressTask : public BooksTask {
+class BooksPageWidget::PressTask : public HarbourTask {
 public:
-    PressTask(shared_ptr<BooksPageWidget::Data> aData, int aX, int aY) :
-        iData(aData), iX(aX), iY(aY), iKind(REGULAR) {}
+    PressTask(QThreadPool* aPool, Data::Ptr aData, int aX, int aY) :
+        HarbourTask(aPool), iData(aData), iX(aX), iY(aY), iKind(REGULAR) {}
 
     void performTask();
     QString getLinkText(ZLTextWordCursor& aCursor);
 
 public:
-    shared_ptr<BooksPageWidget::Data> iData;
+    Data::Ptr iData;
     int iX;
     int iY;
     QRect iRect;
@@ -765,9 +770,9 @@ void BooksPageWidget::resetView()
         width() > 0 && height() > 0 && iModel) {
         shared_ptr<ZLTextModel> textModel = iModel->bookTextModel();
         if (!textModel.isNull()) {
-            iResetTask = new ResetTask(textModel, iTextStyle,
-                width(), height(), iMargins, iPageMark);
-            iTaskQueue->submit(iResetTask, this, SLOT(onResetTaskDone()));
+            (iResetTask = new ResetTask(iTaskQueue->pool(), textModel, iTextStyle,
+                width(), height(), iMargins, iPageMark))->
+                submit(this, SLOT(onResetTaskDone()));
             cancelRepaint();
         }
     }
@@ -793,8 +798,8 @@ void BooksPageWidget::scheduleRepaint()
     const int h = height();
     if (w > 0 && h > 0 && !iData.isNull() && !iData->iView.isNull()) {
         iData->iView->setInvertColors(invertColors());
-        iRenderTask = new RenderTask(iData, w, h);
-        iTaskQueue->submit(iRenderTask, this, SLOT(onRenderTaskDone()));
+        (iRenderTask = new RenderTask(iTaskQueue->pool(), iData, w, h))->
+            submit(this, SLOT(onRenderTaskDone()));
     } else {
         update();
     }
@@ -962,12 +967,11 @@ void BooksPageWidget::onLongPressTaskDone()
                 // Render the footnote
                 HDEBUG("footnote" << QString(task->iLink.c_str()));
                 if (iFootnoteTask) iFootnoteTask->release(this);
-                iFootnoteTask = new FootnoteTask(task->iX, task->iY,
-                    width()*3/4, height()*10, book->path(), task->iLinkText,
-                    QString::fromStdString(task->iLink), note, iTextStyle,
-                    iSettings->invertColors());
-                iTaskQueue->submit(iFootnoteTask, this,
-                    SLOT(onFootnoteTaskDone()));
+                (iFootnoteTask = new FootnoteTask(iTaskQueue->pool(),
+                    task->iX, task->iY, width()*3/4, height()*10, book->path(),
+                    task->iLinkText, QString::fromStdString(task->iLink), note,
+                    iTextStyle, iSettings->invertColors()))->
+                    submit(this, SLOT(onFootnoteTaskDone()));
             } else {
                 HDEBUG("bad footnote" << QString(task->iLink.c_str()));
             }
@@ -997,10 +1001,9 @@ void BooksPageWidget::onLongPressTaskDone()
             task->iRect);
     } else if (!iData.isNull()) {
         if (iStartSelectionTask) iStartSelectionTask->release(this);
-        iStartSelectionTask = new StartSelectionTask(iData,
-            task->iX, task->iY, width(), height());
-        iTaskQueue->submit(iStartSelectionTask, this,
-            SLOT(onStartSelectionTaskDone()));
+        (iStartSelectionTask = new StartSelectionTask(iTaskQueue->pool(), iData,
+            task->iX, task->iY, width(), height()))->
+            submit(this, SLOT(onStartSelectionTaskDone()));
     }
 
     task->release(this);
@@ -1045,8 +1048,8 @@ void BooksPageWidget::handleLongPress(int aX, int aY)
     HDEBUG(aX << aY);
     if (!iResetTask && !iRenderTask && !iData.isNull()) {
         if (iLongPressTask) iLongPressTask->release(this);
-        iTaskQueue->submit(iLongPressTask = new PressTask(iData, aX, aY),
-            this, SLOT(onLongPressTaskDone()));
+        (iLongPressTask = new PressTask(iTaskQueue->pool(), iData, aX, aY))->
+            submit(this, SLOT(onLongPressTaskDone()));
     }
 }
 
@@ -1055,8 +1058,8 @@ void BooksPageWidget::handlePress(int aX, int aY)
     HDEBUG(aX << aY);
     if (!iResetTask && !iRenderTask && !iData.isNull()) {
         if (iPressTask) iPressTask->release(this);
-        iTaskQueue->submit(iPressTask = new PressTask(iData, aX, aY),
-            this, SLOT(onPressTaskDone()));
+        (iPressTask = new PressTask(iTaskQueue->pool(), iData, aX, aY))->
+            submit(this, SLOT(onPressTaskDone()));
     }
 }
 
@@ -1076,8 +1079,9 @@ void BooksPageWidget::handlePositionChanged(int aX, int aY)
                 HDEBUG("dropped queued task," << i << "left");
             }
         }
-        task = new ExtendSelectionTask(iData, aX, aY, width(), height());
-        iTaskQueue->submit(task, this, SLOT(onExtendSelectionTaskDone()));
+        (task = new ExtendSelectionTask(iTaskQueue->pool(), iData,
+            aX, aY, width(), height()))->
+            submit(this, SLOT(onExtendSelectionTaskDone()));
         iExtendSelectionTasks.append(task);
     } else {
         // Finger was moved before we entered selection mode
@@ -1093,9 +1097,9 @@ void BooksPageWidget::clearSelection()
 {
     if (!iData.isNull()) {
         if (iClearSelectionTask) iClearSelectionTask->release(this);
-        iTaskQueue->submit(iClearSelectionTask =
-            new ClearSelectionTask(iData, width(), height()),
-            this, SLOT(onClearSelectionTaskDone()));
+        (iClearSelectionTask =new ClearSelectionTask(iTaskQueue->pool(),
+            iData, width(), height()))->
+            submit(this, SLOT(onClearSelectionTaskDone()));
     }
     if (iSelecting) {
         iSelecting = false;

@@ -36,6 +36,7 @@
 #include "BooksUtil.h"
 
 #include "HarbourDebug.h"
+#include "HarbourTask.h"
 
 #include "ZLTextHyphenator.h"
 
@@ -59,7 +60,7 @@ public:
 // BooksBookModel::PagingTask
 // ==========================================================================
 
-class BooksBookModel::PagingTask : public BooksTask
+class BooksBookModel::PagingTask : public HarbourTask
 {
     Q_OBJECT
 
@@ -78,7 +79,8 @@ public:
         quint32 count;
     } __attribute__((packed));
 
-    PagingTask(BooksBookModel* aModel, shared_ptr<Book> aBook);
+    PagingTask(QThreadPool* aPool, BooksBookModel* aModel,
+        shared_ptr<Book> aBook);
     ~PagingTask();
 
     void performTask();
@@ -104,8 +106,9 @@ public:
 
 const char BooksBookModel::PagingTask::MarksFileMagic[] = "MARK";
 
-BooksBookModel::PagingTask::PagingTask(BooksBookModel* aModel,
-    shared_ptr<Book> aBook) :
+BooksBookModel::PagingTask::PagingTask(QThreadPool* aPool,
+    BooksBookModel* aModel, shared_ptr<Book> aBook) :
+    HarbourTask(aPool),
     iBook(aBook),
     iTextStyle(aModel->textStyle()),
     iPaint(aModel->width(), aModel->height()),
@@ -621,8 +624,8 @@ void BooksBookModel::startReset(ResetReason aResetReason, bool aFullReset)
     if (iBook && width() > 0 && height() > 0) {
         HDEBUG("starting" << qPrintable(QString("%1x%2").arg(width()).
             arg(height())) << "paging");
-        iPagingTask = new PagingTask(this, iBook->bookRef());
-        iTaskQueue->submit(iPagingTask);
+        (iPagingTask = new PagingTask(iTaskQueue->pool(), this,
+            iBook->bookRef()))->submit();
     }
 
     if (oldPageCount > 0) {

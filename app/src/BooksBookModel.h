@@ -35,7 +35,6 @@
 #define BOOKS_BOOK_MODEL_H
 
 #include "BooksBook.h"
-#include "BooksTask.h"
 #include "BooksTaskQueue.h"
 #include "BooksTextView.h"
 #include "BooksSettings.h"

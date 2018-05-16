@@ -40,7 +40,7 @@
 
 #include <QString>
 
-class BooksTask;
+class HarbourTask;
 
 namespace BooksUtil {
     shared_ptr<Book> bookFromFile(std::string aPath);
@@ -48,8 +48,8 @@ namespace BooksUtil {
     bool isValidFileName(QString aName);
     QByteArray fileHashAttr(QString aPath);
     bool setFileHashAttr(QString aPath, QByteArray aHash);
-    QByteArray computeFileHash(QString aPath, const BooksTask* aTask = NULL);
-    QByteArray computeFileHashAndSetAttr(QString aPath, const BooksTask* aTask = NULL);
+    QByteArray computeFileHash(QString aPath, const HarbourTask* aTask = NULL);
+    QByteArray computeFileHashAndSetAttr(QString aPath, const HarbourTask* aTask = NULL);
 }
 
 inline shared_ptr<Book> BooksUtil::bookFromFile(QString aPath)

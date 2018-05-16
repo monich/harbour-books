@@ -33,8 +33,9 @@
 
 #include "BooksUtil.h"
 #include "BooksDefs.h"
-#include "BooksTask.h"
+
 #include "HarbourDebug.h"
+#include "HarbourTask.h"
 
 #include "ZLDir.h"
 #include "formats/FormatPlugin.h"
@@ -90,7 +91,7 @@ shared_ptr<Book> BooksUtil::bookFromFile(std::string aPath)
     return book;
 }
 
-QByteArray BooksUtil::computeFileHash(QString aPath, const BooksTask* aTask)
+QByteArray BooksUtil::computeFileHash(QString aPath, const HarbourTask* aTask)
 {
     QByteArray result;
     QFile file(aPath);
@@ -157,7 +158,7 @@ bool BooksUtil::setFileHashAttr(QString aPath, QByteArray aHash)
     return false;
 }
 
-QByteArray BooksUtil::computeFileHashAndSetAttr(QString aPath, const BooksTask* aTask)
+QByteArray BooksUtil::computeFileHashAndSetAttr(QString aPath, const HarbourTask* aTask)
 {
     QByteArray hash = computeFileHash(aPath, aTask);
     if (!hash.isEmpty()) {
