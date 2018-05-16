@@ -1,6 +1,6 @@
 /*
-  Copyright (C) 2015-2017 Jolla Ltd.
-  Contact: Slava Monich <slava.monich@jolla.com>
+  Copyright (C) 2015-2018 Jolla Ltd.
+  Copyright (C) 2015-2018 Slava Monich <slava.monich@jolla.com>
 
   You may use this file under the terms of BSD license as follows:
 
@@ -54,6 +54,11 @@ ApplicationWindow {
     BooksHints { id: globalHints }
     BooksFeedback { id: globalFeedback }
     SystemState { id: globalSystemState }
+    DisplayBlanking {
+        pauseRequested: Qt.application.active &&
+            Settings.currentBook &&
+            Settings.keepDisplayOn
+    }
 
     initialPage: BooksMainPage { id: mainPage }
 

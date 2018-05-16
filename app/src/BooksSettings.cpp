@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2015-2017 Jolla Ltd.
- * Contact: Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2015-2018 Jolla Ltd.
+ * Copyright (C) 2015-2018 Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
  *
@@ -49,6 +49,7 @@
 #define KEY_CURRENT_FOLDER          "currentFolder"
 #define KEY_REMOVABLE_ROOT          "removableRoot"
 #define KEY_INVERT_COLORS           "invertColors"
+#define KEY_KEEP_DISPLAY_ON         "keepDisplayOn"
 #define KEY_VOLUME_UP_ACTION        "volumeUpAction"
 #define KEY_VOLUME_DOWN_ACTION      "volumeDownAction"
 #define KEY_ORIENTATION             "orientation"
@@ -59,6 +60,7 @@
 #define DEFAULT_CURRENT_FOLDER      QString()
 #define DEFAULT_REMOVABLE_ROOT      "Books"
 #define DEFAULT_INVERT_COLORS       false
+#define DEFAULT_KEEP_DISPLAY_ON     false
 #define DEFAULT_VOLUME_UP_ACTION    (BooksSettings::ActionNextPage)
 #define DEFAULT_VOLUME_DOWN_ACTION  (BooksSettings::ActionPreviousPage)
 #define DEFAULT_ORIENTATION         (BooksSettings::OrientationAny)
@@ -232,6 +234,7 @@ public:
     MGConfItem* iFontSizeConf;
     MGConfItem* iPageDetailsConf;
     MGConfItem* iInvertColorsConf;
+    MGConfItem* iKeepDisplayOnConf;
     MGConfItem* iVolumeUpActionConf;
     MGConfItem* iVolumeDownActionConf;
     MGConfItem* iCurrentFolderConf;
@@ -252,6 +255,7 @@ BooksSettings::Private::Private(BooksSettings* aParent) :
     iFontSizeConf(new MGConfItem(DCONF_PATH KEY_FONT_SIZE, this)),
     iPageDetailsConf(new MGConfItem(DCONF_PATH KEY_PAGE_DETAILS, this)),
     iInvertColorsConf(new MGConfItem(DCONF_PATH KEY_INVERT_COLORS, this)),
+    iKeepDisplayOnConf(new MGConfItem(DCONF_PATH KEY_KEEP_DISPLAY_ON, this)),
     iVolumeUpActionConf(new MGConfItem(DCONF_PATH KEY_VOLUME_UP_ACTION, this)),
     iVolumeDownActionConf(new MGConfItem(DCONF_PATH KEY_VOLUME_DOWN_ACTION, this)),
     iCurrentFolderConf(new MGConfItem(DCONF_PATH KEY_CURRENT_FOLDER, this)),
@@ -267,6 +271,7 @@ BooksSettings::Private::Private(BooksSettings* aParent) :
     connect(iPageDetailsConf, SIGNAL(valueChanged()), iParent, SIGNAL(pageDetailsChanged()));
     connect(iInvertColorsConf, SIGNAL(valueChanged()), iParent, SIGNAL(invertColorsChanged()));
     connect(iInvertColorsConf, SIGNAL(valueChanged()), iParent, SIGNAL(pageBackgroundColorChanged()));
+    connect(iKeepDisplayOnConf, SIGNAL(valueChanged()), iParent, SIGNAL(keepDisplayOnChanged()));
     connect(iVolumeUpActionConf, SIGNAL(valueChanged()), iParent, SIGNAL(volumeUpActionChanged()));
     connect(iVolumeDownActionConf, SIGNAL(valueChanged()), iParent, SIGNAL(volumeDownActionChanged()));
     connect(iOrientationConf, SIGNAL(valueChanged()), iParent, SIGNAL(orientationChanged()));
@@ -541,6 +546,20 @@ BooksSettings::setInvertColors(
 {
     HDEBUG(aValue);
     iPrivate->iInvertColorsConf->set(aValue);
+}
+
+bool
+BooksSettings::keepDisplayOn() const
+{
+    return iPrivate->iKeepDisplayOnConf->value(DEFAULT_KEEP_DISPLAY_ON).toBool();
+}
+
+void
+BooksSettings::setKeepDisplayOn(
+    bool aValue)
+{
+    HDEBUG(aValue);
+    iPrivate->iKeepDisplayOnConf->set(aValue);
 }
 
 BooksSettings::Action

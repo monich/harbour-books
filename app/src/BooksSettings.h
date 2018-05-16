@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2015-2017 Jolla Ltd.
- * Contact: Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2015-2018 Jolla Ltd.
+ * Copyright (C) 2015-2018 Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
  *
@@ -49,6 +49,7 @@ class BooksSettings : public QObject
     Q_PROPERTY(int fontSize READ fontSize WRITE setFontSize NOTIFY fontSizeChanged)
     Q_PROPERTY(int pageDetails READ pageDetails WRITE setPageDetails NOTIFY pageDetailsChanged)
     Q_PROPERTY(bool invertColors READ invertColors WRITE setInvertColors NOTIFY invertColorsChanged)
+    Q_PROPERTY(bool keepDisplayOn READ keepDisplayOn WRITE setKeepDisplayOn NOTIFY keepDisplayOnChanged)
     Q_PROPERTY(int volumeUpAction READ volumeUpAction WRITE setVolumeUpAction NOTIFY volumeUpActionChanged)
     Q_PROPERTY(int volumeDownAction READ volumeDownAction WRITE setVolumeDownAction NOTIFY volumeDownActionChanged)
     Q_PROPERTY(QObject* currentBook READ currentBook WRITE setCurrentBook NOTIFY currentBookChanged)
@@ -101,6 +102,9 @@ public:
     bool invertColors() const;
     void setInvertColors(bool aValue);
 
+    bool keepDisplayOn() const;
+    void setKeepDisplayOn(bool aValue);
+
     Action volumeUpAction() const;
     void setVolumeUpAction(int aValue);
 
@@ -127,6 +131,7 @@ Q_SIGNALS:
     void textStyleChanged();
     void pageDetailsChanged();
     void invertColorsChanged();
+    void keepDisplayOnChanged();
     void volumeUpActionChanged();
     void volumeDownActionChanged();
     void currentBookChanged();
