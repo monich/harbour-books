@@ -166,20 +166,15 @@
         <extracomment>Combo box value for landscape orientation</extracomment>
         <translation>Альбомная</translation>
     </message>
-    <message id="harbour-books-settings-page-removable-section_header">
-        <source>Memory card</source>
-        <extracomment>Section header for memory card settings</extracomment>
-        <translation>Карта памяти</translation>
+    <message id="harbour-books-settings-page-keep_display_on">
+        <source>Keep display on while reading</source>
+        <extracomment>Text switch label</extracomment>
+        <translation>Держать дисплей включённым во время чтения</translation>
     </message>
-    <message id="harbour-books-settings-page-removable_root-label">
-        <source>Books folder</source>
-        <extracomment>Settings field label</extracomment>
-        <translation>Книжная папка</translation>
-    </message>
-    <message id="harbour-books-settings-page-removable_root-description">
-        <source>Leave the folder name empty to scan the entire memory card for books.</source>
-        <extracomment>Settings field description</extracomment>
-        <translation>Если оставить имя папки пустым, то можно будет найти книгу в любой папке на карте памяти. Особого смысла в этой настройке нет, просто так исторически сложилось, что по умолчанию книги искались только в папке Books, а теперь можно вообще где угодно.</translation>
+    <message id="harbour-books-settings-page-keep_display_on_description">
+        <source>Prevent the display from blanking while reading the book.</source>
+        <extracomment>Text switch description</extracomment>
+        <translation>Не гасить экран, пока открыта книга. Это не очень хорошо для батареи, зато удобно для чтения. Главное - не уснуть.</translation>
     </message>
     <message id="harbour-books-settings-page-media-keys-section_header">
         <source>Media keys</source>
@@ -210,6 +205,21 @@
         <source>Volume down</source>
         <extracomment>Combo box label</extracomment>
         <translation>Громкость вниз</translation>
+    </message>
+    <message id="harbour-books-settings-page-removable-section_header">
+        <source>Memory card</source>
+        <extracomment>Section header for memory card settings</extracomment>
+        <translation>Карта памяти</translation>
+    </message>
+    <message id="harbour-books-settings-page-removable_root-label">
+        <source>Books folder</source>
+        <extracomment>Settings field label</extracomment>
+        <translation>Книжная папка</translation>
+    </message>
+    <message id="harbour-books-settings-page-removable_root-description">
+        <source>Leave the folder name empty to scan the entire memory card for books.</source>
+        <extracomment>Settings field description</extracomment>
+        <translation>Если оставить имя папки пустым, то можно будет найти книгу в любой папке на карте памяти. Особого смысла в этой настройке нет, просто так исторически сложилось, что по умолчанию книги искались только в папке Books, а теперь можно вообще где угодно.</translation>
     </message>
 </context>
 </TS>

@@ -1,6 +1,6 @@
 /*
-  Copyright (C) 2016-2017 Jolla Ltd.
-  Contact: Slava Monich <slava.monich@jolla.com>
+  Copyright (C) 2015-2018 Jolla Ltd.
+  Copyright (C) 2015-2018 Slava Monich <slava.monich@jolla.com>
 
   You may use this file under the terms of BSD license as follows:
 
@@ -167,6 +167,24 @@ Page {
                 }
             }
 
+            TextSwitch {
+                automaticCheck: false
+                checked: keepDisplayOn.value
+                //: Text switch label
+                //% "Keep display on while reading"
+                text: qsTrId("harbour-books-settings-page-keep_display_on")
+                //: Text switch description
+                //% "Prevent the display from blanking while reading the book."
+                description: qsTrId("harbour-books-settings-page-keep_display_on_description")
+                onClicked: keepDisplayOn.value = !checked
+
+                ConfigurationValue {
+                    id: keepDisplayOn
+                    key: rootPath + "keepDisplayOn"
+                    defaultValue: false
+                }
+            }
+
             SectionHeader {
                 //: Section header for media keys
                 //% "Media keys"
@@ -242,7 +260,6 @@ Page {
                 color: Theme.secondaryColor
                 wrapMode: Text.Wrap
             }
-
         }
     }
 }

@@ -164,6 +164,21 @@
         <extracomment>Combo box value for landscape orientation</extracomment>
         <translation>Querformat</translation>
     </message>
+    <message id="harbour-books-settings-page-keep_display_on">
+        <source>Keep display on while reading</source>
+        <extracomment>Text switch label</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message id="harbour-books-settings-page-keep_display_on_description">
+        <source>Prevent the display from blanking while reading the book.</source>
+        <extracomment>Text switch description</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message id="harbour-books-settings-page-media-keys-section_header">
+        <source>Media keys</source>
+        <extracomment>Section header for media keys</extracomment>
+        <translation type="unfinished">Medienschlüssel</translation>
+    </message>
     <message id="harbour-books-settings-page-action-none">
         <source>No action</source>
         <extracomment>Combo box value for no action</extracomment>
@@ -178,11 +193,6 @@
         <source>Next page</source>
         <extracomment>Combo box value for next page action</extracomment>
         <translation type="unfinished">Folge Seite</translation>
-    </message>
-    <message id="harbour-books-settings-page-media-keys-section_header">
-        <source>Media keys</source>
-        <extracomment>Section header for media keys</extracomment>
-        <translation type="unfinished">Medienschlüssel</translation>
     </message>
     <message id="harbour-books-settings-page-volume_up-label">
         <source>Volume up</source>

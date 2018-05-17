@@ -164,6 +164,16 @@
         <extracomment>Combo box value for landscape orientation</extracomment>
         <translation>Landscape</translation>
     </message>
+    <message id="harbour-books-settings-page-keep_display_on">
+        <source>Keep display on while reading</source>
+        <extracomment>Text switch label</extracomment>
+        <translation>Keep display on while reading</translation>
+    </message>
+    <message id="harbour-books-settings-page-keep_display_on_description">
+        <source>Prevent the display from blanking while reading the book.</source>
+        <extracomment>Text switch description</extracomment>
+        <translation>Prevent the display from blanking while reading the book.</translation>
+    </message>
     <message id="harbour-books-settings-page-media-keys-section_header">
         <source>Media keys</source>
         <extracomment>Section header for media keys</extracomment>
