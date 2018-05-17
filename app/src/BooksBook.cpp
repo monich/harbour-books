@@ -300,7 +300,7 @@ void BooksBook::GuessCoverTask::performTask()
 class BooksBook::HashTask : public HarbourTask
 {
 public:
-    HashTask(QThreadPool* aPool, QString aPath);
+    HashTask(QThreadPool* aPool, QThread* aTargetThread, QString aPath);
 
     virtual void performTask();
 
@@ -309,8 +309,8 @@ public:
     QByteArray iHash;
 };
 
-BooksBook::HashTask::HashTask(QThreadPool* aPool, QString aPath) :
-    HarbourTask(aPool), iPath(aPath)
+BooksBook::HashTask::HashTask(QThreadPool* aPool, QThread* aTargetThread,
+    QString aPath) : HarbourTask(aPool, aTargetThread), iPath(aPath)
 {
 }
 
@@ -390,8 +390,7 @@ BooksBook::BooksBook(const BooksStorage& aStorage, QString aRelativePath,
     if (iHash.isEmpty()) {
         HDEBUG("need to calculate hash for" << qPrintable(iPath));
         iHashTaskQueue = BooksTaskQueue::hashQueue();
-        iHashTask = new HashTask(iHashTaskQueue->pool(), iPath);
-        iHashTask->moveToThread(thread());
+        iHashTask = new HashTask(iHashTaskQueue->pool(), thread(), iPath);
         iHashTask->submit(this, SLOT(onHashTaskDone()));
     }
     // Refcounted BooksBook objects are managed by C++ code
