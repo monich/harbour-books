@@ -1,6 +1,6 @@
 Name:           harbour-books
 Summary:        E-book reader
-Version:        1.0.26
+Version:        1.0.28
 Release:        1
 License:        BSD
 Group:          Applications/File
@@ -57,6 +57,10 @@ desktop-file-install --delete-original \
 make -C test test
 
 %changelog
+* Thu May 17 2018 Slava Monich <slava.monich@jolla.com> 1.0.28
+- Added "Keep display on while reading" option
+- Fixed a few memory leaks
+
 * Sun Feb 26 2018 Slava Monich <slava.monich@jolla.com> 1.0.26
 - Fixed compatibility with Sailfish OS < 2.1.0
 - Added Hungarian translations

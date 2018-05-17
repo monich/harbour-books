@@ -1,6 +1,6 @@
 Name:           openrepos-books
 Summary:        E-book reader
-Version:        1.0.27
+Version:        1.0.28
 Release:        1
 License:        BSD
 Vendor:         slava
@@ -60,5 +60,9 @@ desktop-file-install --delete-original \
 make -C test test
 
 %changelog
+* Thu May 17 2018 Slava Monich <slava.monich@jolla.com> 1.0.28
+- Added "Keep display on while reading" option
+- Fixed a few memory leaks
+
 * Fri Apr 27 2018 Slava Monich <slava.monich@jolla.com> 1.0.27
 - Added openrepos variant
