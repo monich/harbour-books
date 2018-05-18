@@ -132,7 +132,7 @@
     <message id="harbour-books-settings-page-display-section_header">
         <source>Display</source>
         <extracomment>Section header for display settings</extracomment>
-        <translation type="unfinished">Skärm</translation>
+        <translation>Skärm</translation>
     </message>
     <message id="harbour-books-settings-page-font_size_label">
         <source>Font size</source>
@@ -167,17 +167,17 @@
     <message id="harbour-books-settings-page-keep_display_on">
         <source>Keep display on while reading</source>
         <extracomment>Text switch label</extracomment>
-        <translation type="unfinished">Håll skärmen på när läsning</translation>
+        <translation>Håll skärmen på vid läsning</translation>
     </message>
     <message id="harbour-books-settings-page-keep_display_on_description">
         <source>Prevent the display from blanking while reading the book.</source>
         <extracomment>Text switch description</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Förhindra att skärmen slocknar vid läsning</translation>
     </message>
     <message id="harbour-books-settings-page-media-keys-section_header">
         <source>Media keys</source>
         <extracomment>Section header for media keys</extracomment>
-        <translation type="unfinished">Mediaknappar</translation>
+        <translation>Mediaknappar</translation>
     </message>
     <message id="harbour-books-settings-page-action-none">
         <source>No action</source>
