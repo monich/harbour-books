@@ -1,6 +1,6 @@
 Name:           harbour-books
 Summary:        E-book reader
-Version:        1.0.28
+Version:        1.0.29
 Release:        1
 License:        BSD
 Group:          Applications/File
@@ -57,6 +57,9 @@ desktop-file-install --delete-original \
 make -C test test
 
 %changelog
+* Sat May 19 2018 Slava Monich <slava.monich@jolla.com> 1.0.29
+- Updated Swedish and Hungarian translations
+
 * Thu May 17 2018 Slava Monich <slava.monich@jolla.com> 1.0.28
 - Added "Keep display on while reading" option
 - Fixed a few memory leaks
