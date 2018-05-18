@@ -165,12 +165,12 @@
     <message id="harbour-books-settings-page-keep_display_on">
         <source>Keep display on while reading</source>
         <extracomment>Text switch label</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Kijelző ébrentartása olvasás közben</translation>
     </message>
     <message id="harbour-books-settings-page-keep_display_on_description">
         <source>Prevent the display from blanking while reading the book.</source>
         <extracomment>Text switch description</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Megakadályozza, hogy a kijelző elsötétüljön olvasás közben.</translation>
     </message>
     <message id="harbour-books-settings-page-media-keys-section_header">
         <source>Media keys</source>
