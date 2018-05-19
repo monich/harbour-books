@@ -5,7 +5,7 @@
     <name></name>
     <message id="harbour-books-app-name">
         <source>Books</source>
-        <translation>Books</translation>
+        <translation>Livros</translation>
     </message>
     <message id="harbour-books-book-view-back">
         <source>Back to library</source>
