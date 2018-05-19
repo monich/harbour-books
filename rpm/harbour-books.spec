@@ -1,6 +1,6 @@
 Name:           harbour-books
 Summary:        E-book reader
-Version:        1.0.29
+Version:        1.0.30
 Release:        1
 License:        BSD
 Group:          Applications/File
@@ -57,6 +57,9 @@ desktop-file-install --delete-original \
 make -C test test
 
 %changelog
+* Sat May 19 2018 Slava Monich <slava.monich@jolla.com> 1.0.30
+- Added Brazilian Portuguese translations
+
 * Sat May 19 2018 Slava Monich <slava.monich@jolla.com> 1.0.29
 - Updated Swedish and Hungarian translations
 
