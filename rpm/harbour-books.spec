@@ -1,6 +1,6 @@
 Name:           harbour-books
 Summary:        E-book reader
-Version:        1.0.31
+Version:        1.0.32
 Release:        1
 License:        BSD
 Group:          Applications/File
@@ -57,6 +57,9 @@ desktop-file-install --delete-original \
 make -C test test
 
 %changelog
+* Mon May 21 2018 Slava Monich <slava.monich@jolla.com> 1.0.32
+- Added Polish translations
+
 * Mon May 21 2018 Slava Monich <slava.monich@jolla.com> 1.0.31
 - Fixed "Keep display on while reading" on older systems
 
