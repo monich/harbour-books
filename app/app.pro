@@ -57,8 +57,7 @@ OTHER_FILES += \
   settings/*.json \
   data/default/* \
   data/zlibrary/core/encodings/* \
-  data/zlibrary/core/resources/* \
-  translations/*.ts
+  data/zlibrary/core/resources/*
 
 TARGET_DATA_DIR = /usr/share/$$TARGET
 TARGET_DEFAULT_DATA_DIR = $$TARGET_DATA_DIR/data
@@ -215,7 +214,10 @@ TRANSLATION_SOURCES = \
   $${_PRO_FILE_PWD_}/settings
 
 defineTest(addTrFile) {
-    in = $${_PRO_FILE_PWD_}/translations/harbour-$$1
+    rel = translations/harbour-$${1}
+    OTHER_FILES += $${rel}.ts
+
+    in = $${_PRO_FILE_PWD_}/$$rel
     out = $${OUT_PWD}/translations/$${PREFIX}-$$1
 
     s = $$replace(1,-,_)
@@ -240,10 +242,11 @@ defineTest(addTrFile) {
     export($${lrelease_target}.commands)
     export(QMAKE_EXTRA_TARGETS)
     export(PRE_TARGETDEPS)
+    export(OTHER_FILES)
     export(qm.files)
 }
 
-LANGUAGES = de fi hu nl pt_BR ru sv es
+LANGUAGES = de fi hu nl pl pt_BR ru sv es
 
 addTrFile($${NAME})
 for(l, LANGUAGES) {
