@@ -1,6 +1,6 @@
 Name:           harbour-books
 Summary:        E-book reader
-Version:        1.0.32
+Version:        1.0.33
 Release:        1
 License:        BSD
 Group:          Applications/File
@@ -57,6 +57,9 @@ desktop-file-install --delete-original \
 make -C test test
 
 %changelog
+* Fri Jun 8 2018 Slava Monich <slava.monich@jolla.com> 1.0.33
+- Fixed SD-card support on Sailfish OS 2.2.0
+
 * Mon May 21 2018 Slava Monich <slava.monich@jolla.com> 1.0.32
 - Added Polish translations
 
