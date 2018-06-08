@@ -274,7 +274,6 @@ void BooksStorage::set(const BooksStorage& aStorage)
 #define STORAGE_SUBSYSTEM       "block"
 #define STORAGE_DISK            "disk"
 #define STORAGE_PARTITION       "partition"
-#define STORAGE_MOUNT_PREFIX    "/media/"
 
 #define STORAGE_ACTION_ADD      "add"
 #define STORAGE_ACTION_REMOVE   "remove"
@@ -286,10 +285,13 @@ class BooksStorageManager::Private : public QObject {
     Q_OBJECT
 public:
     static BooksStorageManager* gInstance;
+    static const QString STORAGE_MOUNT_PREFIX;
+    static const QString STORAGE_MOUNT_PREFIX2;
 
     Private(BooksStorageManager* aParent);
     ~Private();
 
+    static bool isMediaMount(QString aPath);
     int findDevice(QString aDevice) const;
     int findPath(QString aPath, QString* aRelPath) const;
     bool scanMounts();
@@ -312,6 +314,8 @@ public:
 };
 
 BooksStorageManager* BooksStorageManager::Private::gInstance = NULL;
+const QString BooksStorageManager::Private::STORAGE_MOUNT_PREFIX("/media/");
+const QString BooksStorageManager::Private::STORAGE_MOUNT_PREFIX2("/run/media/");
 
 BooksStorageManager::Private::Private(BooksStorageManager* aParent) :
     QObject(aParent),
@@ -336,17 +340,16 @@ BooksStorageManager::Private::Private(BooksStorageManager* aParent) :
         // For some reason QTextStream can't read /proc/mounts line by line
         QByteArray contents = mounts.readAll();
         QTextStream in(&contents);
-        QString mediaPrefix(STORAGE_MOUNT_PREFIX);
         while (!in.atEnd()) {
             QString line = in.readLine();
             QStringList entries = line.split(' ', QString::SkipEmptyParts);
             if (entries.count() > 2) {
-                QString mount(entries.at(1));
+                const QString mount(entries.at(1));
                 if (mount == homeMount) {
                     homeDevice = entries.at(0);
                     HDEBUG("internal" << homeDevice);
-                } else if (mount.startsWith(mediaPrefix)) {
-                    QString dev = entries.at(0);
+                } else if (isMediaMount(mount)) {
+                    const QString dev = entries.at(0);
                     QString path(mount);
                     if (!path.endsWith('/')) path += '/';
                     path += iSettings->removableRoot();
@@ -395,6 +398,12 @@ BooksStorageManager::Private::~Private()
     }
 }
 
+bool BooksStorageManager::Private::isMediaMount(QString aPath)
+{
+    return aPath.startsWith(STORAGE_MOUNT_PREFIX) ||
+        aPath.startsWith(STORAGE_MOUNT_PREFIX2);
+}
+
 int BooksStorageManager::Private::findDevice(QString aDevice) const
 {
     const int n = iStorageList.count();
@@ -439,14 +448,13 @@ bool BooksStorageManager::Private::scanMounts()
         // For some reason QTextStream can't read /proc/mounts line by line
         QByteArray contents = mounts.readAll();
         QTextStream in(&contents);
-        QString mediaPrefix(STORAGE_MOUNT_PREFIX);
         while (!in.atEnd()) {
             QString line = in.readLine();
             QStringList entries = line.split(' ', QString::SkipEmptyParts);
             if (entries.count() > 2) {
-                QString mount(entries.at(1));
-                if (mount.startsWith(mediaPrefix)) {
-                    QString dev = entries.at(0);
+                const QString mount(entries.at(1));
+                if (isMediaMount(mount)) {
+                    const QString dev = entries.at(0);
                     int index = findDevice(dev);
                     if (index < 0) {
                         QString path = mount;
