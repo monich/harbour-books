@@ -285,13 +285,18 @@ class BooksStorageManager::Private : public QObject {
     Q_OBJECT
 public:
     static BooksStorageManager* gInstance;
-    static const QString STORAGE_MOUNT_PREFIX;
-    static const QString STORAGE_MOUNT_PREFIX2;
+
+    struct MountEntry {
+        QString dev;
+        QString path;
+
+        bool parse(QString aLine);
+        bool isMediaMount();
+    };
 
     Private(BooksStorageManager* aParent);
     ~Private();
 
-    static bool isMediaMount(QString aPath);
     int findDevice(QString aDevice) const;
     int findPath(QString aPath, QString* aRelPath) const;
     bool scanMounts();
@@ -314,8 +319,30 @@ public:
 };
 
 BooksStorageManager* BooksStorageManager::Private::gInstance = NULL;
-const QString BooksStorageManager::Private::STORAGE_MOUNT_PREFIX("/media/");
-const QString BooksStorageManager::Private::STORAGE_MOUNT_PREFIX2("/run/media/");
+
+bool BooksStorageManager::Private::MountEntry::parse(QString aLine)
+{
+    QStringList entries = aLine.split(' ', QString::SkipEmptyParts);
+    if (entries.count() > 2) {
+        dev = entries.at(0);
+        path = entries.at(1);
+        // If the path contains spaces, those get replaced with \040
+        static const QString ENCODED_SPACE("\\040");
+        static const QString SPACE(" ");
+        path.replace(ENCODED_SPACE, SPACE);
+        return true;
+    } else {
+        dev = path = QString();
+        return false;
+    }
+}
+
+bool BooksStorageManager::Private::MountEntry::isMediaMount()
+{
+    static const QString MOUNT_PREFIX("/media/");
+    static const QString MOUNT_PREFIX2("/run/media/nemo/");
+    return path.startsWith(MOUNT_PREFIX) || path.startsWith(MOUNT_PREFIX2);
+}
 
 BooksStorageManager::Private::Private(BooksStorageManager* aParent) :
     QObject(aParent),
@@ -340,21 +367,18 @@ BooksStorageManager::Private::Private(BooksStorageManager* aParent) :
         // For some reason QTextStream can't read /proc/mounts line by line
         QByteArray contents = mounts.readAll();
         QTextStream in(&contents);
+        MountEntry entry;
         while (!in.atEnd()) {
-            QString line = in.readLine();
-            QStringList entries = line.split(' ', QString::SkipEmptyParts);
-            if (entries.count() > 2) {
-                const QString mount(entries.at(1));
-                if (mount == homeMount) {
-                    homeDevice = entries.at(0);
+            if (entry.parse(in.readLine())) {
+                if (entry.path == homeMount) {
+                    homeDevice = entry.dev;
                     HDEBUG("internal" << homeDevice);
-                } else if (isMediaMount(mount)) {
-                    const QString dev = entries.at(0);
-                    QString path(mount);
+                } else if (entry.isMediaMount()) {
+                    QString path(entry.path);
                     if (!path.endsWith('/')) path += '/';
                     path += iSettings->removableRoot();
-                    BooksStorage bs(dev, mount, path, false);
-                    HDEBUG("removable" << dev << bs.booksDir().path());
+                    BooksStorage bs(entry.dev, entry.path, path, false);
+                    HDEBUG("removable" << entry.dev << bs.booksDir().path());
                     iStorageList.append(bs);
                 }
             }
@@ -396,12 +420,6 @@ BooksStorageManager::Private::~Private()
         }
         udev_unref(iUdev);
     }
-}
-
-bool BooksStorageManager::Private::isMediaMount(QString aPath)
-{
-    return aPath.startsWith(STORAGE_MOUNT_PREFIX) ||
-        aPath.startsWith(STORAGE_MOUNT_PREFIX2);
 }
 
 int BooksStorageManager::Private::findDevice(QString aDevice) const
@@ -448,25 +466,19 @@ bool BooksStorageManager::Private::scanMounts()
         // For some reason QTextStream can't read /proc/mounts line by line
         QByteArray contents = mounts.readAll();
         QTextStream in(&contents);
+        MountEntry entry;
         while (!in.atEnd()) {
-            QString line = in.readLine();
-            QStringList entries = line.split(' ', QString::SkipEmptyParts);
-            if (entries.count() > 2) {
-                const QString mount(entries.at(1));
-                if (isMediaMount(mount)) {
-                    const QString dev = entries.at(0);
-                    int index = findDevice(dev);
-                    if (index < 0) {
-                        QString path = mount;
-                        if (!path.endsWith('/')) path += '/';
-                        path += iSettings->removableRoot();
-                        HDEBUG("new removable device" << dev << path);
-                        BooksStorage storage(dev, mount, path, false);
-                        iStorageList.append(storage);
-                        Q_EMIT iParent->storageAdded(storage);
-                        newStorageFound = true;
-                    }
-                }
+            if (entry.parse(in.readLine()) &&
+                entry.isMediaMount() &&
+                findDevice(entry.dev) < 0) {
+                QString path(entry.path);
+                if (!path.endsWith('/')) path += '/';
+                path += iSettings->removableRoot();
+                HDEBUG("new removable device" << entry.dev << path);
+                BooksStorage storage(entry.dev, entry.path, path, false);
+                iStorageList.append(storage);
+                Q_EMIT iParent->storageAdded(storage);
+                newStorageFound = true;
             }
         }
         mounts.close();
