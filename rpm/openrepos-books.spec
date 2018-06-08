@@ -1,6 +1,6 @@
 Name:           openrepos-books
 Summary:        E-book reader
-Version:        1.0.33
+Version:        1.0.34
 Release:        1
 License:        BSD
 Vendor:         slava
@@ -60,6 +60,9 @@ desktop-file-install --delete-original \
 make -C test test
 
 %changelog
+* Fri Jun 8 2018 Slava Monich <slava.monich@jolla.com> 1.0.34
+- Support for SD-card labels containing spaces
+
 * Fri Jun 8 2018 Slava Monich <slava.monich@jolla.com> 1.0.33
 - Fixed SD-card support on Sailfish OS 2.2.0
 
