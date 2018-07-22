@@ -217,7 +217,9 @@ SilicaFlickable {
             }
             onPageClicked: {
                 root.pageClicked(index)
-                Settings.pageDetails = (Settings.pageDetails + 1) % _visibilityStates.length
+                if (!Settings.pageDetailsFixed) {
+                    Settings.pageDetails = (Settings.pageDetails + 1) % _visibilityStates.length
+                }
             }
             onImagePressed: {
                 if (currentPage) {

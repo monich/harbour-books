@@ -48,6 +48,7 @@ class BooksSettings : public QObject
     Q_ENUMS(Action)
     Q_PROPERTY(int fontSize READ fontSize WRITE setFontSize NOTIFY fontSizeChanged)
     Q_PROPERTY(int pageDetails READ pageDetails WRITE setPageDetails NOTIFY pageDetailsChanged)
+    Q_PROPERTY(bool pageDetailsFixed READ pageDetailsFixed WRITE setPageDetailsFixed NOTIFY pageDetailsFixedChanged)
     Q_PROPERTY(bool invertColors READ invertColors WRITE setInvertColors NOTIFY invertColorsChanged)
     Q_PROPERTY(bool keepDisplayOn READ keepDisplayOn WRITE setKeepDisplayOn NOTIFY keepDisplayOnChanged)
     Q_PROPERTY(int volumeUpAction READ volumeUpAction WRITE setVolumeUpAction NOTIFY volumeUpActionChanged)
@@ -97,6 +98,9 @@ public:
     int pageDetails() const;
     void setPageDetails(int aValue);
 
+    bool pageDetailsFixed() const;
+    void setPageDetailsFixed(bool aValue);
+
     shared_ptr<ZLTextStyle> textStyle(int aFontSizeAdjust) const;
 
     bool invertColors() const;
@@ -130,6 +134,7 @@ Q_SIGNALS:
     void fontSizeChanged();
     void textStyleChanged();
     void pageDetailsChanged();
+    void pageDetailsFixedChanged();
     void invertColorsChanged();
     void keepDisplayOnChanged();
     void volumeUpActionChanged();

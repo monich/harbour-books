@@ -45,6 +45,7 @@
 #define DCONF_PATH                  BOOKS_DCONF_ROOT
 #define KEY_FONT_SIZE               "fontSize"
 #define KEY_PAGE_DETAILS            "pageDetails"
+#define KEY_PAGE_DETAILS_FIXED      "pageDetailsFixed"
 #define KEY_CURRENT_BOOK            "currentBook"
 #define KEY_CURRENT_FOLDER          "currentFolder"
 #define KEY_REMOVABLE_ROOT          "removableRoot"
@@ -56,6 +57,7 @@
 
 #define DEFAULT_FONT_SIZE           0
 #define DEFAULT_PAGE_DETAILS        0
+#define DEFAULT_PAGE_DETAILS_FIXED  false
 #define DEFAULT_CURRENT_BOOK        QString()
 #define DEFAULT_CURRENT_FOLDER      QString()
 #define DEFAULT_REMOVABLE_ROOT      "Books"
@@ -233,6 +235,7 @@ public:
     BooksSettings* iParent;
     MGConfItem* iFontSizeConf;
     MGConfItem* iPageDetailsConf;
+    MGConfItem* iPageDetailsFixedConf;
     MGConfItem* iInvertColorsConf;
     MGConfItem* iKeepDisplayOnConf;
     MGConfItem* iVolumeUpActionConf;
@@ -254,6 +257,7 @@ BooksSettings::Private::Private(BooksSettings* aParent) :
     iParent(aParent),
     iFontSizeConf(new MGConfItem(DCONF_PATH KEY_FONT_SIZE, this)),
     iPageDetailsConf(new MGConfItem(DCONF_PATH KEY_PAGE_DETAILS, this)),
+    iPageDetailsFixedConf(new MGConfItem(DCONF_PATH KEY_PAGE_DETAILS_FIXED, this)),
     iInvertColorsConf(new MGConfItem(DCONF_PATH KEY_INVERT_COLORS, this)),
     iKeepDisplayOnConf(new MGConfItem(DCONF_PATH KEY_KEEP_DISPLAY_ON, this)),
     iVolumeUpActionConf(new MGConfItem(DCONF_PATH KEY_VOLUME_UP_ACTION, this)),
@@ -269,6 +273,7 @@ BooksSettings::Private::Private(BooksSettings* aParent) :
     connect(iCurrentFolderConf, SIGNAL(valueChanged()), SLOT(onCurrentFolderChanged()));
     connect(iCurrentBookPathConf, SIGNAL(valueChanged()), SLOT(onCurrentBookPathChanged()));
     connect(iPageDetailsConf, SIGNAL(valueChanged()), iParent, SIGNAL(pageDetailsChanged()));
+    connect(iPageDetailsFixedConf, SIGNAL(valueChanged()), iParent, SIGNAL(pageDetailsFixedChanged()));
     connect(iInvertColorsConf, SIGNAL(valueChanged()), iParent, SIGNAL(invertColorsChanged()));
     connect(iInvertColorsConf, SIGNAL(valueChanged()), iParent, SIGNAL(pageBackgroundColorChanged()));
     connect(iKeepDisplayOnConf, SIGNAL(valueChanged()), iParent, SIGNAL(keepDisplayOnChanged()));
@@ -532,6 +537,20 @@ BooksSettings::setPageDetails(
 {
     HDEBUG(aValue);
     iPrivate->iPageDetailsConf->set(aValue);
+}
+
+bool
+BooksSettings::pageDetailsFixed() const
+{
+    return iPrivate->iPageDetailsFixedConf->value(DEFAULT_PAGE_DETAILS_FIXED).toBool();
+}
+
+void
+BooksSettings::setPageDetailsFixed(
+    bool aValue)
+{
+    HDEBUG(aValue);
+    iPrivate->iPageDetailsFixedConf->set(aValue);
 }
 
 bool
