@@ -229,10 +229,10 @@
         <extracomment>Text switch description</extracomment>
         <translation>Prevent the display from blanking while reading the book.</translation>
     </message>
-    <message id="harbour-books-settings-page-media-keys-section_header">
-        <source>Media keys</source>
+    <message id="harbour-books-settings-page-navigation-section_header">
+        <source>Navigation</source>
         <extracomment>Section header for media keys</extracomment>
-        <translation>Media keys</translation>
+        <translation>Navigation</translation>
     </message>
     <message id="harbour-books-settings-page-volume_up-label">
         <source>Volume up</source>
@@ -258,6 +258,16 @@
         <source>Next page</source>
         <extracomment>Combo box value for next page action</extracomment>
         <translation>Next page</translation>
+    </message>
+    <message id="harbour-books-settings-page-turn_pages_by_tap">
+        <source>Turn pages by tapping the screen</source>
+        <extracomment>Text switch label</extracomment>
+        <translation>Turn pages by tapping the screen</translation>
+    </message>
+    <message id="harbour-books-settings-page-turn_pages_by_tap-description">
+        <source>Tapping near the left edge of the screen returns to the previous page, tapping near the right edge gets you to the next page.</source>
+        <extracomment>Text switch description</extracomment>
+        <translation>Tapping near the left edge of the screen returns to the previous page, tapping near the right edge gets you to the next page.</translation>
     </message>
     <message id="harbour-books-settings-page-removable-section_header">
         <source>Memory card</source>

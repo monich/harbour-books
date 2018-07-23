@@ -78,6 +78,8 @@ Page {
                 title: qsTrId("harbour-books-settings-page-header")
             }
 
+            // =============== Display ===============
+
             SectionHeader {
                 //: Section header for display settings
                 //% "Display"
@@ -251,7 +253,7 @@ Page {
                 //: Text switch description
                 //% "Prevent the display from blanking while reading the book."
                 description: qsTrId("harbour-books-settings-page-keep_display_on_description")
-                onClicked: keepDisplayOn.value = !checked
+                onClicked: keepDisplayOn.value = !keepDisplayOn.value
 
                 ConfigurationValue {
                     id: keepDisplayOn
@@ -260,10 +262,12 @@ Page {
                 }
             }
 
+            // =============== Navigation ===============
+
             SectionHeader {
                 //: Section header for media keys
-                //% "Media keys"
-                text: qsTrId("harbour-books-settings-page-media-keys-section_header")
+                //% "Navigation"
+                text: qsTrId("harbour-books-settings-page-navigation-section_header")
             }
 
             BooksActionSelector {
@@ -281,6 +285,26 @@ Page {
                 key: rootPath + "volumeDownAction"
                 defaultValue: 1 // BooksSettings.ActionPreviousPage
             }
+
+            TextSwitch {
+                automaticCheck: false
+                checked: turnPageByTap.value
+                //: Text switch label
+                //% "Turn pages by tapping the screen"
+                text: qsTrId("harbour-books-settings-page-turn_pages_by_tap")
+                //: Text switch description
+                //% "Tapping near the left edge of the screen returns to the previous page, tapping near the right edge gets you to the next page."
+                description: qsTrId("harbour-books-settings-page-turn_pages_by_tap-description")
+                onClicked: turnPageByTap.value = !turnPageByTap.value
+
+                ConfigurationValue {
+                    id: turnPageByTap
+                    key: rootPath + "turnPageByTap"
+                    defaultValue: false
+                }
+            }
+
+            // =============== Memory card ===============
 
             SectionHeader {
                 //: Section header for memory card settings

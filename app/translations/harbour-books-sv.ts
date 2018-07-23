@@ -229,10 +229,10 @@
         <extracomment>Text switch description</extracomment>
         <translation>Förhindra att skärmen slocknar vid läsning</translation>
     </message>
-    <message id="harbour-books-settings-page-media-keys-section_header">
-        <source>Media keys</source>
+    <message id="harbour-books-settings-page-navigation-section_header">
+        <source>Navigation</source>
         <extracomment>Section header for media keys</extracomment>
-        <translation>Mediaknappar</translation>
+        <translation type="unfinished">Navigering</translation>
     </message>
     <message id="harbour-books-settings-page-action-none">
         <source>No action</source>
@@ -258,6 +258,16 @@
         <source>Volume down</source>
         <extracomment>Combo box label</extracomment>
         <translation>Sänk volymen</translation>
+    </message>
+    <message id="harbour-books-settings-page-turn_pages_by_tap">
+        <source>Turn pages by tapping the screen</source>
+        <extracomment>Text switch label</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message id="harbour-books-settings-page-turn_pages_by_tap-description">
+        <source>Tapping near the left edge of the screen returns to the previous page, tapping near the right edge gets you to the next page.</source>
+        <extracomment>Text switch description</extracomment>
+        <translation type="unfinished"></translation>
     </message>
     <message id="harbour-books-settings-page-removable-section_header">
         <source>Memory card</source>

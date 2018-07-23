@@ -231,10 +231,20 @@
         <extracomment>Text switch description</extracomment>
         <translation>Не гасить экран, пока открыта книга. Это не очень хорошо для батареи, зато удобно для чтения. Главное - не уснуть.</translation>
     </message>
-    <message id="harbour-books-settings-page-media-keys-section_header">
-        <source>Media keys</source>
+    <message id="harbour-books-settings-page-navigation-section_header">
+        <source>Navigation</source>
         <extracomment>Section header for media keys</extracomment>
-        <translation>Кнопки</translation>
+        <translation>Навигация</translation>
+    </message>
+    <message id="harbour-books-settings-page-turn_pages_by_tap">
+        <source>Turn pages by tapping the screen</source>
+        <extracomment>Text switch label</extracomment>
+        <translation>Листать страницы касанием экрана</translation>
+    </message>
+    <message id="harbour-books-settings-page-turn_pages_by_tap-description">
+        <source>Tapping near the left edge of the screen returns to the previous page, tapping near the right edge gets you to the next page.</source>
+        <extracomment>Text switch description</extracomment>
+        <translation>Касание ближе к левому краю экрана вызывает переход на предыдущую страницу, ближе к правому краю - на следующую.</translation>
     </message>
     <message id="harbour-books-settings-page-action-none">
         <source>No action</source>
