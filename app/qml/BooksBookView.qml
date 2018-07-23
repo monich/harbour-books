@@ -213,6 +213,16 @@ SilicaFlickable {
             }
             onPageClicked: {
                 root.pageClicked(index)
+                if (Settings.turnPageByTap && mouseY > bookModel.topMargin && mouseY < (pageView.height - bookModel.topMargin)) {
+                    if (mouseX < pageView.width/4) {
+                        bookView.prevPage()
+                        return
+                    }
+                    if (mouseX > pageView.width*3/4) {
+                        bookView.nextPage()
+                        return
+                    }
+                }
                 if (!Settings.pageDetailsFixed) {
                     Settings.pageDetails = (Settings.pageDetails + 1) % _visibilityStates.length
                 }
