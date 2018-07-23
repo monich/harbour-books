@@ -115,7 +115,6 @@ Page {
                 //% "Orientation"
                 label: qsTrId("harbour-books-settings-page-orientation_label")
                 value: currentItem ? currentItem.text : ""
-                property bool ready
                 menu: ContextMenu {
                     id: orientationMenu
                     readonly property int defaultIndex: 0
@@ -123,31 +122,22 @@ Page {
                         //: Combo box value for dynamic orientation
                         //% "Dynamic"
                         text: qsTrId("harbour-books-settings-page-orientation-dynamic")
-                        readonly property int value: 0
+                        onClicked: orientation.value = 0
                     }
                     MenuItem {
                         //: Combo box value for portrait orientation
                         //% "Portrait"
                         text: qsTrId("harbour-books-settings-page-orientation-portrait")
-                        readonly property int value: 1
+                        onClicked: orientation.value = 1
                     }
                     MenuItem {
                         //: Combo box value for landscape orientation
                         //% "Landscape"
                         text: qsTrId("harbour-books-settings-page-orientation-landscape")
-                        readonly property int value: 2
+                        onClicked: orientation.value = 2
                     }
                 }
-                onCurrentItemChanged: {
-                    if (ready && currentItem) {
-                        orientation.value = currentItem.value
-                    }
-                }
-                Component.onCompleted: {
-                    orientation.updateControls()
-                    ready = true
-                }
-
+                Component.onCompleted: orientation.updateControls()
                 ConfigurationValue {
                     id: orientation
                     key: rootPath + "orientation"
@@ -164,6 +154,91 @@ Page {
                         }
                         orientationComboBox.currentIndex = index
                     }
+                }
+            }
+
+            ComboBox {
+                id: layoutComboBox
+                //: Combo box label
+                //% "Page layout"
+                label: qsTrId("harbour-books-settings-page-page_layout")
+                value: currentItem ? currentItem.valueText : ""
+                menu: ContextMenu {
+                    id: layoutMenu
+                    readonly property int defaultIndex: 0
+                    BooksDetailMenuItem {
+                        //: Combo box value for dynamic page layout
+                        //% "Dynamic"
+                        valueText: qsTrId("harbour-books-settings-page-layout-dynamic")
+                        //: Combo box detail for dynamic page layout
+                        //% "(toggle on tap)"
+                        detailText: qsTrId("harbour-books-settings-page-layout-dynamic-detail")
+                        onClicked: pageDetailsFixed.value = false
+                    }
+                    BooksDetailMenuItem {
+                        //: Combo box value for clean page layout (just the content)
+                        //% "Clean"
+                        valueText: qsTrId("harbour-books-settings-page-layout-clean")
+                        //: Combo box detail for clean page layout (just the content)
+                        //% "(just the content)"
+                        detailText: qsTrId("harbour-books-settings-page-layout-clean-detail")
+                        onClicked: {
+                            pageDetailsFixed.value = true
+                            pageDetails.value = 0
+                        }
+                    }
+                    BooksDetailMenuItem {
+                        //: Combo box value for minimal page layout (title + page)
+                        //% "Minimal"
+                        valueText: qsTrId("harbour-books-settings-page-layout-minimal")
+                        //: Combo box detail for minimal page layout (title + page)
+                        //% "(title, page)"
+                        detailText: qsTrId("harbour-books-settings-page-layout-minimal-detail")
+                        onClicked: {
+                            pageDetailsFixed.value = true
+                            pageDetails.value = 1
+                        }
+                    }
+                    BooksDetailMenuItem {
+                        //: Combo box value for normal page layout (title + page + slider)
+                        //% "Regular"
+                        valueText: qsTrId("harbour-books-settings-page-layout-normal")
+                        //: Combo box detail for normal page layout (title + page + slider)
+                        //% "(title, page, slider)"
+                        detailText: qsTrId("harbour-books-settings-page-layout-normal-detail")
+                        onClicked: {
+                            pageDetailsFixed.value = true
+                            pageDetails.value = 2
+                        }
+                    }
+                    BooksDetailMenuItem {
+                        //: Combo box value for full page layout (title + page + slider)
+                        //% "Full"
+                        valueText: qsTrId("harbour-books-settings-page-layout-full")
+                        //: Combo box detail for full page layout (title + page + slider)
+                        //% "(everything)"
+                        detailText: qsTrId("harbour-books-settings-page-layout-full-detail")
+                        onClicked: {
+                            pageDetailsFixed.value = true
+                            pageDetails.value = 3
+                        }
+                    }
+                }
+                Component.onCompleted: updateSelectedItem()
+                function updateSelectedItem() {
+                    currentIndex = pageDetailsFixed.value ? (pageDetails.value + 1) : 0
+                }
+                ConfigurationValue {
+                    id: pageDetails
+                    key: rootPath + "pageDetails"
+                    defaultValue: 0
+                    onValueChanged: layoutComboBox.updateSelectedItem()
+                }
+                ConfigurationValue {
+                    id: pageDetailsFixed
+                    key: rootPath + "pageDetailsFixed"
+                    defaultValue: false
+                    onValueChanged: layoutComboBox.updateSelectedItem()
                 }
             }
 

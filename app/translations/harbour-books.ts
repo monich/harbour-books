@@ -164,6 +164,61 @@
         <extracomment>Combo box value for landscape orientation</extracomment>
         <translation>Landscape</translation>
     </message>
+    <message id="harbour-books-settings-page-page_layout">
+        <source>Page layout</source>
+        <extracomment>Combo box label</extracomment>
+        <translation>Page layout</translation>
+    </message>
+    <message id="harbour-books-settings-page-layout-dynamic">
+        <source>Dynamic</source>
+        <extracomment>Combo box value for dynamic page layout</extracomment>
+        <translation>Dynamic</translation>
+    </message>
+    <message id="harbour-books-settings-page-layout-dynamic-detail">
+        <source>(toggle on tap)</source>
+        <extracomment>Combo box detail for dynamic page layout</extracomment>
+        <translation>(toggle on tap)</translation>
+    </message>
+    <message id="harbour-books-settings-page-layout-clean">
+        <source>Clean</source>
+        <extracomment>Combo box value for clean page layout (just the content)</extracomment>
+        <translation>Clean</translation>
+    </message>
+    <message id="harbour-books-settings-page-layout-clean-detail">
+        <source>(just the content)</source>
+        <extracomment>Combo box detail for clean page layout (just the content)</extracomment>
+        <translation>(just the content)</translation>
+    </message>
+    <message id="harbour-books-settings-page-layout-minimal">
+        <source>Minimal</source>
+        <extracomment>Combo box value for minimal page layout (title + page)</extracomment>
+        <translation>Minimal</translation>
+    </message>
+    <message id="harbour-books-settings-page-layout-minimal-detail">
+        <source>(title, page)</source>
+        <extracomment>Combo box detail for minimal page layout (title + page)</extracomment>
+        <translation>(title, page)</translation>
+    </message>
+    <message id="harbour-books-settings-page-layout-normal">
+        <source>Regular</source>
+        <extracomment>Combo box value for normal page layout (title + page + slider)</extracomment>
+        <translation>Regular</translation>
+    </message>
+    <message id="harbour-books-settings-page-layout-normal-detail">
+        <source>(title, page, slider)</source>
+        <extracomment>Combo box detail for normal page layout (title + page + slider)</extracomment>
+        <translation>(title, page, slider)</translation>
+    </message>
+    <message id="harbour-books-settings-page-layout-full">
+        <source>Full</source>
+        <extracomment>Combo box value for full page layout (title + page + slider)</extracomment>
+        <translation>Full</translation>
+    </message>
+    <message id="harbour-books-settings-page-layout-full-detail">
+        <source>(everything)</source>
+        <extracomment>Combo box detail for full page layout (title + page + slider)</extracomment>
+        <translation>(everything)</translation>
+    </message>
     <message id="harbour-books-settings-page-keep_display_on">
         <source>Keep display on while reading</source>
         <extracomment>Text switch label</extracomment>
