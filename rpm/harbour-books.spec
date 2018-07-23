@@ -1,6 +1,6 @@
 Name:           harbour-books
 Summary:        E-book reader
-Version:        1.0.34
+Version:        1.0.35
 Release:        1
 License:        BSD
 Group:          Applications/File
@@ -57,6 +57,10 @@ desktop-file-install --delete-original \
 make -C test test
 
 %changelog
+* Tue Jun 24 2018 Slava Monich <slava.monich@jolla.com> 1.0.35
+- Added page layout option
+- Added "turn page by tap" option
+
 * Fri Jun 8 2018 Slava Monich <slava.monich@jolla.com> 1.0.34
 - Support for SD-card labels containing spaces
 
