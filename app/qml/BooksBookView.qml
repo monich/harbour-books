@@ -58,7 +58,7 @@ SilicaFlickable {
         { pager: true,  page: true,  title: true,  tools: true  }
     ]
 
-    interactive: !selecting &&
+    interactive: !selecting && !scrollAnimation.running &&
         (!linkMenu || !linkMenu.visible) &&
         (!imageView || !imageView.visible) &&
         (!footnoteView || !footnoteView.visible)
@@ -146,14 +146,12 @@ SilicaFlickable {
         property bool completed
 
         Component.onCompleted: {
-            //console.log(currentPage)
             bookViewWatcher.positionViewAtIndex(currentPage)
             completed = true
         }
 
         onCurrentPageChanged: {
-            //console.log(currentPage, completed, flicking)
-            if (completed && !flicking) {
+            if (completed && !flicking && !scrollAnimation.running) {
                 bookViewWatcher.positionViewAtIndex(currentPage)
             }
         }
@@ -169,13 +167,11 @@ SilicaFlickable {
             listView: bookView
             onCurrentIndexChanged: {
                 if (listView.completed && !listView.flicking && currentIndex >= 0) {
-                    //console.log(currentIndex, listView.completed, listView.flicking)
                     updateModel()
                 }
             }
             function updateModel() {
                 hideViews()
-                //console.trace()
                 stackModel.currentPage = currentIndex
                 if (!pager.pressed) {
                     pager.currentPage = currentIndex
