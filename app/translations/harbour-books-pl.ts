@@ -169,57 +169,57 @@
     <message id="harbour-books-settings-page-page_layout">
         <source>Page layout</source>
         <extracomment>Combo box label</extracomment>
-        <translation type="unfinished">Układ strony</translation>
+        <translation>Układ strony</translation>
     </message>
     <message id="harbour-books-settings-page-layout-dynamic">
         <source>Dynamic</source>
         <extracomment>Combo box value for dynamic page layout</extracomment>
-        <translation type="unfinished">Dynamiczne</translation>
+        <translation>Dynamiczne</translation>
     </message>
     <message id="harbour-books-settings-page-layout-dynamic-detail">
         <source>(toggle on tap)</source>
         <extracomment>Combo box detail for dynamic page layout</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>(włącz poprzez dotknięcie)</translation>
     </message>
     <message id="harbour-books-settings-page-layout-clean">
         <source>Clean</source>
         <extracomment>Combo box value for clean page layout (just the content)</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Wyczyść</translation>
     </message>
     <message id="harbour-books-settings-page-layout-clean-detail">
         <source>(just the content)</source>
         <extracomment>Combo box detail for clean page layout (just the content)</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>(to tylko treść)</translation>
     </message>
     <message id="harbour-books-settings-page-layout-minimal">
         <source>Minimal</source>
         <extracomment>Combo box value for minimal page layout (title + page)</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Minimalistyczny</translation>
     </message>
     <message id="harbour-books-settings-page-layout-minimal-detail">
         <source>(title, page)</source>
         <extracomment>Combo box detail for minimal page layout (title + page)</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>(tytuł, strona)</translation>
     </message>
     <message id="harbour-books-settings-page-layout-normal">
         <source>Regular</source>
         <extracomment>Combo box value for normal page layout (title + page + slider)</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Normalny</translation>
     </message>
     <message id="harbour-books-settings-page-layout-normal-detail">
         <source>(title, page, slider)</source>
         <extracomment>Combo box detail for normal page layout (title + page + slider)</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>(tytuł, strona, suwak</translation>
     </message>
     <message id="harbour-books-settings-page-layout-full">
         <source>Full</source>
         <extracomment>Combo box value for full page layout (title + page + slider)</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Pełny</translation>
     </message>
     <message id="harbour-books-settings-page-layout-full-detail">
         <source>(everything)</source>
         <extracomment>Combo box detail for full page layout (title + page + slider)</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>(wszystko)</translation>
     </message>
     <message id="harbour-books-settings-page-keep_display_on">
         <source>Keep display on while reading</source>
@@ -234,7 +234,7 @@
     <message id="harbour-books-settings-page-navigation-section_header">
         <source>Navigation</source>
         <extracomment>Section header for media keys</extracomment>
-        <translation type="unfinished">Nawigacja</translation>
+        <translation>Nawigacja</translation>
     </message>
     <message id="harbour-books-settings-page-volume_up-label">
         <source>Volume up</source>
@@ -264,12 +264,12 @@
     <message id="harbour-books-settings-page-turn_pages_by_tap">
         <source>Turn pages by tapping the screen</source>
         <extracomment>Text switch label</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Zmień stronę poprzez dotknięcie ekranu</translation>
     </message>
     <message id="harbour-books-settings-page-turn_pages_by_tap-description">
         <source>Tapping near the left edge of the screen returns to the previous page, tapping near the right edge gets you to the next page.</source>
         <extracomment>Text switch description</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Dotknięcie blisko lewej krawędzi ekranu powoduje powrót do wcześniejszej strony, dotknięcie prawej zmienia stronę na nastepną. </translation>
     </message>
     <message id="harbour-books-settings-page-removable-section_header">
         <source>Memory card</source>
