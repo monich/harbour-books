@@ -1,6 +1,6 @@
 Name:           harbour-books
 Summary:        E-book reader
-Version:        1.0.35
+Version:        1.0.36
 Release:        1
 License:        BSD
 Group:          Applications/File
@@ -57,6 +57,10 @@ desktop-file-install --delete-original \
 make -C test test
 
 %changelog
+* Tue Jun 24 2018 Slava Monich <slava.monich@jolla.com> 1.0.36
+- Updated Polish translations
+- Updated Swedish translations
+
 * Tue Jun 24 2018 Slava Monich <slava.monich@jolla.com> 1.0.35
 - Added page layout option
 - Added "turn page by tap" option
