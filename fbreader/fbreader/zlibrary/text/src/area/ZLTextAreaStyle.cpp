@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2004-2010 Geometer Plus <contact@geometerplus.com>
+ * Copyright (C) 2018 Slava Monich <slava.monich@jolla.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,14 +48,14 @@ void ZLTextArea::Style::setTextStyle(shared_ptr<ZLTextStyle> style, unsigned cha
 }
 
 void ZLTextArea::Style::applyControl(const ZLTextControlElement &control) {
-	if (control.isStart()) {
-		const ZLTextStyleDecoration *decoration = ZLTextStyleCollection::Instance().decoration(control.textKind());
-		if (decoration != 0) {
+	const ZLTextStyleDecoration *decoration = ZLTextStyleCollection::Instance().decoration(control.textKind());
+	if (decoration != 0) {
+		if (control.isStart()) {
 			setTextStyle(decoration->createDecoratedStyle(myTextStyle), myBidiLevel);
-		}
-	} else {
-		if (myTextStyle->isDecorated()) {
-			setTextStyle(((ZLTextDecoratedStyle&)*myTextStyle).base(), myBidiLevel);
+		} else {
+			if (myTextStyle->isDecorated()) {
+				setTextStyle(((ZLTextDecoratedStyle&)*myTextStyle).base(), myBidiLevel);
+			}
 		}
 	}
 }
