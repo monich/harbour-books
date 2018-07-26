@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2004-2010 Geometer Plus <contact@geometerplus.com>
- * Copyright (C) 2015 Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2015-2018 Slava Monich <slava.monich@jolla.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -220,7 +220,7 @@ short ZLTextForcedStyle::lineEndIndent(const ZLTextStyleEntry::Metrics &metrics,
 		ZLTextStyleEntry::LENGTH_RIGHT_INDENT;
 
 	if (!myEntry.lengthSupported(lengthType)) {
-		return base()->lineStartIndent(metrics, rtl);
+		return base()->lineEndIndent(metrics, rtl);
 	}
 
 	const short baseLen = base()->lineEndIndent(metrics, rtl);
