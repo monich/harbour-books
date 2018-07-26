@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2004-2010 Geometer Plus <contact@geometerplus.com>
- * Copyright (C) 2015-2017 Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2015-2018 Slava Monich <slava.monich@jolla.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -185,6 +185,11 @@ void StyleSheetParser::processChar4(char c) {
 			} else {
 				myStateStack.push(SKIP_BLOCK_CURLY);
 			}
+			myWord.resize(0);
+			break;
+		case ';':
+			// Probably AT-rule, e.g. @charset "utf-8";
+			mySelectors.resize(0);
 			myWord.resize(0);
 			break;
 		default:
