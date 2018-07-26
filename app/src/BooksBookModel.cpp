@@ -65,7 +65,7 @@ class BooksBookModel::PagingTask : public HarbourTask
     Q_OBJECT
 
 public:
-    static const quint32 MarksFileVersion = 1;
+    static const quint32 MarksFileVersion = 2;
     static const char MarksFileMagic[];
     struct MarksHeader {
         char magic[4];
