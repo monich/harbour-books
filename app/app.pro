@@ -32,6 +32,7 @@ HARBOUR_LIB_DIR = $$_PRO_FILE_PWD_/../harbour-lib
 
 HARBOUR_INCLUDE_DIR = $$HARBOUR_LIB_DIR/include
 HARBOUR_SRC_DIR = $$HARBOUR_LIB_DIR/src
+HARBOUR_LIB_QML = $$HARBOUR_LIB_DIR/qml
 
 # Libraries
 FBREADER_LIB = $$OUT_PWD/../fbreader/libfbreader.a
@@ -190,6 +191,16 @@ SOURCES += \
   $$HARBOUR_SRC_DIR/HarbourMce.cpp \
   $$HARBOUR_SRC_DIR/HarbourPluginLoader.cpp \
   $$HARBOUR_SRC_DIR/HarbourTask.cpp
+
+HARBOUR_QML_COMPONENTS = \
+    $$HARBOUR_LIB_QML/HarbourFitLabel.qml \
+    $$HARBOUR_LIB_QML/HarbourHorizontalSwipeHint.qml
+
+OTHER_FILES += $${HARBOUR_QML_COMPONENTS}
+
+qml_components.files = $${HARBOUR_QML_COMPONENTS}
+qml_components.path = /usr/share/$${TARGET}/qml/harbour
+INSTALLS += qml_components
 
 # Icons
 ICON_SIZES = 86 108 128 256
