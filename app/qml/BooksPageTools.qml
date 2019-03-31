@@ -1,6 +1,6 @@
 /*
-  Copyright (C) 2015-2017 Jolla Ltd.
-  Contact: Slava Monich <slava.monich@jolla.com>
+  Copyright (C) 2015-2019 Jolla Ltd.
+  Copyright (C) 2015-2019 Slava Monich <slava.monich@jolla.com>
 
   You may use this file under the terms of BSD license as follows:
 
@@ -8,14 +8,15 @@
   modification, are permitted provided that the following conditions
   are met:
 
-    * Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above copyright
-      notice, this list of conditions and the following disclaimer in the
-      documentation and/or other materials provided with the distribution.
-    * Neither the name of Jolla Ltd nor the names of its contributors may
-      be used to endorse or promote products derived from this software
-      without specific prior written permission.
+    1. Redistributions of source code must retain the above copyright
+       notice, this list of conditions and the following disclaimer.
+    2. Redistributions in binary form must reproduce the above copyright
+       notice, this list of conditions and the following disclaimer
+       in the documentation and/or other materials provided with the
+       distribution.
+    3. Neither the names of the copyright holders nor the names of its
+       contributors may be used to endorse or promote products derived
+       from this software without specific prior written permission.
 
   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
   AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -51,7 +52,7 @@ Item {
     MouseArea {
         id: dayNightModeSwitch
         height: parent.height
-        width: leftMargin + dayModeImage.width + spacing
+        width: leftMargin + Theme.iconSizeSmall + spacing
         anchors {
             left: parent.left
             verticalCenter: parent.verticalCenter
@@ -66,7 +67,7 @@ Item {
                 leftMargin: pageTools.leftMargin
                 verticalCenter: parent.verticalCenter
             }
-            sourceSize.height: Theme.iconSizeMedium
+            sourceSize.height: Theme.iconSizeSmall
             opacity: Settings.invertColors ? 0.5 : 0
             visible: opacity > 0
             Behavior on opacity { FadeAnimation {} }
@@ -74,8 +75,8 @@ Item {
 
         Image {
             source: "images/night-mode.svg"
-            anchors.fill: dayModeImage
-            sourceSize.height: height
+            anchors.centerIn: dayModeImage
+            sourceSize.height: Theme.iconSizeSmall
             opacity: Settings.invertColors ? 0 : 0.25
             visible: opacity > 0
             Behavior on opacity { FadeAnimation {} }
