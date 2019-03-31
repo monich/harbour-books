@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2009-2010 Geometer Plus <contact@geometerplus.com>
+ * Copyright (C) 2019 Slava Monich <slava.monich@jolla.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -238,14 +239,6 @@ void Book::setTitle(const std::string &title) {
 }
 
 void Book::setLanguage(const std::string &language) {
-	if (!language.empty()) {
-		const std::vector<std::string> &codes = ZLLanguageList::languageCodes();
-		std::vector<std::string>::const_iterator it =
-			std::find(codes.begin(), codes.end(), language);
-		if (it == codes.end()) {
-			return;
-		}
-	}
 	myLanguage = language;
 }
 
