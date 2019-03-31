@@ -30,22 +30,22 @@ FRIBIDI_DIR = $$_PRO_FILE_PWD_/../fribidi
 LINEBREAK_DIR = $$_PRO_FILE_PWD_/../linebreak
 HARBOUR_LIB_DIR = $$_PRO_FILE_PWD_/../harbour-lib
 
+HARBOUR_INCLUDE_DIR = $$HARBOUR_LIB_DIR/include
+HARBOUR_SRC_DIR = $$HARBOUR_LIB_DIR/src
+
 # Libraries
 FBREADER_LIB = $$OUT_PWD/../fbreader/libfbreader.a
 FRIBIDI_LIB = $$OUT_PWD/../fribidi/libfribidi.a
 LINEBREAK_LIB = $$OUT_PWD/../linebreak/liblinebreak.a
-HARBOUR_LIB = $$OUT_PWD/../harbour-lib/libharbour-lib.a
 
 PRE_TARGETDEPS += \
   $$FBREADER_LIB \
   $$FRIBIDI_LIB \
-  $$LINEBREAK_LIB \
-  $$HARBOUR_LIB
+  $$LINEBREAK_LIB
 LIBS += \
   $$FBREADER_LIB \
   $$FRIBIDI_LIB \
   $$LINEBREAK_LIB \
-  $$HARBOUR_LIB \
   -lbz2 -lz -ldl
 
 OTHER_FILES += \
@@ -86,7 +86,7 @@ INSTALLS += formats
 
 INCLUDEPATH += \
   src \
-  $$HARBOUR_LIB_DIR/include \
+  $$HARBOUR_INCLUDE_DIR \
   $$FBREADER_DIR/fbreader/fbreader/src \
   $$FBREADER_DIR/fbreader/zlibrary/text/include \
   $$FBREADER_DIR/fbreader/zlibrary/core/include \
@@ -172,6 +172,24 @@ HEADERS += \
   src/BooksTextStyle.h \
   src/BooksTypes.h \
   src/BooksUtil.h
+
+# harbour-lib
+
+HEADERS += \
+  $$HARBOUR_INCLUDE_DIR/HarbourDisplayBlanking.h \
+  $$HARBOUR_INCLUDE_DIR/HarbourJson.h \
+  $$HARBOUR_INCLUDE_DIR/HarbourPluginLoader.h \
+  $$HARBOUR_INCLUDE_DIR/HarbourTask.h
+
+HEADERS += \
+  $$HARBOUR_SRC_DIR/HarbourMce.h
+
+SOURCES += \
+  $$HARBOUR_SRC_DIR/HarbourDisplayBlanking.cpp \
+  $$HARBOUR_SRC_DIR/HarbourJson.cpp \
+  $$HARBOUR_SRC_DIR/HarbourMce.cpp \
+  $$HARBOUR_SRC_DIR/HarbourPluginLoader.cpp \
+  $$HARBOUR_SRC_DIR/HarbourTask.cpp
 
 # Icons
 ICON_SIZES = 86 108 128 256
