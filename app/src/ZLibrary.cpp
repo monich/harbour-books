@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2015-2018 Jolla Ltd.
- * Contact: Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2015-2019 Jolla Ltd.
+ * Copyright (C) 2015-2019 Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
  *
@@ -8,15 +8,15 @@
  * modification, are permitted provided that the following conditions
  * are met:
  *
- *   * Redistributions of source code must retain the above copyright
- *     notice, this list of conditions and the following disclaimer.
- *   * Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in
- *     the documentation and/or other materials provided with the
- *     distribution.
- *   * Neither the name of Jolla Ltd nor the names of its contributors
- *     may be used to endorse or promote products derived from this
- *     software without specific prior written permission.
+ *   1. Redistributions of source code must retain the above copyright
+ *      notice, this list of conditions and the following disclaimer.
+ *   2. Redistributions in binary form must reproduce the above copyright
+ *      notice, this list of conditions and the following disclaimer
+ *      in the documentation and/or other materials provided with the
+ *      distribution.
+ *   3. Neither the names of the copyright holders nor the names of its
+ *      contributors may be used to endorse or promote products derived
+ *      from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -63,6 +63,7 @@
 #include <QQmlContext>
 #include <QScreen>
 
+#include <unistd.h>
 #include <execinfo.h>
 #include <dlfcn.h>
 
@@ -188,7 +189,44 @@ bool ZLibrary::init(int& aArgc, char** &aArgv)
     // Doing it the other way around will result in two instances of
     // BooksStorageManager being created :)
     QSharedPointer<BooksSettings> settings = BooksSettings::sharedInstance();
-    BooksStorageManager::instance();
+    BooksStorageManager* storageManager = BooksStorageManager::instance();
+
+    // Copy sample book (no more than once)
+    if (!settings->sampleBookCopied()) {
+        BooksStorage internal = storageManager->internalStorage();
+        if (internal.isValid()) {
+            QDir booksDir = internal.booksDir();
+            if (!booksDir.exists()) {
+                HDEBUG("Creating" << qPrintable(booksDir.path()));
+                if (!booksDir.mkpath(".")) {
+                    HWARN("Failed to create" << qPrintable(booksDir.path()));
+                }
+            }
+            // 2 files (. and ..) are always there
+            if (booksDir.count() > 2) {
+                // Don't copy sample book, something is already there
+                HDEBUG("Sample is not needed (" << booksDir.count() << " files)");
+                settings->setSampleBookCopied();
+            } else {
+                HDEBUG(qPrintable(booksDir.path()) << "is empty");
+                const QString sampleBook("welcome.fb2.zip");
+                const QString src(QString((ourZLibraryDirectory + "/samples/").c_str()) + sampleBook);
+                const QString dest(booksDir.path() + "/" + sampleBook);
+                QByteArray oldp(src.toLocal8Bit());
+                QByteArray newp(dest.toLocal8Bit());
+                int err = link(oldp.data(), newp.data());
+                if (!err) {
+                    HDEBUG("Linked" << newp << "->" << oldp);
+                    settings->setSampleBookCopied();
+                } else if (QFile::copy(src, dest)) {
+                    HDEBUG("Copied" << oldp << "to" << newp);
+                    settings->setSampleBookCopied();
+                } else {
+                    HWARN("Failed to copy" << oldp << "to" << newp);
+                }
+            }
+        }
+    }
     return true;
 }
 

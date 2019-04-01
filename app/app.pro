@@ -85,6 +85,10 @@ formats.files = data/formats/*
 formats.path = $$TARGET_DEFAULT_DATA_DIR/formats
 INSTALLS += formats
 
+samples.files = data/samples/*
+samples.path = $$TARGET_DEFAULT_DATA_DIR/samples
+INSTALLS += samples
+
 INCLUDEPATH += \
   src \
   $$HARBOUR_INCLUDE_DIR \
