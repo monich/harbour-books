@@ -1,6 +1,6 @@
 Name:           harbour-books
 Summary:        E-book reader
-Version:        1.0.37
+Version:        1.0.38
 Release:        1
 License:        BSD
 Group:          Applications/File
@@ -57,6 +57,11 @@ desktop-file-install --delete-original \
 make -C test test
 
 %changelog
+* Sun Mar 31 2019 Slava Monich <slava.monich@jolla.com> 1.0.38
+- Fixed a problem with encoding in some format/language combinations
+- Create sample book on the first time run
+- Minor UI tweaks
+
 * Fri Jul 27 2018 Slava Monich <slava.monich@jolla.com> 1.0.37
 - Fixed a few CSS issues affecting layout
 
