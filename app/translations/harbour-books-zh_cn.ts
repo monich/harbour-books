@@ -91,7 +91,7 @@
         <extracomment>Dialog header button</extracomment>
         <translation>
             <numerusform>Import %0 book</numerusform>
-            <numerusform>输入 %0 书籍</numerusform>
+            <numerusform>导入 %0 书籍</numerusform>
         </translation>
     </message>
     <message id="harbour-books-import-page-select_books">
