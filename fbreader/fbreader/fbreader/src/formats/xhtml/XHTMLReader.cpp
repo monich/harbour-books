@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2004-2010 Geometer Plus <contact@geometerplus.com>
- * Copyright (C) 2016-2018 Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2016-2019 Slava Monich <slava.monich@jolla.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -394,7 +394,7 @@ XHTMLTagFootnoteAction::XHTMLTagFootnoteAction() {
 void XHTMLTagFootnoteAction::doAtStart(XHTMLReader &reader, const char **xmlattributes) {
 	const char *id = reader.attributeValue(xmlattributes, "id");
 	if (id) {
-		bookReader(reader).setFootnoteTextModel(id);
+		bookReader(reader).setFootnoteTextModel(id, reader.myReferenceName + "#" + id);
 	}
 }
 

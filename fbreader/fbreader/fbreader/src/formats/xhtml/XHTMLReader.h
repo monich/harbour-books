@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2004-2010 Geometer Plus <contact@geometerplus.com>
- * Copyright (C) 2016-2018 Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2016-2019 Slava Monich <slava.monich@jolla.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,9 +41,9 @@ class XHTMLTagAction {
 
 public:
 	virtual ~XHTMLTagAction();
-	
-    virtual void doAtStart(XHTMLReader &reader, const char **xmlattributes);
-    virtual void doAtEnd(XHTMLReader &reader);
+
+	virtual void doAtStart(XHTMLReader &reader, const char **xmlattributes);
+	virtual void doAtEnd(XHTMLReader &reader);
 
 protected:
 	static BookReader &bookReader(XHTMLReader &reader);	
@@ -87,28 +87,28 @@ private:
 
 	bool processNamespaces() const;
 
-    void haveContent();
-    void beginParagraph();
+	void haveContent();
+	void beginParagraph();
 	void endParagraph();
-    void applyStyles(ParseContext &context);
-    void addStyleParagraph(const ZLTextStyleEntry &style);
-    void addBottomMargin(short size, ZLTextStyleEntry::SizeUnit unit);
-    bool elementHasTopMargin(const ParseContext &context) const;
-    bool elementHasBottomMargin(const ParseContext &context) const;
-    void applyBottomMargins();
-    void addPageBreak();
+	void applyStyles(ParseContext &context);
+	void addStyleParagraph(const ZLTextStyleEntry &style);
+	void addBottomMargin(short size, ZLTextStyleEntry::SizeUnit unit);
+	bool elementHasTopMargin(const ParseContext &context) const;
+	bool elementHasBottomMargin(const ParseContext &context) const;
+	void applyBottomMargins();
+	void addPageBreak();
 
 private:
 	BookReader &myModelReader;
 	std::string myPathPrefix;
 	std::string myReferenceName;
 	std::string myReferenceDirName;
-    int myPreformatted;
+	int myPreformatted;
 	StyleSheetTable myStyleSheetTable;
-    StyleSheetTable::ElementList myElementStack;
-    StyleSheetTable::StyleList myStyleStack;
-    std::vector<ParseContext> myParseStack;
-    std::vector<ZLTextStyleEntry> myBottomMargins;
+	StyleSheetTable::ElementList myElementStack;
+	StyleSheetTable::StyleList myStyleStack;
+	std::vector<ParseContext> myParseStack;
+	std::vector<ZLTextStyleEntry> myBottomMargins;
 	StyleSheetSingleStyleParser myStyleParser;
 	shared_ptr<StyleSheetTableParser> myTableParser;
 	enum {
@@ -118,14 +118,15 @@ private:
 	} myReadState;
 
 	friend class XHTMLTagAction;
-    friend class XHTMLTagStyleAction;
-    friend class XHTMLTagLinkAction;
-    friend class XHTMLTagHyperlinkAction;
-    friend class XHTMLTagPreAction;
-    friend class XHTMLTagControlAction;
-    friend class XHTMLTagParagraphWithControlAction;
-    friend class XHTMLTagBodyAction;
-    friend class XHTMLTagImageAction;
+	friend class XHTMLTagStyleAction;
+	friend class XHTMLTagLinkAction;
+	friend class XHTMLTagHyperlinkAction;
+	friend class XHTMLTagPreAction;
+	friend class XHTMLTagControlAction;
+	friend class XHTMLTagParagraphWithControlAction;
+	friend class XHTMLTagBodyAction;
+	friend class XHTMLTagImageAction;
+	friend class XHTMLTagFootnoteAction;
 };
 
 #endif /* __XHTMLREADER_H__ */
