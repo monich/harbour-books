@@ -21,7 +21,7 @@
     </message>
     <message id="harbour-books-book-view-applying_larger_fonts">
         <source>Applying larger fonts...</source>
-        <translation正在应用更大的字体</translation>
+        <translation>正在应用更大的字体</translation>
     </message>
     <message id="harbour-books-book-view-applying_smaller_fonts">
         <source>Applying smaller fonts...</source>
@@ -63,7 +63,6 @@
         <source>%0 book(s)</source>
         <extracomment>Number of books in the storage header</extracomment>
         <translation>
-            <numerusform>%0 book</numerusform>
             <numerusform>%0 书籍</numerusform>
         </translation>
     </message>
@@ -90,7 +89,6 @@
         <source>Import %0 book(s)</source>
         <extracomment>Dialog header button</extracomment>
         <translation>
-            <numerusform>Import %0 book</numerusform>
             <numerusform>导入 %0 书籍</numerusform>
         </translation>
     </message>
@@ -282,7 +280,7 @@
     <message id="harbour-books-settings-page-removable_root-description">
         <source>Leave the folder name empty to scan the entire memory card for books.</source>
         <extracomment>Settings field description</extracomment>
-        <translation>不填写文件夹名称以扫描SD卡中的全部书籍<translation>
+        <translation>不填写文件夹名称以扫描SD卡中的全部书籍</translation>
     </message>
 </context>
 </TS>
