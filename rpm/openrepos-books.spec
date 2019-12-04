@@ -1,6 +1,6 @@
 Name:           openrepos-books
 Summary:        E-book reader
-Version:        1.0.39
+Version:        1.0.40
 Release:        1
 License:        BSD
 Vendor:         slava
@@ -60,6 +60,9 @@ desktop-file-install --delete-original \
 make -C test test
 
 %changelog
+* Wed Dec 4 2019 Slava Monich <slava.monich@jolla.com> 1.0.40
+- Chinese translation
+
 * Wed Dec 4 2019 Slava Monich <slava.monich@jolla.com> 1.0.39
 - Fixed a permacrash
 
