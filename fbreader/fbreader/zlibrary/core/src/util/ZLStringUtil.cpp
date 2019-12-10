@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2004-2010 Geometer Plus <contact@geometerplus.com>
- * Copyright (C) 2015 Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2015-2019 Slava Monich <slava.monich@jolla.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -129,7 +129,7 @@ std::vector<std::string> ZLStringUtil::splitString(const char *str, const char* 
 
 void ZLStringUtil::replaceAll(std::string &str, const std::string &find, const std::string &replaceWith) {
 	size_t pos = 0;
-	while ((pos == str.find(find, pos)) != std::string::npos) {
+	while ((pos = str.find(find, pos)) != std::string::npos) {
 		str.replace(pos, find.length(), replaceWith);
 		pos += replaceWith.length();
 	}
