@@ -9,7 +9,7 @@
     </message>
     <message id="harbour-books-book-view-back">
         <source>Back to library</source>
-        <translation>返回图书馆</translation>
+        <translation>返回书库</translation>
     </message>
     <message id="harbour-books-book-view-loading">
         <source>Loading...</source>
@@ -63,7 +63,7 @@
         <source>%0 book(s)</source>
         <extracomment>Number of books in the storage header</extracomment>
         <translation>
-            <numerusform>%0 书籍</numerusform>
+            <numerusform>%0 本书籍</numerusform>
         </translation>
     </message>
     <message id="harbour-books-storage-menu-settings">
@@ -89,7 +89,7 @@
         <source>Import %0 book(s)</source>
         <extracomment>Dialog header button</extracomment>
         <translation>
-            <numerusform>导入 %0 书籍</numerusform>
+            <numerusform>导入 %0 本书籍</numerusform>
         </translation>
     </message>
     <message id="harbour-books-import-page-select_books">
