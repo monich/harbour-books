@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2004-2010 Geometer Plus <contact@geometerplus.com>
+ * Copyright (C) 2020 Slava Monich <slava.monich@jolla.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -175,6 +176,7 @@ bool PmlReader::parseDocument(ZLInputStream &stream) {
 			switch (parserState) {
 				case READ_NORMAL_DATA:
 					processCharData(dataStart, end - dataStart);
+					break;
 				case READ_TAG:
 					tagName.append(dataStart, end - dataStart);
 					break;

@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2004-2010 Geometer Plus <contact@geometerplus.com>
+ * Copyright (C) 2020 Slava Monich <slava.monich@jolla.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -97,6 +98,7 @@ void NCXReader::endElementHandler(const char *fullTag) {
 				myPointStack.pop_back();
 				myReadState = myPointStack.empty() ? READ_MAP : READ_POINT;
 			}
+			break;
 		case READ_LABEL:
 			if (TAG_NAVLABEL == tag) {
 				myReadState = READ_POINT;
