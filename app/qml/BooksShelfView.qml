@@ -1,6 +1,6 @@
 /*
-  Copyright (C) 2015-2019 Jolla Ltd.
-  Copyright (C) 2015-2019 Slava Monich <slava.monich@jolla.com>
+  Copyright (C) 2015-2020 Jolla Ltd.
+  Copyright (C) 2015-2020 Slava Monich <slava.monich@jolla.com>
 
   You may use this file under the terms of BSD license as follows:
 
@@ -313,7 +313,7 @@ Item {
     Loader {
         id: leftSwipeHintLoader
         anchors.fill: parent
-        active: globalHints.storageLeftSwipe < MaximumHintCount || running
+        active: BooksHints.storageLeftSwipe < MaximumHintCount || running
         property bool running
         sourceComponent: Component {
             HarbourHorizontalSwipeHint {
@@ -321,12 +321,12 @@ Item {
                     storageView.visible &&
                     shelfIndex == storageListWatcher.currentIndex &&
                     (shelfIndex+1) < storageModel.count &&
-                    globalHints.storageLeftSwipe < MaximumHintCount
+                    BooksHints.storageLeftSwipe < MaximumHintCount
 
                 //% "Swipe left to see what's on the SD-card"
                 text: qsTrId("harbour-books-storage-view-swipe_left_hint")
                 swipeRight: false
-                onHintShown: globalHints.storageLeftSwipe++
+                onHintShown: BooksHints.storageLeftSwipe++
                 onHintRunningChanged: leftSwipeHintLoader.running = hintRunning
             }
         }

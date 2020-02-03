@@ -52,7 +52,6 @@ ApplicationWindow {
 
     property variant currentShelf: mainPage.currentShelf
 
-    BooksHints { id: globalHints }
     DisplayBlanking {
         pauseRequested: Qt.application.active &&
             Settings.currentBook &&

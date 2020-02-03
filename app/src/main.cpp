@@ -83,9 +83,9 @@ Q_DECL_EXPORT int main(int argc, char **argv)
     BOOKS_QML_REGISTER(BooksPageWidget, "PageWidget");
     BOOKS_QML_REGISTER(BooksListWatcher, "ListWatcher");
     BOOKS_QML_REGISTER(BooksCoverWidget, "BookCover");
-    BOOKS_QML_REGISTER(BooksHints, "BooksHints");
     BOOKS_QML_REGISTER(BooksSettings, "BooksSettings");
     BOOKS_QML_REGISTER(HarbourDisplayBlanking, "DisplayBlanking");
+    BOOKS_QML_REGISTER_SINGLETON(BooksHints, "BooksHints");
     BOOKS_QML_REGISTER_SINGLETON(BooksFeedback, "BooksFeedback");
 
     QLocale locale;
