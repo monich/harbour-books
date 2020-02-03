@@ -182,6 +182,7 @@ HEADERS += \
 
 HEADERS += \
   $$HARBOUR_INCLUDE_DIR/HarbourDisplayBlanking.h \
+  $$HARBOUR_INCLUDE_DIR/HarbourImageProvider.h \
   $$HARBOUR_INCLUDE_DIR/HarbourJson.h \
   $$HARBOUR_INCLUDE_DIR/HarbourPluginLoader.h \
   $$HARBOUR_INCLUDE_DIR/HarbourTask.h
@@ -191,6 +192,7 @@ HEADERS += \
 
 SOURCES += \
   $$HARBOUR_SRC_DIR/HarbourDisplayBlanking.cpp \
+  $$HARBOUR_SRC_DIR/HarbourImageProvider.cpp \
   $$HARBOUR_SRC_DIR/HarbourJson.cpp \
   $$HARBOUR_SRC_DIR/HarbourMce.cpp \
   $$HARBOUR_SRC_DIR/HarbourPluginLoader.cpp \
@@ -268,7 +270,6 @@ defineTest(addTrFile) {
     QMAKE_EXTRA_TARGETS += $${lrelease_target} $${lupdate_target}
     PRE_TARGETDEPS += $${out}.qm
     qm.files += $${out}.qm
-
     export($${lupdate_target}.commands)
     export($${lrelease_target}.target)
     export($${lrelease_target}.depends)

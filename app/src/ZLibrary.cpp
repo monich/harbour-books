@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2015-2019 Jolla Ltd.
- * Copyright (C) 2015-2019 Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2015-2020 Jolla Ltd.
+ * Copyright (C) 2015-2020 Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
  *
@@ -41,6 +41,7 @@
 #include "BooksSettings.h"
 
 #include "HarbourDebug.h"
+#include "HarbourImageProvider.h"
 
 #include "ZLibrary.h"
 #include "ZLApplication.h"
@@ -247,6 +248,7 @@ void ZLibrary::run(ZLApplication* aApp)
         BOOKS_QML_PLUGIN_V1, BOOKS_QML_PLUGIN_V2);
     BooksMediaPlugin::registerTypes(engine, BOOKS_QML_PLUGIN,
         BOOKS_QML_PLUGIN_V1, BOOKS_QML_PLUGIN_V2);
+    engine->addImageProvider("harbour", new HarbourImageProvider);
     engine->addImageProvider(BooksImageProvider::PROVIDER_ID,
         new BooksImageProvider(root));
 

@@ -73,7 +73,7 @@ Column {
         width: parent.width
         height: Math.max(storageLabel.height, bookCount.height)
 
-        BooksSDCardIcon {
+        Image {
             id: icon
             anchors {
                 left: parent.left
@@ -82,6 +82,9 @@ Column {
             }
             visible: removableStorage
             height: storageLabel.height*3/4
+            sourceSize.height: height
+            fillMode: Image.PreserveAspectFit
+            source: "image://harbour/" + Qt.resolvedUrl("images/sdcard.svg") + "?" + storageLabel.color
         }
 
         Label {
