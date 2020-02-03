@@ -87,6 +87,8 @@ SilicaFlickable {
         }
     }
 
+    onBookChanged: if (!book) pager.currentPage = 0
+
     Component {
         id: linkMenuComponent
         BooksLinkMenu { }
@@ -259,7 +261,7 @@ SilicaFlickable {
 
         property int jumpingTo: -1
         function jumpTo(page) {
-            if (page >=0 && page !== bookViewWatcher.currentIndex) {
+            if (book && page >=0 && page !== bookViewWatcher.currentIndex) {
                 jumpingTo = page
                 bookViewWatcher.positionViewAtIndex(page)
                 pager.currentPage = page
