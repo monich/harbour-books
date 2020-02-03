@@ -1,6 +1,6 @@
 /*
-  Copyright (C) 2015-2019 Jolla Ltd.
-  Copyright (C) 2015-2019 Slava Monich <slava.monich@jolla.com>
+  Copyright (C) 2015-2020 Jolla Ltd.
+  Copyright (C) 2015-2020 Slava Monich <slava.monich@jolla.com>
 
   You may use this file under the terms of BSD license as follows:
 
@@ -53,7 +53,6 @@ ApplicationWindow {
     property variant currentShelf: mainPage.currentShelf
 
     BooksHints { id: globalHints }
-    BooksFeedback { id: globalFeedback }
     DisplayBlanking {
         pauseRequested: Qt.application.active &&
             Settings.currentBook &&

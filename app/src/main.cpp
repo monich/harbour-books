@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2015-2019 Jolla Ltd.
- * Copyright (C) 2015-2019 Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2015-2020 Jolla Ltd.
+ * Copyright (C) 2015-2020 Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
  *
@@ -83,10 +83,10 @@ Q_DECL_EXPORT int main(int argc, char **argv)
     BOOKS_QML_REGISTER(BooksPageWidget, "PageWidget");
     BOOKS_QML_REGISTER(BooksListWatcher, "ListWatcher");
     BOOKS_QML_REGISTER(BooksCoverWidget, "BookCover");
-    BOOKS_QML_REGISTER(BooksFeedback, "BooksFeedback");
     BOOKS_QML_REGISTER(BooksHints, "BooksHints");
     BOOKS_QML_REGISTER(BooksSettings, "BooksSettings");
     BOOKS_QML_REGISTER(HarbourDisplayBlanking, "DisplayBlanking");
+    BOOKS_QML_REGISTER_SINGLETON(BooksFeedback, "BooksFeedback");
 
     QLocale locale;
     QTranslator* translator = new QTranslator(app);

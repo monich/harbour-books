@@ -210,8 +210,9 @@ SilicaFlickable {
             }
             onSelectingChanged: {
                 if (currentPage) {
-                    globalFeedback.start("push_gesture")
-                    if (!pageView.selecting) {
+                    if (pageView.selecting) {
+                        BooksFeedback.start("push_gesture")
+                    } else {
                         notification.publish()
                     }
                     root.selecting = pageView.selecting
