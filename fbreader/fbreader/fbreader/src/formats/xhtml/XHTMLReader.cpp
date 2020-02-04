@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2004-2010 Geometer Plus <contact@geometerplus.com>
- * Copyright (C) 2016-2019 Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2016-2020 Slava Monich <slava.monich@jolla.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@
 #include <ZLStringUtil.h>
 #include <ZLXMLNamespace.h>
 #include <ZLTextStyleCollection.h>
+#include <ZLBase64EncodedImage.h>
 
 #include "XHTMLReader.h"
 #include "../util/EntityFilesCollector.h"
@@ -293,19 +294,45 @@ void XHTMLTagImageAction::doAtStart(XHTMLReader &reader, const char **xmlattribu
 		return;
 	}
 
-	const std::string fullfileName = pathPrefix(reader) + MiscUtil::decodeHtmlURL(fileName);
-	if (!ZLFile(fullfileName).exists()) {
-		return;
+	std::string imageref;
+	shared_ptr<const ZLImage> image;
+
+	static const char dataSchema[] = { 'd', 'a', 't', 'a', ':' };
+	if (!strncmp(fileName, dataSchema, sizeof(dataSchema))) {
+		// data:[<media type>][;base64],<data>
+		const char* mediaTypeStart = fileName + sizeof(dataSchema);
+		const char* comma = strchr(mediaTypeStart, ',');
+		if (comma > mediaTypeStart) {
+			std::string mediaType(mediaTypeStart, comma - mediaTypeStart);
+			// Require ";base64" and id
+			static const std::string base64(";base64");
+			const char *id = reader.attributeValue(xmlattributes, "id");
+			if (id && ZLStringUtil::stringEndsWith(mediaType, base64)) {
+				std::string data(comma + 1);
+				mediaType.resize(mediaType.length() - base64.length());
+				ZLBase64EncodedImage* base64img = new ZLBase64EncodedImage(mediaType);
+				base64img->addData(data, 0, data.length());
+				image = base64img;
+				imageref = id;
+			}
+		}
+	} else {
+		const std::string fullfileName = pathPrefix(reader) + MiscUtil::decodeHtmlURL(fileName);
+		if (ZLFile(fullfileName).exists()) {
+			if ((strlen(fileName) > 2) && strncmp(fileName, "./", 2) == 0) {
+				fileName +=2;
+			}
+			image = new ZLFileImage(ZLFile(fullfileName), 0);
+			imageref = fullfileName;
+		}
 	}
 
-	if ((strlen(fileName) > 2) && strncmp(fileName, "./", 2) == 0) {
-		fileName +=2;
+	if (!image.isNull()) {
+		reader.myParseStack.back().kind = IMAGE;
+		reader.haveContent();
+		reader.myModelReader.addImageReference(imageref);
+		reader.myModelReader.addImage(imageref, image);
 	}
-
-	reader.myParseStack.back().kind = IMAGE;
-	reader.haveContent();
-	reader.myModelReader.addImageReference(fullfileName);
-	reader.myModelReader.addImage(fullfileName, new ZLFileImage(ZLFile(fullfileName), 0));
 }
 
 XHTMLTagSvgAction::XHTMLTagSvgAction(XHTMLSvgImageAttributeNamePredicate &predicate) : myPredicate(predicate) {
