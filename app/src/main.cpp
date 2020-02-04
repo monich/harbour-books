@@ -51,6 +51,7 @@
 
 #include "HarbourDisplayBlanking.h"
 #include "HarbourDebug.h"
+#include "HarbourTheme.h"
 
 #include "ZLibrary.h"
 
@@ -85,6 +86,7 @@ Q_DECL_EXPORT int main(int argc, char **argv)
     BOOKS_QML_REGISTER(BooksCoverWidget, "BookCover");
     BOOKS_QML_REGISTER(BooksSettings, "BooksSettings");
     BOOKS_QML_REGISTER(HarbourDisplayBlanking, "DisplayBlanking");
+    BOOKS_QML_REGISTER_SINGLETON(HarbourTheme, "HarbourTheme");
     BOOKS_QML_REGISTER_SINGLETON(BooksHints, "BooksHints");
     BOOKS_QML_REGISTER_SINGLETON(BooksFeedback, "BooksFeedback");
 
