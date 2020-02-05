@@ -1,6 +1,6 @@
 Name:           harbour-books
 Summary:        E-book reader
-Version:        1.0.40
+Version:        1.0.41
 Release:        1
 License:        BSD
 Group:          Applications/File
@@ -57,6 +57,11 @@ desktop-file-install --delete-original \
 make -C test test
 
 %changelog
+* Wed Feb 5 2020 Slava Monich <slava.monich@jolla.com> 1.0.41
+- Fixed a problem with books opening at unexpected page
+- Handle data: scheme for xhtml
+- Various UI tweaks
+
 * Wed Dec 4 2019 Slava Monich <slava.monich@jolla.com> 1.0.40
 - Chinese translation
 
