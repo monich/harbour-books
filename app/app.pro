@@ -185,6 +185,7 @@ HEADERS += \
   $$HARBOUR_INCLUDE_DIR/HarbourImageProvider.h \
   $$HARBOUR_INCLUDE_DIR/HarbourJson.h \
   $$HARBOUR_INCLUDE_DIR/HarbourPluginLoader.h \
+  $$HARBOUR_INCLUDE_DIR/HarbourSystem.h \
   $$HARBOUR_INCLUDE_DIR/HarbourTask.h \
   $$HARBOUR_INCLUDE_DIR/HarbourTheme.h
 
@@ -197,6 +198,7 @@ SOURCES += \
   $$HARBOUR_SRC_DIR/HarbourJson.cpp \
   $$HARBOUR_SRC_DIR/HarbourMce.cpp \
   $$HARBOUR_SRC_DIR/HarbourPluginLoader.cpp \
+  $$HARBOUR_SRC_DIR/HarbourSystem.cpp \
   $$HARBOUR_SRC_DIR/HarbourTask.cpp \
   $$HARBOUR_SRC_DIR/HarbourTheme.cpp
 
