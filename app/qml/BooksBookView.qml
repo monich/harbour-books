@@ -177,31 +177,20 @@ SilicaFlickable {
         }
 
         onCurrentPageChanged: {
-            if (completed && !flicking && !scrollAnimation.running) {
+            if (completed && !moving && !scrollAnimation.running) {
                 bookViewWatcher.positionViewAtIndex(currentPage)
             }
         }
 
-        onFlickingChanged: {
-            if (!flicking) {
-                bookViewWatcher.updateModel()
+        onCurrentIndexChanged: {
+            if (completed && !moving && currentIndex >= 0) {
+                updateModel()
             }
         }
 
-        ListWatcher {
-            id: bookViewWatcher
-            listView: bookView
-            onCurrentIndexChanged: {
-                if (listView.completed && !listView.flicking && currentIndex >= 0) {
-                    updateModel()
-                }
-            }
-            function updateModel() {
-                hideViews()
-                stackModel.currentPage = currentIndex
-                if (!pager.pressed) {
-                    pager.currentPage = currentIndex
-                }
+        onMovingChanged: {
+            if (!moving) {
+                updateModel()
             }
         }
 
@@ -219,7 +208,7 @@ SilicaFlickable {
             rightSpaceReserved: pageTools.visible ? pageTools.rightSpaceUsed: 0
             titleVisible: _currentState.title
             pageNumberVisible: _currentState.page
-            currentPage: bookViewWatcher.currentIndex === index
+            currentPage: ListView.isCurrentItem
             title: bookModel.title
             onJumpToPage: bookView.jumpTo(page)
             onPushPosition: stackModel.pushPosition(position) // bookView.jumpTo(page)
@@ -261,12 +250,12 @@ SilicaFlickable {
 
         property int jumpingTo: -1
         function jumpTo(page) {
-            if (book && page >=0 && page !== bookViewWatcher.currentIndex) {
+            if (book && page >=0 && page !== currentIndex) {
                 jumpingTo = page
                 bookViewWatcher.positionViewAtIndex(page)
                 pager.currentPage = page
                 jumpingTo = -1
-                if (bookViewWatcher.currentIndex !== page) {
+                if (currentIndex !== page) {
                     console.log("oops, still at", currentPage)
                     resetPager.restart()
                 }
@@ -291,6 +280,19 @@ SilicaFlickable {
             }
         }
 
+        function updateModel() {
+            hideViews()
+            stackModel.currentPage = currentIndex
+            if (!pager.pressed) {
+                pager.currentPage = currentIndex
+            }
+        }
+
+        ListWatcher {
+            id: bookViewWatcher
+            listView: bookView
+        }
+
         NumberAnimation {
             id: scrollAnimation
             target: bookView
@@ -305,8 +307,8 @@ SilicaFlickable {
             id: resetPager
             interval: 0
             onTriggered: {
-                console.log("resetting pager to", bookViewWatcher.currentIndex)
-                pager.currentPage = bookViewWatcher.currentIndex
+                console.log("resetting pager to", bookView.currentIndex)
+                pager.currentPage = bookView.currentIndex
             }
         }
 
