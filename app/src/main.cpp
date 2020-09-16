@@ -46,7 +46,6 @@
 #include "BooksListWatcher.h"
 #include "BooksCoverWidget.h"
 #include "BooksTaskQueue.h"
-#include "BooksFeedback.h"
 #include "BooksHints.h"
 
 #include "HarbourDisplayBlanking.h"
@@ -88,7 +87,6 @@ Q_DECL_EXPORT int main(int argc, char **argv)
     BOOKS_QML_REGISTER(HarbourDisplayBlanking, "DisplayBlanking");
     BOOKS_QML_REGISTER_SINGLETON(HarbourTheme, "HarbourTheme");
     BOOKS_QML_REGISTER_SINGLETON(BooksHints, "BooksHints");
-    BOOKS_QML_REGISTER_SINGLETON(BooksFeedback, "BooksFeedback");
 
     QLocale locale;
     QTranslator* translator = new QTranslator(app);

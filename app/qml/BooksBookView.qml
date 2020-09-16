@@ -32,6 +32,7 @@
 */
 
 import QtQuick 2.0
+import QtFeedback 5.0
 import Sailfish.Silica 1.0
 import org.nemomobile.notifications 1.0
 import harbour.books 1.0
@@ -45,7 +46,8 @@ SilicaFlickable {
     id: root
 
     property variant book
-    property bool selecting
+    readonly property bool selecting: bookView.currentItem && bookView.currentItem.selecting
+    readonly property bool selectionEmpty: !bookView.currentItem || bookView.currentItem.selectionEmpty
 
     signal closeBook()
     signal pageClicked(var page)
@@ -71,6 +73,7 @@ SilicaFlickable {
     readonly property bool haveVolumeDownAction: Settings.volumeDownAction !== BooksSettings.ActionNone
     readonly property bool haveKeyAction: haveVolumeUpAction || haveVolumeDownAction
 
+    property var hapticFeedback
     property var linkMenu
     property var imageView
     property var footnoteView
@@ -89,6 +92,17 @@ SilicaFlickable {
 
     onBookChanged: if (!book) pager.currentPage = 0
 
+    onSelectingChanged: {
+        if (selecting) {
+            if (!hapticFeedback) {
+                hapticFeedback = hapticFeedbackComponent.createObject(root)
+            }
+            hapticFeedback.play()
+        } else if (!selectionEmpty) {
+            notification.publish()
+        }
+    }
+
     Component {
         id: linkMenuComponent
         BooksLinkMenu { }
@@ -102,6 +116,11 @@ SilicaFlickable {
     Component {
         id: footnoteViewComponent
         BooksFootnoteView { }
+    }
+
+    Component {
+        id: hapticFeedbackComponent
+        ThemeEffect { effect: ThemeEffect.Press }
     }
 
     PullDownMenu {
@@ -143,6 +162,7 @@ SilicaFlickable {
         flickDeceleration: maximumFlickVelocity
         orientation: ListView.Horizontal
         snapMode: ListView.SnapOneItem
+        highlightRangeMode: ListView.StrictlyEnforceRange
         spacing: Theme.paddingMedium
         opacity: loading ? 0 : 1
         visible: opacity > 0
@@ -199,25 +219,10 @@ SilicaFlickable {
             rightSpaceReserved: pageTools.visible ? pageTools.rightSpaceUsed: 0
             titleVisible: _currentState.title
             pageNumberVisible: _currentState.page
-            currentPage: bookViewWatcher.currentIndex == index
+            currentPage: bookViewWatcher.currentIndex === index
             title: bookModel.title
             onJumpToPage: bookView.jumpTo(page)
             onPushPosition: stackModel.pushPosition(position) // bookView.jumpTo(page)
-            onCurrentPageChanged: {
-                if (currentPage) {
-                    root.selecting = pageView.selecting
-                }
-            }
-            onSelectingChanged: {
-                if (currentPage) {
-                    if (pageView.selecting) {
-                        BooksFeedback.start("push_gesture")
-                    } else {
-                        notification.publish()
-                    }
-                    root.selecting = pageView.selecting
-                }
-            }
             onPageClicked: {
                 root.pageClicked(index)
                 if (Settings.turnPageByTap && mouseY > bookModel.topMargin && mouseY < (pageView.height - bookModel.topMargin)) {
@@ -235,28 +240,22 @@ SilicaFlickable {
                 }
             }
             onImagePressed: {
-                if (currentPage) {
-                    if (!imageView) {
-                        imageView = imageViewComponent.createObject(root)
-                    }
-                    imageView.show(url,rect)
+                if (!imageView) {
+                    imageView = imageViewComponent.createObject(root)
                 }
+                imageView.show(url,rect)
             }
             onBrowserLinkPressed: {
-                if (currentPage) {
-                    if (!linkMenu) {
-                        linkMenu = linkMenuComponent.createObject(root)
-                    }
-                    linkMenu.show(url)
+                if (!linkMenu) {
+                    linkMenu = linkMenuComponent.createObject(root)
                 }
+                linkMenu.show(url)
             }
             onFootnotePressed: {
-                if (bookViewWatcher.currentIndex == index) {
-                    if (!footnoteView) {
-                        footnoteView = footnoteViewComponent.createObject(root)
-                    }
-                    footnoteView.show(touchX,touchY,text,url)
+                if (!footnoteView) {
+                    footnoteView = footnoteViewComponent.createObject(root)
                 }
+                footnoteView.show(touchX,touchY,text,url)
             }
         }
 

@@ -109,7 +109,6 @@ SOURCES += \
   src/BooksCoverModel.cpp \
   src/BooksCoverWidget.cpp \
   src/BooksDialogManager.cpp \
-  src/BooksFeedback.cpp \
   src/BooksHints.cpp \
   src/BooksImageProvider.cpp \
   src/BooksImportModel.cpp \
@@ -153,7 +152,6 @@ HEADERS += \
   src/BooksCoverWidget.h \
   src/BooksDefs.h \
   src/BooksDialogManager.h \
-  src/BooksFeedback.h \
   src/BooksHints.h \
   src/BooksImageProvider.h \
   src/BooksImportModel.h \
