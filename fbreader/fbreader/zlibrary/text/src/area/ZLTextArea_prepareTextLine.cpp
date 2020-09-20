@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2004-2010 Geometer Plus <contact@geometerplus.com>
+ * Copyright (C) 2015-2020 Slava Monich <slava.monich@jolla.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -115,6 +116,7 @@ void ZLTextArea::prepareTextLine(Style &style, const ZLTextLineInfo &info, int y
 				break;
 			}
 			// Fall through to center "justified" images
+			/* fallthrough */
 		case ALIGN_CENTER:
 			x += (metrics.FullWidth - style.textStyle()->lineEndIndent(metrics, isRtl()) - info.Width) / 2;
 			break;
