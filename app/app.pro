@@ -53,6 +53,7 @@ OTHER_FILES += \
   icons/harbour-books.svg \
   harbour-books.desktop \
   qml/*.qml \
+  qml/*.js \
   qml/images/* \
   settings/*.qml \
   settings/*.json \

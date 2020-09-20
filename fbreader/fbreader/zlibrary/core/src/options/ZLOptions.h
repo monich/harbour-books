@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2004-2010 Geometer Plus <contact@geometerplus.com>
+ * Copyright (C) 2015-2020 Slava Monich <slava.monich@jolla.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -183,8 +184,8 @@ public:
 	void setValue(ZLColor value);
 
 private:
-	mutable long myIntValue;
-	const long myDefaultIntValue;
+	mutable unsigned long myIntValue;
+	const unsigned long myDefaultIntValue;
 };
 
 class ZLDoubleOption : public ZLOption {

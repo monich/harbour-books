@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2015-2018 Jolla Ltd.
- * Copyright (C) 2015-2018 Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2015-2020 Jolla Ltd.
+ * Copyright (C) 2015-2020 Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
  *
@@ -8,15 +8,15 @@
  * modification, are permitted provided that the following conditions
  * are met:
  *
- *   * Redistributions of source code must retain the above copyright
- *     notice, this list of conditions and the following disclaimer.
- *   * Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in
- *     the documentation and/or other materials provided with the
- *     distribution.
- *   * Neither the name of Jolla Ltd nor the names of its contributors
- *     may be used to endorse or promote products derived from this
- *     software without specific prior written permission.
+ *   1. Redistributions of source code must retain the above copyright
+ *      notice, this list of conditions and the following disclaimer.
+ *   2. Redistributions in binary form must reproduce the above copyright
+ *      notice, this list of conditions and the following disclaimer
+ *      in the documentation and/or other materials provided with the
+ *      distribution.
+ *   3. Neither the names of the copyright holders nor the names of its
+ *      contributors may be used to endorse or promote products derived
+ *      from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -243,7 +243,9 @@ void BooksPaintContext::drawFilledCircle(int x, int y, int r)
 void BooksPaintContext::clear(ZLColor aColor)
 {
     if (iPainter) {
+        iPainter->setCompositionMode(QPainter::CompositionMode_Source);
         iPainter->fillRect(0, 0, iWidth, iHeight, qtColor(aColor));
+        iPainter->setCompositionMode(QPainter::CompositionMode_SourceOver);
     }
 }
 
@@ -257,11 +259,15 @@ int BooksPaintContext::height() const
     return iHeight;
 }
 
-ZLColor BooksPaintContext::realColor(quint8 aRed, quint8 aGreen, quint8 aBlue, bool aInvert)
+ZLColor BooksPaintContext::realColor(uchar aRed, uchar aGreen, uchar aBlue, uchar aAlpha,
+    bool aInvertColors)
 {
-    return aInvert ?
-        ZLColor(255-aRed, 255-aGreen, 255-aBlue) :
-        ZLColor(aRed, aGreen, aBlue);
+    if (aInvertColors) {
+        aRed = 255 - aRed;
+        aGreen = 255 - aGreen;
+        aBlue = 255 - aBlue;
+    }
+    return ZLColor(aRed, aGreen, aBlue, aAlpha);
 }
 
 ZLColor BooksPaintContext::realColor(const std::string& aStyle, bool aInvert)
@@ -269,33 +275,46 @@ ZLColor BooksPaintContext::realColor(const std::string& aStyle, bool aInvert)
     static const std::string INTERNAL_HYPERLINK("internal");
     static const std::string EXTERNAL_HYPERLINK("external");
     static const std::string BOOK_HYPERLINK("book");
+    unsigned long argb = ZLColor::rgbValue(0);
 
     if (ZLStringUtil::startsWith(aStyle, '#')) {
-        if (aStyle.length() == 7) {
-            int i, value = 0;
+        const size_t len = aStyle.length();
+        if (len == 7 || len == 9) {
+            int i;
+            unsigned long rgb = 0;
             for (i=1; i<7; i++) {
                 int nibble = ZLStringUtil::fromHex(aStyle[i]);
                 if (nibble >= 0) {
-                    value <<= 4;
-                    value |= nibble;
+                    rgb <<= 4;
+                    rgb |= nibble;
                 } else {
                     break;
                 }
             }
             if (i == 7) {
-                return realColor(ZLColor(value), aInvert);
+                if (len == 9) {
+                    int a1 = ZLStringUtil::fromHex(aStyle[7]);
+                    int a2 = ZLStringUtil::fromHex(aStyle[8]);
+                    if (a1 >= 0 && a2 >= 0) {
+                        argb = ZLColor::rgbValue(rgb, (a1 << 4) | a2);
+                    } else {
+                        argb = ZLColor::rgbValue(rgb);
+                    }
+                } else {
+                    argb = ZLColor::rgbValue(rgb);
+                }
             }
         }
     } else if (aStyle == INTERNAL_HYPERLINK) {
-        return realColor(33, 96, 180, aInvert);
+        argb =  ZLColor::rgbValue(0x2160b4);
     } else if (aStyle == EXTERNAL_HYPERLINK) {
-        return realColor(33, 96, 180, aInvert);
+        argb = ZLColor::rgbValue(0x2160b4);
     } else if (aStyle == BOOK_HYPERLINK) {
-        return realColor(23, 68, 128, aInvert);
+        argb = ZLColor::rgbValue(0x174480);
     } else if (aStyle == ZLTextStyle::SELECTION_BACKGROUND) {
-        return realColor(60, 139, 255, aInvert);
+        argb = ZLColor::rgbValue(0x3c8bff);
     } else if (aStyle == ZLTextStyle::HIGHLIGHTED_TEXT) {
-        return realColor(60, 139, 255, aInvert);
+        argb = ZLColor::rgbValue(0x3c8bff);
     }
-    return realColor(0, 0, 0, aInvert);
+    return realColor(ZLColor(argb), aInvert);
 }

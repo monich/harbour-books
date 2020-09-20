@@ -35,8 +35,12 @@ import QtQuick 2.0
 import Sailfish.Silica 1.0
 import harbour.books 1.0
 
-Item {
+import "Books.js" as Books
+
+Rectangle {
     id: view
+
+    color: Settings.pageBackgroundColor
 
     property alias model: widget.model
     property alias page: widget.page
@@ -62,9 +66,12 @@ Item {
 
     PageWidget {
         id: widget
+
         anchors.fill: parent
         model: bookModel
         pressed: mouseArea.pressed
+        opacity: Books.contentOpacity(Settings.brightness)
+
         onBrowserLinkPressed: view.browserLinkPressed(url)
         onImagePressed: view.imagePressed(imageId, rect)
         onActiveTouch: pressImage.animate(touchX, touchY)
@@ -75,6 +82,7 @@ Item {
 
     BooksTitleLabel {
         id: titleLabel
+
         anchors {
             top: parent.top
             left: parent.left
@@ -99,6 +107,7 @@ Item {
 
     Image {
         id: pressImage
+
         source: Settings.invertColors ?  "images/press-invert.svg" : "images/press.svg"
         visible: opacity > 0
         opacity: 0
@@ -162,6 +171,7 @@ Item {
 
     MouseArea {
         id: mouseArea
+
         anchors.fill: parent
         onClicked: {
             if (widget.selectionEmpty) {

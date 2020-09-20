@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2015-2019 Jolla Ltd.
- * Copyright (C) 2015-2019 Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2015-2020 Jolla Ltd.
+ * Copyright (C) 2015-2020 Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
  *
@@ -32,6 +32,7 @@
  */
 
 #include "BooksSettings.h"
+#include "BooksPaintContext.h"
 #include "BooksTextStyle.h"
 #include "BooksTextView.h"
 #include "BooksBook.h"
@@ -45,6 +46,7 @@
 #define DCONF_PATH                  BOOKS_DCONF_ROOT
 #define KEY_FONT_SIZE               "fontSize"
 #define KEY_PAGE_DETAILS            "pageDetails"
+#define KEY_NIGHT_MODE_BRIGHTNESS   "nightModeBrightness"
 #define KEY_PAGE_DETAILS_FIXED      "pageDetailsFixed"
 #define KEY_TURN_PAGE_BY_TAP        "turnPageByTap"
 #define KEY_SAMPLE_BOOK_COPIED      "sampleBookCopied"
@@ -58,6 +60,7 @@
 #define KEY_ORIENTATION             "orientation"
 
 #define DEFAULT_FONT_SIZE           0
+#define DEFAULT_NIGHT_BRIGHTNESS    1.0
 #define DEFAULT_PAGE_DETAILS        0
 #define DEFAULT_PAGE_DETAILS_FIXED  false
 #define DEFAULT_TURN_PAGE_BY_TAP    false
@@ -71,6 +74,8 @@
 #define DEFAULT_VOLUME_DOWN_ACTION  (BooksSettings::ActionPreviousPage)
 #define DEFAULT_ORIENTATION         (BooksSettings::OrientationAny)
 
+#define DEFAULT_BACKGROUND                  QColor(Qt::white)
+#define INVERTED_BACKGROUND                 QColor(Qt::black)
 #define PAGETOOL_COLOR                      QColor(128,128,128) // any bg
 #define NORMAL_PAGETOOL_HIGHLIGHT_COLOR     QColor(64,64,64)    // on white
 #define INVERTED_PAGETOOL_HIGHLIGHT_COLOR   QColor(192,192,192) // on black
@@ -220,24 +225,32 @@ class BooksSettings::Private : public QObject {
 public:
     Private(BooksSettings* aParent);
 
+    BooksSettings* parentSettings() const;
     bool updateCurrentBook();
     bool updateCurrentStorage();
-    int currentFontSize() const;
+    bool updateBrightness();
+    bool invertColors() const;
+    int fontSizeValue() const;
     int fontSize(int aFontSizeAdjust) const;
+    qreal brightnessValue() const;
+    qreal nightModeBrightness() const;
     QString currentFolder() const;
     shared_ptr<ZLTextStyle> textStyle(int aFontSizeAdjust) const;
     void setCurrentBook(QObject* aBook);
     static Action getAction(MGConfItem* aItem, Action aDefault);
+    static qreal normalizeBrightness(qreal aBrightness);
 
 private Q_SLOTS:
+    void onInvertColorsChanged();
+    void onNightModeBrightnessChanged();
     void onFontSizeValueChanged();
     void onCurrentBookPathChanged();
     void onCurrentFolderChanged();
 
 public:
     static QWeakPointer<BooksSettings> sSharedInstance;
-    BooksSettings* iParent;
     MGConfItem* iFontSizeConf;
+    MGConfItem* iNightModeBrightnessConf;
     MGConfItem* iPageDetailsConf;
     MGConfItem* iPageDetailsFixedConf;
     MGConfItem* iTurnPageByTapConf;
@@ -254,14 +267,15 @@ public:
     BooksBook* iCurrentBook;
     QString iCurrentStorageDevice;
     int iFontSize;
+    qreal iBrightness;
 };
 
 QWeakPointer<BooksSettings> BooksSettings::Private::sSharedInstance;
 
 BooksSettings::Private::Private(BooksSettings* aParent) :
     QObject(aParent),
-    iParent(aParent),
     iFontSizeConf(new MGConfItem(DCONF_PATH KEY_FONT_SIZE, this)),
+    iNightModeBrightnessConf(new MGConfItem(DCONF_PATH KEY_NIGHT_MODE_BRIGHTNESS, this)),
     iPageDetailsConf(new MGConfItem(DCONF_PATH KEY_PAGE_DETAILS, this)),
     iPageDetailsFixedConf(new MGConfItem(DCONF_PATH KEY_PAGE_DETAILS_FIXED, this)),
     iTurnPageByTapConf(new MGConfItem(DCONF_PATH KEY_TURN_PAGE_BY_TAP, this)),
@@ -276,33 +290,106 @@ BooksSettings::Private::Private(BooksSettings* aParent) :
     iRemovableRootConf(new MGConfItem(DCONF_PATH KEY_REMOVABLE_ROOT, this)),
     iCurrentBook(NULL)
 {
-    iFontSize = currentFontSize();
+    iFontSize = fontSizeValue();
+    iBrightness = brightnessValue();
     connect(iFontSizeConf, SIGNAL(valueChanged()), SLOT(onFontSizeValueChanged()));
     connect(iCurrentFolderConf, SIGNAL(valueChanged()), SLOT(onCurrentFolderChanged()));
     connect(iCurrentBookPathConf, SIGNAL(valueChanged()), SLOT(onCurrentBookPathChanged()));
-    connect(iPageDetailsConf, SIGNAL(valueChanged()), iParent, SIGNAL(pageDetailsChanged()));
-    connect(iPageDetailsFixedConf, SIGNAL(valueChanged()), iParent, SIGNAL(pageDetailsFixedChanged()));
-    connect(iTurnPageByTapConf, SIGNAL(valueChanged()), iParent, SIGNAL(turnPageByTapChanged()));
-    connect(iInvertColorsConf, SIGNAL(valueChanged()), iParent, SIGNAL(invertColorsChanged()));
-    connect(iInvertColorsConf, SIGNAL(valueChanged()), iParent, SIGNAL(pageBackgroundColorChanged()));
-    connect(iSampleBookCopiedConf, SIGNAL(valueChanged()), iParent, SIGNAL(sampleBookCopiedChanged()));
-    connect(iKeepDisplayOnConf, SIGNAL(valueChanged()), iParent, SIGNAL(keepDisplayOnChanged()));
-    connect(iVolumeUpActionConf, SIGNAL(valueChanged()), iParent, SIGNAL(volumeUpActionChanged()));
-    connect(iVolumeDownActionConf, SIGNAL(valueChanged()), iParent, SIGNAL(volumeDownActionChanged()));
-    connect(iOrientationConf, SIGNAL(valueChanged()), iParent, SIGNAL(orientationChanged()));
-    connect(iRemovableRootConf, SIGNAL(valueChanged()), iParent, SIGNAL(removableRootChanged()));
+    connect(iInvertColorsConf, SIGNAL(valueChanged()), SLOT(onInvertColorsChanged()));
+    connect(iNightModeBrightnessConf, SIGNAL(valueChanged()), SLOT(onNightModeBrightnessChanged()));
+    connect(iPageDetailsConf, SIGNAL(valueChanged()), aParent, SIGNAL(pageDetailsChanged()));
+    connect(iPageDetailsFixedConf, SIGNAL(valueChanged()), aParent, SIGNAL(pageDetailsFixedChanged()));
+    connect(iTurnPageByTapConf, SIGNAL(valueChanged()), aParent, SIGNAL(turnPageByTapChanged()));
+    connect(iSampleBookCopiedConf, SIGNAL(valueChanged()), aParent, SIGNAL(sampleBookCopiedChanged()));
+    connect(iKeepDisplayOnConf, SIGNAL(valueChanged()), aParent, SIGNAL(keepDisplayOnChanged()));
+    connect(iVolumeUpActionConf, SIGNAL(valueChanged()), aParent, SIGNAL(volumeUpActionChanged()));
+    connect(iVolumeDownActionConf, SIGNAL(valueChanged()), aParent, SIGNAL(volumeDownActionChanged()));
+    connect(iOrientationConf, SIGNAL(valueChanged()), aParent, SIGNAL(orientationChanged()));
+    connect(iRemovableRootConf, SIGNAL(valueChanged()), aParent, SIGNAL(removableRootChanged()));
+}
+
+inline BooksSettings*
+BooksSettings::Private::parentSettings() const
+{
+    return qobject_cast<BooksSettings*>(parent());
+}
+
+inline bool
+BooksSettings::Private::invertColors() const
+{
+    return iInvertColorsConf->value(DEFAULT_INVERT_COLORS).toBool();
+}
+
+inline qreal
+BooksSettings::Private::normalizeBrightness(
+    qreal aBrightness)
+{
+    return (aBrightness < 0) ? 0 : (aBrightness > 1) ? 1 : aBrightness;
+}
+
+qreal
+BooksSettings::Private::nightModeBrightness() const
+{
+    bool ok;
+    QVariant var(iNightModeBrightnessConf->value(DEFAULT_NIGHT_BRIGHTNESS));
+    const qreal value = var.toReal(&ok);
+    return ok ? normalizeBrightness(value) : DEFAULT_NIGHT_BRIGHTNESS;
+}
+
+inline qreal
+BooksSettings::Private::brightnessValue() const
+{
+    return invertColors() ? nightModeBrightness() : 1.0;
+}
+
+bool
+BooksSettings::Private::updateBrightness()
+{
+    const qreal newBrightness = brightnessValue();
+    if (iBrightness != newBrightness) {
+        iBrightness = newBrightness;
+        HDEBUG(iBrightness);
+        return true;
+    }
+    return false;
+}
+
+void
+BooksSettings::Private::onInvertColorsChanged()
+{
+    BooksSettings* settings = parentSettings();
+    if (updateBrightness()) {
+        Q_EMIT settings->brightnessChanged();
+    }
+    Q_EMIT settings->invertColorsChanged();
+    Q_EMIT settings->pageBackgroundColorChanged();
+}
+
+void
+BooksSettings::Private::onNightModeBrightnessChanged()
+{
+    BooksSettings* settings = parentSettings();
+    if (updateBrightness()) {
+        Q_EMIT settings->brightnessChanged();
+    }
+    Q_EMIT settings->nightModeBrightnessChanged();
 }
 
 int
-BooksSettings::Private::currentFontSize() const
+BooksSettings::Private::fontSizeValue() const
 {
-    const int fontSize = iFontSizeConf->value(DEFAULT_FONT_SIZE).toInt();
-    if (fontSize < MinFontSize) {
-        return MinFontSize;
-    } else if (fontSize > MaxFontSize) {
-        return MaxFontSize;
+    bool ok;
+    const int fontSize = iFontSizeConf->value(DEFAULT_FONT_SIZE).toInt(&ok);
+    if (ok) {
+        if (fontSize < MinFontSize) {
+            return MinFontSize;
+        } else if (fontSize > MaxFontSize) {
+            return MaxFontSize;
+        } else {
+            return fontSize;
+        }
     } else {
-        return fontSize;
+        return iFontSize;
     }
 }
 
@@ -355,7 +442,7 @@ BooksSettings::Private::setCurrentBook(
             iCurrentBook = NULL;
             iCurrentBookPathConf->set(QString());
         }
-        Q_EMIT iParent->currentBookChanged();
+        Q_EMIT parentSettings()->currentBookChanged();
     }
 }
 
@@ -407,33 +494,35 @@ BooksSettings::Private::updateCurrentStorage()
 void
 BooksSettings::Private::onFontSizeValueChanged()
 {
-    const int newSize = currentFontSize();
+    const int newSize = fontSizeValue();
     HDEBUG(newSize);
     if (iFontSize != newSize) {
         iFontSize = newSize;
         for (int i=0; i<=FontSizeSteps; i++) {
             iTextStyle[i].reset();
         }
-        Q_EMIT iParent->fontSizeChanged();
-        Q_EMIT iParent->textStyleChanged();
+        BooksSettings* settings = parentSettings();
+        Q_EMIT settings->fontSizeChanged();
+        Q_EMIT settings->textStyleChanged();
     }
 }
 
 void
 BooksSettings::Private::onCurrentFolderChanged()
 {
+    BooksSettings* settings = parentSettings();
     if (updateCurrentStorage()) {
-        Q_EMIT iParent->currentStorageChanged();
+        Q_EMIT settings->currentStorageChanged();
     }
-    Q_EMIT iParent->currentFolderChanged();
-    Q_EMIT iParent->relativePathChanged();
+    Q_EMIT settings->currentFolderChanged();
+    Q_EMIT settings->relativePathChanged();
 }
 
 void
 BooksSettings::Private::onCurrentBookPathChanged()
 {
     if (updateCurrentBook()) {
-        Q_EMIT iParent->currentBookChanged();
+        Q_EMIT parentSettings()->currentBookChanged();
     }
 }
 
@@ -522,6 +611,26 @@ BooksSettings::fontSize() const
     return iPrivate->iFontSize;
 }
 
+void
+BooksSettings::setNightModeBrightness(
+    qreal aValue)
+{
+    HDEBUG(aValue);
+    iPrivate->iNightModeBrightnessConf->set(Private::normalizeBrightness(aValue));
+}
+
+qreal
+BooksSettings::brightness() const
+{
+    return iPrivate->iBrightness;
+}
+
+qreal
+BooksSettings::nightModeBrightness() const
+{
+    return iPrivate->nightModeBrightness();
+}
+
 QString
 BooksSettings::currentStorage() const
 {
@@ -580,7 +689,7 @@ BooksSettings::setTurnPageByTap(
 bool
 BooksSettings::invertColors() const
 {
-    return iPrivate->iInvertColorsConf->value(DEFAULT_INVERT_COLORS).toBool();
+    return iPrivate->invertColors();
 }
 
 void
@@ -698,7 +807,7 @@ BooksSettings::primaryPageToolColor() const
 QColor
 BooksSettings::highlightPageToolColor() const
 {
-    return invertColors() ?
+    return iPrivate->invertColors() ?
         INVERTED_PAGETOOL_HIGHLIGHT_COLOR :
         NORMAL_PAGETOOL_HIGHLIGHT_COLOR;
 }
@@ -706,9 +815,9 @@ BooksSettings::highlightPageToolColor() const
 QColor
 BooksSettings::pageBackgroundColor() const
 {
-    return qtColor(invertColors() ?
-        BooksTextView::INVERTED_BACKGROUND :
-        BooksTextView::DEFAULT_BACKGROUND);
+    return iPrivate->invertColors() ?
+        INVERTED_BACKGROUND :
+        DEFAULT_BACKGROUND;
 }
 
 BooksSettings::Orientation

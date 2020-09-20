@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2015-2016 Jolla Ltd.
- * Contact: Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2015-2020 Jolla Ltd.
+ * Copyright (C) 2015-2020 Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
  *
@@ -8,15 +8,15 @@
  * modification, are permitted provided that the following conditions
  * are met:
  *
- *   * Redistributions of source code must retain the above copyright
- *     notice, this list of conditions and the following disclaimer.
- *   * Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in
- *     the documentation and/or other materials provided with the
- *     distribution.
- *   * Neither the name of Nemo Mobile nor the names of its contributors
- *     may be used to endorse or promote products derived from this
- *     software without specific prior written permission.
+ *   1. Redistributions of source code must retain the above copyright
+ *      notice, this list of conditions and the following disclaimer.
+ *   2. Redistributions in binary form must reproduce the above copyright
+ *      notice, this list of conditions and the following disclaimer
+ *      in the documentation and/or other materials provided with the
+ *      distribution.
+ *   3. Neither the names of the copyright holders nor the names of its
+ *      contributors may be used to endorse or promote products derived
+ *      from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -46,7 +46,6 @@
 class QPainter;
 
 class BooksPaintContext : public ZLPaintContext {
-
 public:
     BooksPaintContext(int aWidth, int aHeight);
     BooksPaintContext();
@@ -88,12 +87,15 @@ public:
     void drawFilledCircle(int x, int y, int r);
 
     void setInvertColors(bool aInvertColors);
-    static ZLColor realColor(const std::string& aStyle, bool aInvertColors);
-    static ZLColor realColor(quint8 aRed, quint8 aGreen, quint8 aBlue, bool aInvert);
-    static ZLColor realColor(const ZLColor aColor, bool aInvert);
-    ZLColor realColor(const std::string& aStyle) const;
-    ZLColor realColor(quint8 aRed, quint8 aGreen, quint8 aBlue) const;
+
     ZLColor realColor(const ZLColor aColor) const;
+    ZLColor realColor(const std::string& aStyle) const;
+    static ZLColor realColor(const std::string& aStyle, bool aInvert);
+
+private:
+    ZLColor realColor(uchar aRed, uchar aGreen, uchar aBlue, uchar aAlpha) const;
+    static ZLColor realColor(uchar aRed, uchar aGreen, uchar aBlue, uchar aAlpha, bool aInvert);
+    static ZLColor realColor(const ZLColor aColor, bool aInvert);
 
 private:
     QPainter* iPainter;
@@ -117,13 +119,13 @@ inline QSize BooksPaintContext::size() const
     { return QSize(iWidth, iHeight); }
 
 inline QColor qtColor(const ZLColor& aColor)
-    { return QColor(aColor.Red, aColor.Green, aColor.Blue); }
+    { return QColor(aColor.Red, aColor.Green, aColor.Blue, aColor.Alpha); }
 inline ZLColor BooksPaintContext::realColor(const ZLColor aColor) const
-    { return realColor(aColor.Red, aColor.Green, aColor.Blue); }
-inline ZLColor BooksPaintContext::realColor(quint8 aRed, quint8 aGreen, quint8 aBlue) const
-    { return realColor(aRed, aGreen, aBlue, iInvertColors); }
+    { return realColor(aColor.Red, aColor.Green, aColor.Blue, aColor.Alpha); }
+inline ZLColor BooksPaintContext::realColor(uchar aRed, uchar aGreen, uchar aBlue, uchar aAlpha) const
+    { return realColor(aRed, aGreen, aBlue, aAlpha, iInvertColors); }
 inline ZLColor BooksPaintContext::realColor(const ZLColor aColor, bool aInvert)
-    { return realColor(aColor.Red, aColor.Green, aColor.Blue, aInvert); }
+    { return realColor(aColor.Red, aColor.Green, aColor.Blue, aColor.Alpha, aInvert); }
 inline ZLColor BooksPaintContext::realColor(const std::string& aStyle) const
     { return realColor(aStyle, iInvertColors); }
 inline void BooksPaintContext::setInvertColors(bool aInvertColors)

@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2015-2019 Jolla Ltd.
- * Copyright (C) 2015-2019 Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2015-2020 Jolla Ltd.
+ * Copyright (C) 2015-2020 Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
  *
@@ -47,6 +47,8 @@ class BooksSettings : public QObject
     Q_ENUMS(Orientation)
     Q_ENUMS(Action)
     Q_PROPERTY(int fontSize READ fontSize WRITE setFontSize NOTIFY fontSizeChanged)
+    Q_PROPERTY(qreal brightness READ brightness NOTIFY brightnessChanged)
+    Q_PROPERTY(qreal nightModeBrightness READ nightModeBrightness WRITE setNightModeBrightness NOTIFY nightModeBrightnessChanged)
     Q_PROPERTY(int pageDetails READ pageDetails WRITE setPageDetails NOTIFY pageDetailsChanged)
     Q_PROPERTY(bool pageDetailsFixed READ pageDetailsFixed WRITE setPageDetailsFixed NOTIFY pageDetailsFixedChanged)
     Q_PROPERTY(bool turnPageByTap READ turnPageByTap WRITE setTurnPageByTap NOTIFY turnPageByTapChanged)
@@ -99,6 +101,10 @@ public:
     int fontSize() const;
     void setFontSize(int aValue);
 
+    qreal brightness() const;
+    qreal nightModeBrightness() const;
+    void setNightModeBrightness(qreal aValue);
+
     int pageDetails() const;
     void setPageDetails(int aValue);
 
@@ -108,7 +114,7 @@ public:
     bool turnPageByTap() const;
     void setTurnPageByTap(bool aValue);
 
-    bool invertColors() const;
+    bool invertColors() const; // Night mode
     void setInvertColors(bool aValue);
 
     bool sampleBookCopied() const;
@@ -140,6 +146,8 @@ public:
 
 Q_SIGNALS:
     void fontSizeChanged();
+    void nightModeBrightnessChanged();
+    void brightnessChanged();
     void textStyleChanged();
     void pageDetailsChanged();
     void pageDetailsFixedChanged();

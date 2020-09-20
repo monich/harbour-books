@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2004-2010 Geometer Plus <contact@geometerplus.com>
- * Copyright (C) 2015 Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2015-2020 Slava Monich <slava.monich@jolla.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,25 +22,34 @@
 #define __ZLCOLOR_H__
 
 struct ZLColor {
+	unsigned char Alpha;
 	unsigned char Red;
 	unsigned char Green;
 	unsigned char Blue;
 
+	static const unsigned long ALPHA_MASK = 0xff000000;
+
+	ZLColor(unsigned char r, unsigned char g, unsigned char b, unsigned char a);
 	ZLColor(unsigned char r, unsigned char g, unsigned char b);
-	ZLColor(long longValue = 0);
+	ZLColor(unsigned long argb = ALPHA_MASK);
 
-	void setIntValue(long longValue);
-	long intValue();
+	void setIntValue(unsigned long argb);
+	unsigned long intValue();
+	static unsigned long rgbValue(unsigned long rgb, unsigned char a = 0xff);
 
+	bool equals(const ZLColor color) const;
 	bool operator == (const ZLColor &color) const;
 	bool operator != (const ZLColor &color) const;
 };
 
-inline ZLColor::ZLColor(unsigned char r, unsigned char g, unsigned char b) : Red(r), Green(g), Blue(b) {}
-inline ZLColor::ZLColor(long longValue) : Red((unsigned char)(longValue >> 16)), Green((unsigned char)(longValue >> 8)), Blue((unsigned char)longValue) {}
-inline void ZLColor::setIntValue(long longValue) { Red = (unsigned char)(longValue >> 16); Green = (unsigned char)(longValue >> 8); Blue = (unsigned char)longValue; }
-inline long ZLColor::intValue() { return (((long)Red) << 16) + (((long)Green) << 8) + Blue; }
-inline bool ZLColor::operator == (const ZLColor &color) const { return (Red == color.Red) && (Green == color.Green) && (Blue == color.Blue); }
-inline bool ZLColor::operator != (const ZLColor &color) const { return !operator==(color); }
+inline ZLColor::ZLColor(unsigned char r, unsigned char g, unsigned char b) : Alpha(0xff), Red(r), Green(g), Blue(b) {}
+inline ZLColor::ZLColor(unsigned char r, unsigned char g, unsigned char b, unsigned char a) : Alpha(a), Red(r), Green(g), Blue(b) {}
+inline ZLColor::ZLColor(unsigned long argb) :  Alpha((unsigned char)(argb >> 24)), Red((unsigned char)(argb >> 16)), Green((unsigned char)(argb >> 8)), Blue((unsigned char)argb) {}
+inline void ZLColor::setIntValue(unsigned long argb) { Alpha = (unsigned char)(argb >> 24); Red = (unsigned char)(argb >> 16); Green = (unsigned char)(argb >> 8); Blue = (unsigned char)argb; }
+inline unsigned long ZLColor::intValue() { return (((unsigned long)Alpha) << 24) | (((unsigned long)Red) << 16) | (((unsigned long)Green) << 8) | (unsigned long)Blue; }
+inline unsigned long ZLColor::rgbValue(unsigned long rgb, unsigned char a) { return (((unsigned long)a) << 24) | rgb; }
+inline bool ZLColor::equals(const ZLColor color) const { return (Red == color.Red) && (Green == color.Green) && (Blue == color.Blue) && (Alpha == color.Alpha); }
+inline bool ZLColor::operator == (const ZLColor &color) const { return equals(color); }
+inline bool ZLColor::operator != (const ZLColor &color) const { return !equals(color); }
 
 #endif /* __ZLCOLOR_H__ */

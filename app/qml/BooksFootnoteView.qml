@@ -1,6 +1,6 @@
 /*
-  Copyright (C) 2016 Jolla Ltd.
-  Contact: Slava Monich <slava.monich@jolla.com>
+  Copyright (C) 2015-2020 Jolla Ltd.
+  Copyright (C) 2015-2020 Slava Monich <slava.monich@jolla.com>
 
   You may use this file under the terms of BSD license as follows:
 
@@ -8,14 +8,15 @@
   modification, are permitted provided that the following conditions
   are met:
 
-    * Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above copyright
-      notice, this list of conditions and the following disclaimer in the
-      documentation and/or other materials provided with the distribution.
-    * Neither the name of Jolla Ltd nor the names of its contributors may
-      be used to endorse or promote products derived from this software
-      without specific prior written permission.
+    1. Redistributions of source code must retain the above copyright
+       notice, this list of conditions and the following disclaimer.
+    2. Redistributions in binary form must reproduce the above copyright
+       notice, this list of conditions and the following disclaimer
+       in the documentation and/or other materials provided with the
+       distribution.
+    3. Neither the names of the copyright holders nor the names of its
+       contributors may be used to endorse or promote products derived
+       from this software without specific prior written permission.
 
   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
   AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -32,9 +33,13 @@
 
 import QtQuick 2.0
 import Sailfish.Silica 1.0
+import harbour.books 1.0
+
+import "Books.js" as Books
 
 Rectangle {
     id: root
+
     visible: opacity > 0
     opacity: 0.0
     anchors.fill: parent
@@ -47,7 +52,7 @@ Rectangle {
 
     function show(startX,startY,text,url) {
         flickable.scrollToTop()
-        image.source = url
+        content.source = url
         if (state !== "show") {
             footnoteItem.scale = 0
             footnoteItem.x = startX
@@ -77,6 +82,7 @@ Rectangle {
 
     Item {
         id: footnoteItem
+
         x: footnoteX
         y: footnoteY
         width: footnote.width
@@ -85,42 +91,50 @@ Rectangle {
 
         Label {
             id: footnoteLabel
+
+            anchors {
+                top: parent.top
+                bottom: footnote.top
+                bottomMargin: Theme.paddingMedium
+            }
             width: parent.width
             height: Math.round(root.height - footnote.height/2) - 2*Theme.paddingMedium
             color: Theme.highlightColor
             verticalAlignment: Text.AlignBottom
             maximumLineCount: 4
             visible: opacity > 0
+
             Behavior on opacity { FadeAnimation {} }
-            anchors {
-                top: parent.top
-                bottom: footnote.top
-                bottomMargin: Theme.paddingMedium
-            }
         }
 
         Rectangle {
             id: footnote
+
             radius: Theme.paddingMedium/2
             border.color: Settings.invertedPageBackgroundColor
             color: Settings.pageBackgroundColor
-            width: image.width + 2*Theme.paddingMedium
-            height: Math.min(root.height/2, image.height + 2*Theme.paddingMedium)
-            anchors {
-                bottom: parent.bottom
-            }
+            width: content.width + 2*Theme.paddingMedium
+            height: Math.min(root.height/2, content.height + 2*Theme.paddingMedium)
+            anchors.bottom: parent.bottom
+
             SilicaFlickable {
                 id: flickable
+
                 anchors {
                     fill: parent
                     margins: Theme.paddingMedium
                 }
                 clip: true
-                contentWidth: image.width
-                contentHeight: image.height
+                contentWidth: content.width
+                contentHeight: content.height
+
                 Image {
-                    id: image
+                    id: content
+
+                    opacity: Books.contentOpacity(Settings.brightness)
+                    cache: false
                 }
+
                 VerticalScrollDecorator {}
             }
         }

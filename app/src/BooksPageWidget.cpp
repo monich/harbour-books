@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2015-2018 Jolla Ltd.
- * Copyright (C) 2015-2018 Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2015-2020 Jolla Ltd.
+ * Copyright (C) 2015-2020 Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
  *
@@ -8,15 +8,15 @@
  * modification, are permitted provided that the following conditions
  * are met:
  *
- *   * Redistributions of source code must retain the above copyright
- *     notice, this list of conditions and the following disclaimer.
- *   * Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in
- *     the documentation and/or other materials provided with the
- *     distribution.
- *   * Neither the name of Jolla Ltd nor the names of its contributors
- *     may be used to endorse or promote products derived from this
- *     software without specific prior written permission.
+ *   1. Redistributions of source code must retain the above copyright
+ *      notice, this list of conditions and the following disclaimer.
+ *   2. Redistributions in binary form must reproduce the above copyright
+ *      notice, this list of conditions and the following disclaimer
+ *      in the documentation and/or other materials provided with the
+ *      distribution.
+ *   3. Neither the names of the copyright holders nor the names of its
+ *      contributors may be used to endorse or promote products derived
+ *      from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -157,7 +157,7 @@ void BooksPageWidget::RenderTask::performTask()
 {
     if (!isCanceled() && !iData.isNull() && !iData->iView.isNull() &&
         iWidth > 0 && iHeight > 0) {
-        iImage = QImage(iWidth, iHeight, QImage::Format_RGB32);
+        iImage = QImage(iWidth, iHeight, QImage::Format_ARGB32_Premultiplied);
         if (!isCanceled()) {
             QPainter painter(&iImage);
             iData->paint(&painter);
@@ -192,7 +192,7 @@ void BooksPageWidget::ClearSelectionTask::performTask()
         const ZLTextArea& area = iData->iView->textArea();
         if (!area.selectionIsEmpty()) {
             area.clearSelection();
-            iImage = QImage(iWidth, iHeight, QImage::Format_RGB32);
+            iImage = QImage(iWidth, iHeight, QImage::Format_ARGB32_Premultiplied);
             if (!isCanceled()) {
                 QPainter painter(&iImage);
                 iData->paint(&painter);
@@ -288,10 +288,10 @@ public:
     FootnoteTask(QThreadPool* aPool, int aX, int aY, int aMaxWidth, int aMaxHeight,
         QString aPath, QString aLinkText, QString aRef,
         shared_ptr<ZLTextModel> aTextModel, shared_ptr<ZLTextStyle> aTextStyle,
-        bool aInvertColors) : HarbourTask(aPool),
+        const BooksSettings* aSettings) : HarbourTask(aPool),
         iTextModel(aTextModel), iTextStyle(aTextStyle),
-        iInvertColors(aInvertColors), iX(aX), iY(aY),
-        iMaxWidth(aMaxWidth), iMaxHeight(aMaxHeight),
+        iInvertColors(aSettings->invertColors()),
+        iX(aX), iY(aY), iMaxWidth(aMaxWidth), iMaxHeight(aMaxHeight),
         iRef(aRef), iLinkText(aLinkText), iPath(aPath) {}
     ~FootnoteTask();
 
@@ -354,12 +354,10 @@ void BooksPageWidget::FootnoteTask::performTask()
             BooksPaintContext paintContext(size.myWidth, size.myHeight);
             paintContext.setInvertColors(iInvertColors);
             ZLTextAreaController paintController(paintContext, *this, &cache);
-            iImage = QImage(size.myWidth, size.myHeight, QImage::Format_RGB32);
+            iImage = QImage(size.myWidth, size.myHeight, QImage::Format_ARGB32_Premultiplied);
             QPainter painter(&iImage);
             paintContext.beginPaint(&painter);
-            paintContext.clear(iInvertColors ?
-                BooksTextView::INVERTED_BACKGROUND :
-                BooksTextView::DEFAULT_BACKGROUND);
+            paintContext.clear(ZLColor(0 /* transparent */));
             paintController.setModel(iTextModel);
             paintController.preparePaintInfo();
             paintController.area().paint();
@@ -512,12 +510,7 @@ BooksPageWidget::BooksPageWidget(QQuickItem* aParent) :
     iCurrentPage(false),
     iPage(-1)
 {
-    connect(iSettings.data(),
-        SIGNAL(invertColorsChanged()),
-        SLOT(onInvertColorsChanged()));
-    setFillColor(qtColor(iSettings->invertColors() ?
-        BooksTextView::INVERTED_BACKGROUND :
-        BooksTextView::DEFAULT_BACKGROUND));
+    connect(iSettings.data(), SIGNAL(invertColorsChanged()), SLOT(onColorsChanged()));
     setFlag(ItemHasContents, true);
     iResizeTimer->setSingleShot(true);
     iResizeTimer->setInterval(0);
@@ -613,14 +606,11 @@ void BooksPageWidget::onTextStyleChanged()
     resetView();
 }
 
-void BooksPageWidget::onInvertColorsChanged()
+void BooksPageWidget::onColorsChanged()
 {
     HDEBUG(iPage);
     HASSERT(sender() == iSettings);
-    if (!iData.isNull() && !iData->iView.isNull()) {
-        iData->iView->setInvertColors(iSettings->invertColors());
-        scheduleRepaint();
-    }
+    scheduleRepaint();
 }
 
 void BooksPageWidget::onBookModelChanged()
@@ -797,7 +787,9 @@ void BooksPageWidget::scheduleRepaint()
     const int w = width();
     const int h = height();
     if (w > 0 && h > 0 && !iData.isNull() && !iData->iView.isNull()) {
-        iData->iView->setInvertColors(invertColors());
+        const shared_ptr<BooksTextView> view(iData->iView);
+        BooksSettings* settings = iSettings.data();
+        view->setInvertColors(settings->invertColors());
         (iRenderTask = new RenderTask(iTaskQueue->pool(), iData, w, h))->
             submit(this, SLOT(onRenderTaskDone()));
     } else {
@@ -970,7 +962,7 @@ void BooksPageWidget::onLongPressTaskDone()
                 (iFootnoteTask = new FootnoteTask(iTaskQueue->pool(),
                     task->iX, task->iY, width()*3/4, height()*10, book->path(),
                     task->iLinkText, QString::fromStdString(task->iLink), note,
-                    iTextStyle, iSettings->invertColors()))->
+                    iTextStyle, iSettings.data()))->
                     submit(this, SLOT(onFootnoteTaskDone()));
             } else {
                 HDEBUG("bad footnote" << QString(task->iLink.c_str()));
