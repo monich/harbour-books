@@ -124,14 +124,15 @@ public:
     int fontSizeAdjust() const;
 
     // QAbstractListModel
-    virtual QHash<int,QByteArray> roleNames() const;
-    virtual int rowCount(const QModelIndex& aParent) const;
-    virtual QVariant data(const QModelIndex& aIndex, int aRole) const;
+    virtual QHash<int,QByteArray> roleNames() const Q_DECL_OVERRIDE;
+    virtual int rowCount(const QModelIndex& aParent) const Q_DECL_OVERRIDE;
+    virtual QVariant data(const QModelIndex& aIndex, int aRole) const Q_DECL_OVERRIDE;
 
 private:
     void updateSize();
     void updateModel(int aPrevPageCount);
     void startReset(ResetReason aReason = ReasonUnknown, bool aFull = true);
+    void emitBookPosChanged();
 
 private Q_SLOTS:
     void onResetProgress(int aProgress);
@@ -141,11 +142,11 @@ private Q_SLOTS:
     void onHashChanged();
 
 Q_SIGNALS:
+    void loadingChanged() Q_DECL_OVERRIDE;
     void sizeChanged();
     void bookChanged();
     void bookModelChanged();
     void titleChanged();
-    void loadingChanged();
     void pageCountChanged();
     void pageMarksChanged();
     void progressChanged();

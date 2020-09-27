@@ -1,6 +1,6 @@
 /*
-  Copyright (C) 2015-2019 Jolla Ltd.
-  Copyright (C) 2015-2019 Slava Monich <slava.monich@jolla.com>
+  Copyright (C) 2015-2020 Jolla Ltd.
+  Copyright (C) 2015-2020 Slava Monich <slava.monich@jolla.com>
 
   You may use this file under the terms of BSD license as follows:
 
@@ -172,6 +172,7 @@ SilicaFlickable {
         flickDeceleration: maximumFlickVelocity
         orientation: ListView.Horizontal
         snapMode: ListView.SnapOneItem
+        highlightRangeMode: ListView.StrictlyEnforceRange
         spacing: Theme.paddingMedium
         interactive: !dragInProgress && !dragScrollAnimation.running
 

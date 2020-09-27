@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2015-2017 Jolla Ltd.
- * Contact: Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2015-2020 Jolla Ltd.
+ * Copyright (C) 2015-2020 Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
  *
@@ -8,15 +8,15 @@
  * modification, are permitted provided that the following conditions
  * are met:
  *
- *   * Redistributions of source code must retain the above copyright
- *     notice, this list of conditions and the following disclaimer.
- *   * Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in
- *     the documentation and/or other materials provided with the
- *     distribution.
- *   * Neither the name of Jolla Ltd nor the names of its contributors
- *     may be used to endorse or promote products derived from this
- *     software without specific prior written permission.
+ *   1. Redistributions of source code must retain the above copyright
+ *      notice, this list of conditions and the following disclaimer.
+ *   2. Redistributions in binary form must reproduce the above copyright
+ *      notice, this list of conditions and the following disclaimer
+ *      in the documentation and/or other materials provided with the
+ *      distribution.
+ *   3. Neither the names of the copyright holders nor the names of its
+ *      contributors may be used to endorse or promote products derived
+ *      from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -27,7 +27,7 @@
  * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
  * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
  * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE ``USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
@@ -49,7 +49,7 @@ BooksListWatcher::BooksListWatcher(QObject* aParent) :
     iContentY(0),
     iListView(NULL),
     iCenterMode(-1),
-    iPositionIsChanging(false),
+    iPositionIsChanging(0),
     iResizeTimer(new QTimer(this))
 {
     iResizeTimer->setSingleShot(true);
@@ -121,6 +121,7 @@ void BooksListWatcher::positionViewAtIndex(int aIndex)
     if (iListView) {
         HDEBUG(aIndex);
         doPositionViewAtIndex(aIndex);
+        updateCurrentIndex();
     }
 }
 
@@ -146,21 +147,15 @@ void BooksListWatcher::doPositionViewAtIndex(int aIndex)
             iCenterMode = 1;
         }
     }
-    iPositionIsChanging = true;
+    iPositionIsChanging++;
     positionViewAtIndex(aIndex, iCenterMode);
-    // This is probably a bug in QQuickListView - it first calculates
-    // the item position and then starts instantiating the delegates.
-    // If there are no delegates yet, then the average item size is zero
-    // and the resulting item position will always turn out to be zero.
-    // So if we are trying to position the list at a non-zero index and
-    // instead we got positioned at zero, try it again.
-    if (aIndex > 0 && getCurrentIndex() == 0) {
+    const int currentIndex = getCurrentIndex();
+    if (currentIndex != aIndex) {
         // Didn't work from the first try, give it another go
-        HDEBUG("retrying...");
+        HDEBUG("still" << currentIndex << ", retrying...");
         positionViewAtIndex(aIndex, iCenterMode);
     }
-    iPositionIsChanging = false;
-    updateCurrentIndex();
+    iPositionIsChanging--;
 }
 
 void BooksListWatcher::positionViewAtIndex(int aIndex, int aMode)
@@ -208,10 +203,12 @@ int BooksListWatcher::getCurrentIndex()
 void BooksListWatcher::tryToRestoreCurrentIndex()
 {
     HASSERT(!iPositionIsChanging);
-    const int index = getCurrentIndex();
-    if (iCurrentIndex != index) {
-        if (iCurrentIndex >= 0) {
+    if (iCurrentIndex >= 0 && !iPositionIsChanging) {
+        const int index = getCurrentIndex();
+        if (iCurrentIndex != index) {
+            HDEBUG(index << "->" << iCurrentIndex);
             doPositionViewAtIndex(iCurrentIndex);
+            HDEBUG(getCurrentIndex());
         }
     }
 }
@@ -219,9 +216,9 @@ void BooksListWatcher::tryToRestoreCurrentIndex()
 void BooksListWatcher::updateCurrentIndex()
 {
     HASSERT(!iPositionIsChanging);
-    if (contentWidth() > 0 || contentHeight() > 0) {
+    if (!iPositionIsChanging && (contentWidth() > 0 || contentHeight() > 0)) {
         const int index = getCurrentIndex();
-        if (iCurrentIndex != index) {
+        if (iCurrentIndex != index && index >= 0) {
             iCurrentIndex = index;
             HDEBUG(index << contentWidth() << "x" << contentHeight());
             Q_EMIT currentIndexChanged();
@@ -234,7 +231,7 @@ void BooksListWatcher::updateCurrentIndex()
 void BooksListWatcher::updateSize()
 {
     const QSize size(iListView->width(), iListView->height());
-    HDEBUG(size);
+    HDEBUG(size << getCurrentIndex());
     if (iSize != size) {
         const QSize oldSize(iSize);
         iSize = size;
@@ -282,7 +279,7 @@ void BooksListWatcher::onContentXChanged()
 {
     HASSERT(sender() == iListView);
     iContentX = contentX();
-    if (!iPositionIsChanging) {
+    if (!iPositionIsChanging && !iResizeTimer->isActive()) {
         updateCurrentIndex();
     }
 }
@@ -291,7 +288,7 @@ void BooksListWatcher::onContentYChanged()
 {
     HASSERT(sender() == iListView);
     iContentY = contentY();
-    if (!iPositionIsChanging) {
+    if (!iPositionIsChanging && !iResizeTimer->isActive()) {
         updateCurrentIndex();
     }
 }
@@ -299,7 +296,7 @@ void BooksListWatcher::onContentYChanged()
 void BooksListWatcher::onContentSizeChanged()
 {
     HASSERT(sender() == iListView);
-    if (!iPositionIsChanging) {
+    if (!iPositionIsChanging && !iResizeTimer->isActive()) {
         tryToRestoreCurrentIndex();
         updateCurrentIndex();
     }

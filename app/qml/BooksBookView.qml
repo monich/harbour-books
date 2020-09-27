@@ -84,6 +84,13 @@ SilicaFlickable {
         if (footnoteView) footnoteView.hide()
     }
 
+    function bzzz() {
+        if (!hapticFeedback) {
+            hapticFeedback = hapticFeedbackComponent.createObject(root)
+        }
+        hapticFeedback.play()
+    }
+
     onOrientationChanged: {
         if (footnoteView) {
             footnoteView.cancel()
@@ -94,10 +101,7 @@ SilicaFlickable {
 
     onSelectingChanged: {
         if (selecting) {
-            if (!hapticFeedback) {
-                hapticFeedback = hapticFeedbackComponent.createObject(root)
-            }
-            hapticFeedback.play()
+            bzzz()
         } else if (!selectionEmpty) {
             notification.publish()
         }
@@ -105,21 +109,25 @@ SilicaFlickable {
 
     Component {
         id: linkMenuComponent
+
         BooksLinkMenu { }
     }
 
     Component {
         id: imageViewComponent
+
         BooksImageView { }
     }
 
     Component {
         id: footnoteViewComponent
+
         BooksFootnoteView { }
     }
 
     Component {
         id: hapticFeedbackComponent
+
         ThemeEffect { effect: ThemeEffect.Press }
     }
 
@@ -127,27 +135,32 @@ SilicaFlickable {
         MenuItem {
             //% "Back to library"
             text: qsTrId("harbour-books-book-view-back")
+
             onClicked: root.closeBook()
         }
     }
 
     BookModel {
         id: bookModel
+
         book: root.book ? root.book : null
         size: bookViewWatcher.size
         leftMargin: Theme.horizontalPageMargin
         rightMargin: Theme.horizontalPageMargin
         topMargin: Theme.itemSizeSmall
         bottomMargin: Theme.itemSizeSmall
+
         onJumpToPage: bookView.jumpTo(page)
     }
 
     Notification {
         id: notification
+
         //: Pop-up notification
         //% "Copied to clipboard"
         previewBody: qsTrId("harbour-books-book-view-copied_to_clipboard")
         expireTimeout: 2000
+
         Component.onCompleted: {
             if ("icon" in notification) {
                 notification.icon = "icon-s-clipboard"
@@ -157,6 +170,7 @@ SilicaFlickable {
 
     SilicaListView {
         id: bookView
+
         model: bookModel
         anchors.fill: parent
         flickDeceleration: maximumFlickVelocity
@@ -167,12 +181,14 @@ SilicaFlickable {
         opacity: loading ? 0 : 1
         visible: opacity > 0
         interactive: root.interactive
+
         readonly property real maxContentX: Math.max(0, contentWidth - width)
         readonly property int currentPage: stackModel.currentPage
         property bool completed
 
         Component.onCompleted: {
             bookViewWatcher.positionViewAtIndex(currentPage)
+            pager.setPage(currentPage)
             completed = true
         }
 
@@ -180,6 +196,7 @@ SilicaFlickable {
             if (completed && !moving && !scrollAnimation.running) {
                 bookViewWatcher.positionViewAtIndex(currentPage)
             }
+            pager.setPage(currentPage)
         }
 
         onCurrentIndexChanged: {
@@ -189,17 +206,19 @@ SilicaFlickable {
         }
 
         onMovingChanged: {
-            if (!moving) {
+            if (!moving && currentIndex >= 0) {
                 updateModel()
             }
         }
 
         delegate: BooksPageView {
             id: pageView
+
             width: bookView.width
             height: bookView.height
-            model: bookModel
-            page: index
+            bookModel: bookView.model
+            page: model.pageIndex
+            bookPos: model.bookPos
             leftMargin: bookModel.leftMargin
             rightMargin: bookModel.rightMargin
             topMargin: bookModel.topMargin
@@ -210,6 +229,7 @@ SilicaFlickable {
             pageNumberVisible: _currentState.page
             currentPage: ListView.isCurrentItem
             title: bookModel.title
+
             onJumpToPage: bookView.jumpTo(page)
             onPushPosition: stackModel.pushPosition(position) // bookView.jumpTo(page)
             onPageClicked: {
@@ -248,17 +268,11 @@ SilicaFlickable {
             }
         }
 
-        property int jumpingTo: -1
         function jumpTo(page) {
-            if (book && page >=0 && page !== currentIndex) {
-                jumpingTo = page
+            if (book && page >=0) {
+                console.log("showing page", page)
                 bookViewWatcher.positionViewAtIndex(page)
-                pager.currentPage = page
-                jumpingTo = -1
-                if (currentIndex !== page) {
-                    console.log("oops, still at", currentPage)
-                    resetPager.restart()
-                }
+                stackModel.currentPage = page
             }
         }
 
@@ -282,19 +296,18 @@ SilicaFlickable {
 
         function updateModel() {
             hideViews()
-            stackModel.currentPage = currentIndex
-            if (!pager.pressed) {
-                pager.currentPage = currentIndex
-            }
+            stackModel.currentPage = bookViewWatcher.currentIndex
         }
 
         ListWatcher {
             id: bookViewWatcher
+
             listView: bookView
         }
 
         NumberAnimation {
             id: scrollAnimation
+
             target: bookView
             property: "contentX"
             duration: 500
@@ -303,17 +316,9 @@ SilicaFlickable {
 
         Behavior on opacity { FadeAnimation {} }
 
-        Timer {
-            id: resetPager
-            interval: 0
-            onTriggered: {
-                console.log("resetting pager to", bookView.currentIndex)
-                pager.currentPage = bookView.currentIndex
-            }
-        }
-
         BooksPageTools {
             id: pageTools
+
             anchors {
                 top: parent.top
                 left: parent.left
@@ -323,13 +328,16 @@ SilicaFlickable {
             rightMargin: bookModel.rightMargin
             opacity: _currentState.tools ? 1 : 0
             visible: opacity > 0 && book && bookModel.pageCount && !loading
-            Behavior on opacity { FadeAnimation {} }
+
             onIncreaseFontSize: bookModel.increaseFontSize()
             onDecreaseFontSize: bookModel.decreaseFontSize()
+
+            Behavior on opacity { FadeAnimation {} }
         }
 
         BooksPager {
             id: pager
+
             anchors {
                 left: parent.left
                 right: parent.right
@@ -341,15 +349,19 @@ SilicaFlickable {
             stack: stackModel
             pageCount: bookModel.pageCount
             width: parent.width
-            opacity: (_currentState.pager && book && bookModel.pageCount) ? 0.75 : 0
+            opacity: (_currentState.pager && pageCount) ? 0.75 : 0
             visible: opacity > 0
+
             onPageChanged: bookView.jumpTo(page)
+            onFeedback: bzzz()
+
             Behavior on opacity { FadeAnimation {} }
         }
     }
 
     BooksTitleLabel {
         id: titleLabel
+
         anchors {
             top: parent.top
             left: parent.left
@@ -365,6 +377,7 @@ SilicaFlickable {
 
     BusyIndicator {
         id: busyIndicator
+
         anchors.centerIn: parent
         size: BusyIndicatorSize.Large
         running: loading
@@ -384,10 +397,12 @@ SilicaFlickable {
             bottom: parent.bottom
             horizontalCenter: parent.horizontalCenter
         }
-        onClicked: root.closeBook()
         enabled: loading && bookModel.resetReason === BookModel.ReasonLoading
         visible: opacity > 0
         opacity: enabled ? 1.0 : 0.0
+
+        onClicked: root.closeBook()
+
         Behavior on opacity { FadeAnimation { } }
     }
 
@@ -402,7 +417,6 @@ SilicaFlickable {
         color: Theme.highlightColor
         opacity: loading ? 1 : 0
         visible: opacity > 0
-        Behavior on opacity { FadeAnimation {} }
         text: bookModel ? (bookModel.resetReason == BookModel.ReasonLoading ?
             //% "Loading..."
             qsTrId("harbour-books-book-view-loading") :
@@ -414,10 +428,11 @@ SilicaFlickable {
             qsTrId("harbour-books-book-view-applying_smaller_fonts") :
             //% "Formatting..."
             qsTrId("harbour-books-book-view-formatting")) : ""
+
+        Behavior on opacity { FadeAnimation {} }
     }
 
-    function performAction(action)
-    {
+    function performAction(action) {
         switch (action) {
         case BooksSettings.ActionPreviousPage:
             bookView.prevPage()
@@ -431,8 +446,10 @@ SilicaFlickable {
     MediaKey {
         enabled: viewActive && haveVolumeUpAction
         key: Qt.Key_VolumeUp
+
         onPressed: volumeUpAction()
         onRepeat: volumeUpAction()
+
         function volumeUpAction() {
             performAction(Settings.volumeUpAction)
         }
@@ -441,8 +458,10 @@ SilicaFlickable {
     MediaKey {
         enabled: viewActive && haveVolumeDownAction
         key: Qt.Key_VolumeDown
+
         onPressed: volumeDownAction()
         onRepeat: volumeDownAction()
+
         function volumeDownAction() {
             performAction(Settings.volumeDownAction)
         }
@@ -455,6 +474,7 @@ SilicaFlickable {
 
         Resource {
             id: volumeKeysResource
+
             type: Resource.ScaleButton
             optional: true
         }

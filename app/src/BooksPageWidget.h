@@ -62,6 +62,7 @@ class BooksPageWidget: public QQuickPaintedItem, private BooksLoadingProperty
     Q_PROPERTY(int topMargin READ topMargin WRITE setTopMargin NOTIFY topMarginChanged)
     Q_PROPERTY(int bottomMargin READ bottomMargin WRITE setBottomMargin NOTIFY bottomMarginChanged)
     Q_PROPERTY(BooksBookModel* model READ model WRITE setModel NOTIFY modelChanged)
+    Q_PROPERTY(BooksPos bookPos READ bookPos WRITE setBookPos NOTIFY bookPosChanged)
 
 public:
     class Data;
@@ -85,6 +86,9 @@ public:
     BooksBookModel* model() const;
     void setModel(BooksBookModel* aModel);
 
+    const BooksPos& bookPos() const;
+    void setBookPos(const BooksPos& aBookPos);
+
     int leftMargin() const;
     int rightMargin() const;
     int topMargin() const;
@@ -103,13 +107,14 @@ public:
     Q_INVOKABLE void clearSelection();
 
 Q_SIGNALS:
-    void loadingChanged();
+    void loadingChanged() Q_DECL_OVERRIDE;
     void pressedChanged();
     void selectingChanged();
     void selectionEmptyChanged();
     void currentPageChanged();
     void pageChanged();
     void modelChanged();
+    void bookPosChanged();
     void leftMarginChanged();
     void rightMarginChanged();
     void topMarginChanged();
@@ -125,10 +130,7 @@ private Q_SLOTS:
     void onWidthChanged();
     void onHeightChanged();
     void onResizeTimeout();
-    void onBookModelChanged();
     void onBookModelDestroyed();
-    void onBookModelPageMarksChanged();
-    void onBookModelLoadingChanged();
     void onTextStyleChanged();
     void onColorsChanged();
     void onResetTaskDone();
@@ -141,7 +143,7 @@ private Q_SLOTS:
     void onFootnoteTaskDone();
 
 private:
-    void paint(QPainter *painter);
+    void paint(QPainter *painter) Q_DECL_OVERRIDE;
     void updateSize();
     void resetView();
     void releaseExtendSelectionTasks();
@@ -160,7 +162,7 @@ private:
     QSharedPointer<BooksSettings> iSettings;
     shared_ptr<BooksTaskQueue> iTaskQueue;
     shared_ptr<ZLTextStyle> iTextStyle;
-    BooksPos iPageMark;
+    BooksPos iBookPos;
     QTimer* iResizeTimer;
     BooksBookModel* iModel;
     BooksMargins iMargins;
@@ -192,6 +194,8 @@ inline bool BooksPageWidget::currentPage() const
     { return iCurrentPage; }
 inline int BooksPageWidget::page() const
     { return iPage; }
+inline const BooksPos& BooksPageWidget::bookPos() const
+    { return iBookPos; }
 inline BooksBookModel* BooksPageWidget::model() const
     { return iModel; }
 inline int BooksPageWidget::leftMargin() const

@@ -546,7 +546,7 @@ void BooksPageWidget::setPressed(bool aPressed)
     if (iPressed != aPressed) {
         iPressed = aPressed;
         if (!iPressed && iSelecting) {
-            HDEBUG("leaving selection mode");
+            HDEBUG("page" << iPage << "leaving selection mode");
             iSelecting = false;
             Q_EMIT selectingChanged();
         }
@@ -558,7 +558,7 @@ void BooksPageWidget::setCurrentPage(bool aCurrentPage)
 {
     if (iCurrentPage != aCurrentPage) {
         iCurrentPage = aCurrentPage;
-        HDEBUG(iCurrentPage);
+        HDEBUG("page" << iPage << iCurrentPage);
         if (!iCurrentPage) clearSelection();
         Q_EMIT currentPageChanged();
     }
@@ -578,19 +578,11 @@ void BooksPageWidget::setModel(BooksBookModel* aModel)
             }
 #endif // HARBOUR_DEBUG
             iTextStyle = iModel->textStyle();
-            iPageMark = iModel->pageMark(iPage);
-            connect(iModel, SIGNAL(bookModelChanged()),
-                SLOT(onBookModelChanged()));
             connect(iModel, SIGNAL(destroyed()),
                 SLOT(onBookModelDestroyed()));
-            connect(iModel, SIGNAL(pageMarksChanged()),
-                SLOT(onBookModelPageMarksChanged()));
-            connect(iModel, SIGNAL(loadingChanged()),
-                SLOT(onBookModelLoadingChanged()));
             connect(iModel, SIGNAL(textStyleChanged()),
                 SLOT(onTextStyleChanged()));
         } else {
-            iPageMark.invalidate();
             iTextStyle = BooksTextStyle::defaults();
         }
         resetView();
@@ -613,14 +605,6 @@ void BooksPageWidget::onColorsChanged()
     scheduleRepaint();
 }
 
-void BooksPageWidget::onBookModelChanged()
-{
-    HDEBUG(iModel->title());
-    BooksLoadingSignalBlocker block(this);
-    iPageMark = iModel->pageMark(iPage);
-    resetView();
-}
-
 void BooksPageWidget::onBookModelDestroyed()
 {
     HDEBUG("model destroyed");
@@ -631,43 +615,23 @@ void BooksPageWidget::onBookModelDestroyed()
     resetView();
 }
 
-void BooksPageWidget::onBookModelPageMarksChanged()
-{
-    const BooksPos pos = iModel->pageMark(iPage);
-    if (iPageMark != pos) {
-        BooksLoadingSignalBlocker block(this);
-        iPageMark = pos;
-        HDEBUG("page" << iPage);
-        resetView();
-    }
-}
-
-void BooksPageWidget::onBookModelLoadingChanged()
-{
-    BooksLoadingSignalBlocker block(this);
-    if (!iModel->loading()) {
-        HDEBUG("page" << iPage);
-        const BooksPos pos = iModel->pageMark(iPage);
-        if (iPageMark != pos) {
-            iPageMark = pos;
-            resetView();
-        }
-    }
-}
-
 void BooksPageWidget::setPage(int aPage)
 {
     if (iPage != aPage) {
         BooksLoadingSignalBlocker block(this);
         iPage = aPage;
         HDEBUG(iPage);
-        const BooksPos pos = iModel->pageMark(iPage);
-        if (iPageMark != pos) {
-            iPageMark = pos;
-            resetView();
-        }
-        resetView();
         Q_EMIT pageChanged();
+    }
+}
+
+void BooksPageWidget::setBookPos(const BooksPos& aBookPos)
+{
+    if (iBookPos != aBookPos) {
+        iBookPos = aBookPos;
+        HDEBUG("page" << iPage << iBookPos);
+        resetView();
+        Q_EMIT bookPosChanged();
     }
 }
 
@@ -717,7 +681,7 @@ void BooksPageWidget::paint(QPainter* aPainter)
         HDEBUG("page" << iPage);
         aPainter->drawImage(0, 0, iImage);
         iEmpty = false;
-    } else if (iPage >= 0 && iPageMark.valid() && !iData.isNull()) {
+    } else if (iPage >= 0 && iBookPos.valid() && !iData.isNull()) {
         if (!iRenderTask) {
             HDEBUG("page" << iPage << "(scheduled)");
             scheduleRepaint();
@@ -755,18 +719,19 @@ void BooksPageWidget::resetView()
         iFootnoteTask->release(this);
         iFootnoteTask = NULL;
     }
+    iImage = QImage();
     iData.reset();
-    if (iPage >= 0 && iPageMark.valid() &&
+    if (iPage >= 0 && iBookPos.valid() &&
         width() > 0 && height() > 0 && iModel) {
         shared_ptr<ZLTextModel> textModel = iModel->bookTextModel();
         if (!textModel.isNull()) {
             (iResetTask = new ResetTask(iTaskQueue->pool(), textModel, iTextStyle,
-                width(), height(), iMargins, iPageMark))->
+                width(), height(), iMargins, iBookPos))->
                 submit(this, SLOT(onResetTaskDone()));
             cancelRepaint();
         }
     }
-    if (!iResetTask && !iEmpty) {
+    if (!iEmpty) {
         update();
     }
 }
@@ -788,8 +753,7 @@ void BooksPageWidget::scheduleRepaint()
     const int h = height();
     if (w > 0 && h > 0 && !iData.isNull() && !iData->iView.isNull()) {
         const shared_ptr<BooksTextView> view(iData->iView);
-        BooksSettings* settings = iSettings.data();
-        view->setInvertColors(settings->invertColors());
+        view->setInvertColors(iSettings->invertColors());
         (iRenderTask = new RenderTask(iTaskQueue->pool(), iData, w, h))->
             submit(this, SLOT(onRenderTaskDone()));
     } else {
@@ -1013,6 +977,8 @@ void BooksPageWidget::onWidthChanged()
     HVERBOSE((int)width());
     // Width change will probably be followed by height change
     iResizeTimer->start();
+    iImage = QImage();
+    update();
 }
 
 void BooksPageWidget::onHeightChanged()
@@ -1024,6 +990,8 @@ void BooksPageWidget::onHeightChanged()
         updateSize();
     } else {
         iResizeTimer->start();
+        iImage = QImage();
+        update();
     }
 }
 

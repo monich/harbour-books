@@ -42,8 +42,9 @@ Rectangle {
 
     color: Settings.pageBackgroundColor
 
-    property alias model: widget.model
     property alias page: widget.page
+    property alias bookPos: widget.bookPos
+    property alias bookModel: widget.model
     property alias leftMargin: widget.leftMargin
     property alias rightMargin: widget.rightMargin
     property alias topMargin: widget.topMargin

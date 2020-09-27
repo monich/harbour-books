@@ -299,7 +299,8 @@ void BooksBookModel::PagingTask::performTask()
 // ==========================================================================
 
 enum BooksBookModelRole {
-    BooksBookModelPageIndex = Qt::UserRole
+    BooksBookModelPageIndex = Qt::UserRole,
+    BooksBookModelBookPos
 };
 
 BooksBookModel::BooksBookModel(QObject* aParent) :
@@ -528,11 +529,23 @@ void BooksBookModel::setBottomMargin(int aMargin)
     }
 }
 
+void BooksBookModel::emitBookPosChanged()
+{
+    const int n = pageCount();
+    if (n > 0) {
+        const QModelIndex topLeft(index(0));
+        const QModelIndex bottomRight(index(n - 1));
+        const QVector<int> roles(1, BooksBookModelBookPos);
+        Q_EMIT dataChanged(topLeft, bottomRight, roles);
+    }
+}
+
 void BooksBookModel::updateModel(int aPrevPageCount)
 {
     const int newPageCount = pageCount();
     if (aPrevPageCount != newPageCount) {
         HDEBUG(aPrevPageCount << "->" << newPageCount);
+        emitBookPosChanged();
         if (newPageCount > aPrevPageCount) {
             beginInsertRows(QModelIndex(), aPrevPageCount, newPageCount-1);
             endInsertRows();
@@ -695,6 +708,7 @@ QHash<int,QByteArray> BooksBookModel::roleNames() const
 {
     QHash<int, QByteArray> roles;
     roles.insert(BooksBookModelPageIndex, "pageIndex");
+    roles.insert(BooksBookModelBookPos, "bookPos");
     return roles;
 }
 
@@ -705,10 +719,13 @@ int BooksBookModel::rowCount(const QModelIndex&) const
 
 QVariant BooksBookModel::data(const QModelIndex& aIndex, int aRole) const
 {
-    const int i = aIndex.row();
-    if (i >= 0 && i < pageCount()) {
-        switch (aRole) {
-        case BooksBookModelPageIndex: return i;
+    const int row = aIndex.row();
+    if (row >= 0 && row < pageCount()) {
+        switch ((BooksBookModelRole)aRole) {
+        case BooksBookModelPageIndex:
+            return row;
+        case BooksBookModelBookPos:
+            return QVariant::fromValue(iData->iPageMarks.at(row));
         }
     }
     return QVariant();
