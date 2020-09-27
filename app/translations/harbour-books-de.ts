@@ -7,6 +7,11 @@
         <source>Books</source>
         <translation>Bücher</translation>
     </message>
+    <message id="harbour-books-menu-settings">
+        <source>Settings</source>
+        <extracomment>Pulley menu item</extracomment>
+        <translation>Einstellungen</translation>
+    </message>
     <message id="harbour-books-book-view-back">
         <source>Back to library</source>
         <translation>Zur Bibliothek</translation>
@@ -66,11 +71,6 @@
             <numerusform>%0 Buch</numerusform>
             <numerusform>%0 Bücher</numerusform>
         </translation>
-    </message>
-    <message id="harbour-books-storage-menu-settings">
-        <source>Settings</source>
-        <extracomment>Pulley menu item</extracomment>
-        <translation>Einstellungen</translation>
     </message>
     <message id="harbour-books-storage-menu-scan_downloads">
         <source>Scan downloads</source>

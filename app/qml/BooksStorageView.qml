@@ -95,7 +95,7 @@ SilicaFlickable {
         MenuItem {
             //: Pulley menu item
             //% "Settings"
-            text: qsTrId("harbour-books-storage-menu-settings")
+            text: qsTrId("harbour-books-menu-settings")
             visible: !editMode && BooksSettingsMenu
             onClicked: {
                 if (!_settingsComponent) {

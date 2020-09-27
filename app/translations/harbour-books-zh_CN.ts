@@ -7,6 +7,11 @@
         <source>Books</source>
         <translation>书籍</translation>
     </message>
+    <message id="harbour-books-menu-settings">
+        <source>Settings</source>
+        <extracomment>Pulley menu item</extracomment>
+        <translation>设置</translation>
+    </message>
     <message id="harbour-books-book-view-back">
         <source>Back to library</source>
         <translation>返回书库</translation>
@@ -65,11 +70,6 @@
         <translation>
             <numerusform>%0 本书籍</numerusform>
         </translation>
-    </message>
-    <message id="harbour-books-storage-menu-settings">
-        <source>Settings</source>
-        <extracomment>Pulley menu item</extracomment>
-        <translation>设置</translation>
     </message>
     <message id="harbour-books-storage-menu-scan_downloads">
         <source>Scan downloads</source>

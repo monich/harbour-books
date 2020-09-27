@@ -7,6 +7,11 @@
         <source>Books</source>
         <translation>Könyvek</translation>
     </message>
+    <message id="harbour-books-menu-settings">
+        <source>Settings</source>
+        <extracomment>Pulley menu item</extracomment>
+        <translation>Beállítások</translation>
+    </message>
     <message id="harbour-books-book-view-back">
         <source>Back to library</source>
         <translation>Vissza a könyvtárhoz</translation>
@@ -65,11 +70,6 @@
         <translation>
             <numerusform>%0 könyv</numerusform>
         </translation>
-    </message>
-    <message id="harbour-books-storage-menu-settings">
-        <source>Settings</source>
-        <extracomment>Pulley menu item</extracomment>
-        <translation>Beállítások</translation>
     </message>
     <message id="harbour-books-storage-menu-scan_downloads">
         <source>Scan downloads</source>

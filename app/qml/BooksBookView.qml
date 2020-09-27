@@ -77,6 +77,7 @@ SilicaFlickable {
     property var linkMenu
     property var imageView
     property var footnoteView
+    property var settingsComponent
 
     function hideViews() {
         if (linkMenu) linkMenu.hide()
@@ -132,6 +133,25 @@ SilicaFlickable {
     }
 
     PullDownMenu {
+        MenuItem {
+            //: Pulley menu item
+            //% "Settings"
+            text: qsTrId("harbour-books-menu-settings")
+            visible: !editMode && BooksSettingsMenu
+            onClicked: {
+                if (!settingsComponent) {
+                    settingsComponent = Qt.createComponent("../settings/BooksSettings.qml")
+                    if (settingsComponent.status !== Component.Ready) {
+                        console.log(settingsComponent.errorString())
+                    }
+                }
+                pageStack.push(settingsComponent, {
+                    "title" : text,
+                    "allowedOrientations": window.allowedOrientations,
+                    "followOrientationChanges": true
+                })
+            }
+        }
         MenuItem {
             //% "Back to library"
             text: qsTrId("harbour-books-book-view-back")
