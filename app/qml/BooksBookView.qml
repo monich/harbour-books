@@ -98,7 +98,7 @@ SilicaFlickable {
         }
     }
 
-    onBookChanged: if (!book) pager.currentPage = 0
+    onBookChanged: if (!book) pager.setPage(0)
 
     onSelectingChanged: {
         if (selecting) {
@@ -137,7 +137,7 @@ SilicaFlickable {
             //: Pulley menu item
             //% "Settings"
             text: qsTrId("harbour-books-menu-settings")
-            visible: !editMode && BooksSettingsMenu
+            visible: BooksSettingsMenu
             onClicked: {
                 if (!settingsComponent) {
                     settingsComponent = Qt.createComponent("../settings/BooksSettings.qml")
