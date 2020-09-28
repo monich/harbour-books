@@ -140,8 +140,8 @@ void BooksPageWidget::ResetTask::performTask()
 
 class BooksPageWidget::RenderTask : public HarbourTask {
 public:
-    RenderTask(QThreadPool* aPool, Data::Ptr aData,
-        int aWidth, int aHeight) : HarbourTask(aPool),
+    RenderTask(QThreadPool* aPool, QThread* aTargetThread, Data::Ptr aData,
+        int aWidth, int aHeight) : HarbourTask(aPool, aTargetThread),
         iData(aData), iWidth(aWidth), iHeight(aHeight) {}
 
     void performTask();
@@ -754,8 +754,8 @@ void BooksPageWidget::scheduleRepaint()
     if (w > 0 && h > 0 && !iData.isNull() && !iData->iView.isNull()) {
         const shared_ptr<BooksTextView> view(iData->iView);
         view->setInvertColors(iSettings->invertColors());
-        (iRenderTask = new RenderTask(iTaskQueue->pool(), iData, w, h))->
-            submit(this, SLOT(onRenderTaskDone()));
+        (iRenderTask = new RenderTask(iTaskQueue->pool(), thread(),
+            iData, w, h))->submit(this, SLOT(onRenderTaskDone()));
     } else {
         update();
     }
