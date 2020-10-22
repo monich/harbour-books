@@ -68,7 +68,8 @@ SilicaFlickable {
         (!imageView || !imageView.visible) &&
         (!footnoteView || !footnoteView.visible)
 
-    readonly property bool viewActive: Qt.application.active && book
+    property bool pageActive
+    readonly property bool viewActive: pageActive && Qt.application.active && book
     readonly property bool haveVolumeUpAction: Settings.volumeUpAction !== BooksSettings.ActionNone
     readonly property bool haveVolumeDownAction: Settings.volumeDownAction !== BooksSettings.ActionNone
     readonly property bool haveKeyAction: haveVolumeUpAction || haveVolumeDownAction
