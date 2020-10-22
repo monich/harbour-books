@@ -178,7 +178,6 @@ HEADERS += \
 
 HEADERS += \
   $$HARBOUR_INCLUDE_DIR/HarbourDisplayBlanking.h \
-  $$HARBOUR_INCLUDE_DIR/HarbourImageProvider.h \
   $$HARBOUR_INCLUDE_DIR/HarbourJson.h \
   $$HARBOUR_INCLUDE_DIR/HarbourMediaPlugin.h \
   $$HARBOUR_INCLUDE_DIR/HarbourPluginLoader.h \
@@ -192,7 +191,6 @@ HEADERS += \
 
 SOURCES += \
   $$HARBOUR_SRC_DIR/HarbourDisplayBlanking.cpp \
-  $$HARBOUR_SRC_DIR/HarbourImageProvider.cpp \
   $$HARBOUR_SRC_DIR/HarbourJson.cpp \
   $$HARBOUR_SRC_DIR/HarbourMce.cpp \
   $$HARBOUR_SRC_DIR/HarbourMediaPlugin.cpp \

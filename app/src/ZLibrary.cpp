@@ -39,7 +39,6 @@
 #include "BooksSettings.h"
 
 #include "HarbourDebug.h"
-#include "HarbourImageProvider.h"
 #include "HarbourMediaPlugin.h"
 #include "HarbourPolicyPlugin.h"
 
@@ -248,7 +247,6 @@ void ZLibrary::run(ZLApplication* aApp)
         BOOKS_QML_PLUGIN_V1, BOOKS_QML_PLUGIN_V2);
     HarbourMediaPlugin::registerTypes(engine, BOOKS_QML_PLUGIN,
         BOOKS_QML_PLUGIN_V1, BOOKS_QML_PLUGIN_V2);
-    engine->addImageProvider("harbour", new HarbourImageProvider);
     engine->addImageProvider(BooksImageProvider::PROVIDER_ID,
         new BooksImageProvider(root));
 
