@@ -146,6 +146,16 @@
         <extracomment>Slider value label for the standard font size</extracomment>
         <translation>Стандартный</translation>
     </message>
+    <message id="harbour-books-settings-page-night_mode_example">
+        <source>Night mode</source>
+        <extracomment>Night mode example label</extracomment>
+        <translation>Ночной режим</translation>
+    </message>
+    <message id="harbour-books-settings-page-night_mode_brightness_label">
+        <source>Night mode brightness</source>
+        <extracomment>Slider label</extracomment>
+        <translation>Яркость в ночном режиме</translation>
+    </message>
     <message id="harbour-books-settings-page-orientation_label">
         <source>Orientation</source>
         <extracomment>Combo box label</extracomment>

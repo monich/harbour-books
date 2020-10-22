@@ -35,11 +35,15 @@ import QtQuick 2.0
 import Sailfish.Silica 1.0
 import org.nemomobile.configuration 1.0
 
+import "../qml/Books.js" as Books
+import "../qml/harbour"
+
 Page {
     id: page
     property bool followOrientationChanges
     property alias title: pageHeader.title
     readonly property string rootPath: "/apps/" + appName() + "/"
+    readonly property bool darkOnLight: ('colorScheme' in Theme) && Theme.colorScheme === 1
 
     // Deduce package name from the path
     function appName() {
@@ -67,6 +71,44 @@ Page {
     SilicaFlickable {
         anchors.fill: parent
         contentHeight: content.height
+
+        // Night mode example (positioned right above the slider)
+        Rectangle {
+            opacity: nightModeBrightnessSlider.pressed ? 1.0 : 0
+            visible: opacity > 0
+            radius: Theme.paddingSmall
+            width: nightModeExampleLabel.width + 2 * Theme.paddingLarge
+            height: nightModeExampleLabel.height + 2 * Theme.paddingMedium
+            readonly property int xMin:  nightModeBrightnessSlider.leftMargin
+            readonly property int xMax: content.width - nightModeBrightnessSlider.rightMargin - width
+            x: content.x + Math.max(Math.min(nightModeBrightnessSlider.sliderLeft + Math.round(nightModeBrightnessSlider.sliderThumbX - width/2.0), xMax), xMin)
+            y: content.y + nightModeBrightnessSlider.y - height
+            z: nightModeBrightnessSlider.z + 1
+            color: "black"
+            border {
+                color: Theme.highlightColor
+                width: Math.ceil(radius/5)
+            }
+
+            Label {
+                id: nightModeExampleLabel
+
+                anchors.centerIn: parent
+                color: "white"
+                opacity: Books.contentOpacity(nightModeBrightness.value)
+                //: Night mode example label
+                //% "Night mode"
+                text: qsTrId("harbour-books-settings-page-night_mode_example")
+                font {
+                    bold: true
+                    pixelSize: Theme.fontSizeLarge
+                    family: "Times"
+                }
+            }
+
+            Behavior on x { SmoothedAnimation { duration: 125 } }
+            Behavior on opacity { FadeAnimation { duration: 500 } }
+        }
 
         Column {
             id: content
@@ -99,7 +141,7 @@ Page {
                 //% "Font size"
                 label: qsTrId("harbour-books-settings-page-font_size_label")
                 valueText: (value === 0) ? normal : ((value > 0) ? ("+" + value) : value)
-                width: page.width
+                width: parent.width
                 anchors.horizontalCenter: parent.horizontalCenter
                 onSliderValueChanged: fontSize.value = value
                 Component.onCompleted: value = fontSize.value
@@ -109,6 +151,55 @@ Page {
                     key: rootPath + "fontSize"
                     defaultValue: 0
                     onValueChanged: fontSizeSlider.value = value
+                }
+            }
+
+            Slider {
+                id: nightModeBrightnessSlider
+                width: parent.width
+                //: Slider label
+                //% "Night mode brightness"
+                label: qsTrId("harbour-books-settings-page-night_mode_brightness_label")
+                stepSize: (maximumValue - minimumValue) / 100.0
+                anchors.horizontalCenter: parent.horizontalCenter
+                onSliderValueChanged: nightModeBrightness.value = value
+                value: nightModeBrightness.value
+
+                readonly property real sliderLeft: x + leftMargin
+                readonly property real sliderRight: x + width - rightMargin
+                readonly property real sliderWidth: width - leftMargin - rightMargin
+                readonly property real sliderThumbX: sliderLeft + (maximumValue > minimumValue) ? (sliderWidth * sliderValue / (maximumValue - minimumValue)) : 0
+                readonly property real sliderBarVerticalCenter: Math.round(height - Theme.fontSizeSmall - Theme.paddingSmall - Theme.itemSizeExtraSmall*3/8)
+                readonly property color highlightColor: highlighted ? Theme.secondaryHighlightColor : Theme.secondaryColor
+
+                ConfigurationValue {
+                    id: nightModeBrightness
+                    key: rootPath + "nightModeBrightness"
+                    defaultValue: 1
+                }
+
+                HarbourHighlightIcon {
+                    source: "images/brightness.svg"
+                    y: nightModeBrightnessSlider.sliderBarVerticalCenter - Math.round(height/2)
+                    anchors {
+                        left: parent.left
+                        leftMargin: nightModeBrightnessSlider.leftMargin - Theme.paddingSmall - width
+                    }
+                    sourceSize.height: Math.round(Theme.iconSizeSmall * 0.8)
+                    highlightColor: nightModeBrightnessSlider.highlightColor
+                    opacity: (darkOnLight && !nightModeBrightnessSlider.highlighted) ? 0.6 : 1.0
+                }
+
+                HarbourHighlightIcon {
+                    source: "images/brightness.svg"
+                    y: nightModeBrightnessSlider.sliderBarVerticalCenter - Math.round(height/2)
+                    anchors {
+                        right: parent.right
+                        rightMargin: nightModeBrightnessSlider.rightMargin - Theme.paddingSmall - width
+                    }
+                    sourceSize.height: Math.round(Theme.iconSizeSmall * 1.2)
+                    highlightColor: nightModeBrightnessSlider.highlightColor
+                    opacity: (darkOnLight && !nightModeBrightnessSlider.highlighted) ? 0.6 : 1.0
                 }
             }
 

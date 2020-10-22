@@ -144,6 +144,16 @@
         <extracomment>Slider value label for the standard font size</extracomment>
         <translation>Por defecto</translation>
     </message>
+    <message id="harbour-books-settings-page-night_mode_example">
+        <source>Night mode</source>
+        <extracomment>Night mode example label</extracomment>
+        <translation type="unfinished">Modo nocturno</translation>
+    </message>
+    <message id="harbour-books-settings-page-night_mode_brightness_label">
+        <source>Night mode brightness</source>
+        <extracomment>Slider label</extracomment>
+        <translation type="unfinished">Brillo en modo nocturno</translation>
+    </message>
     <message id="harbour-books-settings-page-orientation_label">
         <source>Orientation</source>
         <extracomment>Combo box label</extracomment>

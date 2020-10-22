@@ -57,6 +57,7 @@ OTHER_FILES += \
   qml/images/* \
   settings/*.qml \
   settings/*.json \
+  settings/images/* \
   data/default/* \
   data/zlibrary/core/encodings/* \
   data/zlibrary/core/resources/*
@@ -203,6 +204,7 @@ SOURCES += \
 
 HARBOUR_QML_COMPONENTS = \
     $$HARBOUR_LIB_QML/HarbourFitLabel.qml \
+    $$HARBOUR_LIB_QML/HarbourHighlightIcon.qml \
     $$HARBOUR_LIB_QML/HarbourHorizontalSwipeHint.qml
 
 OTHER_FILES += $${HARBOUR_QML_COMPONENTS}
@@ -239,6 +241,10 @@ app_settings {
 settings_qml.files = settings/*.qml
 settings_qml.path = /usr/share/$${TARGET}/settings/
 INSTALLS += settings_qml
+
+settings_images.files = settings/images/*.svg
+settings_images.path = /usr/share/$${TARGET}/settings/images/
+INSTALLS += settings_images
 
 # Desktop file
 equals(PREFIX, "openrepos") {
