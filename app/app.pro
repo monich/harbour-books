@@ -115,12 +115,10 @@ SOURCES += \
   src/BooksImportModel.cpp \
   src/BooksListWatcher.cpp \
   src/BooksLoadingProperty.cpp \
-  src/BooksMediaPlugin.cpp \
   src/BooksPageStack.cpp \
   src/BooksPageWidget.cpp \
   src/BooksPaintContext.cpp \
   src/BooksPathModel.cpp \
-  src/BooksPolicyPlugin.cpp \
   src/BooksPos.cpp \
   src/BooksSaveTimer.cpp \
   src/BooksSettings.cpp \
@@ -159,12 +157,10 @@ HEADERS += \
   src/BooksItem.h \
   src/BooksListWatcher.h \
   src/BooksLoadingProperty.h \
-  src/BooksMediaPlugin.h \
   src/BooksPageStack.h \
   src/BooksPageWidget.h \
   src/BooksPaintContext.h \
   src/BooksPathModel.h \
-  src/BooksPolicyPlugin.h \
   src/BooksPos.h \
   src/BooksSaveTimer.h \
   src/BooksSettings.h \
@@ -183,7 +179,9 @@ HEADERS += \
   $$HARBOUR_INCLUDE_DIR/HarbourDisplayBlanking.h \
   $$HARBOUR_INCLUDE_DIR/HarbourImageProvider.h \
   $$HARBOUR_INCLUDE_DIR/HarbourJson.h \
+  $$HARBOUR_INCLUDE_DIR/HarbourMediaPlugin.h \
   $$HARBOUR_INCLUDE_DIR/HarbourPluginLoader.h \
+  $$HARBOUR_INCLUDE_DIR/HarbourPolicyPlugin.h \
   $$HARBOUR_INCLUDE_DIR/HarbourSystem.h \
   $$HARBOUR_INCLUDE_DIR/HarbourTask.h \
   $$HARBOUR_INCLUDE_DIR/HarbourTheme.h
@@ -196,7 +194,9 @@ SOURCES += \
   $$HARBOUR_SRC_DIR/HarbourImageProvider.cpp \
   $$HARBOUR_SRC_DIR/HarbourJson.cpp \
   $$HARBOUR_SRC_DIR/HarbourMce.cpp \
+  $$HARBOUR_SRC_DIR/HarbourMediaPlugin.cpp \
   $$HARBOUR_SRC_DIR/HarbourPluginLoader.cpp \
+  $$HARBOUR_SRC_DIR/HarbourPolicyPlugin.cpp \
   $$HARBOUR_SRC_DIR/HarbourSystem.cpp \
   $$HARBOUR_SRC_DIR/HarbourTask.cpp \
   $$HARBOUR_SRC_DIR/HarbourTheme.cpp

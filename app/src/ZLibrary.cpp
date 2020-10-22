@@ -22,7 +22,7 @@
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
  * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
- * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
  * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
  * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
  * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
@@ -36,12 +36,12 @@
 #include "BooksPaintContext.h"
 #include "BooksDialogManager.h"
 #include "BooksImageProvider.h"
-#include "BooksMediaPlugin.h"
-#include "BooksPolicyPlugin.h"
 #include "BooksSettings.h"
 
 #include "HarbourDebug.h"
 #include "HarbourImageProvider.h"
+#include "HarbourMediaPlugin.h"
+#include "HarbourPolicyPlugin.h"
 
 #include "ZLibrary.h"
 #include "ZLApplication.h"
@@ -244,9 +244,9 @@ void ZLibrary::run(ZLApplication* aApp)
     QQmlContext* root = view->rootContext();
     QQmlEngine* engine = root->engine();
     QSharedPointer<BooksSettings> settings = BooksSettings::sharedInstance();
-    BooksPolicyPlugin::registerTypes(engine, BOOKS_QML_PLUGIN,
+    HarbourPolicyPlugin::registerTypes(engine, BOOKS_QML_PLUGIN,
         BOOKS_QML_PLUGIN_V1, BOOKS_QML_PLUGIN_V2);
-    BooksMediaPlugin::registerTypes(engine, BOOKS_QML_PLUGIN,
+    HarbourMediaPlugin::registerTypes(engine, BOOKS_QML_PLUGIN,
         BOOKS_QML_PLUGIN_V1, BOOKS_QML_PLUGIN_V2);
     engine->addImageProvider("harbour", new HarbourImageProvider);
     engine->addImageProvider(BooksImageProvider::PROVIDER_ID,
