@@ -152,7 +152,7 @@
         <translation>Ночной режим</translation>
     </message>
     <message id="harbour-books-settings-page-night_mode_brightness_label">
-        <source>Night mode brightness</source>
+        <source>Brightness in night mode</source>
         <extracomment>Slider label</extracomment>
         <translation>Яркость в ночном режиме</translation>
     </message>

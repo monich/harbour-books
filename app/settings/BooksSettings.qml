@@ -158,7 +158,7 @@ Page {
                 id: nightModeBrightnessSlider
                 width: parent.width
                 //: Slider label
-                //% "Night mode brightness"
+                //% "Brightness in night mode"
                 label: qsTrId("harbour-books-settings-page-night_mode_brightness_label")
                 stepSize: (maximumValue - minimumValue) / 100.0
                 anchors.horizontalCenter: parent.horizontalCenter

@@ -148,7 +148,8 @@
         <translation type="unfinished">夜间模式</translation>
     </message>
     <message id="harbour-books-settings-page-night_mode_brightness_label">
-        <source>Night mode brightness</source>
+        <source>Brightness in night mode</source>
+        <oldsource>Night mode brightness</oldsource>
         <extracomment>Slider label</extracomment>
         <translation type="unfinished">夜间模式下的亮度</translation>
     </message>
