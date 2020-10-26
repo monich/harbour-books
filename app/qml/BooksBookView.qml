@@ -317,7 +317,7 @@ SilicaFlickable {
 
         function updateModel() {
             hideViews()
-            stackModel.currentPage = bookViewWatcher.currentIndex
+            stackModel.currentPage = currentIndex
         }
 
         ListWatcher {
