@@ -10,11 +10,11 @@
     <message id="harbour-books-menu-settings">
         <source>Settings</source>
         <extracomment>Pulley menu item</extracomment>
-        <translation>Configuración</translation>
+        <translation>Ajustes</translation>
     </message>
     <message id="harbour-books-book-view-back">
         <source>Back to library</source>
-        <translation>Regresar a la librería</translation>
+        <translation>Regresar a librería</translation>
     </message>
     <message id="harbour-books-book-view-loading">
         <source>Loading...</source>
@@ -47,12 +47,12 @@
     </message>
     <message id="harbour-books-shelf-view-no_books">
         <source>No books</source>
-        <translation>No hay libros disponibles</translation>
+        <translation>No hay libros</translation>
     </message>
     <message id="harbour-books-shelf-title-placeholder">
         <source>Enter folder name</source>
         <extracomment>Placeholder for the bookshelf title</extracomment>
-        <translation>Introduzca el nombre de la carpeta</translation>
+        <translation>Introducir el nombre de carpeta</translation>
     </message>
     <message id="harbour-books-storage-removable">
         <source>Memory card</source>
@@ -75,7 +75,7 @@
     <message id="harbour-books-storage-menu-scan_downloads">
         <source>Scan downloads</source>
         <extracomment>Pulley menu item</extracomment>
-        <translation>Escanear descargas</translation>
+        <translation>Escanear bajadas</translation>
     </message>
     <message id="harbour-books-storage-menu-delete_everything">
         <source>Delete all books</source>
@@ -84,7 +84,7 @@
     </message>
     <message id="harbour-books-storage-view-swipe_left_hint">
         <source>Swipe left to see what&apos;s on the SD-card</source>
-        <translation>Arrastre hacia la izquierda para ver contenido en la tarjeta de memoria</translation>
+        <translation>Arrastrar a la izquierda para ver contenido en la tarjeta de memoria</translation>
     </message>
     <message id="harbour-books-import-page-import_n_books" numerus="yes">
         <source>Import %0 book(s)</source>
@@ -117,12 +117,12 @@
     <message id="harbour-books-book-browser_link-open_in_browser">
         <source>Open in browser</source>
         <extracomment>Open link in browser</extracomment>
-        <translation>Abrir enlace en el navegador</translation>
+        <translation>Abrir enlace en navegador</translation>
     </message>
     <message id="harbour-books-book-browser_link-copy_to_clipboard">
         <source>Copy to clipboard</source>
         <extracomment>Copy link to clipboard</extracomment>
-        <translation>Copiar enlace al portapapeles</translation>
+        <translation>Copiar al portapapeles</translation>
     </message>
     <message id="harbour-books-settings-page-header">
         <source>Books</source>
@@ -147,12 +147,12 @@
     <message id="harbour-books-settings-page-night_mode_example">
         <source>Night mode</source>
         <extracomment>Night mode example label</extracomment>
-        <translation type="unfinished">Modo nocturno</translation>
+        <translation>Modo noche</translation>
     </message>
     <message id="harbour-books-settings-page-night_mode_brightness_label">
         <source>Brightness in night mode</source>
         <extracomment>Slider label</extracomment>
-        <translation type="unfinished">Brillo en modo nocturno</translation>
+        <translation>Brillo en modo noche</translation>
     </message>
     <message id="harbour-books-settings-page-orientation_label">
         <source>Orientation</source>
@@ -162,87 +162,87 @@
     <message id="harbour-books-settings-page-orientation-dynamic">
         <source>Dynamic</source>
         <extracomment>Combo box value for dynamic orientation</extracomment>
-        <translation>Dinámica</translation>
+        <translation>Dinámico</translation>
     </message>
     <message id="harbour-books-settings-page-orientation-portrait">
         <source>Portrait</source>
         <extracomment>Combo box value for portrait orientation</extracomment>
-        <translation>Horizontal</translation>
+        <translation>Retrato</translation>
     </message>
     <message id="harbour-books-settings-page-orientation-landscape">
         <source>Landscape</source>
         <extracomment>Combo box value for landscape orientation</extracomment>
-        <translation>Vertical</translation>
+        <translation>Paisaje</translation>
     </message>
     <message id="harbour-books-settings-page-page_layout">
         <source>Page layout</source>
         <extracomment>Combo box label</extracomment>
-        <translation type="unfinished">Diseño de página</translation>
+        <translation>Diseño de página</translation>
     </message>
     <message id="harbour-books-settings-page-layout-dynamic">
         <source>Dynamic</source>
         <extracomment>Combo box value for dynamic page layout</extracomment>
-        <translation type="unfinished">Dinámica</translation>
+        <translation>Dinámico</translation>
     </message>
     <message id="harbour-books-settings-page-layout-dynamic-detail">
         <source>(toggle on tap)</source>
         <extracomment>Combo box detail for dynamic page layout</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>(alternar en el grifo)</translation>
     </message>
     <message id="harbour-books-settings-page-layout-clean">
         <source>Clean</source>
         <extracomment>Combo box value for clean page layout (just the content)</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Limpiar</translation>
     </message>
     <message id="harbour-books-settings-page-layout-clean-detail">
         <source>(just the content)</source>
         <extracomment>Combo box detail for clean page layout (just the content)</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>(solo el contenido)</translation>
     </message>
     <message id="harbour-books-settings-page-layout-minimal">
         <source>Minimal</source>
         <extracomment>Combo box value for minimal page layout (title + page)</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Mínimo</translation>
     </message>
     <message id="harbour-books-settings-page-layout-minimal-detail">
         <source>(title, page)</source>
         <extracomment>Combo box detail for minimal page layout (title + page)</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>(título, página)</translation>
     </message>
     <message id="harbour-books-settings-page-layout-normal">
         <source>Regular</source>
         <extracomment>Combo box value for normal page layout (title + page + slider)</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Regular</translation>
     </message>
     <message id="harbour-books-settings-page-layout-normal-detail">
         <source>(title, page, slider)</source>
         <extracomment>Combo box detail for normal page layout (title + page + slider)</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>(título, página, deslizador)</translation>
     </message>
     <message id="harbour-books-settings-page-layout-full">
         <source>Full</source>
         <extracomment>Combo box value for full page layout (title + page + slider)</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Lleno</translation>
     </message>
     <message id="harbour-books-settings-page-layout-full-detail">
         <source>(everything)</source>
         <extracomment>Combo box detail for full page layout (title + page + slider)</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>(todo)</translation>
     </message>
     <message id="harbour-books-settings-page-keep_display_on">
         <source>Keep display on while reading</source>
         <extracomment>Text switch label</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Mantener pantalla encendida al leer</translation>
     </message>
     <message id="harbour-books-settings-page-keep_display_on_description">
         <source>Prevent the display from blanking while reading the book.</source>
         <extracomment>Text switch description</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Evitar pantalla la  blanca al leer</translation>
     </message>
     <message id="harbour-books-settings-page-navigation-section_header">
         <source>Navigation</source>
         <extracomment>Section header for media keys</extracomment>
-        <translation type="unfinished">Navegación</translation>
+        <translation>Navegación</translation>
     </message>
     <message id="harbour-books-settings-page-volume_up-label">
         <source>Volume up</source>
@@ -267,17 +267,17 @@
     <message id="harbour-books-settings-page-action-next_page">
         <source>Next page</source>
         <extracomment>Combo box value for next page action</extracomment>
-        <translation>Página posterior</translation>
+        <translation>Página siguiente</translation>
     </message>
     <message id="harbour-books-settings-page-turn_pages_by_tap">
         <source>Turn pages by tapping the screen</source>
         <extracomment>Text switch label</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Pasar páginas al tocar la pantalla</translation>
     </message>
     <message id="harbour-books-settings-page-turn_pages_by_tap-description">
         <source>Tapping near the left edge of the screen returns to the previous page, tapping near the right edge gets you to the next page.</source>
         <extracomment>Text switch description</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Tocando cerca del borde izquierdo de la pantalla, se regresa a la página anterior; si se toca cerca del borde derecho, se pasa a la página siguiente.</translation>
     </message>
     <message id="harbour-books-settings-page-removable-section_header">
         <source>Memory card</source>
@@ -292,7 +292,7 @@
     <message id="harbour-books-settings-page-removable_root-description">
         <source>Leave the folder name empty to scan the entire memory card for books.</source>
         <extracomment>Settings field description</extracomment>
-        <translation>Deje el nombre de la carpeta en blanco para escanear la tarjeta de memoria entera en busca de libros.</translation>
+        <translation>Salir del nombre de la carpeta vacía para escanear la tarjeta de memoria entera en busca de libros.</translation>
     </message>
 </context>
 </TS>
