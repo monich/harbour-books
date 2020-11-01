@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2015-2019 Jolla Ltd.
- * Copyright (C) 2015-2019 Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2015-2020 Jolla Ltd.
+ * Copyright (C) 2015-2020 Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
  *
@@ -51,6 +51,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <pwd.h>
+
 #include <libudev.h>
 
 #define INTERNAL_STATE_DIR  "internal"
@@ -291,7 +293,6 @@ public:
         QString path;
 
         bool parse(QString aLine);
-        bool isMediaMount();
     };
 
     Private(BooksStorageManager* aParent);
@@ -300,6 +301,7 @@ public:
     BooksStorage internalStorage() const;
     int findDevice(QString aDevice) const;
     int findPath(QString aPath, QString* aRelPath) const;
+    bool isMediaMount(const MountEntry* aEntry);
     bool scanMounts();
 
 public Q_SLOTS:
@@ -317,6 +319,7 @@ public:
     QSocketNotifier* iNotifier;
     QTimer* iScanMountsTimer;
     QDateTime iScanDeadline;
+    QString iRunMediaPrefix;
 };
 
 BooksStorageManager* BooksStorageManager::Private::gInstance = NULL;
@@ -338,13 +341,6 @@ bool BooksStorageManager::Private::MountEntry::parse(QString aLine)
     }
 }
 
-bool BooksStorageManager::Private::MountEntry::isMediaMount()
-{
-    static const QString MOUNT_PREFIX("/media/");
-    static const QString MOUNT_PREFIX2("/run/media/nemo/");
-    return path.startsWith(MOUNT_PREFIX) || path.startsWith(MOUNT_PREFIX2);
-}
-
 BooksStorageManager::Private::Private(BooksStorageManager* aParent) :
     QObject(aParent),
     iParent(aParent),
@@ -353,15 +349,24 @@ BooksStorageManager::Private::Private(BooksStorageManager* aParent) :
     iMonitor(NULL),
     iDescriptor(-1),
     iNotifier(NULL),
-    iScanMountsTimer(NULL)
+    iScanMountsTimer(NULL),
+    iRunMediaPrefix("/run/media/")
 {
     QString homeDevice;
     QString homeBooks = QDir::homePath();
     QString homeMount(BooksStorage::Private::mountPoint(homeBooks));
     if (!homeBooks.endsWith('/')) homeBooks += '/';
     homeBooks += QLatin1String(BOOKS_INTERNAL_ROOT);
+
+    const struct passwd* pw = getpwuid(geteuid());
+    if (pw) {
+        iRunMediaPrefix += QLatin1String(pw->pw_name);
+        iRunMediaPrefix += QChar('/');
+    }
+
     HDEBUG("home mount" << qPrintable(homeMount));
     HDEBUG("home books path" << qPrintable(homeBooks));
+    HDEBUG("media mount prefix" << qPrintable(iRunMediaPrefix));
 
     QFile mounts(STORAGE_MOUNTS_FILE);
     if (mounts.open(QIODevice::ReadOnly | QIODevice::Text)) {
@@ -374,13 +379,15 @@ BooksStorageManager::Private::Private(BooksStorageManager* aParent) :
                 if (entry.path == homeMount) {
                     homeDevice = entry.dev;
                     HDEBUG("internal" << homeDevice);
-                } else if (entry.isMediaMount()) {
+                } else if (isMediaMount(&entry)) {
                     QString path(entry.path);
                     if (!path.endsWith('/')) path += '/';
                     path += iSettings->removableRoot();
                     BooksStorage bs(entry.dev, entry.path, path, false);
                     HDEBUG("removable" << entry.dev << bs.booksDir().path());
                     iStorageList.append(bs);
+                } else {
+                    HDEBUG(entry.dev << entry.path);
                 }
             }
         }
@@ -482,7 +489,7 @@ bool BooksStorageManager::Private::scanMounts()
         MountEntry entry;
         while (!in.atEnd()) {
             if (entry.parse(in.readLine()) &&
-                entry.isMediaMount() &&
+                isMediaMount(&entry) &&
                 findDevice(entry.dev) < 0) {
                 QString path(entry.path);
                 if (!path.endsWith('/')) path += '/';
@@ -497,6 +504,12 @@ bool BooksStorageManager::Private::scanMounts()
         mounts.close();
     }
     return newStorageFound;
+}
+
+bool BooksStorageManager::Private::isMediaMount(const MountEntry* aEntry)
+{
+    return aEntry->path.startsWith(QStringLiteral("/media/")) ||
+        aEntry->path.startsWith(iRunMediaPrefix);
 }
 
 void BooksStorageManager::Private::onScanMounts()
