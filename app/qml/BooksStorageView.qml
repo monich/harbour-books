@@ -37,8 +37,10 @@ import harbour.books 1.0
 
 SilicaFlickable {
     id: storageView
+
     interactive: !dragInProgress
 
+    property bool pageActive
     property bool editMode: false
 
     signal openBook(var book)
@@ -156,7 +158,12 @@ SilicaFlickable {
         // Show the contents of SD-card and let use know that he can switch
         // between the internal memory and the removable storage by swiping
         // the list horizontally
-        onNewStorage: storageList.scrollToPage(index)
+        onNewStorage: {
+            if (pageActive && storageView.visible) {
+                console.log("showing SD card contents")
+                storageList.scrollToPage(index)
+            }
+        }
     }
 
     ListWatcher {

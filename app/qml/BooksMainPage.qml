@@ -40,8 +40,8 @@ Page {
 
     allowedOrientations: window.allowedOrientations
 
-    //property variant shelf
     property variant currentShelf: storageView.currentShelf
+    readonly property bool pageActive: status === PageStatus.Active
 
     property Item _bookView
 
@@ -63,7 +63,7 @@ Page {
             opacity: book ? 1 : 0
             visible: opacity > 0
             orientation: root.orientation
-            pageActive: root.status === PageStatus.Active
+            pageActive: root.pageActive
             book: Settings.currentBook ? Settings.currentBook : null
             onCloseBook: Settings.currentBook = null
             Behavior on opacity { FadeAnimation {} }
@@ -73,6 +73,7 @@ Page {
     BooksStorageView {
         id: storageView
         anchors.fill: parent
+        pageActive: root.pageActive
         opacity: Settings.currentBook ? 0 : 1
         visible: opacity > 0
         Behavior on opacity { FadeAnimation {} }
