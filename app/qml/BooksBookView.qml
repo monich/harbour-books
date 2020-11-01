@@ -42,7 +42,7 @@ import harbour.books 1.0
 
 import "harbour"
 
-SilicaFlickable {
+Item {
     id: root
 
     property variant book
@@ -63,12 +63,10 @@ SilicaFlickable {
         { pager: true,  page: true,  title: true,  tools: true  }
     ]
 
-    interactive: !selecting && !scrollAnimation.running &&
-        (!linkMenu || !linkMenu.visible) &&
-        (!imageView || !imageView.visible) &&
-        (!footnoteView || !footnoteView.visible)
-
+    property alias viewInteractive: bookView.interactive
+    property alias pullDownMenu: menu
     property bool pageActive
+
     readonly property bool viewActive: pageActive && Qt.application.active && book
     readonly property bool haveVolumeUpAction: Settings.volumeUpAction !== BooksSettings.ActionNone
     readonly property bool haveVolumeDownAction: Settings.volumeDownAction !== BooksSettings.ActionNone
@@ -134,6 +132,8 @@ SilicaFlickable {
     }
 
     PullDownMenu {
+        id: menu
+
         MenuItem {
             //: Pulley menu item
             //% "Settings"
@@ -201,7 +201,10 @@ SilicaFlickable {
         spacing: Theme.paddingMedium
         opacity: loading ? 0 : 1
         visible: opacity > 0
-        interactive: root.interactive
+        interactive: !selecting && !scrollAnimation.running &&
+            (!linkMenu || !linkMenu.visible) &&
+            (!imageView || !imageView.visible) &&
+            (!footnoteView || !footnoteView.visible)
 
         readonly property real maxContentX: Math.max(0, contentWidth - width)
         readonly property int currentPage: stackModel.currentPage

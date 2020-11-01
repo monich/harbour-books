@@ -35,11 +35,11 @@ import QtQuick 2.0
 import Sailfish.Silica 1.0
 import harbour.books 1.0
 
-SilicaFlickable {
+Item {
     id: storageView
 
-    interactive: !dragInProgress
-
+    property alias viewInteractive: storageList.interactive
+    property alias pullDownMenu: menu
     property bool pageActive
     property bool editMode: false
 
@@ -94,6 +94,8 @@ SilicaFlickable {
     }
 
     PullDownMenu {
+        id: menu
+
         MenuItem {
             //: Pulley menu item
             //% "Settings"
@@ -137,6 +139,7 @@ SilicaFlickable {
 
     Component {
         id: importComponent
+
         BooksImport {
             destination: currentShelf ? currentShelf.path : ""
             onAccepted: {
@@ -155,6 +158,7 @@ SilicaFlickable {
 
     BookStorage {
         id: storageModel
+
         // Show the contents of SD-card and let use know that he can switch
         // between the internal memory and the removable storage by swiping
         // the list horizontally
@@ -168,12 +172,14 @@ SilicaFlickable {
 
     ListWatcher {
         id: storageListWatcher
+
         listView: storageList
         onSizeChanged: _cellWidth = calculateCellWidth()
     }
 
     SilicaListView {
         id: storageList
+
         anchors.fill: parent
         model: storageModel
         flickDeceleration: maximumFlickVelocity
@@ -286,6 +292,7 @@ SilicaFlickable {
 
     BooksShelfItem {
         id: dragItem
+
         visible: false
         width: storageView._cellWidth
         height: storageView._cellHeight
@@ -303,6 +310,7 @@ SilicaFlickable {
 
     NumberAnimation {
         id: dragScrollAnimation
+
         target: storageList
         property: "contentX"
         duration: 500

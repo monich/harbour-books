@@ -42,12 +42,28 @@ Page {
 
     property variant currentShelf: storageView.currentShelf
     readonly property bool pageActive: status === PageStatus.Active
+    readonly property Item currentView: Settings.currentBook ? bookView : storageView
+    property Item bookView
 
-    property Item _bookView
+    Component.onCompleted: createBookViewIfNeeded()
+
+    onCurrentViewChanged: setPullDownMenu(currentView ? currentView.pullDownMenu : null)
 
     function createBookViewIfNeeded() {
-        if (Settings.currentBook && !_bookView) {
-            _bookView = bookViewComponent.createObject(root)
+        if (Settings.currentBook && !bookView) {
+            bookView = bookViewComponent.createObject(flickable.contentItem)
+        }
+    }
+
+    function setPullDownMenu(menu) {
+        if (flickable.pullDownMenu !== menu) {
+            if (flickable.pullDownMenu) {
+                flickable.pullDownMenu.visible = false
+            }
+            if (menu) {
+                menu.visible = true
+            }
+            flickable.pullDownMenu = menu
         }
     }
 
@@ -56,11 +72,36 @@ Page {
         onCurrentBookChanged: createBookViewIfNeeded()
     }
 
+    Connections {
+        target: currentView
+        onPullDownMenuChanged: setPullDownMenu(currentView.pullDownMenu)
+    }
+
+    SilicaFlickable {
+        id: flickable
+
+        anchors.fill: parent
+        flickableDirection: Flickable.VerticalFlick
+        interactive: currentView && currentView.viewInteractive
+        pullDownMenu: currentView ? currentView.pullDownMenu : null
+
+        BooksStorageView {
+            id: storageView
+            anchors.fill: parent
+            pageActive: root.pageActive
+            opacity: Settings.currentBook ? 0 : 1
+            visible: opacity > 0
+            Behavior on opacity { FadeAnimation {} }
+            onOpenBook: Settings.currentBook = book
+        }
+    }
+
     Component {
         id: bookViewComponent
+
         BooksBookView {
             anchors.fill: parent
-            opacity: book ? 1 : 0
+            opacity: Settings.currentBook ? 1 : 0
             visible: opacity > 0
             orientation: root.orientation
             pageActive: root.pageActive
@@ -69,16 +110,4 @@ Page {
             Behavior on opacity { FadeAnimation {} }
         }
     }
-
-    BooksStorageView {
-        id: storageView
-        anchors.fill: parent
-        pageActive: root.pageActive
-        opacity: Settings.currentBook ? 0 : 1
-        visible: opacity > 0
-        Behavior on opacity { FadeAnimation {} }
-        onOpenBook: Settings.currentBook = book
-    }
-
-    Component.onCompleted: createBookViewIfNeeded()
 }
