@@ -250,9 +250,11 @@ SilicaFlickable {
         }
 
         function scrollToPage(index) {
-            dragScrollAnimation.from = contentX
-            dragScrollAnimation.to = (width + spacing) * index
-            dragScrollAnimation.start()
+            if (currentIndex !== index) {
+                dragScrollAnimation.from = contentX
+                dragScrollAnimation.to = contentX + (width + spacing) * (index - currentIndex)
+                dragScrollAnimation.start()
+            }
         }
     }
 
