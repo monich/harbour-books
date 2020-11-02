@@ -35,12 +35,16 @@
 
 #include "HarbourDebug.h"
 
-#define LISTVIEW_CONTENT_X              "contentX"
-#define LISTVIEW_CONTENT_Y              "contentY"
-#define LISTVIEW_CONTENT_WIDTH          "contentWidth"
-#define LISTVIEW_CONTENT_HEIGHT         "contentHeight"
-#define LISTVIEW_INDEX_AT               "indexAt"
-#define LISTVIEW_POSITION_VIEW_AT_INDEX "positionViewAtIndex"
+// Properties
+static const char LISTVIEW_CONTENT_X[] = "contentX";
+static const char LISTVIEW_CONTENT_Y[] = "contentY";
+static const char LISTVIEW_CONTENT_WIDTH[] = "contentWidth";
+static const char LISTVIEW_CONTENT_HEIGHT[] = "contentHeight";
+static const char LISTVIEW_CURRENT_INDEX[] = "currentIndex";
+
+// Methods
+static const char LISTVIEW_INDEX_AT[] = "indexAt";
+static const char LISTVIEW_POSITION_VIEW_AT_INDEX[] = "positionViewAtIndex";
 
 BooksListWatcher::BooksListWatcher(QObject* aParent) :
     QObject(aParent),
@@ -104,16 +108,18 @@ void BooksListWatcher::setListView(QQuickItem* aView)
     }
 }
 
-qreal BooksListWatcher::getRealProperty(const char *name, qreal defaultValue)
+qreal BooksListWatcher::getRealProperty(const char* aName, qreal aDefaultValue)
 {
-    QVariant value = iListView->property(name);
-    bool ok = false;
-    if (value.isValid()) {
-        ok = false;
-        qreal r = value.toReal(&ok);
-        if (ok) return r;
+    if (iListView) {
+        QVariant value = iListView->property(aName);
+        bool ok = false;
+        if (value.isValid()) {
+            ok = false;
+            qreal r = value.toReal(&ok);
+            if (ok) return r;
+        }
     }
-    return defaultValue;
+    return aDefaultValue;
 }
 
 void BooksListWatcher::positionViewAtIndex(int aIndex)
@@ -147,7 +153,10 @@ void BooksListWatcher::doPositionViewAtIndex(int aIndex)
             iCenterMode = 1;
         }
     }
-    iPositionIsChanging++;
+    positionUpdatedStarted();
+    HDEBUG(iListView->property(LISTVIEW_CURRENT_INDEX).toInt());
+    iListView->setProperty(LISTVIEW_CURRENT_INDEX, aIndex);
+    HDEBUG(iListView->property(LISTVIEW_CURRENT_INDEX).toInt());
     positionViewAtIndex(aIndex, iCenterMode);
     const int currentIndex = getCurrentIndex();
     if (currentIndex != aIndex) {
@@ -155,7 +164,8 @@ void BooksListWatcher::doPositionViewAtIndex(int aIndex)
         HDEBUG("still" << currentIndex << ", retrying...");
         positionViewAtIndex(aIndex, iCenterMode);
     }
-    iPositionIsChanging--;
+    positionUpdatedFinished();
+    updateCurrentIndex();
 }
 
 void BooksListWatcher::positionViewAtIndex(int aIndex, int aMode)
@@ -164,6 +174,20 @@ void BooksListWatcher::positionViewAtIndex(int aIndex, int aMode)
         QMetaObject::invokeMethod(iListView,
             LISTVIEW_POSITION_VIEW_AT_INDEX,
             Q_ARG(int,aIndex), Q_ARG(int,aMode));
+    }
+}
+
+void BooksListWatcher::positionUpdatedStarted()
+{
+    if (!iPositionIsChanging++) {
+        Q_EMIT updatingViewPositionChanged();
+    }
+}
+
+void BooksListWatcher::positionUpdatedFinished()
+{
+    if (!--iPositionIsChanging) {
+        Q_EMIT updatingViewPositionChanged();
     }
 }
 
@@ -202,8 +226,7 @@ int BooksListWatcher::getCurrentIndex()
 
 void BooksListWatcher::tryToRestoreCurrentIndex()
 {
-    HASSERT(!iPositionIsChanging);
-    if (iCurrentIndex >= 0 && !iPositionIsChanging) {
+    if (iCurrentIndex >= 0 && !updatingViewPosition()) {
         const int index = getCurrentIndex();
         if (iCurrentIndex != index) {
             HDEBUG(index << "->" << iCurrentIndex);
@@ -215,8 +238,7 @@ void BooksListWatcher::tryToRestoreCurrentIndex()
 
 void BooksListWatcher::updateCurrentIndex()
 {
-    HASSERT(!iPositionIsChanging);
-    if (!iPositionIsChanging && (contentWidth() > 0 || contentHeight() > 0)) {
+    if (!updatingViewPosition() && (contentWidth() > 0 || contentHeight() > 0)) {
         const int index = getCurrentIndex();
         if (iCurrentIndex != index && index >= 0) {
             iCurrentIndex = index;
@@ -279,7 +301,7 @@ void BooksListWatcher::onContentXChanged()
 {
     HASSERT(sender() == iListView);
     iContentX = contentX();
-    if (!iPositionIsChanging && !iResizeTimer->isActive()) {
+    if (!updatingViewPosition() && !iResizeTimer->isActive()) {
         updateCurrentIndex();
     }
 }
@@ -288,7 +310,7 @@ void BooksListWatcher::onContentYChanged()
 {
     HASSERT(sender() == iListView);
     iContentY = contentY();
-    if (!iPositionIsChanging && !iResizeTimer->isActive()) {
+    if (!updatingViewPosition() && !iResizeTimer->isActive()) {
         updateCurrentIndex();
     }
 }
@@ -296,7 +318,7 @@ void BooksListWatcher::onContentYChanged()
 void BooksListWatcher::onContentSizeChanged()
 {
     HASSERT(sender() == iListView);
-    if (!iPositionIsChanging && !iResizeTimer->isActive()) {
+    if (!updatingViewPosition() && !iResizeTimer->isActive()) {
         tryToRestoreCurrentIndex();
         updateCurrentIndex();
     }

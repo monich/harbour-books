@@ -43,6 +43,7 @@ class BooksListWatcher: public QObject
 {
     Q_OBJECT
     Q_PROPERTY(int currentIndex READ currentIndex NOTIFY currentIndexChanged)
+    Q_PROPERTY(bool updatingViewPosition READ updatingViewPosition NOTIFY updatingViewPositionChanged)
     Q_PROPERTY(QQuickItem* listView READ listView WRITE setListView NOTIFY listViewChanged)
     Q_PROPERTY(qreal width READ width NOTIFY widthChanged)
     Q_PROPERTY(qreal height READ height NOTIFY heightChanged)
@@ -51,6 +52,7 @@ class BooksListWatcher: public QObject
 public:
     explicit BooksListWatcher(QObject* aParent = NULL);
 
+    bool updatingViewPosition() const { return iPositionIsChanging > 0; }
     int currentIndex() const { return iCurrentIndex; }
     QSize size() const { return iSize; }
     qreal width() const { return iSize.width(); }
@@ -66,10 +68,12 @@ private:
     qreal contentY();
     qreal contentWidth();
     qreal contentHeight();
-    qreal getRealProperty(const char *name, qreal defaultValue = 0.0);
+    qreal getRealProperty(const char* aName, qreal aDefaultValue = 0.0);
     int getCurrentIndex();
     void doPositionViewAtIndex(int aIndex);
     void positionViewAtIndex(int aIndex, int aMode);
+    void positionUpdatedStarted();
+    void positionUpdatedFinished();
     void updateCurrentIndex();
     void tryToRestoreCurrentIndex();
     void updateSize();
@@ -88,6 +92,7 @@ Q_SIGNALS:
     void widthChanged();
     void heightChanged();
     void currentIndexChanged();
+    void updatingViewPositionChanged();
 
 private:
     QSize iSize;

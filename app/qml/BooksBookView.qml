@@ -199,6 +199,8 @@ Item {
         flickDeceleration: maximumFlickVelocity
         orientation: ListView.Horizontal
         snapMode: ListView.SnapOneItem
+        preferredHighlightBegin: 0
+        preferredHighlightEnd: width
         highlightRangeMode: ListView.StrictlyEnforceRange
         spacing: Theme.paddingMedium
         opacity: loading ? 0 : 1
@@ -225,17 +227,9 @@ Item {
             pager.setPage(currentPage)
         }
 
-        onCurrentIndexChanged: {
-            if (completed && !moving && currentIndex >= 0) {
-                updateModel()
-            }
-        }
+        onCurrentIndexChanged: updateModel()
 
-        onMovingChanged: {
-            if (!moving && currentIndex >= 0) {
-                updateModel()
-            }
-        }
+        onMovingChanged: updateModel()
 
         delegate: BooksPageView {
             id: pageView
@@ -321,8 +315,10 @@ Item {
         }
 
         function updateModel() {
-            hideViews()
-            stackModel.currentPage = currentIndex
+            if (completed && !moving && currentIndex >= 0 && !bookViewWatcher.updatingViewPosition) {
+                hideViews()
+                stackModel.currentPage = currentIndex
+            }
         }
 
         ListWatcher {
