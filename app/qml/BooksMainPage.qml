@@ -47,23 +47,26 @@ Page {
 
     Component.onCompleted: createBookViewIfNeeded()
 
-    onCurrentViewChanged: setPullDownMenu(currentView ? currentView.pullDownMenu : null)
+    onCurrentViewChanged: updatePullDownMenu()
 
     function createBookViewIfNeeded() {
         if (Settings.currentBook && !bookView) {
             bookView = bookViewComponent.createObject(flickable.contentItem)
+            updatePullDownMenu()
         }
     }
 
-    function setPullDownMenu(menu) {
+    function updatePullDownMenu() {
+        var menu = currentView ? currentView.pullDownMenu : null
+        if (menu) {
+            menu.visible = true
+        }
         if (flickable.pullDownMenu !== menu) {
-            if (flickable.pullDownMenu) {
-                flickable.pullDownMenu.visible = false
-            }
-            if (menu) {
-                menu.visible = true
-            }
+            var prevMenu = flickable.pullDownMenu
             flickable.pullDownMenu = menu
+            if (prevMenu) {
+                prevMenu.visible = false
+            }
         }
     }
 
@@ -74,7 +77,7 @@ Page {
 
     Connections {
         target: currentView
-        onPullDownMenuChanged: setPullDownMenu(currentView.pullDownMenu)
+        onPullDownMenuChanged: updatePullDownMenu()
     }
 
     SilicaFlickable {
@@ -83,7 +86,6 @@ Page {
         anchors.fill: parent
         flickableDirection: Flickable.VerticalFlick
         interactive: currentView && currentView.viewInteractive
-        pullDownMenu: currentView ? currentView.pullDownMenu : null
 
         BooksStorageView {
             id: storageView

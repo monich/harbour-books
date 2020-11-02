@@ -96,6 +96,8 @@ Item {
     PullDownMenu {
         id: menu
 
+        visible: false // BooksMainPage will make it visible when it's needed
+
         MenuItem {
             //: Pulley menu item
             //% "Settings"
