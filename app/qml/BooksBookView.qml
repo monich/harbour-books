@@ -69,7 +69,7 @@ Item {
     property alias loadingBackgroundOpacity: loadingBackground.opacity
     property bool pageActive
 
-    readonly property bool viewActive: pageActive && Qt.application.active && book
+    readonly property bool viewActive: pageActive && Qt.application.active && !!book
     readonly property bool haveVolumeUpAction: Settings.volumeUpAction !== BooksSettings.ActionNone
     readonly property bool haveVolumeDownAction: Settings.volumeDownAction !== BooksSettings.ActionNone
     readonly property bool haveKeyAction: haveVolumeUpAction || haveVolumeDownAction
@@ -380,7 +380,7 @@ Item {
             leftMargin: bookModel.leftMargin
             rightMargin: bookModel.rightMargin
             opacity: _currentState.tools ? 1 : 0
-            visible: opacity > 0 && book && bookModel.pageCount && !loading
+            visible: opacity > 0 && !!book && bookModel.pageCount && !loading
 
             onIncreaseFontSize: bookModel.increaseFontSize()
             onDecreaseFontSize: bookModel.decreaseFontSize()
