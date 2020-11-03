@@ -123,6 +123,7 @@ Page {
             isCurrentView: currentView === bookView
             pageActive: page.pageActive
             book: Settings.currentBook ? Settings.currentBook : null
+            loadingBackgroundOpacity: HarbourTheme.opacityOverlay * storageView.opacity
 
             onCloseBook: Settings.currentBook = null
             onVisibleChanged: if (visible) opacity = 1

@@ -66,6 +66,7 @@ Item {
     property alias viewInteractive: bookView.interactive
     property alias pullDownMenu: menu
     property alias isCurrentView: menu.visible
+    property alias loadingBackgroundOpacity: loadingBackground.opacity
     property bool pageActive
 
     readonly property bool viewActive: pageActive && Qt.application.active && book
@@ -214,6 +215,13 @@ Item {
         }
     }
 
+    Rectangle {
+        id: loadingBackground
+        anchors.fill: parent
+        color: HarbourTheme.invertedPrimaryColor
+        visible: loading && opacity > 0
+    }
+
     SilicaListView {
         id: bookView
 
@@ -223,7 +231,7 @@ Item {
         orientation: ListView.Horizontal
         snapMode: ListView.SnapOneItem
         preferredHighlightBegin: 0
-        preferredHighlightEnd: width + spacing
+        preferredHighlightEnd: width
         highlightRangeMode: ListView.StrictlyEnforceRange
         spacing: Theme.paddingMedium
         opacity: loading ? 0 : 1
