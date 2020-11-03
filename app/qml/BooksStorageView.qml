@@ -40,6 +40,7 @@ Item {
 
     property alias viewInteractive: storageList.interactive
     property alias pullDownMenu: menu
+    property alias isCurrentView: menu.visible
     property bool pageActive
     property bool editMode: false
 
@@ -95,8 +96,6 @@ Item {
 
     PullDownMenu {
         id: menu
-
-        visible: false // BooksMainPage will make it visible when it's needed
 
         MenuItem {
             //: Pulley menu item
@@ -187,6 +186,8 @@ Item {
         flickDeceleration: maximumFlickVelocity
         orientation: ListView.Horizontal
         snapMode: ListView.SnapOneItem
+        preferredHighlightBegin: 0
+        preferredHighlightEnd: width + spacing
         highlightRangeMode: ListView.StrictlyEnforceRange
         spacing: Theme.paddingMedium
         interactive: !dragInProgress && !dragScrollAnimation.running

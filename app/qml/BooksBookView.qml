@@ -65,6 +65,7 @@ Item {
 
     property alias viewInteractive: bookView.interactive
     property alias pullDownMenu: menu
+    property alias isCurrentView: menu.visible
     property bool pageActive
 
     readonly property bool viewActive: pageActive && Qt.application.active && book
@@ -131,10 +132,23 @@ Item {
         ThemeEffect { effect: ThemeEffect.Press }
     }
 
+    Behavior on opacity {
+        enabled: menu.backToLibrary === 0
+        FadeAnimation { }
+    }
+
+    Binding on opacity {
+        // Fade out the page while menu is bouncing back
+        when: menu.backToLibrary < 0
+        value: menu.flickable.contentY / menu.backToLibrary
+    }
+
     PullDownMenu {
         id: menu
 
         visible: false // BooksMainPage will make it visible when it's needed
+
+        property real backToLibrary
 
         MenuItem {
             //: Pulley menu item
@@ -159,7 +173,16 @@ Item {
             //% "Back to library"
             text: qsTrId("harbour-books-book-view-back")
 
-            onClicked: root.closeBook()
+            // Delay the actual action until bounce back is finished
+            onClicked: menu.backToLibrary = flickable.contentY
+        }
+
+        onActiveChanged: {
+            if (!active && backToLibrary < 0) {
+                // The actual "Back to library" action
+                backToLibrary = 0
+                root.closeBook()
+            }
         }
     }
 
@@ -200,7 +223,7 @@ Item {
         orientation: ListView.Horizontal
         snapMode: ListView.SnapOneItem
         preferredHighlightBegin: 0
-        preferredHighlightEnd: width
+        preferredHighlightEnd: width + spacing
         highlightRangeMode: ListView.StrictlyEnforceRange
         spacing: Theme.paddingMedium
         opacity: loading ? 0 : 1

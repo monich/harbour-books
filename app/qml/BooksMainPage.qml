@@ -36,7 +36,7 @@ import Sailfish.Silica 1.0
 import harbour.books 1.0
 
 Page {
-    id: root
+    id: page
 
     allowedOrientations: window.allowedOrientations
 
@@ -45,28 +45,21 @@ Page {
     readonly property Item currentView: Settings.currentBook ? bookView : storageView
     property Item bookView
 
+    readonly property real fadeInThreshold: height/4
+    readonly property real swipeAwayThreshold: 3 * height/4
+
     Component.onCompleted: createBookViewIfNeeded()
 
-    onCurrentViewChanged: updatePullDownMenu()
+    onCurrentViewChanged: {
+        if (currentView) {
+            flickable.pullDownMenu = currentView.pullDownMenu
+            flickable.pullDownMenu.flickable = flickable
+        }
+    }
 
     function createBookViewIfNeeded() {
         if (Settings.currentBook && !bookView) {
             bookView = bookViewComponent.createObject(flickable.contentItem)
-            updatePullDownMenu()
-        }
-    }
-
-    function updatePullDownMenu() {
-        var menu = currentView ? currentView.pullDownMenu : null
-        if (menu) {
-            menu.visible = true
-        }
-        if (flickable.pullDownMenu !== menu) {
-            var prevMenu = flickable.pullDownMenu
-            flickable.pullDownMenu = menu
-            if (prevMenu) {
-                prevMenu.visible = false
-            }
         }
     }
 
@@ -75,26 +68,44 @@ Page {
         onCurrentBookChanged: createBookViewIfNeeded()
     }
 
-    Connections {
-        target: currentView
-        onPullDownMenuChanged: updatePullDownMenu()
-    }
-
     SilicaFlickable {
         id: flickable
 
         anchors.fill: parent
+        contentWidth: page.width
+        contentHeight: Settings.currentBook ? (2 * page.height) : page.height
         flickableDirection: Flickable.VerticalFlick
-        interactive: currentView && currentView.viewInteractive
+        flickDeceleration: maximumFlickVelocity
+        interactive: currentView && currentView.viewInteractive && !swipeAwayAnimation.running
+        pressDelay: 0
 
         BooksStorageView {
             id: storageView
-            anchors.fill: parent
-            pageActive: root.pageActive
-            opacity: Settings.currentBook ? 0 : 1
+
+            width: page.width
+            height: page.height
+            y: Settings.currentBook ? flickable.contentY : 0
+            pageActive: page.pageActive
+            isCurrentView: currentView === storageView
+            opacity: Settings.currentBook ? ((y > fadeInThreshold) ? 1 : (y > 0) ? y/fadeInThreshold : 0) : 1
             visible: opacity > 0
-            Behavior on opacity { FadeAnimation {} }
+
             onOpenBook: Settings.currentBook = book
+
+            Behavior on opacity {
+                enabled: !Settings.currentBook
+                FadeAnimation { }
+            }
+        }
+
+        onMovementEnded: {
+            if (contentY > 0 && Settings.currentBook) {
+                if (contentY > swipeAwayThreshold) {
+                    swipeAwayAnimation.start()
+                } else {
+                    unswipeAnimation.start()
+                }
+            }
         }
     }
 
@@ -102,14 +113,51 @@ Page {
         id: bookViewComponent
 
         BooksBookView {
-            anchors.fill: parent
-            opacity: Settings.currentBook ? 1 : 0
-            visible: opacity > 0
-            orientation: root.orientation
-            pageActive: root.pageActive
+            id: bookView
+
+            width: page.width
+            height: page.height
+            z: storageView.z + 1
+            visible: !!Settings.currentBook
+            orientation: page.orientation
+            isCurrentView: currentView === bookView
+            pageActive: page.pageActive
             book: Settings.currentBook ? Settings.currentBook : null
+
             onCloseBook: Settings.currentBook = null
-            Behavior on opacity { FadeAnimation {} }
+            onVisibleChanged: if (visible) opacity = 1
+        }
+    }
+
+    SequentialAnimation {
+        id: swipeAwayAnimation
+
+        alwaysRunToEnd: true
+        NumberAnimation {
+            target: flickable
+            property: "contentY"
+            to: page.height
+            duration: 150
+            easing.type: Easing.InQuad
+        }
+        ScriptAction {
+            script: {
+                Settings.currentBook = null
+                flickable.contentY = 0
+            }
+        }
+    }
+
+    SequentialAnimation {
+        id: unswipeAnimation
+
+        alwaysRunToEnd: true
+        NumberAnimation {
+            target: flickable
+            property: "contentY"
+            to: 0
+            duration: 150
+            easing.type: Easing.InOutQuad
         }
     }
 }
