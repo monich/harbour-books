@@ -1,6 +1,6 @@
 /*
-  Copyright (C) 2018 Jolla Ltd.
-  Copyright (C) 2018 Slava Monich <slava.monich@jolla.com>
+  Copyright (C) 2018-2020 Jolla Ltd.
+  Copyright (C) 2018-2020 Slava Monich <slava.monich@jolla.com>
 
   You may use this file under the terms of BSD license as follows:
 
@@ -8,14 +8,15 @@
   modification, are permitted provided that the following conditions
   are met:
 
-    * Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above copyright
-      notice, this list of conditions and the following disclaimer in the
-      documentation and/or other materials provided with the distribution.
-    * Neither the name of Jolla Ltd nor the names of its contributors may
-      be used to endorse or promote products derived from this software
-      without specific prior written permission.
+    1. Redistributions of source code must retain the above copyright
+       notice, this list of conditions and the following disclaimer.
+    2. Redistributions in binary form must reproduce the above copyright
+       notice, this list of conditions and the following disclaimer
+       in the documentation and/or other materials provided with the
+       distribution.
+    3. Neither the names of the copyright holders nor the names of its
+       contributors may be used to endorse or promote products derived
+       from this software without specific prior written permission.
 
   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
   AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -35,15 +36,15 @@ import Sailfish.Silica 1.0
 
 MenuItem {
     id: menuItem
+
     property alias valueText: valueLabel.text
     property alias detailText: detailLabel.text
+
     Row {
         spacing: Theme.paddingMedium
-        anchors {
-            top: parent.top
-            bottom: parent.bottom
-            horizontalCenter: parent.horizontalCenter
-        }
+        height: parent.height
+        anchors.horizontalCenter: parent.horizontalCenter
+
         Label {
             id: valueLabel
             height: parent.height
@@ -51,8 +52,10 @@ MenuItem {
             verticalAlignment: menuItem.verticalAlignment
             visible: text.length > 0
         }
+
         Label {
             id: detailLabel
+
             anchors.baseline: valueLabel.baseline
             font.pixelSize: Theme.fontSizeSmall
             color: Theme.highlightColor
