@@ -22,15 +22,15 @@
     </message>
     <message id="harbour-books-book-view-formatting">
         <source>Formatting...</source>
-        <translation>正在格式化</translation>
+        <translation>正在格式化…</translation>
     </message>
     <message id="harbour-books-book-view-applying_larger_fonts">
         <source>Applying larger fonts...</source>
-        <translation>正在应用更大的字体</translation>
+        <translation>正在应用较大字体…</translation>
     </message>
     <message id="harbour-books-book-view-applying_smaller_fonts">
         <source>Applying smaller fonts...</source>
-        <translation>正在应用更小的字体</translation>
+        <translation>正在应用较小字体</translation>
     </message>
     <message id="harbour-books-book-view-cancel_loading">
         <source>Cancel</source>
@@ -43,7 +43,7 @@
     </message>
     <message id="harbour-books-shelf-view-about_to_delete_all">
         <source>Deleting all books</source>
-        <translation>正在删除全部书籍</translation>
+        <translation>删除全部书籍</translation>
     </message>
     <message id="harbour-books-shelf-view-no_books">
         <source>No books</source>
@@ -83,7 +83,7 @@
     </message>
     <message id="harbour-books-storage-view-swipe_left_hint">
         <source>Swipe left to see what&apos;s on the SD-card</source>
-        <translation>向左轻扫以查看SD卡中的书籍</translation>
+        <translation>向左轻扫即可查看SD卡中的书籍</translation>
     </message>
     <message id="harbour-books-import-page-import_n_books" numerus="yes">
         <source>Import %0 book(s)</source>
@@ -145,13 +145,13 @@
     <message id="harbour-books-settings-page-night_mode_example">
         <source>Night mode</source>
         <extracomment>Night mode example label</extracomment>
-        <translation type="unfinished">夜间模式</translation>
+        <translation>夜间模式</translation>
     </message>
     <message id="harbour-books-settings-page-night_mode_brightness_label">
         <source>Brightness in night mode</source>
         <oldsource>Night mode brightness</oldsource>
         <extracomment>Slider label</extracomment>
-        <translation type="unfinished">夜间模式下的亮度</translation>
+        <translation>夜间模式下的亮度</translation>
     </message>
     <message id="harbour-books-settings-page-orientation_label">
         <source>Orientation</source>
@@ -186,7 +186,7 @@
     <message id="harbour-books-settings-page-layout-dynamic-detail">
         <source>(toggle on tap)</source>
         <extracomment>Combo box detail for dynamic page layout</extracomment>
-        <translation>(点击以切换)</translation>
+        <translation>(点击可切换)</translation>
     </message>
     <message id="harbour-books-settings-page-layout-clean">
         <source>Clean</source>
@@ -206,7 +206,7 @@
     <message id="harbour-books-settings-page-layout-minimal-detail">
         <source>(title, page)</source>
         <extracomment>Combo box detail for minimal page layout (title + page)</extracomment>
-        <translation>(标题, 页)</translation>
+        <translation>(标题, 页面)</translation>
     </message>
     <message id="harbour-books-settings-page-layout-normal">
         <source>Regular</source>
@@ -216,7 +216,7 @@
     <message id="harbour-books-settings-page-layout-normal-detail">
         <source>(title, page, slider)</source>
         <extracomment>Combo box detail for normal page layout (title + page + slider)</extracomment>
-        <translation>(标题, 页, 滑块)</translation>
+        <translation>(标题, 页面, 滑块)</translation>
     </message>
     <message id="harbour-books-settings-page-layout-full">
         <source>Full</source>
@@ -231,7 +231,7 @@
     <message id="harbour-books-settings-page-keep_display_on">
         <source>Keep display on while reading</source>
         <extracomment>Text switch label</extracomment>
-        <translation>阅读时保持显示</translation>
+        <translation>阅读时保持常亮</translation>
     </message>
     <message id="harbour-books-settings-page-keep_display_on_description">
         <source>Prevent the display from blanking while reading the book.</source>
@@ -271,12 +271,12 @@
     <message id="harbour-books-settings-page-turn_pages_by_tap">
         <source>Turn pages by tapping the screen</source>
         <extracomment>Text switch label</extracomment>
-        <translation>点击屏幕以翻页</translation>
+        <translation>点击屏幕进行翻页</translation>
     </message>
     <message id="harbour-books-settings-page-turn_pages_by_tap-description">
         <source>Tapping near the left edge of the screen returns to the previous page, tapping near the right edge gets you to the next page.</source>
         <extracomment>Text switch description</extracomment>
-        <translation>点击屏幕左侧边缘以返回上一页，点击右边缘附近以切换到下一页。</translation>
+        <translation>点击屏幕左侧边缘即可返回上一页，点击右边缘附近即可翻到下一页。</translation>
     </message>
     <message id="harbour-books-settings-page-removable-section_header">
         <source>Memory card</source>
