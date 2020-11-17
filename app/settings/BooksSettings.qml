@@ -239,6 +239,8 @@ Page {
                         menu: ContextMenu {
                             id: orientationMenu
 
+                            x: 0
+                            width: orientationComboBox.width
                             readonly property int defaultIndex: 0
                             MenuItem {
                                 readonly property int value: 0
@@ -291,8 +293,8 @@ Page {
                         value: currentItem ? currentItem.valueText : ""
                         readonly property int yBottom: y + Theme.itemSizeSmall
                         menu: ContextMenu {
-                            id: layoutMenu
-
+                            x: 0
+                            width: layoutComboBox.width
                             readonly property int defaultIndex: 0
                             BooksDetailMenuItem {
                                 //: Combo box value for dynamic page layout
@@ -384,13 +386,6 @@ Page {
                     //% "Prevent the display from blanking while reading the book."
                     description: qsTrId("harbour-books-settings-page-keep_display_on_description")
                     onClicked: keepDisplayOn.value = !keepDisplayOn.value
-
-                    // Avoid overlapping:
-                    readonly property int yBottom: y + height
-                    opacity: (landscapeLayout && (orientationMenu.active || (layoutMenu.active && yBottom > layoutComboBox.yBottom))) ? 0.0 : 1.0
-                    visible: opacity > 0
-                    Behavior on opacity { FadeAnimation { } }
-
                     ConfigurationValue {
                         id: keepDisplayOn
                         key: rootPath + "keepDisplayOn"
@@ -418,8 +413,6 @@ Page {
                     width: parent.columnWidth
 
                     BooksActionSelector {
-                        id: volumeUpSelector
-
                         //: Combo box label
                         //% "Volume up"
                         label: qsTrId("harbour-books-settings-page-volume_up-label")
@@ -428,8 +421,6 @@ Page {
                     }
 
                     BooksActionSelector {
-                        id: volumeDownSelector
-
                         //: Combo box label
                         //% "Volume down"
                         label: qsTrId("harbour-books-settings-page-volume_down-label")
@@ -450,13 +441,6 @@ Page {
                     //% "Tapping near the left edge of the screen returns to the previous page, tapping near the right edge gets you to the next page."
                     description: qsTrId("harbour-books-settings-page-turn_pages_by_tap-description")
                     onClicked: turnPageByTap.value = !turnPageByTap.value
-
-                    // Avoid overlapping:
-                    readonly property int yBottom: y + height
-                    opacity: (landscapeLayout && (volumeUpSelector.menuActive || (volumeDownSelector.menuActive && yBottom > volumeDownSelector.yBottom))) ? 0.0 : 1.0
-                    visible: opacity > 0
-                    Behavior on opacity { FadeAnimation { } }
-
                     ConfigurationValue {
                         id: turnPageByTap
                         key: rootPath + "turnPageByTap"

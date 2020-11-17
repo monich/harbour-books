@@ -41,12 +41,13 @@ ComboBox {
     property alias key: configuration.key
     property alias defaultValue: configuration.defaultValue
     property bool ready
-    property alias menuActive: actionMenu.active
 
     value: currentItem ? currentItem.text : ""
     menu: ContextMenu {
         id: actionMenu
 
+        x: 0
+        width: actionComboBox.width
         readonly property int defaultIndex: 0
         MenuItem {
             //: Combo box value for no action
