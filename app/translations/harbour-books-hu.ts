@@ -275,7 +275,7 @@
     <message id="harbour-books-settings-page-turn_pages_by_tap-description">
         <source>Tapping near the left edge of the screen returns to the previous page, tapping near the right edge gets you to the next page.</source>
         <extracomment>Text switch description</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Ha a képernyő bal szélét megérinted, az előző oldalra, a jobb szélét megérintve pedig a következő oldalra kerülsz.</translation>
     </message>
     <message id="harbour-books-settings-page-removable-section_header">
         <source>Memory card</source>
