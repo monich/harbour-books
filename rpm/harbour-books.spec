@@ -1,6 +1,6 @@
 Name:           harbour-books
 Summary:        E-book reader
-Version:        1.0.42
+Version:        1.0.43
 Release:        1
 License:        BSD
 Group:          Applications/File
@@ -57,6 +57,12 @@ desktop-file-install --delete-original \
 make -C test test
 
 %changelog
+* Sat May 15 2021 Slava Monich <slava.monich@jolla.com> 1.0.43
+- Integration with My Backup
+- Updated Hungarian translation
+- Updated Chinese translation
+- Tweaked settings layout
+
 * Tue Nov 3 2020 Slava Monich <slava.monich@jolla.com> 1.0.42
 - Fixed detection of removable media on new fresh installs of Sailfish OS 3.4.0
 - Implemented a fancy way of closing the book by swiping it up
