@@ -40,11 +40,16 @@ import "../qml/harbour"
 
 Page {
     id: page
+
     property bool followOrientationChanges
     property alias title: pageHeader.title
     readonly property string rootPath: "/apps/" + appName() + "/"
     readonly property bool darkOnLight: ('colorScheme' in Theme) && Theme.colorScheme === 1
     readonly property bool landscapeLayout: (width > height && Screen.sizeCategory > Screen.Small) || Screen.sizeCategory > Screen.Medium
+
+    // jolla-settings expects these properties:
+    property var applicationName
+    property var applicationIcon
 
     // Deduce package name from the path
     function appName() {
