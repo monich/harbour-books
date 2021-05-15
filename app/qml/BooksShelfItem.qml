@@ -1,6 +1,6 @@
 /*
-  Copyright (C) 2015-2019 Jolla Ltd.
-  Copyright (C) 2015-2019 Slava Monich <slava.monich@jolla.com>
+  Copyright (C) 2015-2021 Jolla Ltd.
+  Copyright (C) 2015-2021 Slava Monich <slava.monich@jolla.com>
 
   You may use this file under the terms of the BSD license as follows:
 
@@ -33,6 +33,8 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 import harbour.books 1.0
+
+import "harbour"
 
 Item {
     id: root
@@ -115,18 +117,8 @@ Item {
         }
 
         layer.enabled: root.pressed
-        layer.effect: ShaderEffect { // i.e. PressEffect from Lipstick
-            property variant source
-            property color color: Theme.rgba(Theme.highlightBackgroundColor, 0.4)
-            fragmentShader: "
-            uniform sampler2D source;
-            uniform highp vec4 color;
-            uniform lowp float qt_Opacity;
-            varying highp vec2 qt_TexCoord0;
-            void main(void) {
-                highp vec4 pixelColor = texture2D(source, qt_TexCoord0);
-                gl_FragColor = vec4(mix(pixelColor.rgb/max(pixelColor.a, 0.00390625), color.rgb/max(color.a, 0.00390625), color.a) * pixelColor.a, pixelColor.a) * qt_Opacity;
-            }"
+        layer.effect: HarbourPressEffect {
+            source: cover
         }
     }
 
