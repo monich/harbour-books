@@ -41,7 +41,7 @@ import "../qml/harbour"
 Page {
     id: page
 
-    property bool followOrientationChanges
+    property bool inApp
     property alias title: pageHeader.title
     readonly property string rootPath: "/apps/" + appName() + "/"
     readonly property bool darkOnLight: ('colorScheme' in Theme) && Theme.colorScheme === 1
@@ -66,7 +66,7 @@ Page {
     }
 
     Loader {
-        active: followOrientationChanges
+        active: inApp // Follow orientation changes
         Connections {
             target: orientation
             onValueChanged: allowedOrientations =
@@ -125,9 +125,28 @@ Page {
 
             PageHeader {
                 id: pageHeader
-                //: Settings page header
-                //% "Books"
-                title: qsTrId("harbour-books-settings-page-header")
+                rightMargin: Theme.horizontalPageMargin + (appIcon.visible ? (height - appIcon.padding) : 0)
+                title: applicationName ? applicationName :
+                    //: Settings page header (app name)
+                    //% "Books"
+                    qsTrId("harbour-books-settings-page-header")
+                description: inApp ? "" :
+                    //: Settings page header description (app version)
+                    //% "Version %1"
+                    qsTrId("harbour-books-settings-version").arg("1.0.43")
+
+                Image {
+                    id: appIcon
+                    readonly property int padding: Theme.paddingLarge
+                    readonly property int size: pageHeader.height - 2 * padding
+                    x: pageHeader.width - width - Theme.horizontalPageMargin
+                    y: padding
+                    width: size
+                    height: size
+                    sourceSize: Qt.size(size,size)
+                    source: applicationIcon ? applicationIcon : ""
+                    visible: appIcon.status === Image.Ready
+                }
             }
 
             // =============== Display ===============

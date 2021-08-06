@@ -126,8 +126,13 @@
     </message>
     <message id="harbour-books-settings-page-header">
         <source>Books</source>
-        <extracomment>Settings page header</extracomment>
+        <extracomment>Settings page header (app name)</extracomment>
         <translation>Boeken</translation>
+    </message>
+    <message id="harbour-books-settings-version">
+        <source>Version %1</source>
+        <extracomment>Settings page header description (app version)</extracomment>
+        <translation type="unfinished">Versie %1</translation>
     </message>
     <message id="harbour-books-settings-page-display-section_header">
         <source>Display</source>
