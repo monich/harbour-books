@@ -45,7 +45,9 @@ Page {
     property alias title: pageHeader.title
     readonly property string rootPath: "/apps/" + appName() + "/"
     readonly property bool darkOnLight: ('colorScheme' in Theme) && Theme.colorScheme === 1
-    readonly property bool landscapeLayout: (width > height && Screen.sizeCategory > Screen.Small) || Screen.sizeCategory > Screen.Medium
+    readonly property int screenWidth: isPortrait ? Screen.width : Screen.height
+    readonly property int screenHeight: isPortrait ? Screen.height : Screen.width
+    readonly property bool landscapeLayout: (screenWidth > screenHeight && Screen.sizeCategory > Screen.Small) || Screen.sizeCategory > Screen.Medium
 
     // jolla-settings expects these properties:
     property var applicationName
