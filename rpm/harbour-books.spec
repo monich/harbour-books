@@ -120,7 +120,7 @@ make -C test test
 - Added "Keep display on while reading" option
 - Fixed a few memory leaks
 
-* Sun Feb 26 2018 Slava Monich <slava.monich@jolla.com> 1.0.26
+* Mon Feb 26 2018 Slava Monich <slava.monich@jolla.com> 1.0.26
 - Fixed compatibility with Sailfish OS < 2.1.0
 - Added Hungarian translations
 
@@ -134,7 +134,7 @@ make -C test test
 - Corrected page stack behaviour
 - Fixed FB2 footnotes
 
-* Tue Sep 07 2017 Slava Monich <slava.monich@jolla.com> 1.0.23
+* Thu Sep 07 2017 Slava Monich <slava.monich@jolla.com> 1.0.23
 - Copy text to clipboard on long press
 - Added "Select all" function to the import view
 - Fixed the behavior of the position stack
@@ -166,14 +166,14 @@ make -C test test
 * Sun Oct 09 2016 Slava Monich <slava.monich@jolla.com> 1.0.15
 - Fixed the problem with wrong images popping up in zoom view
 
-* Wed Oct 08 2016 Slava Monich <slava.monich@jolla.com> 1.0.14
+* Sat Oct 08 2016 Slava Monich <slava.monich@jolla.com> 1.0.14
 - Improved image zoom transitions
 
-* Wed Oct 08 2016 Slava Monich <slava.monich@jolla.com> 1.0.13
+* Sat Oct 08 2016 Slava Monich <slava.monich@jolla.com> 1.0.13
 - Implemented long press actions (open links in brower, zoom images)
 - Added settings page
 
-* Wed Jul 28 2016 Slava Monich <slava.monich@jolla.com> 1.0.12
+* Thu Jul 28 2016 Slava Monich <slava.monich@jolla.com> 1.0.12
 - Minor UI tweaks (wrapping of "No books" label)
 - Fixed license in rpm spec
 
