@@ -1,6 +1,6 @@
 /*
-  Copyright (C) 2015-2020 Jolla Ltd.
-  Copyright (C) 2015-2020 Slava Monich <slava.monich@jolla.com>
+  Copyright (C) 2015-2021 Jolla Ltd.
+  Copyright (C) 2015-2021 Slava Monich <slava.monich@jolla.com>
 
   You may use this file under the terms of BSD license as follows:
 
@@ -60,10 +60,10 @@ Item {
     signal scrollRight()
     signal scrollLeft()
 
-    property bool _haveBooks: shelfModel && shelfModel.count
-    property int _cellsPerRow: Math.floor(width/cellWidth)
+    readonly property bool _haveBooks: shelfModel.count > 0
+    readonly property int _cellsPerRow: Math.floor(width/cellWidth)
     readonly property int _remorseTimeout: 5000
-    property bool _loading: !shelfModel || shelfModel.loading || startAnimationTimer.running
+    readonly property bool _loading: shelfModel.loading || startAnimationTimer.running
     property var _remorse
 
     on_HaveBooksChanged: if (!_haveBooks) shelfView.stopEditing()
