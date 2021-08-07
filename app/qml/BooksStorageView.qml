@@ -131,6 +131,14 @@ Item {
             enabled: currentShelf && (currentShelf.count > 0)
             onClicked: storageModel.setDeleteAllRequest(storageListWatcher.currentIndex, true)
         }
+        MenuLabel {
+            //: Number of books in the storage header
+            //% "%0 book(s)"
+            text: qsTrId("harbour-books-storage-book_count",bookCount).arg(bookCount)
+            visible: !bookCountVisible && bookCount > 0
+            readonly property int bookCount: storageList.currentItem ? storageList.currentItem.bookCount : 0
+            readonly property bool bookCountVisible: storageList.currentItem && storageList.currentItem.bookCountVisible
+        }
     }
 
     onEditModeChanged: {

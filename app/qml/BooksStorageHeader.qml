@@ -1,6 +1,6 @@
 /*
-  Copyright (C) 2015-2020 Jolla Ltd.
-  Copyright (C) 2015-2020 Slava Monich <slava.monich@jolla.com>
+  Copyright (C) 2015-2021 Jolla Ltd.
+  Copyright (C) 2015-2021 Slava Monich <slava.monich@jolla.com>
 
   You may use this file under the terms of BSD license as follows:
 
@@ -58,19 +58,7 @@ Column {
     property int count
     property bool showCount: true
 
-    property int _shownCount
-
     signal clicked()
-
-    function updateShownCount() {
-        if (count > 0) {
-            _shownCount = count
-        }
-    }
-
-    onCountChanged: updateShownCount()
-
-    Component.onCompleted: updateShownCount()
 
     Item {
         width: parent.width
@@ -134,12 +122,10 @@ Column {
             }
             //: Number of books in the storage header
             //% "%0 book(s)"
-            text: qsTrId("harbour-books-storage-book_count",_shownCount).arg(_shownCount)
+            text: qsTrId("harbour-books-storage-book_count",count).arg(count)
             font.pixelSize: Theme.fontSizeExtraSmall
             color: Theme.highlightColor
-            opacity: (showCount && count > 0) ? 1 : 0
-            visible: opacity > 0
-            Behavior on opacity { FadeAnimation {} }
+            visible: (showCount && needed && count > 0) ? 1 : 0
         }
     }
 

@@ -51,6 +51,8 @@ Item {
     property alias shelf: shelfModel
     property alias device: shelfModel.device
     property alias dummyItemIndex: shelfModel.dummyItemIndex
+    property alias bookCount: shelfModel.bookCount
+    property alias bookCountVisible: storageHeader.needed
 
     signal openBook(var book)
     signal dropItem(var mouseX, var mouseY)
