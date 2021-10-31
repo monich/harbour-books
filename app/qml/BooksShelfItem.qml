@@ -103,6 +103,7 @@ Item {
         borderRadius: _borderRadius
         borderWidth: book ? _borderWidth : 0
         borderColor: _borderColor
+        mode: BookCover.Bottom
         opacity: (copyingIn || copyingOut) ? 0.1 : 1
         Behavior on opacity { FadeAnimation { } }
 

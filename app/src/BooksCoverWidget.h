@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2015-2018 Jolla Ltd.
- * Copyright (C) 2015-2018 Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2015-2021 Jolla Ltd.
+ * Copyright (C) 2015-2021 Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
  *
@@ -8,15 +8,15 @@
  * modification, are permitted provided that the following conditions
  * are met:
  *
- *   * Redistributions of source code must retain the above copyright
- *     notice, this list of conditions and the following disclaimer.
- *   * Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in
- *     the documentation and/or other materials provided with the
- *     distribution.
- *   * Neither the name of Nemo Mobile nor the names of its contributors
- *     may be used to endorse or promote products derived from this
- *     software without specific prior written permission.
+ *   1. Redistributions of source code must retain the above copyright
+ *      notice, this list of conditions and the following disclaimer.
+ *   2. Redistributions in binary form must reproduce the above copyright
+ *      notice, this list of conditions and the following disclaimer
+ *      in the documentation and/or other materials provided with the
+ *      distribution.
+ *   3. Neither the names of the copyright holders nor the names of its
+ *      contributors may be used to endorse or promote products derived
+ *      from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -49,8 +49,8 @@ class BooksCoverWidget: public QQuickPaintedItem
     Q_OBJECT
     Q_PROPERTY(bool empty READ empty NOTIFY emptyChanged)
     Q_PROPERTY(bool loading READ loading NOTIFY loadingChanged)
-    Q_PROPERTY(bool stretch READ stretch WRITE setStretch NOTIFY stretchChanged)
     Q_PROPERTY(bool synchronous READ synchronous WRITE setSynchronous NOTIFY synchronousChanged)
+    Q_PROPERTY(Mode mode READ mode WRITE setMode NOTIFY modeChanged)
     Q_PROPERTY(qreal borderWidth READ borderWidth WRITE setBorderWidth NOTIFY borderWidthChanged)
     Q_PROPERTY(qreal borderRadius READ borderRadius WRITE setBorderRadius NOTIFY borderRadiusChanged)
     Q_PROPERTY(QColor borderColor READ borderColor WRITE setBorderColor NOTIFY borderColorChanged)
@@ -59,8 +59,15 @@ class BooksCoverWidget: public QQuickPaintedItem
     Q_PROPERTY(qreal centerX READ centerX NOTIFY centerXChanged)
     Q_PROPERTY(qreal centerY READ centerY NOTIFY centerYChanged)
     Q_PROPERTY(QPoint center READ center NOTIFY centerChanged)
+    Q_ENUMS(Mode)
 
 public:
+    enum Mode {
+        Fill,
+        Stretch,
+        Bottom
+    };
+
     BooksCoverWidget(QQuickItem* aParent = NULL);
     ~BooksCoverWidget();
 
@@ -82,8 +89,8 @@ public:
     BooksBook* book() const { return iBook; }
     void setBook(BooksBook* aBook);
 
-    bool stretch() const { return iStretch; }
-    void setStretch(bool aValue);
+    Mode mode() const { return iMode; }
+    void setMode(Mode aMode);
 
     bool synchronous() const { return iSynchronous; }
     void setSynchronous(bool aValue);
@@ -96,8 +103,8 @@ Q_SIGNALS:
     void bookChanged();
     void emptyChanged();
     void loadingChanged();
-    void stretchChanged();
     void synchronousChanged();
+    void modeChanged();
     void borderWidthChanged();
     void borderRadiusChanged();
     void borderColorChanged();
@@ -124,6 +131,8 @@ private:
     ScaleTask* iScaleTask;
     QImage iScaledImage;
     QImage iCoverImage;
+    QColor iBackground1;
+    QColor iBackground2;
     BooksBook* iBook;
     QImage* iDefaultImage;
     qreal iBorderWidth;
@@ -132,7 +141,7 @@ private:
     QUrl iDefaultCover;
     QString iTitle;
     QPoint iCenter;
-    bool iStretch;
+    Mode iMode;
     bool iSynchronous;
 };
 

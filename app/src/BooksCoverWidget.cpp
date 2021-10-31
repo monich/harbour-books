@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2015-2018 Jolla Ltd.
- * Copyright (C) 2015-2018 Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2015-2021 Jolla Ltd.
+ * Copyright (C) 2015-2021 Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
  *
@@ -8,15 +8,15 @@
  * modification, are permitted provided that the following conditions
  * are met:
  *
- *   * Redistributions of source code must retain the above copyright
- *     notice, this list of conditions and the following disclaimer.
- *   * Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in
- *     the documentation and/or other materials provided with the
- *     distribution.
- *   * Neither the name of Nemo Mobile nor the names of its contributors
- *     may be used to endorse or promote products derived from this
- *     software without specific prior written permission.
+ *   1. Redistributions of source code must retain the above copyright
+ *      notice, this list of conditions and the following disclaimer.
+ *   2. Redistributions in binary form must reproduce the above copyright
+ *      notice, this list of conditions and the following disclaimer
+ *      in the documentation and/or other materials provided with the
+ *      distribution.
+ *   3. Neither the names of the copyright holders nor the names of its
+ *      contributors may be used to endorse or promote products derived
+ *      from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -50,19 +50,28 @@ public:
     ScaleTask(QThreadPool* aPool, QImage aImage, int aWidth, int aHeight,
         bool aStretch);
     static QImage scale(QImage aImage, int aWidth, int aHeight, bool aStretch);
+    static QColor leftBackground(const QImage& aImage);
+    static QColor rightBackground(const QImage& aImage);
+    static QColor topBackground(const QImage& aImage);
+    static QColor bottomBackground(const QImage& aImage);
+    static QColor pickColor(const QHash<QRgb,int>& aColorCounts);
     void performTask();
 
 public:
     QImage iImage;
     QImage iScaledImage;
+    QColor iBackground1; // Left or top
+    QColor iBackground2; // Right or bottom
     int iWidth;
     int iHeight;
     bool iStretch;
 };
 
 BooksCoverWidget::ScaleTask::ScaleTask(QThreadPool* aPool, QImage aImage,
-    int aWidth, int aHeight, bool aStretch) : HarbourTask(aPool),
-    iImage(aImage), iWidth(aWidth), iHeight(aHeight), iStretch(aStretch)
+    int aWidth, int aHeight, bool aStretch) : HarbourTask(aPool), iImage(aImage),
+    iBackground1(Qt::transparent), iBackground2(Qt::transparent),
+    iWidth(aWidth), iHeight(aHeight),
+    iStretch(aStretch)
 {
 }
 
@@ -79,10 +88,106 @@ QImage BooksCoverWidget::ScaleTask::scale(QImage aImage,
     }
 }
 
+// The idea is to pick the colors which occur more often
+// at the edges of the picture.
+QColor BooksCoverWidget::ScaleTask::leftBackground(const QImage& aImage)
+{
+    QHash<QRgb,int> counts;
+    if (aImage.width() > 0) {
+        const int h = aImage.height();
+        for (int y = 0; y < h; y++) {
+            const QRgb left(aImage.pixelColor(0, y).rgb());
+            counts.insert(left, counts.value(left) + 1);
+        }
+    }
+    const QColor color(pickColor(counts));
+    HDEBUG(color << "left" << counts.count());
+    return color;
+}
+
+QColor BooksCoverWidget::ScaleTask::rightBackground(const QImage& aImage)
+{
+    QHash<QRgb,int> counts;
+    const int w = aImage.width();
+    if (w > 0) {
+        const int h = aImage.height();
+        for (int y = 0; y < h; y++) {
+            const QRgb right(aImage.pixelColor(w - 1, y).rgb());
+            counts.insert(right, counts.value(right) + 1);
+        }
+    }
+    const QColor color(pickColor(counts));
+    HDEBUG(color << "right" << counts.count());
+    return color;
+}
+
+QColor BooksCoverWidget::ScaleTask::topBackground(const QImage& aImage)
+{
+    QHash<QRgb,int> counts;
+    if (aImage.height() > 0) {
+        const int w = aImage.width();
+        for (int x = 0; x < w; x++) {
+            const QRgb left(aImage.pixelColor(x, 0).rgb());
+            counts.insert(left, counts.value(left) + 1);
+        }
+    }
+    const QColor color(pickColor(counts));
+    HDEBUG(color << "top" << counts.count());
+    return color;
+}
+
+QColor BooksCoverWidget::ScaleTask::bottomBackground(const QImage& aImage)
+{
+    QHash<QRgb,int> counts;
+    const int h = aImage.height();
+    if (h > 0) {
+        const int w = aImage.width();
+        for (int x = 0; x < w; x++) {
+            const QRgb left(aImage.pixelColor(x, h - 1).rgb());
+            counts.insert(left, counts.value(left) + 1);
+        }
+    }
+    const QColor color(pickColor(counts));
+    HDEBUG(color << "bottom" << counts.count());
+    return color;
+}
+
+QColor BooksCoverWidget::ScaleTask::pickColor(const QHash<QRgb,int>& aCounts)
+{
+    if (aCounts.size() > 0) {
+        QRgb rgb;
+        int max;
+        QHashIterator<QRgb,int> it(aCounts);
+        for (max = 0; it.hasNext();) {
+            it.next();
+            const int count = it.value();
+            if (max < count) {
+                max = count;
+                rgb = it.key();
+            }
+        }
+        return QColor(rgb);
+    }
+    return QColor();
+}
+
 void BooksCoverWidget::ScaleTask::performTask()
 {
     if (!iImage.isNull() && !isCanceled()) {
         iScaledImage = scale(iImage, iWidth, iHeight, iStretch);
+        if (!isCanceled()) {
+            if (iScaledImage.width() < iWidth) {
+                iBackground1 = leftBackground(iScaledImage);
+                if (!isCanceled()) {
+                    iBackground2 = rightBackground(iScaledImage);
+                }
+            } else if (iScaledImage.height() < iHeight) {
+                iBackground1 = topBackground(iScaledImage);
+                if (!isCanceled()) {
+                    iBackground2 = bottomBackground(iScaledImage);
+                }
+            }
+        }
     }
 }
 
@@ -204,7 +309,7 @@ BooksCoverWidget::BooksCoverWidget(QQuickItem* aParent) :
     iBorderWidth(0),
     iBorderRadius(0),
     iBorderColor(Qt::transparent),
-    iStretch(false),
+    iMode(Bottom),
     iSynchronous(false)
 {
     setFlag(ItemHasContents, true);
@@ -264,13 +369,13 @@ void BooksCoverWidget::onCoverImageChanged()
     scaleImage(wasEmpty);
 }
 
-void BooksCoverWidget::setStretch(bool aValue)
+void BooksCoverWidget::setMode(Mode aMode)
 {
-    if (iStretch != aValue) {
-        iStretch = aValue;
-        HDEBUG(aValue);
+    if (iMode != aMode) {
+        iMode = aMode;
+        HDEBUG(aMode);
         scaleImage();
-        Q_EMIT stretchChanged();
+        Q_EMIT modeChanged();
     }
 }
 
@@ -362,12 +467,20 @@ void BooksCoverWidget::scaleImage(bool aWasEmpty)
         }
 
         if (!iCoverImage.isNull()) {
+            const bool stretch = (iMode == Stretch);
             if (iSynchronous) {
-                iScaledImage = ScaleTask::scale(iCoverImage, w, h, iStretch);
+                iScaledImage = ScaleTask::scale(iCoverImage, w, h, stretch);
+                if (iScaledImage.width() < w) {
+                    iBackground1 = ScaleTask::leftBackground(iScaledImage);
+                    iBackground2 = ScaleTask::rightBackground(iScaledImage);
+                } else if (iScaledImage.height() < h) {
+                    iBackground1 = ScaleTask::topBackground(iScaledImage);
+                    iBackground2 = ScaleTask::bottomBackground(iScaledImage);
+                }
                 update();
             } else {
-                (iScaleTask = new ScaleTask(iTaskQueue->pool(), iCoverImage, w, h,
-                    iStretch))->submit(this, SLOT(onScaleTaskDone()));
+                (iScaleTask = new ScaleTask(iTaskQueue->pool(), iCoverImage,
+                    w, h, stretch))->submit(this, SLOT(onScaleTaskDone()));
             }
         } else {
             iScaledImage = QImage();
@@ -389,6 +502,8 @@ void BooksCoverWidget::onScaleTaskDone()
     const bool wasEmpty(empty());
     HASSERT(iScaleTask == sender());
     iScaledImage = iScaleTask->iScaledImage;
+    iBackground1 = iScaleTask->iBackground1;
+    iBackground2 = iScaleTask->iBackground2;
     iScaleTask->release(this);
     iScaleTask = NULL;
     update();
@@ -403,28 +518,17 @@ void BooksCoverWidget::paint(QPainter* aPainter)
     const qreal w = width();
     const qreal h = height();
     if (w > 0 && h > 0) {
-        qreal sw, sh;
-
         // This has to be consistent with updateCenter()
-        if (!iScaledImage.isNull()) {
-            sw = iScaledImage.width();
-            sh = iScaledImage.height();
-        } else {
-            sw = w;
-            sh = h;
-        }
-
-        const int x = floor((w - sw)/2);
-        const int y = h - sh;
+        const qreal sh = (iScaledImage.height() && iMode == Bottom) ?
+            qMax((qreal)iScaledImage.height(), w) : h;
 
         QPainterPath path;
         qreal w1, h1, x1, y1;
-
         if (iBorderRadius > 0) {
             // The border rectangle is no less that 3*radius
             // and no more than the size of the item.
             const qreal d = 2*iBorderRadius;
-            w1 = qMin(w, qMax(sw, 2*d)) - iBorderWidth;
+            w1 = qMin(w, qMax(w, 2*d)) - iBorderWidth;
             h1 = qMin(h, qMax(sh, 3*d)) - iBorderWidth;
             x1 = floor((w - w1)/2);
             y1 = h - h1 - iBorderWidth/2;
@@ -439,13 +543,41 @@ void BooksCoverWidget::paint(QPainter* aPainter)
             path.closeSubpath();
             aPainter->setClipPath(path);
         } else {
-            w1 = sw - iBorderWidth;
+            w1 = w - iBorderWidth;
             h1 = sh - iBorderWidth;
             x1 = floor((w - w1)/2);
             y1 = h - h1 - iBorderWidth/2;
         }
 
+        const int x = floor((w - iScaledImage.width())/2);
+        const int y = floor(h - (sh + iScaledImage.height())/2);
+
         if (!iScaledImage.isNull()) {
+            if (x > 0) {
+                aPainter->setPen(Qt::NoPen);
+                if (iBackground1.isValid()) {
+                    aPainter->setBrush(QBrush(iBackground1));
+                    aPainter->drawRect(0, y, x, iScaledImage.height());
+                }
+                if (iBackground2.isValid()) {
+                    const int left = x + iScaledImage.width();
+                    aPainter->setBrush(QBrush(iBackground2));
+                    aPainter->drawRect(left, y, x, iScaledImage.height());
+                }
+            } else {
+                const int top = h - sh;
+                if (y > top) {
+                    aPainter->setPen(Qt::NoPen);
+                    if (iBackground1.isValid()) {
+                        aPainter->setBrush(QBrush(iBackground1));
+                        aPainter->drawRect(0, 0, w, y - top);
+                    }
+                    if (iBackground2.isValid()) {
+                        aPainter->setBrush(QBrush(iBackground2));
+                        aPainter->drawRect(0, y + iScaledImage.height(), w, y - top);
+                    }
+                }
+            }
             aPainter->drawImage(x, y, iScaledImage);
         }
 
@@ -475,7 +607,8 @@ void BooksCoverWidget::updateCenter()
     if (iScaledImage.isNull()) {
         iCenter.setY(floor(h/2));
     } else {
-        iCenter.setY(floor(h - iScaledImage.height()/2));
+        const qreal sh = qMax((qreal)iScaledImage.height(), w);
+        iCenter.setY(floor(h - sh/2));
     }
 
     if (iCenter != oldCenter) {
