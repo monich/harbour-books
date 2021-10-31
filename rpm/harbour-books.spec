@@ -1,6 +1,6 @@
 Name:           harbour-books
 Summary:        E-book reader
-Version:        1.0.43
+Version:        1.0.44
 Release:        1
 License:        BSD
 Group:          Applications/File
@@ -57,6 +57,12 @@ desktop-file-install --delete-original \
 make -C test test
 
 %changelog
+* Mon Nov 01 2021 Slava Monich <slava.monich@jolla.com> 1.0.44
+- Improved rendering of book covers
+- Show book count as menu label when appropriate
+- Perserve settings layout when keyboard opens
+- Minor content rendering tweaks
+
 * Sat May 15 2021 Slava Monich <slava.monich@jolla.com> 1.0.43
 - Integration with My Backup
 - Updated Hungarian translation
