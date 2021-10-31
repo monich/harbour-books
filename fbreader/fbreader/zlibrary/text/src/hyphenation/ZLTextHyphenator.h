@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2004-2010 Geometer Plus <contact@geometerplus.com>
+ * Copyright (C) 2021 Slava Monich <slava.monich@jolla.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,11 +31,12 @@ class ZLTextHyphenationInfo {
 
 private:
 	ZLTextHyphenationInfo(int length);
-	const ZLTextHyphenationInfo &operator = (ZLTextHyphenationInfo &info);
+	const ZLTextHyphenationInfo &operator = (const ZLTextHyphenationInfo &info);
 
 public:
+	ZLTextHyphenationInfo(const ZLTextHyphenationInfo &info) : myMask(info.myMask) { }
 	~ZLTextHyphenationInfo() {}
-	bool isHyphenationPossible(size_t position);
+	bool isHyphenationPossible(size_t position) const;
 	
 private:
 	std::vector<unsigned char> myMask;
@@ -70,7 +72,7 @@ protected:
 inline ZLTextHyphenationInfo::ZLTextHyphenationInfo(int length) : myMask(length - 1, false) {
 }
 
-inline bool ZLTextHyphenationInfo::isHyphenationPossible(size_t position) {
+inline bool ZLTextHyphenationInfo::isHyphenationPossible(size_t position) const {
 	return (position < myMask.size()) && myMask[position];
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2015-2021 Slava Monich <slava.monich@jolla.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -50,7 +50,7 @@ void OCFContainerReader::startElementHandler(const char *tag, const char **attr)
 				}
 			}
 		}
-		/* no break */
+		/* fallthrough */
 	default:
 		myStateStack.push(STATE_IGNORE);
 		break;
