@@ -96,7 +96,7 @@ QColor BooksCoverWidget::ScaleTask::leftBackground(const QImage& aImage)
     if (aImage.width() > 0) {
         const int h = aImage.height();
         for (int y = 0; y < h; y++) {
-            const QRgb left(aImage.pixelColor(0, y).rgb());
+            const QRgb left(aImage.pixel(0, y));
             counts.insert(left, counts.value(left) + 1);
         }
     }
@@ -112,7 +112,7 @@ QColor BooksCoverWidget::ScaleTask::rightBackground(const QImage& aImage)
     if (w > 0) {
         const int h = aImage.height();
         for (int y = 0; y < h; y++) {
-            const QRgb right(aImage.pixelColor(w - 1, y).rgb());
+            const QRgb right(aImage.pixel(w - 1, y));
             counts.insert(right, counts.value(right) + 1);
         }
     }
@@ -127,7 +127,7 @@ QColor BooksCoverWidget::ScaleTask::topBackground(const QImage& aImage)
     if (aImage.height() > 0) {
         const int w = aImage.width();
         for (int x = 0; x < w; x++) {
-            const QRgb left(aImage.pixelColor(x, 0).rgb());
+            const QRgb left(aImage.pixel(x, 0));
             counts.insert(left, counts.value(left) + 1);
         }
     }
@@ -143,7 +143,7 @@ QColor BooksCoverWidget::ScaleTask::bottomBackground(const QImage& aImage)
     if (h > 0) {
         const int w = aImage.width();
         for (int x = 0; x < w; x++) {
-            const QRgb left(aImage.pixelColor(x, h - 1).rgb());
+            const QRgb left(aImage.pixel(x, h - 1));
             counts.insert(left, counts.value(left) + 1);
         }
     }
