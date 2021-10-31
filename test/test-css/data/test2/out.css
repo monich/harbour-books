@@ -19,7 +19,7 @@ svg.cover-svg {
     page-break-before: avoid;
     text-align: center;
     font-weight: bold;
-    font-size: 248%; /* 5 */
+    font-size: 207%; /* 4 */
 }
 .p {
     margin-left: 0;
@@ -59,7 +59,7 @@ svg.cover-svg {
     page-break-before: avoid;
     text-align: center;
     font-weight: bold;
-    font-size: 207%; /* 4 */
+    font-size: 172%; /* 3 */
 }
 .title2 {
     margin-left: 1.56em;
@@ -69,7 +69,7 @@ svg.cover-svg {
     page-break-before: avoid;
     text-align: left;
     font-weight: bold;
-    font-size: 172%; /* 3 */
+    font-size: 144%; /* 2 */
 }
 .empty-line {
     margin-left: 0;
@@ -118,7 +118,7 @@ svg.cover-svg {
     page-break-before: avoid;
     text-align: left;
     font-weight: bold;
-    font-size: 144%; /* 2 */
+    font-size: 120%; /* 1 */
 }
 .cite {
     margin-left: 1em;
