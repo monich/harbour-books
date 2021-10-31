@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2004-2010 Geometer Plus <contact@geometerplus.com>
- * Copyright (C) 2015 Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2015-2021 Slava Monich <slava.monich@jolla.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -330,12 +330,12 @@ void StyleSheetTable::updateTextStyle(ZLTextStyleEntry &entry, const AttributeMa
 							entry.setFontSizeMag(-mag);
 						}
 					} else if (size > 100) {
-						if (size < 120) {
+						if (size <= 120) {
 							entry.setFontSizeMag(1);
 						} else {
 							int mag;
 							unsigned int x1 = 6*100, x2 = 5*size;
-							for (mag=1; mag<=6 && x1<x2; ++mag) {
+							for (mag=1; mag<=6 && 6*x1<5*x2; ++mag) {
 								x1 *= 6; x2 *= 5;
 							}
 							entry.setFontSizeMag(mag);
