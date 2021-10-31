@@ -133,7 +133,7 @@ Page {
                 description: inApp ? "" :
                     //: Settings page header description (app version)
                     //% "Version %1"
-                    qsTrId("harbour-books-settings-version").arg("1.0.43")
+                    qsTrId("harbour-books-settings-version").arg(Books.version)
 
                 Image {
                     id: appIcon
