@@ -134,7 +134,7 @@
     <message id="harbour-books-settings-version">
         <source>Version %1</source>
         <extracomment>Settings page header description (app version)</extracomment>
-        <translation type="unfinished">Wersja %1</translation>
+        <translation>Wersja %1</translation>
     </message>
     <message id="harbour-books-settings-page-display-section_header">
         <source>Display</source>
@@ -154,12 +154,12 @@
     <message id="harbour-books-settings-page-night_mode_example">
         <source>Night mode</source>
         <extracomment>Night mode example label</extracomment>
-        <translation type="unfinished">Tryb nocny</translation>
+        <translation>Tryb nocny</translation>
     </message>
     <message id="harbour-books-settings-page-night_mode_brightness_label">
         <source>Brightness in night mode</source>
         <extracomment>Slider label</extracomment>
-        <translation type="unfinished">Jasność w trybie nocnym</translation>
+        <translation>Jasność w trybie nocnym</translation>
     </message>
     <message id="harbour-books-settings-page-orientation_label">
         <source>Orientation</source>
