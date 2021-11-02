@@ -41,21 +41,21 @@
 #include <QPainter>
 
 // ==========================================================================
-// BooksCoverWidget::ScaleTask
+// BooksCoverWidget::Scaler
 // ==========================================================================
 
-class BooksCoverWidget::ScaleTask : public HarbourTask
+class BooksCoverWidget::Scaler
 {
 public:
-    ScaleTask(QThreadPool* aPool, QImage aImage, int aWidth, int aHeight,
-        bool aStretch);
-    static QImage scale(QImage aImage, int aWidth, int aHeight, bool aStretch);
+    Scaler(QImage aImage, int aWidth, int aHeight, Mode aMode);
+
     static QColor leftBackground(const QImage& aImage);
     static QColor rightBackground(const QImage& aImage);
     static QColor topBackground(const QImage& aImage);
     static QColor bottomBackground(const QImage& aImage);
     static QColor pickColor(const QHash<QRgb,int>& aColorCounts);
-    void performTask();
+
+    void performTask(HarbourTask* aTask);
 
 public:
     QImage iImage;
@@ -64,33 +64,18 @@ public:
     QColor iBackground2; // Right or bottom
     int iWidth;
     int iHeight;
-    bool iStretch;
+    Mode iMode;
 };
 
-BooksCoverWidget::ScaleTask::ScaleTask(QThreadPool* aPool, QImage aImage,
-    int aWidth, int aHeight, bool aStretch) : HarbourTask(aPool), iImage(aImage),
-    iBackground1(Qt::transparent), iBackground2(Qt::transparent),
-    iWidth(aWidth), iHeight(aHeight),
-    iStretch(aStretch)
+BooksCoverWidget::Scaler::Scaler(QImage aImage, int aWidth, int aHeight,
+    Mode aMode) : iImage(aImage), iWidth(aWidth), iHeight(aHeight),
+    iMode(aMode)
 {
-}
-
-QImage BooksCoverWidget::ScaleTask::scale(QImage aImage,
-    int aWidth, int aHeight, bool aStretch)
-{
-    if (aStretch){
-        return aImage.scaled(aWidth, aHeight, Qt::KeepAspectRatioByExpanding,
-            Qt::SmoothTransformation);
-    } else {
-        return (aWidth*aImage.height() > aImage.width()*aHeight) ?
-            aImage.scaledToHeight(aHeight, Qt::SmoothTransformation) :
-            aImage.scaledToWidth(aWidth, Qt::SmoothTransformation);
-    }
 }
 
 // The idea is to pick the colors which occur more often
 // at the edges of the picture.
-QColor BooksCoverWidget::ScaleTask::leftBackground(const QImage& aImage)
+QColor BooksCoverWidget::Scaler::leftBackground(const QImage& aImage)
 {
     QHash<QRgb,int> counts;
     if (aImage.width() > 0) {
@@ -105,7 +90,7 @@ QColor BooksCoverWidget::ScaleTask::leftBackground(const QImage& aImage)
     return color;
 }
 
-QColor BooksCoverWidget::ScaleTask::rightBackground(const QImage& aImage)
+QColor BooksCoverWidget::Scaler::rightBackground(const QImage& aImage)
 {
     QHash<QRgb,int> counts;
     const int w = aImage.width();
@@ -121,7 +106,7 @@ QColor BooksCoverWidget::ScaleTask::rightBackground(const QImage& aImage)
     return color;
 }
 
-QColor BooksCoverWidget::ScaleTask::topBackground(const QImage& aImage)
+QColor BooksCoverWidget::Scaler::topBackground(const QImage& aImage)
 {
     QHash<QRgb,int> counts;
     if (aImage.height() > 0) {
@@ -136,7 +121,7 @@ QColor BooksCoverWidget::ScaleTask::topBackground(const QImage& aImage)
     return color;
 }
 
-QColor BooksCoverWidget::ScaleTask::bottomBackground(const QImage& aImage)
+QColor BooksCoverWidget::Scaler::bottomBackground(const QImage& aImage)
 {
     QHash<QRgb,int> counts;
     const int h = aImage.height();
@@ -152,8 +137,9 @@ QColor BooksCoverWidget::ScaleTask::bottomBackground(const QImage& aImage)
     return color;
 }
 
-QColor BooksCoverWidget::ScaleTask::pickColor(const QHash<QRgb,int>& aCounts)
+QColor BooksCoverWidget::Scaler::pickColor(const QHash<QRgb,int>& aCounts)
 {
+    QColor color;
     if (aCounts.size() > 0) {
         QRgb rgb;
         int max;
@@ -166,29 +152,110 @@ QColor BooksCoverWidget::ScaleTask::pickColor(const QHash<QRgb,int>& aCounts)
                 rgb = it.key();
             }
         }
-        return QColor(rgb);
+        // A simple criteria for detecting an edge consisting
+        // predominantly of the same color
+        if (max > aCounts.count()) {
+            color = QColor(rgb);
+            HDEBUG(color << max <<  "out of" << aCounts.count());
+        }
     }
-    return QColor();
+    return color;
 }
 
-void BooksCoverWidget::ScaleTask::performTask()
+void BooksCoverWidget::Scaler::performTask(HarbourTask* aTask)
 {
-    if (!iImage.isNull() && !isCanceled()) {
-        iScaledImage = scale(iImage, iWidth, iHeight, iStretch);
-        if (!isCanceled()) {
+    if (!iImage.isNull()) {
+        const int wh = iWidth * iImage.height();
+        const int hw = iHeight * iImage.width();
+        // Also stretch in Fill mode if aspect ratio is almost right
+        if (iMode == Stretch ||
+           (iMode == Fill && (10*wh > 9*hw && 10*wh < 11*hw))) {
+            int x, y;
+            if (wh > hw) {
+                // Scale and center
+                iScaledImage = iImage.scaledToWidth(iWidth,
+                    Qt::SmoothTransformation);
+                x = 0;
+                y = (iScaledImage.height() - iHeight)/2;
+            } else {
+                iScaledImage = iImage.scaledToHeight(iHeight,
+                    Qt::SmoothTransformation);
+                x = (iScaledImage.width() - iWidth)/2;
+                y = 0;
+            }
+            if (!aTask || !aTask->isCanceled()) {
+                iScaledImage = iScaledImage.copy(x, y, iWidth, iHeight);
+            }
+        } else {
+            iScaledImage = (wh > hw) ?
+                iImage.scaledToHeight(iHeight, Qt::SmoothTransformation) :
+                iImage.scaledToWidth(iWidth, Qt::SmoothTransformation);
+        }
+        if (!aTask || !aTask->isCanceled()) {
             if (iScaledImage.width() < iWidth) {
                 iBackground1 = leftBackground(iScaledImage);
-                if (!isCanceled()) {
+                if (!aTask || !aTask->isCanceled()) {
                     iBackground2 = rightBackground(iScaledImage);
+                    if ((!aTask || !aTask->isCanceled()) &&
+                        (!iBackground1.isValid() || !iBackground2.isValid())) {
+                        // No predominant color
+                        iBackground1 = iBackground2 = QColor();
+                        iScaledImage = iImage.scaledToWidth(iWidth,
+                            Qt::SmoothTransformation);
+                        if (!aTask || !aTask->isCanceled()) {
+                            iScaledImage = iScaledImage.copy
+                                (0,(iScaledImage.height() - iHeight)/2,
+                                    iWidth, iHeight);
+                        }
+                    }
                 }
-            } else if (iScaledImage.height() < iHeight) {
+            } else if (iMode != Bottom && iScaledImage.height() < iHeight) {
                 iBackground1 = topBackground(iScaledImage);
-                if (!isCanceled()) {
+                if (!aTask || !aTask->isCanceled()) {
                     iBackground2 = bottomBackground(iScaledImage);
+                    if ((!aTask || !aTask->isCanceled()) &&
+                        (!iBackground1.isValid() || !iBackground2.isValid())) {
+                        // No predominant color
+                        iBackground1 = iBackground2 = QColor();
+                        iScaledImage = iImage.scaledToHeight(iHeight,
+                            Qt::SmoothTransformation);
+                        if (!aTask || !aTask->isCanceled()) {
+                            iScaledImage = iScaledImage.copy
+                                ((iScaledImage.width() - iWidth)/2, 0,
+                                    iWidth, iHeight);
+                        }
+                    }
                 }
             }
         }
     }
+}
+
+// ==========================================================================
+// BooksCoverWidget::ScaleTask
+// ==========================================================================
+
+class BooksCoverWidget::ScaleTask : public HarbourTask
+{
+public:
+    ScaleTask(QThreadPool* aPool, QImage aImage, int aWidth, int aHeight,
+        Mode aMode);
+
+    void performTask() Q_DECL_OVERRIDE;
+
+public:
+    Scaler iScaler;
+};
+
+BooksCoverWidget::ScaleTask::ScaleTask(QThreadPool* aPool, QImage aImage,
+    int aWidth, int aHeight, Mode aMode) : HarbourTask(aPool),
+    iScaler(aImage, aWidth, aHeight, aMode)
+{
+}
+
+void BooksCoverWidget::ScaleTask::performTask()
+{
+    iScaler.performTask(this);
 }
 
 // ==========================================================================
@@ -467,20 +534,16 @@ void BooksCoverWidget::scaleImage(bool aWasEmpty)
         }
 
         if (!iCoverImage.isNull()) {
-            const bool stretch = (iMode == Stretch);
             if (iSynchronous) {
-                iScaledImage = ScaleTask::scale(iCoverImage, w, h, stretch);
-                if (iScaledImage.width() < w) {
-                    iBackground1 = ScaleTask::leftBackground(iScaledImage);
-                    iBackground2 = ScaleTask::rightBackground(iScaledImage);
-                } else if (iScaledImage.height() < h) {
-                    iBackground1 = ScaleTask::topBackground(iScaledImage);
-                    iBackground2 = ScaleTask::bottomBackground(iScaledImage);
-                }
+                Scaler scaler(iCoverImage, w, h, iMode);
+                scaler.performTask(Q_NULLPTR);
+                iScaledImage = scaler.iScaledImage;
+                iBackground1 = scaler.iBackground1;
+                iBackground2 = scaler.iBackground2;
                 update();
             } else {
                 (iScaleTask = new ScaleTask(iTaskQueue->pool(), iCoverImage,
-                    w, h, stretch))->submit(this, SLOT(onScaleTaskDone()));
+                    w, h, iMode))->submit(this, SLOT(onScaleTaskDone()));
             }
         } else {
             iScaledImage = QImage();
@@ -501,9 +564,9 @@ void BooksCoverWidget::onScaleTaskDone()
 {
     const bool wasEmpty(empty());
     HASSERT(iScaleTask == sender());
-    iScaledImage = iScaleTask->iScaledImage;
-    iBackground1 = iScaleTask->iBackground1;
-    iBackground2 = iScaleTask->iBackground2;
+    iScaledImage = iScaleTask->iScaler.iScaledImage;
+    iBackground1 = iScaleTask->iScaler.iBackground1;
+    iBackground2 = iScaleTask->iScaler.iBackground2;
     iScaleTask->release(this);
     iScaleTask = NULL;
     update();

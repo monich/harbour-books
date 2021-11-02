@@ -125,6 +125,7 @@ private:
     void updateCenter();
 
 private:
+    class Scaler;
     class ScaleTask;
     class DefaultImage;
     shared_ptr<BooksTaskQueue> iTaskQueue;
