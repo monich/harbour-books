@@ -1,6 +1,6 @@
 Name:           openrepos-books
 Summary:        E-book reader
-Version:        1.0.44
+Version:        1.0.45
 Release:        1
 License:        BSD
 Vendor:         slava
@@ -60,6 +60,10 @@ desktop-file-install --delete-original \
 make -C test test
 
 %changelog
+* Sat Nov 06 2021 Slava Monich <slava.monich@jolla.com> 1.0.45
+- Tweaked rendering of book covers
+- Fixed opening external links
+
 * Mon Nov 01 2021 Slava Monich <slava.monich@jolla.com> 1.0.44
 - Improved rendering of book covers
 - Show book count as menu label when appropriate
