@@ -1,6 +1,6 @@
 /*
-  Copyright (C) 2016 Jolla Ltd.
-  Contact: Slava Monich <slava.monich@jolla.com>
+  Copyright (C) 2016-2021 Jolla Ltd.
+  Copyright (C) 2016-2021 Slava Monich <slava.monich@jolla.com>
 
   You may use this file under the terms of BSD license as follows:
 
@@ -8,14 +8,15 @@
   modification, are permitted provided that the following conditions
   are met:
 
-    * Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above copyright
-      notice, this list of conditions and the following disclaimer in the
-      documentation and/or other materials provided with the distribution.
-    * Neither the name of Jolla Ltd nor the names of its contributors
-      may be used to endorse or promote products derived from this software
-      without specific prior written permission.
+    1. Redistributions of source code must retain the above copyright
+       notice, this list of conditions and the following disclaimer.
+    2. Redistributions in binary form must reproduce the above copyright
+       notice, this list of conditions and the following disclaimer
+       in the documentation and/or other materials provided with the
+       distribution.
+    3. Neither the names of the copyright holders nor the names of its
+       contributors may be used to endorse or promote products derived
+       from this software without specific prior written permission.
 
   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
   AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -35,6 +36,7 @@ import Sailfish.Silica 1.0
 
 Rectangle {
     id: root
+
     visible: opacity > 0.0
     opacity: 0.0
     width: parent.width
@@ -60,6 +62,7 @@ Rectangle {
 
         Label {
             id: title
+
             anchors.horizontalCenter: parent.horizontalCenter
             //: External link menu title
             //% "Link"
@@ -113,9 +116,9 @@ Rectangle {
             //% "Open in browser"
             text: qsTrId("harbour-books-book-browser_link-open_in_browser")
             onClicked: {
-                console.log("opening", root.url)
+                console.log("opening", linkLabel.text)
                 root.hide()
-                Qt.openUrlExternally(root.url)
+                Qt.openUrlExternally(linkLabel.text)
             }
         }
 
