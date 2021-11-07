@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2015-2020 Jolla Ltd.
- * Copyright (C) 2015-2020 Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2015-2021 Jolla Ltd.
+ * Copyright (C) 2015-2021 Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
  *
@@ -35,16 +35,12 @@
 #include "BooksStorage.h"
 #include "BooksPaintContext.h"
 #include "BooksDialogManager.h"
-#include "BooksImageProvider.h"
 #include "BooksSettings.h"
 
 #include "HarbourDebug.h"
-#include "HarbourMediaPlugin.h"
-#include "HarbourPolicyPlugin.h"
 
 #include "ZLibrary.h"
 #include "ZLApplication.h"
-#include "ZLLanguageUtil.h"
 #include "ZLLogger.h"
 
 #include "filesystem/ZLQtFSManager.h"
@@ -232,33 +228,6 @@ bool ZLibrary::init(int& aArgc, char** &aArgv)
 
 void ZLibrary::run(ZLApplication* aApp)
 {
-    if (ZLLanguageUtil::isRTLLanguage(ZLibrary::Language())) {
-        qApp->setLayoutDirection(Qt::RightToLeft);
-    }
-
-    QString qml(QString::fromStdString(BaseDirectory + BOOKS_QML_FILE));
-    HDEBUG("qml file" << qPrintable(qml));
-
-    QQuickView* view = SailfishApp::createView();
-    QQmlContext* root = view->rootContext();
-    QQmlEngine* engine = root->engine();
-    QSharedPointer<BooksSettings> settings = BooksSettings::sharedInstance();
-    HarbourPolicyPlugin::registerTypes(engine, BOOKS_QML_PLUGIN,
-        BOOKS_QML_PLUGIN_V1, BOOKS_QML_PLUGIN_V2);
-    HarbourMediaPlugin::registerTypes(engine, BOOKS_QML_PLUGIN,
-        BOOKS_QML_PLUGIN_V1, BOOKS_QML_PLUGIN_V2);
-    engine->addImageProvider(BooksImageProvider::PROVIDER_ID,
-        new BooksImageProvider(root));
-
-    root->setContextProperty("PointsPerInch", booksPPI);
-    root->setContextProperty("MaximumHintCount", 1);
-    root->setContextProperty("BooksSettingsMenu",
-        QVariant::fromValue(BOOKS_SETTINGS_MENU));
-    root->setContextProperty("Settings", settings.data());
-
-    view->setTitle(qtTrId("harbour-books-app-name"));
-    view->setSource(QUrl::fromLocalFile(qml));
-    view->show();
     HDEBUG("started");
     qApp->exec();
     HDEBUG("exiting...");

@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2015-2020 Jolla Ltd.
- * Copyright (C) 2015-2020 Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2015-2021 Jolla Ltd.
+ * Copyright (C) 2015-2021 Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
  *
@@ -453,7 +453,7 @@ BooksSettings::Private::updateCurrentBook()
     if (path.isEmpty()) {
         if (iCurrentBook) {
             iCurrentBook->release();
-            iCurrentBook = NULL;
+            iCurrentBook = Q_NULLPTR;
             return true;
         }
     } else if (!iCurrentBook || iCurrentBook->path() != path) {
@@ -463,16 +463,17 @@ BooksSettings::Private::updateCurrentBook()
             QFileInfo info(path);
             BooksStorageManager* mgr = BooksStorageManager::instance();
             BooksStorage storage = mgr->storageForPath(info.path(), &rel);
-            if (storage.isValid()) {
-                if (iCurrentBook) iCurrentBook->release();
-                iCurrentBook = new BooksBook(storage, rel, book);
-                iCurrentBook->requestCoverImage();
-                return true;
-            }
+            if (iCurrentBook) iCurrentBook->release();
+            iCurrentBook = storage.isValid() ?
+                new BooksBook(storage, rel, book) :
+                new BooksBook(BooksStorage::tmpStorage(),
+                    info.dir().absolutePath(), book);
+            iCurrentBook->requestCoverImage();
+            return true;
         }
         if (iCurrentBook) {
             iCurrentBook->release();
-            iCurrentBook = NULL;
+            iCurrentBook = Q_NULLPTR;
             return true;
         }
     }

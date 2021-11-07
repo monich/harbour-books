@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2015-2020 Jolla Ltd.
- * Copyright (C) 2015-2020 Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2015-2021 Jolla Ltd.
+ * Copyright (C) 2015-2021 Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
  *
@@ -38,6 +38,7 @@
 #include "BooksBookModel.h"
 #include "BooksCoverModel.h"
 #include "BooksConfig.h"
+#include "BooksImageProvider.h"
 #include "BooksImportModel.h"
 #include "BooksPathModel.h"
 #include "BooksPageStack.h"
@@ -50,9 +51,12 @@
 
 #include "HarbourDisplayBlanking.h"
 #include "HarbourDebug.h"
+#include "HarbourMediaPlugin.h"
+#include "HarbourPolicyPlugin.h"
 #include "HarbourTheme.h"
 
 #include "ZLibrary.h"
+#include "ZLLanguageUtil.h"
 
 #include <sailfishapp.h>
 
@@ -106,6 +110,47 @@ Q_DECL_EXPORT int main(int argc, char **argv)
 
     BooksConfigManager configManager;
     if (ZLibrary::init(argc, argv)) {
+        if (ZLLanguageUtil::isRTLLanguage(ZLibrary::Language())) {
+            qApp->setLayoutDirection(Qt::RightToLeft);
+        }
+
+        const QString qml(QString::fromStdString(ZLibrary::BaseDirectory +
+            BOOKS_QML_FILE));
+        HDEBUG("qml file" << qPrintable(qml));
+
+        QQuickView* view = SailfishApp::createView();
+        QQmlContext* root = view->rootContext();
+        QQmlEngine* engine = root->engine();
+        QSharedPointer<BooksSettings> settings = BooksSettings::sharedInstance();
+        HarbourPolicyPlugin::registerTypes(engine, BOOKS_QML_PLUGIN,
+            BOOKS_QML_PLUGIN_V1, BOOKS_QML_PLUGIN_V2);
+        HarbourMediaPlugin::registerTypes(engine, BOOKS_QML_PLUGIN,
+            BOOKS_QML_PLUGIN_V1, BOOKS_QML_PLUGIN_V2);
+        engine->addImageProvider(BooksImageProvider::PROVIDER_ID,
+            new BooksImageProvider(root));
+
+        root->setContextProperty("PointsPerInch", booksPPI);
+        root->setContextProperty("MaximumHintCount", 1);
+        root->setContextProperty("BooksSettingsMenu",
+            QVariant::fromValue(BOOKS_SETTINGS_MENU));
+        root->setContextProperty("Settings", settings.data());
+
+        if (argc > 1) {
+            const QString file(QString::fromLocal8Bit(argv[1]));
+            if (QFile::exists(file)) {
+                BooksBook* book = BooksBook::newBook(file);
+                if (book) {
+                    settings->setCurrentBook(book);
+                    book->requestCoverImage();
+                    book->release();
+                }
+            }
+        }
+
+        view->setTitle(qtTrId("harbour-books-app-name"));
+        view->setSource(QUrl::fromLocalFile(qml));
+        view->show();
+
         ZLibrary::run(NULL);
         BooksTaskQueue::waitForDone(TASK_QUEUE_TIMEOUT);
         ZLibrary::shutdown();

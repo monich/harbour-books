@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2015-2018 Jolla Ltd.
- * Copyright (C) 2015-2018 Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2015-2021 Jolla Ltd.
+ * Copyright (C) 2015-2021 Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
  *
@@ -8,15 +8,15 @@
  * modification, are permitted provided that the following conditions
  * are met:
  *
- *   * Redistributions of source code must retain the above copyright
- *     notice, this list of conditions and the following disclaimer.
- *   * Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in
- *     the documentation and/or other materials provided with the
- *     distribution.
- *   * Neither the name of Jolla Ltd nor the names of its contributors
- *     may be used to endorse or promote products derived from this
- *     software without specific prior written permission.
+ *   1. Redistributions of source code must retain the above copyright
+ *      notice, this list of conditions and the following disclaimer.
+ *   2. Redistributions in binary form must reproduce the above copyright
+ *      notice, this list of conditions and the following disclaimer
+ *      in the documentation and/or other materials provided with the
+ *      distribution.
+ *   3. Neither the names of the copyright holders nor the names of its
+ *      contributors may be used to endorse or promote products derived
+ *      from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -67,11 +67,12 @@ class BooksBook : public QObject, public BooksItem
     Q_PROPERTY(bool fontSizeAdjust READ fontSizeAdjust WRITE setFontSizeAdjust NOTIFY fontSizeAdjustChanged)
 
 public:
-    explicit BooksBook(QObject* aParent = NULL);
+    explicit BooksBook(QObject* aParent = Q_NULLPTR);
     BooksBook(const BooksStorage& aStorage, QString aRelativePath,
         shared_ptr<Book> aBook);
     ~BooksBook();
 
+    static BooksBook* newBook(QString aFullPath);
     static BooksBook* newBook(const BooksStorage& aStorage, QString aRelPath,
         QString aFileName);
 
