@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2015-2019 Jolla Ltd.
- * Copyright (C) 2015-2019 Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2015-2021 Jolla Ltd.
+ * Copyright (C) 2015-2021 Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
  *
@@ -48,6 +48,12 @@ class BooksStorage: public QObject
     Q_PROPERTY(bool internal READ isInternal CONSTANT)
     Q_PROPERTY(bool valid READ isValid CONSTANT)
 
+    enum Type {
+        InternalStorage,
+        RemovableStorage,
+        TmpStorage
+    };
+
 public:
     BooksStorage();
     BooksStorage(const BooksStorage& aStorage);
@@ -72,12 +78,14 @@ public:
     bool operator == (const BooksStorage& aStorage) const
         { return equal(aStorage); }
 
+    static BooksStorage tmpStorage();
+
 Q_SIGNALS:
     void removed();
 
 private:
     friend class BooksStorageManager;
-    BooksStorage(QString, QString, QString, bool);
+    BooksStorage(QString, QString, QString, Type);
     void connectNotify(const QMetaMethod& aSignal);
 
 private:

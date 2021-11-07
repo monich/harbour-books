@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2015-2020 Jolla Ltd.
- * Copyright (C) 2015-2020 Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2015-2021 Jolla Ltd.
+ * Copyright (C) 2015-2021 Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
  *
@@ -55,6 +55,7 @@
 
 #include <libudev.h>
 
+#define TMP_STATE_DIR       "tmp"
 #define INTERNAL_STATE_DIR  "internal"
 #define REMOVABLE_STATE_DIR "removable"
 
@@ -68,7 +69,7 @@ class BooksStorage::Private: public QObject
 
 public:
     Private(QString aDevice, QString aMountPoint, QString aBooksDir,
-        bool aInternal);
+        Type aType);
 
     bool isRemoved() const;
     bool equal(const Private& aData) const;
@@ -86,7 +87,7 @@ public:
     QString iMountPoint;
     QDir iBooksDir;
     QDir iConfigDir;
-    bool iInternal;
+    Type iType;
     bool iPresent;
 };
 
@@ -94,35 +95,42 @@ BooksStorage::Private::Private(
     QString aDevice,
     QString aMountPoint,
     QString aBooksDir,
-    bool aInternal) :
+    Type aType) :
     iRef(1),
     iDevice(aDevice),
     iMountPoint(aMountPoint),
     iBooksDir(aBooksDir),
-    iInternal(aInternal),
+    iType(aType),
     iPresent(true)
 {
     QString cfgDir;
     cfgDir = QString::fromStdString(ZLibrary::ApplicationWritableDirectory());
     if (!cfgDir.endsWith('/')) cfgDir += '/';
-    if (aInternal) {
+    QString subDir;
+    switch (aType) {
+    case InternalStorage:
         cfgDir += INTERNAL_STATE_DIR;
-        QString subDir(aDevice);
+        subDir = aDevice;
         if (subDir.startsWith("/dev")) subDir.remove(0,4);
         if (!subDir.startsWith('/')) cfgDir += '/';
         cfgDir += subDir;
-    } else {
+        break;
+    case RemovableStorage:
         cfgDir += REMOVABLE_STATE_DIR "/";
-        QString label = QDir(Private::mountPoint(aBooksDir)).dirName();
-        if (label.isEmpty()) label = "sdcard";
-        cfgDir += label;
+        subDir = QDir(Private::mountPoint(aBooksDir)).dirName();
+        if (subDir.isEmpty()) subDir = "sdcard";
+        cfgDir += subDir;
+        break;
+    case TmpStorage:
+        cfgDir += TMP_STATE_DIR "/";
+        break;
     }
     iConfigDir.setPath(cfgDir);
 }
 
 bool BooksStorage::Private::equal(const BooksStorage::Private& aData) const
 {
-    return iInternal == aData.iInternal &&
+    return iType == aData.iType &&
            iPresent == aData.iPresent &&
            iMountPoint == aData.iMountPoint &&
            iDevice == aData.iDevice &&
@@ -182,8 +190,8 @@ BooksStorage::BooksStorage(const BooksStorage& aStorage) :
 }
 
 BooksStorage::BooksStorage(QString aDevice, QString aMount, QString aBooksDir,
-    bool aInternal) : QObject(NULL),
-    iPrivate(new Private(aDevice, aMount, aBooksDir, aInternal)),
+    Type aType) : QObject(NULL),
+    iPrivate(new Private(aDevice, aMount, aBooksDir, aType)),
     iPassThrough(false)
 {
     HDEBUG("config dir" << qPrintable(configDir().path()));
@@ -192,6 +200,11 @@ BooksStorage::BooksStorage(QString aDevice, QString aMount, QString aBooksDir,
 BooksStorage::~BooksStorage()
 {
     if (iPrivate && !iPrivate->iRef.deref()) delete iPrivate;
+}
+
+BooksStorage BooksStorage::tmpStorage()
+{
+    return BooksStorage("tmpfs", "/tmp", "/", BooksStorage::TmpStorage);
 }
 
 void BooksStorage::connectNotify(const QMetaMethod& aSignal)
@@ -223,7 +236,7 @@ QDir BooksStorage::configDir() const
 
 bool BooksStorage::isInternal() const
 {
-    return iPrivate && iPrivate->iInternal;
+    return iPrivate && iPrivate->iType == InternalStorage;
 }
 
 bool BooksStorage::isPresent() const
@@ -383,7 +396,8 @@ BooksStorageManager::Private::Private(BooksStorageManager* aParent) :
                     QString path(entry.path);
                     if (!path.endsWith('/')) path += '/';
                     path += iSettings->removableRoot();
-                    BooksStorage bs(entry.dev, entry.path, path, false);
+                    BooksStorage bs(entry.dev, entry.path, path,
+                        BooksStorage::RemovableStorage);
                     HDEBUG("removable" << entry.dev << bs.booksDir().path());
                     iStorageList.append(bs);
                 } else {
@@ -394,7 +408,8 @@ BooksStorageManager::Private::Private(BooksStorageManager* aParent) :
         mounts.close();
     }
 
-    iStorageList.insert(0, BooksStorage(homeDevice, homeMount, homeBooks, true));
+    iStorageList.insert(0, BooksStorage(homeDevice, homeMount, homeBooks,
+        BooksStorage::InternalStorage));
 
     if (iUdev) {
         iMonitor = udev_monitor_new_from_netlink(iUdev, "udev");
@@ -495,7 +510,8 @@ bool BooksStorageManager::Private::scanMounts()
                 if (!path.endsWith('/')) path += '/';
                 path += iSettings->removableRoot();
                 HDEBUG("new removable device" << entry.dev << path);
-                BooksStorage storage(entry.dev, entry.path, path, false);
+                BooksStorage storage(entry.dev, entry.path, path,
+                    BooksStorage::RemovableStorage);
                 iStorageList.append(storage);
                 Q_EMIT iParent->storageAdded(storage);
                 newStorageFound = true;
@@ -585,7 +601,8 @@ void BooksStorageManager::Private::onRemovableRootChanged()
             if (!path.endsWith('/')) path += '/';
             path += iSettings->removableRoot();
             BooksStorage updated(storage.iPrivate->iDevice,
-                storage.iPrivate->iMountPoint, path, false);
+                storage.iPrivate->iMountPoint, path,
+                BooksStorage::RemovableStorage);
             if (!storage.equal(updated)) {
                 replaced.append(storage);
                 replaced.append(updated);
