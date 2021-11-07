@@ -55,8 +55,6 @@
 
 #include <QGuiApplication>
 #include <QStandardPaths>
-#include <QQuickView>
-#include <QQmlContext>
 #include <QScreen>
 
 #include <unistd.h>

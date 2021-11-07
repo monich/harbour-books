@@ -61,6 +61,8 @@
 #include <sailfishapp.h>
 
 #include <QGuiApplication>
+#include <QQuickView>
+#include <QQmlContext>
 
 // If the current task is stuck for too long after being canceled it's
 // probably stuck forever. Let "too long" be 10 seconds.
