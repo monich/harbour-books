@@ -277,12 +277,22 @@
     <message id="harbour-books-settings-page-turn_pages_by_tap">
         <source>Turn pages by tapping the screen</source>
         <extracomment>Text switch label</extracomment>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Pagina&apos;s omslaan door op het scherm te tikken</translation>
     </message>
     <message id="harbour-books-settings-page-turn_pages_by_tap-description">
         <source>Tapping near the left edge of the screen returns to the previous page, tapping near the right edge gets you to the next page.</source>
         <extracomment>Text switch description</extracomment>
         <translation type="unfinished"></translation>
+    </message>
+    <message id="harbour-books-settings-page-book_pulldown_menu">
+        <source>Show pulley menu when the book is open</source>
+        <extracomment>Text switch label</extracomment>
+        <translation type="unfinished">Toon uittrekmenu wanneer het boek is geopend</translation>
+    </message>
+    <message id="harbour-books-settings-page-book_pulldown_menu-description">
+        <source>Without the pulley menu, the book has to be closed by swiping it up.</source>
+        <extracomment>Text switch description</extracomment>
+        <translation type="unfinished">Zonder uittrekmenu moet het boek worden gesloten door het omhoog te vegen.</translation>
     </message>
     <message id="harbour-books-settings-page-removable-section_header">
         <source>Memory card</source>

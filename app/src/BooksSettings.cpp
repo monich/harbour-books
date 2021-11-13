@@ -55,6 +55,7 @@
 #define KEY_REMOVABLE_ROOT          "removableRoot"
 #define KEY_INVERT_COLORS           "invertColors"
 #define KEY_KEEP_DISPLAY_ON         "keepDisplayOn"
+#define KEY_BOOK_PULL_DOWN_MENU     "bookPullDownMenu"
 #define KEY_VOLUME_UP_ACTION        "volumeUpAction"
 #define KEY_VOLUME_DOWN_ACTION      "volumeDownAction"
 #define KEY_ORIENTATION             "orientation"
@@ -70,6 +71,7 @@
 #define DEFAULT_REMOVABLE_ROOT      "Books"
 #define DEFAULT_INVERT_COLORS       false
 #define DEFAULT_KEEP_DISPLAY_ON     false
+#define DEFAULT_BOOK_PULL_DOWN_MENU true
 #define DEFAULT_VOLUME_UP_ACTION    (BooksSettings::ActionNextPage)
 #define DEFAULT_VOLUME_DOWN_ACTION  (BooksSettings::ActionPreviousPage)
 #define DEFAULT_ORIENTATION         (BooksSettings::OrientationAny)
@@ -257,6 +259,7 @@ public:
     MGConfItem* iInvertColorsConf;
     MGConfItem* iSampleBookCopiedConf;
     MGConfItem* iKeepDisplayOnConf;
+    MGConfItem* iBookPullDownMenuConf;
     MGConfItem* iVolumeUpActionConf;
     MGConfItem* iVolumeDownActionConf;
     MGConfItem* iCurrentFolderConf;
@@ -282,6 +285,7 @@ BooksSettings::Private::Private(BooksSettings* aParent) :
     iInvertColorsConf(new MGConfItem(DCONF_PATH KEY_INVERT_COLORS, this)),
     iSampleBookCopiedConf(new MGConfItem(DCONF_PATH KEY_SAMPLE_BOOK_COPIED, this)),
     iKeepDisplayOnConf(new MGConfItem(DCONF_PATH KEY_KEEP_DISPLAY_ON, this)),
+    iBookPullDownMenuConf(new MGConfItem(DCONF_PATH KEY_BOOK_PULL_DOWN_MENU, this)),
     iVolumeUpActionConf(new MGConfItem(DCONF_PATH KEY_VOLUME_UP_ACTION, this)),
     iVolumeDownActionConf(new MGConfItem(DCONF_PATH KEY_VOLUME_DOWN_ACTION, this)),
     iCurrentFolderConf(new MGConfItem(DCONF_PATH KEY_CURRENT_FOLDER, this)),
@@ -302,6 +306,7 @@ BooksSettings::Private::Private(BooksSettings* aParent) :
     connect(iTurnPageByTapConf, SIGNAL(valueChanged()), aParent, SIGNAL(turnPageByTapChanged()));
     connect(iSampleBookCopiedConf, SIGNAL(valueChanged()), aParent, SIGNAL(sampleBookCopiedChanged()));
     connect(iKeepDisplayOnConf, SIGNAL(valueChanged()), aParent, SIGNAL(keepDisplayOnChanged()));
+    connect(iBookPullDownMenuConf, SIGNAL(valueChanged()), aParent, SIGNAL(bookPullDownMenuChanged()));
     connect(iVolumeUpActionConf, SIGNAL(valueChanged()), aParent, SIGNAL(volumeUpActionChanged()));
     connect(iVolumeDownActionConf, SIGNAL(valueChanged()), aParent, SIGNAL(volumeDownActionChanged()));
     connect(iOrientationConf, SIGNAL(valueChanged()), aParent, SIGNAL(orientationChanged()));
@@ -702,19 +707,6 @@ BooksSettings::setInvertColors(
 }
 
 bool
-BooksSettings::sampleBookCopied() const
-{
-    return iPrivate->iSampleBookCopiedConf->value(DEFAULT_SAMPLE_BOOK_COPIED).toBool();
-}
-
-void
-BooksSettings::setSampleBookCopied()
-{
-    HDEBUG("");
-    iPrivate->iSampleBookCopiedConf->set(true);
-}
-
-bool
 BooksSettings::keepDisplayOn() const
 {
     return iPrivate->iKeepDisplayOnConf->value(DEFAULT_KEEP_DISPLAY_ON).toBool();
@@ -727,6 +719,34 @@ BooksSettings::setKeepDisplayOn(
     HDEBUG(aValue);
     iPrivate->iKeepDisplayOnConf->set(aValue);
 }
+
+bool
+BooksSettings::bookPullDownMenu() const
+{
+    return iPrivate->iBookPullDownMenuConf->value(DEFAULT_BOOK_PULL_DOWN_MENU).toBool();
+}
+
+void
+BooksSettings::setBookPullDownMenu(
+    bool aValue)
+{
+    HDEBUG(aValue);
+    iPrivate->iBookPullDownMenuConf->set(aValue);
+}
+
+bool
+BooksSettings::sampleBookCopied() const
+{
+    return iPrivate->iSampleBookCopiedConf->value(DEFAULT_SAMPLE_BOOK_COPIED).toBool();
+}
+
+void
+BooksSettings::setSampleBookCopied()
+{
+    HDEBUG("");
+    iPrivate->iSampleBookCopiedConf->set(true);
+}
+
 
 BooksSettings::Action
 BooksSettings::volumeUpAction() const

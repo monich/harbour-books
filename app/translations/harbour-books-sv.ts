@@ -284,6 +284,16 @@
         <extracomment>Text switch description</extracomment>
         <translation>Tryck nära vänster skärmkant, för att återvända till föregående sida. Tryck nära höger skärmkant, för att komma till nästa sida.</translation>
     </message>
+    <message id="harbour-books-settings-page-book_pulldown_menu">
+        <source>Show pulley menu when the book is open</source>
+        <extracomment>Text switch label</extracomment>
+        <translation type="unfinished">Visa rullgardinsmeny när boken är öppen</translation>
+    </message>
+    <message id="harbour-books-settings-page-book_pulldown_menu-description">
+        <source>Without the pulley menu, the book has to be closed by swiping it up.</source>
+        <extracomment>Text switch description</extracomment>
+        <translation type="unfinished">Utan rullgardinsmeny måste boken stängas genom att svepa uppåt.</translation>
+    </message>
     <message id="harbour-books-settings-page-removable-section_header">
         <source>Memory card</source>
         <extracomment>Section header for memory card settings</extracomment>

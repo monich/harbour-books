@@ -291,6 +291,16 @@
         <extracomment>Section header for memory card settings</extracomment>
         <translation>Карта памяти</translation>
     </message>
+    <message id="harbour-books-settings-page-book_pulldown_menu">
+        <source>Show pulley menu when the book is open</source>
+        <extracomment>Text switch label</extracomment>
+        <translation>Показывать вытягиваемое меню при открытой книге</translation>
+    </message>
+    <message id="harbour-books-settings-page-book_pulldown_menu-description">
+        <source>Without the pulley menu, the book has to be closed by swiping it up.</source>
+        <extracomment>Text switch description</extracomment>
+        <translation>Чтобы закрыть книгу в отсутствие вытягиваемого меню, её надо будет сдвинуть вверх больше, чем на пол-экрана.</translation>
+    </message>
     <message id="harbour-books-settings-page-removable_root-label">
         <source>Books folder</source>
         <extracomment>Settings field label</extracomment>

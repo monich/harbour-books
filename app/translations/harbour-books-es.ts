@@ -284,6 +284,16 @@
         <extracomment>Text switch description</extracomment>
         <translation>Tocando cerca del borde izquierdo de la pantalla, se regresa a la página anterior; si se toca cerca del borde derecho, se pasa a la página siguiente.</translation>
     </message>
+    <message id="harbour-books-settings-page-book_pulldown_menu">
+        <source>Show pulley menu when the book is open</source>
+        <extracomment>Text switch label</extracomment>
+        <translation type="unfinished">Mostrar menú actualizable cuando el libro está abierto</translation>
+    </message>
+    <message id="harbour-books-settings-page-book_pulldown_menu-description">
+        <source>Without the pulley menu, the book has to be closed by swiping it up.</source>
+        <extracomment>Text switch description</extracomment>
+        <translation type="unfinished">Sin menú actualizable, el libro debe cerrarse deslizándose hacia arriba.</translation>
+    </message>
     <message id="harbour-books-settings-page-removable-section_header">
         <source>Memory card</source>
         <extracomment>Section header for memory card settings</extracomment>

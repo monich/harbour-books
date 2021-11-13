@@ -282,6 +282,16 @@
         <extracomment>Text switch description</extracomment>
         <translation>Ha a képernyő bal szélét megérinted, az előző oldalra, a jobb szélét megérintve pedig a következő oldalra kerülsz.</translation>
     </message>
+    <message id="harbour-books-settings-page-book_pulldown_menu">
+        <source>Show pulley menu when the book is open</source>
+        <extracomment>Text switch label</extracomment>
+        <translation type="unfinished">A  lehúzható menü megjelenítése, amikor a könyv nyitva van</translation>
+    </message>
+    <message id="harbour-books-settings-page-book_pulldown_menu-description">
+        <source>Without the pulley menu, the book has to be closed by swiping it up.</source>
+        <extracomment>Text switch description</extracomment>
+        <translation type="unfinished">Lehúzható menü nélkül a könyvet felfelé húzással kell bezárni.</translation>
+    </message>
     <message id="harbour-books-settings-page-removable-section_header">
         <source>Memory card</source>
         <extracomment>Section header for memory card settings</extracomment>

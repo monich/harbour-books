@@ -456,6 +456,12 @@ Page {
                     }
                 }
 
+                Item {
+                    width: 1
+                    height: 1
+                    visible: landscapeLayout // To occupy the grid slot
+                }
+
                 TextSwitch {
                     width: parent.columnWidth
                     automaticCheck: false
@@ -471,6 +477,24 @@ Page {
                         id: turnPageByTap
                         key: rootPath + "turnPageByTap"
                         defaultValue: false
+                    }
+                }
+
+                TextSwitch {
+                    width: parent.columnWidth
+                    automaticCheck: false
+                    checked: bookPullDownMenu.value
+                    //: Text switch label
+                    //% "Show pulley menu when the book is open"
+                    text: qsTrId("harbour-books-settings-page-book_pulldown_menu")
+                    //: Text switch description
+                    //% "Without the pulley menu, the book has to be closed by swiping it up."
+                    description: qsTrId("harbour-books-settings-page-book_pulldown_menu-description")
+                    onClicked: bookPullDownMenu.value = !bookPullDownMenu.value
+                    ConfigurationValue {
+                        id: bookPullDownMenu
+                        key: rootPath + "bookPullDownMenu"
+                        defaultValue: true
                     }
                 }
             }

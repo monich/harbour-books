@@ -65,8 +65,8 @@ Item {
 
     property alias viewInteractive: bookView.interactive
     property alias pullDownMenu: menu
-    property alias isCurrentView: menu.visible
     property alias loadingBackgroundOpacity: loadingBackground.opacity
+    property bool isCurrentView
     property bool pageActive
 
     readonly property bool viewActive: pageActive && Qt.application.active && !!book
@@ -147,7 +147,7 @@ Item {
     PullDownMenu {
         id: menu
 
-        visible: false // BooksMainPage will make it visible when it's needed
+        visible: isCurrentView && Settings.bookPullDownMenu
 
         property real backToLibrary
 

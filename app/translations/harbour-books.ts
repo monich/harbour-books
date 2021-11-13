@@ -284,6 +284,16 @@
         <extracomment>Text switch description</extracomment>
         <translation>Tapping near the left edge of the screen returns to the previous page, tapping near the right edge gets you to the next page.</translation>
     </message>
+    <message id="harbour-books-settings-page-book_pulldown_menu">
+        <source>Show pulley menu when the book is open</source>
+        <extracomment>Text switch label</extracomment>
+        <translation>Show pulley menu when the book is open</translation>
+    </message>
+    <message id="harbour-books-settings-page-book_pulldown_menu-description">
+        <source>Without the pulley menu, the book has to be closed by swiping it up.</source>
+        <extracomment>Text switch description</extracomment>
+        <translation>Without the pulley menu, the book has to be closed by swiping it up.</translation>
+    </message>
     <message id="harbour-books-settings-page-removable-section_header">
         <source>Memory card</source>
         <extracomment>Section header for memory card settings</extracomment>

@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2015-2020 Jolla Ltd.
- * Copyright (C) 2015-2020 Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2015-2021 Jolla Ltd.
+ * Copyright (C) 2015-2021 Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
  *
@@ -55,6 +55,7 @@ class BooksSettings : public QObject
     Q_PROPERTY(bool invertColors READ invertColors WRITE setInvertColors NOTIFY invertColorsChanged)
     Q_PROPERTY(bool sampleBookCopied READ sampleBookCopied NOTIFY sampleBookCopiedChanged)
     Q_PROPERTY(bool keepDisplayOn READ keepDisplayOn WRITE setKeepDisplayOn NOTIFY keepDisplayOnChanged)
+    Q_PROPERTY(bool bookPullDownMenu READ bookPullDownMenu WRITE setBookPullDownMenu NOTIFY bookPullDownMenuChanged)
     Q_PROPERTY(int volumeUpAction READ volumeUpAction WRITE setVolumeUpAction NOTIFY volumeUpActionChanged)
     Q_PROPERTY(int volumeDownAction READ volumeDownAction WRITE setVolumeDownAction NOTIFY volumeDownActionChanged)
     Q_PROPERTY(QObject* currentBook READ currentBook WRITE setCurrentBook NOTIFY currentBookChanged)
@@ -117,11 +118,14 @@ public:
     bool invertColors() const; // Night mode
     void setInvertColors(bool aValue);
 
-    bool sampleBookCopied() const;
-    void setSampleBookCopied();
-
     bool keepDisplayOn() const;
     void setKeepDisplayOn(bool aValue);
+
+    bool bookPullDownMenu() const;
+    void setBookPullDownMenu(bool aValue);
+
+    bool sampleBookCopied() const;
+    void setSampleBookCopied();
 
     Action volumeUpAction() const;
     void setVolumeUpAction(int aValue);
@@ -158,6 +162,7 @@ Q_SIGNALS:
     void invertColorsChanged();
     void sampleBookCopiedChanged();
     void keepDisplayOnChanged();
+    void bookPullDownMenuChanged();
     void volumeUpActionChanged();
     void volumeDownActionChanged();
     void currentBookChanged();
