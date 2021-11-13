@@ -272,8 +272,6 @@ Item {
             easing.type: Easing.OutCubic
         }
 
-        onActiveFocusChanged: console.log("BooksShelfView.grid", activeFocus)
-
         Behavior on y { SpringAnimation {} }
         VerticalScrollDecorator {}
     }
@@ -288,7 +286,6 @@ Item {
             }
         }
         onDropItem: shelfView.dropItem(mouseX, mouseY)
-        onActiveFocusChanged: console.log("BooksShelfView.grid.dragArea", activeFocus)
         Component.onCompleted: {
             console.log("BooksDragArea created")
             grid.focus = true
