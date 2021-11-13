@@ -47,6 +47,12 @@ desktop-file-install --delete-original \
   --dir %{buildroot}%{_datadir}/applications \
    %{buildroot}%{_datadir}/applications/*.desktop
 
+%preun
+if [ "$1" == 0 ] ; then \
+  getent passwd | grep -v '/nologin$' | \
+  while IFS=: read -r name pw uid gid comment home shell; \
+  do rm -fr "$home/.local/share/openrepos-books"; done; fi || :
+
 %files
 %defattr(-,root,root,-)
 %{_bindir}/%{name}
