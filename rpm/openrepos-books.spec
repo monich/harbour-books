@@ -1,6 +1,6 @@
 Name:           openrepos-books
 Summary:        E-book reader
-Version:        1.0.45
+Version:        1.0.46
 Release:        1
 License:        BSD
 Vendor:         slava
@@ -67,6 +67,12 @@ if [ "$1" == 0 ] ; then \
 make -C test test
 
 %changelog
+* Sat Nov 13 2021 Slava Monich <slava.monich@jolla.com> 1.0.46
+- Added option to remove pulley menu from the book view
+- Tweaked book opening and closing animations
+- Remove cached files during uninstallation of OpenRepos app
+- Register OpenRepos app as a file handler
+
 * Sat Nov 06 2021 Slava Monich <slava.monich@jolla.com> 1.0.45
 - Tweaked rendering of book covers
 - Fixed opening external links

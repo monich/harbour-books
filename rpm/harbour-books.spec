@@ -1,6 +1,6 @@
 Name:           harbour-books
 Summary:        E-book reader
-Version:        1.0.45
+Version:        1.0.46
 Release:        1
 License:        BSD
 Group:          Applications/File
@@ -57,6 +57,10 @@ desktop-file-install --delete-original \
 make -C test test
 
 %changelog
+* Sat Nov 13 2021 Slava Monich <slava.monich@jolla.com> 1.0.46
+- Added option to remove pulley menu from the book view
+- Tweaked book opening and closing animations
+
 * Sat Nov 06 2021 Slava Monich <slava.monich@jolla.com> 1.0.45
 - Tweaked rendering of book covers
 - Fixed opening external links
