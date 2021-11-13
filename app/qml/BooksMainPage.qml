@@ -1,6 +1,6 @@
 /*
-  Copyright (C) 2015-2020 Jolla Ltd.
-  Copyright (C) 2015-2020 Slava Monich <slava.monich@jolla.com>
+  Copyright (C) 2015-2021 Jolla Ltd.
+  Copyright (C) 2015-2021 Slava Monich <slava.monich@jolla.com>
 
   You may use this file under the terms of BSD license as follows:
 
@@ -85,6 +85,7 @@ Page {
             width: page.width
             height: page.height
             y: Settings.currentBook ? flickable.contentY : 0
+            viewScale: 0.9 + 0.1 * opacity
             pageActive: page.pageActive
             isCurrentView: currentView === storageView
             opacity: Settings.currentBook ? ((y > fadeInThreshold) ? 1 : (y > 0) ? y/fadeInThreshold : 0) : 1
@@ -139,7 +140,7 @@ Page {
             property: "contentY"
             to: page.height
             duration: 150
-            easing.type: Easing.InQuad
+            easing.type: Easing.Linear
         }
         ScriptAction {
             script: {

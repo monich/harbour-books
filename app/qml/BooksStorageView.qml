@@ -39,6 +39,7 @@ Item {
     id: storageView
 
     property alias viewInteractive: storageList.interactive
+    property alias viewScale: storageList.scale
     property alias pullDownMenu: menu
     property alias isCurrentView: menu.visible
     property bool pageActive
@@ -189,7 +190,9 @@ Item {
     SilicaListView {
         id: storageList
 
-        anchors.fill: parent
+        anchors.centerIn: parent
+        width: parent.width
+        height: parent.height
         model: storageModel
         flickDeceleration: maximumFlickVelocity
         orientation: ListView.Horizontal
@@ -235,6 +238,7 @@ Item {
             device: model.device
             removableStorage: model.removable
             shelfIndex: model.index
+            view.clip: storageList.scale == 1
             onStartEditing: storageView.editMode = true
             onStopEditing: storageView.editMode = false
             onScrollLeft: storageList.scrollOnePageLeft()

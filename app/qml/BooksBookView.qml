@@ -63,7 +63,7 @@ Item {
         { pager: true,  page: true,  title: true,  tools: true  }
     ]
 
-    property alias viewInteractive: bookView.interactive
+    property bool viewInteractive: bookView.interactive && !loading
     property alias pullDownMenu: menu
     property alias loadingBackgroundOpacity: loadingBackground.opacity
     property bool isCurrentView
@@ -147,7 +147,7 @@ Item {
     PullDownMenu {
         id: menu
 
-        visible: isCurrentView && Settings.bookPullDownMenu
+        visible: isCurrentView && !loading && Settings.bookPullDownMenu
 
         property real backToLibrary
 
