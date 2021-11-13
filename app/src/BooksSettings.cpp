@@ -837,4 +837,11 @@ BooksSettings::orientation() const
     return DEFAULT_ORIENTATION;
 }
 
+void
+BooksSettings::setCurrentBookPath(QString aPath)
+{
+    HDEBUG(aPath);
+    iPrivate->iCurrentBookPathConf->set(aPath);
+}
+
 #include "BooksSettings.moc"

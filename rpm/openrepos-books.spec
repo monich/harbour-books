@@ -55,6 +55,7 @@ desktop-file-install --delete-original \
 %{_datadir}/icons/hicolor/*/apps/%{name}.png
 %{_datadir}/translations/%{name}*.qm
 %{_datadir}/jolla-settings/entries/%{name}.json
+ %{_datadir}/dbus-1/services/%{name}.service
 
 %check
 make -C test test

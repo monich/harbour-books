@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2015-2020 Jolla Ltd.
- * Copyright (C) 2015-2020 Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2021 Jolla Ltd.
+ * Copyright (C) 2021 Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
  *
@@ -31,43 +31,26 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BOOKS_DEFS_H
-#define BOOKS_DEFS_H
+#ifndef BOOKS_DBUS_H
+#define BOOKS_DBUS_H
 
-#include <QString>
+#include <QDBusAbstractAdaptor>
 
-#ifdef OPENREPOS
-#  define BOOKS_DBUS_INTERFACE  "openrepos.books"
-#  define BOOKS_APP_NAME        "openrepos-books"
-#  define BOOKS_SETTINGS_MENU   false
-#else
-#  define BOOKS_APP_NAME        "harbour-books"
-#  define BOOKS_SETTINGS_MENU    true
-#endif
+class BooksDBus : public QObject
+{
+    Q_OBJECT
+    BooksDBus(QObject* aParent);
 
-#define BOOKS_DBUS_SERVICE      BOOKS_DBUS_INTERFACE
-#define BOOKS_DCONF_ROOT        "/apps/" BOOKS_APP_NAME "/"
-#define BOOKS_DATA_ROOT         "usr/share/" BOOKS_APP_NAME
-#define BOOKS_QML_DIR           BOOKS_DATA_ROOT "/qml"
-#define BOOKS_ICONS_DIR         BOOKS_DATA_ROOT "/icons"
-#define BOOKS_DATA_DIR          BOOKS_DATA_ROOT "/data"
-#define BOOKS_QML_FILE          BOOKS_QML_DIR "/BooksMain.qml"
+public:
+    static BooksDBus* create(QObject* aParent);
 
-#define BOOKS_INTERNAL_ROOT     "Documents/Books"
+Q_SIGNALS:
+    void openBook(QString aPath);
+    void activate();
 
-#define BOOKS_QML_PLUGIN        "harbour.books"
-#define BOOKS_QML_PLUGIN_V1     1
-#define BOOKS_QML_PLUGIN_V2     0
-#define BOOKS_QML_REGISTER(klass,name) \
-    qmlRegisterType<klass>(BOOKS_QML_PLUGIN, BOOKS_QML_PLUGIN_V1, \
-    BOOKS_QML_PLUGIN_V2, name)
-#define BOOKS_QML_REGISTER_SINGLETON(klass,name) \
-    qmlRegisterSingletonType<klass>(BOOKS_QML_PLUGIN, BOOKS_QML_PLUGIN_V1, \
-    BOOKS_QML_PLUGIN_V2, name, klass::createSingleton)
+private:
+    class Adaptor;
+    Adaptor* iAdaptor;
+};
 
-#define BOOKS_STATE_FILE_SUFFIX ".state"
-
-extern int booksPPI;
-#define BOOKS_PPI booksPPI
-
-#endif // BOOKS_DEFS_H
+#endif // BOOKS_DBUS_H

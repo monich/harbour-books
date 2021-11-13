@@ -1,0 +1,26 @@
+[Desktop Entry]
+Type=Application
+Name=Books
+Name[de]=Bücher
+Name[es]=Libros
+Name[fi]=Kirjat
+Name[hu]=Könyvek
+Name[nl]=Boeken
+Name[pt_BR]=Livros
+Name[ru]=Книги
+Name[sv]=Böcker
+Comment=E-Book Reader
+Icon=openrepos-books
+Exec=openrepos-books %f
+MimeType=application/epub+zip;application/x-fictionbook+xml;
+X-Nemo-Application-Type=silica-qt5
+X-Maemo-Service=openrepos.books
+X-Maemo-Object-Path=/
+X-Maemo-Method=openrepos.books.Open
+
+[X-Sailjail]
+Sandboxing=Disabled
+
+[X-HarbourBackup]
+BackupPathList=.local/share/openrepos-books/:Documents/Books/
+BackupConfigList=/apps/openrepos-books/

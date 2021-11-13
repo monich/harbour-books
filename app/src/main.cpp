@@ -74,6 +74,10 @@
 #  define TASK_QUEUE_TIMEOUT (10000)
 #endif
 
+#ifdef OPENREPOS
+#  include "BooksDBus.h"
+#endif
+
 Q_DECL_EXPORT int main(int argc, char **argv)
 {
     QGuiApplication* app = SailfishApp::application(argc, argv);
@@ -137,15 +141,21 @@ Q_DECL_EXPORT int main(int argc, char **argv)
             QVariant::fromValue(BOOKS_SETTINGS_MENU));
         root->setContextProperty("Settings", settings.data());
 
+#ifdef BOOKS_DBUS_INTERFACE
+        BooksDBus* dbusHandler = BooksDBus::create(app);
+        if (dbusHandler) {
+            view->connect(dbusHandler, SIGNAL(activate()), SLOT(raise()));
+            settings->connect(dbusHandler, SIGNAL(openBook(QString)),
+                SLOT(setCurrentBookPath(QString)));
+        }
+#endif
+
         if (argc > 1) {
             const QString file(QString::fromLocal8Bit(argv[1]));
             if (QFile::exists(file)) {
-                BooksBook* book = BooksBook::newBook(file);
-                if (book) {
-                    settings->setCurrentBook(book);
-                    book->requestCoverImage();
-                    book->release();
-                }
+                settings->setCurrentBookPath(file);
+            } else {
+                HWARN(qPrintable(file) << "doesn't exist");
             }
         }
 

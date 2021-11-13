@@ -1,0 +1,3 @@
+[D-BUS Service]
+Name=openrepos.books
+Exec=/usr/bin/invoker --type=silica-qt5 --desktop-file=openrepos-books.desktop -n -d 5 /usr/bin/openrepos-books

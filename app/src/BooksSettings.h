@@ -144,6 +144,9 @@ public:
 
     Orientation orientation() const;
 
+public Q_SLOTS:
+    void setCurrentBookPath(QString aPath);
+
 Q_SIGNALS:
     void fontSizeChanged();
     void nightModeBrightnessChanged();

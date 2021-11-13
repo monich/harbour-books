@@ -51,7 +51,7 @@ LIBS += \
 
 OTHER_FILES += \
   icons/harbour-books.svg \
-  harbour-books.desktop \
+  *.desktop \
   qml/*.qml \
   qml/*.js \
   qml/images/* \
@@ -134,16 +134,6 @@ SOURCES += \
   src/ZLApplication.cpp \
   src/ZLibrary.cpp
 
-# Some libraries are not allowed in harbour
-openrepos {
-  LIBS += -lexpat -lmagic -ludev
-} else {
-  SOURCES += \
-    stubs/libexpat.c \
-    stubs/libmagic.c \
-    stubs/libudev.c
-}
-
 HEADERS += \
   src/BooksBook.h \
   src/BooksBookModel.h \
@@ -173,6 +163,23 @@ HEADERS += \
   src/BooksTextStyle.h \
   src/BooksTypes.h \
   src/BooksUtil.h
+
+# Some libraries are not allowed in harbour
+openrepos {
+  LIBS += -lexpat -lmagic -ludev
+} else {
+  SOURCES += \
+    stubs/libexpat.c \
+    stubs/libmagic.c \
+    stubs/libudev.c
+}
+
+# D-Bus handler is only used in OpenRepos build
+openrepos {
+  QT += dbus
+  HEADERS += src/BooksDBus.h
+  SOURCES += src/BooksDBus.cpp
+}
 
 # harbour-lib
 
@@ -245,10 +252,11 @@ settings_images.files = settings/images/*.svg
 settings_images.path = /usr/share/$${TARGET}/settings/images/
 INSTALLS += settings_images
 
-# Desktop file
-equals(PREFIX, "openrepos") {
-    desktop.extra = sed s/harbour/openrepos/g harbour-$${NAME}.desktop > $${TARGET}.desktop
-    desktop.CONFIG += no_check_exist
+# File handler
+openrepos {
+    service.files = $${TARGET}.service
+    service.path = /usr/share/dbus-1/services/
+    INSTALLS += service
 }
 
 # Translations
