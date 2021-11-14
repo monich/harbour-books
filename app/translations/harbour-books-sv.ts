@@ -132,7 +132,7 @@
     <message id="harbour-books-settings-version">
         <source>Version %1</source>
         <extracomment>Settings page header description (app version)</extracomment>
-        <translation type="unfinished">Version %1</translation>
+        <translation>Version %1</translation>
     </message>
     <message id="harbour-books-settings-page-display-section_header">
         <source>Display</source>
@@ -152,12 +152,12 @@
     <message id="harbour-books-settings-page-night_mode_example">
         <source>Night mode</source>
         <extracomment>Night mode example label</extracomment>
-        <translation type="unfinished">Nattläge</translation>
+        <translation>Nattläge</translation>
     </message>
     <message id="harbour-books-settings-page-night_mode_brightness_label">
         <source>Brightness in night mode</source>
         <extracomment>Slider label</extracomment>
-        <translation type="unfinished">Ljusstyrka i nattläge</translation>
+        <translation>Ljusstyrka i nattläge</translation>
     </message>
     <message id="harbour-books-settings-page-orientation_label">
         <source>Orientation</source>
@@ -237,7 +237,7 @@
     <message id="harbour-books-settings-page-keep_display_on">
         <source>Keep display on while reading</source>
         <extracomment>Text switch label</extracomment>
-        <translation>Håll skärmen på vid läsning</translation>
+        <translation>Håll skärmen tänd vid läsning</translation>
     </message>
     <message id="harbour-books-settings-page-keep_display_on_description">
         <source>Prevent the display from blanking while reading the book.</source>
@@ -287,12 +287,12 @@
     <message id="harbour-books-settings-page-book_pulldown_menu">
         <source>Show pulley menu when the book is open</source>
         <extracomment>Text switch label</extracomment>
-        <translation type="unfinished">Visa rullgardinsmeny när boken är öppen</translation>
+        <translation>Visa toppmeny när boken är öppen</translation>
     </message>
     <message id="harbour-books-settings-page-book_pulldown_menu-description">
         <source>Without the pulley menu, the book has to be closed by swiping it up.</source>
         <extracomment>Text switch description</extracomment>
-        <translation type="unfinished">Utan rullgardinsmeny måste boken stängas genom att svepa uppåt.</translation>
+        <translation>Utan toppmeny måste boken stängas genom att svepa uppåt.</translation>
     </message>
     <message id="harbour-books-settings-page-removable-section_header">
         <source>Memory card</source>
