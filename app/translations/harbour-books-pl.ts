@@ -289,12 +289,12 @@
     <message id="harbour-books-settings-page-book_pulldown_menu">
         <source>Show pulley menu when the book is open</source>
         <extracomment>Text switch label</extracomment>
-        <translation type="unfinished">Pokaż menu wysuwane, gdy książka jest otwarta</translation>
+        <translation>Pokaż menu wysuwane, gdy książka jest otwarta</translation>
     </message>
     <message id="harbour-books-settings-page-book_pulldown_menu-description">
         <source>Without the pulley menu, the book has to be closed by swiping it up.</source>
         <extracomment>Text switch description</extracomment>
-        <translation type="unfinished">Aby zamknąć książkę w przypadku braku menu wysuwane, należy ją przesunąć w górę o ponad pół ekranu.</translation>
+        <translation>Aby zamknąć książkę w przypadku braku menu wysuwanego, należy ją przesunąć w górę o ponad pół ekranu.</translation>
     </message>
     <message id="harbour-books-settings-page-removable-section_header">
         <source>Memory card</source>
