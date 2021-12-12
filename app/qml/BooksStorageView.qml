@@ -301,6 +301,9 @@ Item {
                 // This hides the target item until the grag item makes it to the destination:
                 dragItem.dropShelfIndex = currentShelfIndex
                 dragItem.dropItemIndex = targetIndex
+            } else {
+                currentShelf.hasDummyItem = false
+                currentShelf.dummyItemIndex = -1
             }
         }
     }
