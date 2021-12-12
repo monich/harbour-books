@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2015-2020 Jolla Ltd.
- * Copyright (C) 2015-2020 Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2015-2021 Jolla Ltd.
+ * Copyright (C) 2015-2021 Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
  *
@@ -66,6 +66,7 @@
     BOOKS_QML_PLUGIN_V2, name, klass::createSingleton)
 
 #define BOOKS_STATE_FILE_SUFFIX ".state"
+#define BOOKS_MARKS_FILE_SUFFIX ".marks"
 
 extern int booksPPI;
 #define BOOKS_PPI booksPPI

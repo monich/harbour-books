@@ -34,6 +34,7 @@
 #include "BooksBookModel.h"
 #include "BooksTextStyle.h"
 #include "BooksUtil.h"
+#include "BooksDefs.h"
 
 #include "HarbourDebug.h"
 #include "HarbourTask.h"
@@ -130,7 +131,7 @@ BooksBookModel::PagingTask::~PagingTask()
 
 QString BooksBookModel::PagingTask::pageMarksFile(BooksBookModel* aModel)
 {
-    return aModel->book()->storageFile(QString(".%1x%2.marks").
+    return aModel->book()->storageFile(QString(".%1x%2" BOOKS_MARKS_FILE_SUFFIX).
         arg(aModel->width()).arg(aModel->height()));
 }
 

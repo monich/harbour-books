@@ -100,7 +100,7 @@ public:
 
     void performTask();
 
-    int findBook(QString aFileName) const;
+    int findBook(const QStringRef* aFileName) const;
     static int find(QFileInfoList aList, QString aFileName, int aStart);
 
 public:
@@ -129,15 +129,14 @@ int BooksShelf::LoadTask::find(QFileInfoList aList, QString aName, int aStart)
     return -1;
 }
 
-int BooksShelf::LoadTask::findBook(QString aFileName) const
+int BooksShelf::LoadTask::findBook(const QStringRef* aFileName) const
 {
-    if (!aFileName.isEmpty()) {
-        const int n = iItems.count();
-        for (int i=0; i<n; i++) {
-            BooksItem* item = iItems.at(i);
-            if (item->book() && item->fileName() == aFileName) {
-                return i;
-            }
+    // Caller makes sure that aFileName is not empty
+    const int n = iItems.count();
+    for (int i=0; i<n; i++) {
+        BooksItem* item = iItems.at(i);
+        if (item->book() && aFileName->compare(item->fileName()) == 0) {
+            return i;
         }
     }
     return -1;
@@ -202,18 +201,31 @@ void BooksShelf::LoadTask::performTask()
         }
     }
 
-    // Cleanup the state files
+    // Delete orphaned state and marks files
     if (!isCanceled()) {
+        static const QString stateSuffix(BOOKS_STATE_FILE_SUFFIX);
+        static const QString marksSuffix(BOOKS_MARKS_FILE_SUFFIX);
         QStringList deleteMe;
-        const QString suffix(BOOKS_STATE_FILE_SUFFIX);
         QDirIterator configIt(iStorage.fullConfigPath(iRelativePath));
         while (configIt.hasNext() && !isCanceled()) {
-            QString path(configIt.next());
-            if (path.endsWith(suffix)) {
-                QString fileName(configIt.fileName());
-                QString name(fileName.left(fileName.length() - suffix.length()));
-                if (!name.isEmpty() && findBook(name) < 0) {
+            const QString path(configIt.next());
+            if (path.endsWith(stateSuffix)) {
+                const QString fileName(configIt.fileName());
+                // State file is named <BOOK>.state
+                QStringRef name(fileName.leftRef(fileName.length() - stateSuffix.length()));
+                if (!name.isEmpty() && findBook(&name) < 0) {
                     deleteMe.append(path);
+                }
+            } else if (path.endsWith(marksSuffix)) {
+                const QString fileName(configIt.fileName());
+                // Marks file is named <BOOK>.<width>x<height>.marks
+                QStringRef name(fileName.leftRef(fileName.length() - stateSuffix.length()));
+                const int nextSeparator = name.lastIndexOf('.');
+                if (nextSeparator > 0) {
+                    name = name.left(nextSeparator);
+                    if (findBook(&name) < 0) {
+                        deleteMe.append(path);
+                    }
                 }
             }
         }
