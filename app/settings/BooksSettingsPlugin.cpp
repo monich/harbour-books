@@ -73,6 +73,7 @@ BooksSettingsPlugin::registerTypes(
     SETTINGS_QML_REGISTER_(BooksSettingsBase, "BooksSettings");
     SETTINGS_QML_REGISTER(BooksColorSchemeModel);
     SETTINGS_QML_REGISTER(HarbourColorEditorModel);
+    qRegisterMetaType<BooksColorScheme>();
 }
 
 #include "BooksSettingsPlugin.moc"
