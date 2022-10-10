@@ -49,6 +49,8 @@ class BooksSettingsBase : public QObject
     Q_PROPERTY(bool nightMode READ nightMode WRITE setNightMode NOTIFY nightModeChanged)
     Q_PROPERTY(QColor pageBackgroundColor READ pageBackgroundColor NOTIFY colorSchemeChanged)
     Q_PROPERTY(QColor invertedPageBackgroundColor READ invertedPageBackgroundColor NOTIFY colorSchemeChanged)
+    Q_PROPERTY(QColor primaryPageToolColor READ primaryPageToolColor NOTIFY colorSchemeChanged)
+    Q_PROPERTY(QColor highlightPageToolColor READ highlightPageToolColor NOTIFY colorSchemeChanged)
     Q_PROPERTY(BooksColorScheme colorScheme READ colorScheme NOTIFY colorSchemeChanged)
     Q_PROPERTY(BooksColorScheme customColorScheme READ customColorScheme WRITE setCustomColorScheme NOTIFY customColorSchemeChanged)
     Q_PROPERTY(BooksColorScheme customNightModeColorScheme READ customNightModeColorScheme NOTIFY customColorSchemeChanged)
@@ -69,6 +71,8 @@ public:
 
     QColor pageBackgroundColor() const;
     QColor invertedPageBackgroundColor() const;
+    QColor primaryPageToolColor() const;
+    QColor highlightPageToolColor() const;
     BooksColorScheme colorScheme() const;
 
     BooksColorScheme customColorScheme() const;
@@ -76,7 +80,7 @@ public:
     void setCustomColorScheme(const BooksColorScheme);
 
     bool useCustomColorScheme() const;
-    void setUseCustomColorScheme(bool aValue);
+    void setUseCustomColorScheme(bool);
 
     const QStringList defaultColors() const;
     QStringList availableColors() const;

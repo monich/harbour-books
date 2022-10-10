@@ -1,6 +1,6 @@
 /*
-  Copyright (C) 2015-2021 Jolla Ltd.
-  Copyright (C) 2015-2021 Slava Monich <slava.monich@jolla.com>
+  Copyright (C) 2015-2022 Jolla Ltd.
+  Copyright (C) 2015-2022 Slava Monich <slava.monich@jolla.com>
 
   You may use this file under the terms of BSD license as follows:
 
@@ -35,6 +35,8 @@ import QtQuick 2.0
 import Sailfish.Silica 1.0
 import harbour.books 1.0
 
+import "harbour"
+
 Item {
     id: pageTools
     height: Theme.itemSizeExtraSmall
@@ -59,7 +61,7 @@ Item {
         }
         onClicked: Settings.nightMode = !Settings.nightMode
 
-        Image {
+        HarbourHighlightIcon {
             id: dayModeImage
             source: "images/day-mode.svg"
             anchors {
@@ -68,16 +70,18 @@ Item {
                 verticalCenter: parent.verticalCenter
             }
             sourceSize.height: Theme.iconSizeSmall
-            opacity: Settings.nightMode ? 0.5 : 0
+            highlightColor: Settings.primaryPageToolColor
+            opacity: Settings.nightMode ? 1 : 0
             visible: opacity > 0
             Behavior on opacity { FadeAnimation {} }
         }
 
-        Image {
+        HarbourHighlightIcon {
             source: "images/night-mode.svg"
             anchors.centerIn: dayModeImage
             sourceSize.height: Theme.iconSizeSmall
-            opacity: Settings.nightMode ? 0 : 0.25
+            highlightColor: Settings.primaryPageToolColor
+            opacity: Settings.nightMode ? 0 : 1
             visible: opacity > 0
             Behavior on opacity { FadeAnimation {} }
         }
@@ -93,7 +97,7 @@ Item {
             right: parent.right
             verticalCenter: parent.verticalCenter
         }
-        Image {
+        HarbourHighlightIcon {
             id: increaseFontSizeButtonImage
             source: "images/font-larger.svg"
             anchors {
@@ -101,8 +105,7 @@ Item {
                 verticalCenter: parent.verticalCenter
             }
             sourceSize.height: Theme.iconSizeSmall
-            opacity: Settings.nightMode ? 1 : 0.5
-            Behavior on opacity { FadeAnimation {} }
+            highlightColor: Settings.primaryPageToolColor
         }
         onClicked: pageTools.increaseFontSize()
     }
@@ -115,7 +118,7 @@ Item {
             right: increaseFontSizeButton.left
             verticalCenter: parent.verticalCenter
         }
-        Image {
+        HarbourHighlightIcon {
             id: decreaseFontSizeButtonImage
             source: "images/font-smaller.svg"
             anchors {
@@ -123,8 +126,7 @@ Item {
                 verticalCenter: parent.verticalCenter
             }
             sourceSize.height: increaseFontSizeButtonImage.height
-            opacity: Settings.nightMode ? 1 : 0.5
-            Behavior on opacity { FadeAnimation {} }
+            highlightColor: Settings.primaryPageToolColor
         }
         onClicked: pageTools.decreaseFontSize()
     }

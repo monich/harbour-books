@@ -64,8 +64,6 @@ class BooksSettings : public BooksSettingsBase
     Q_PROPERTY(QString relativePath READ relativePath NOTIFY relativePathChanged)
     Q_PROPERTY(QString removableRoot READ removableRoot NOTIFY removableRootChanged)
     Q_PROPERTY(int orientation READ orientation NOTIFY orientationChanged)
-    Q_PROPERTY(QColor primaryPageToolColor READ primaryPageToolColor CONSTANT)
-    Q_PROPERTY(QColor highlightPageToolColor READ highlightPageToolColor NOTIFY highlightPageToolColorChanged)
     class TextStyle;
 
 public:
@@ -95,60 +93,57 @@ public:
     Q_INVOKABLE bool increaseFontSize();
     Q_INVOKABLE bool decreaseFontSize();
 
-    shared_ptr<ZLTextStyle> textStyle(int aFontSizeAdjust) const;
+    shared_ptr<ZLTextStyle> textStyle(int) const;
 
     int fontSize() const;
     void setFontSize(int aValue);
 
     qreal brightness() const;
     qreal nightModeBrightness() const;
-    void setNightModeBrightness(qreal aValue);
+    void setNightModeBrightness(qreal);
 
     int pageDetails() const;
-    void setPageDetails(int aValue);
+    void setPageDetails(int);
 
     bool pageDetailsFixed() const;
-    void setPageDetailsFixed(bool aValue);
+    void setPageDetailsFixed(bool);
 
     bool turnPageByTap() const;
-    void setTurnPageByTap(bool aValue);
+    void setTurnPageByTap(bool);
 
     bool keepDisplayOn() const;
-    void setKeepDisplayOn(bool aValue);
+    void setKeepDisplayOn(bool);
 
     bool bookPullDownMenu() const;
-    void setBookPullDownMenu(bool aValue);
+    void setBookPullDownMenu(bool);
 
     bool sampleBookCopied() const;
     void setSampleBookCopied();
 
     Action volumeUpAction() const;
-    void setVolumeUpAction(int aValue);
+    void setVolumeUpAction(int);
 
     Action volumeDownAction() const;
-    void setVolumeDownAction(int aValue);
+    void setVolumeDownAction(int);
 
     QObject* currentBook() const;
-    void setCurrentBook(QObject* aBook);
+    void setCurrentBook(QObject*);
 
     QString relativePath() const;
     QString removableRoot() const;
     QString currentFolder() const;
-    void setCurrentFolder(const QString aValue);
+    void setCurrentFolder(const QString);
 
     QString currentStorage() const;
-    QColor primaryPageToolColor() const;
-    QColor highlightPageToolColor() const;
 
     Orientation orientation() const;
 
 public Q_SLOTS:
-    void setCurrentBookPath(QString aPath);
+    void setCurrentBookPath(QString);
 
 Q_SIGNALS:
     void fontSizeChanged();
     void nightModeBrightnessChanged();
-    void highlightPageToolColorChanged();
     void brightnessChanged();
     void textStyleChanged();
     void pageDetailsChanged();

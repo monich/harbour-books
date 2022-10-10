@@ -430,6 +430,20 @@ BooksSettingsBase::invertedPageBackgroundColor() const
     return QColor(HarbourUtil::invertedRgb(iPrivate->iColorScheme.background()));
 }
 
+QColor
+BooksSettingsBase::primaryPageToolColor() const
+{
+    const QRgb rgb = iPrivate->iColorScheme.foreground();
+    return QColor(qRed(rgb), qGreen(rgb), qBlue(rgb), 128);
+}
+
+QColor
+BooksSettingsBase::highlightPageToolColor() const
+{
+    const QRgb rgb = iPrivate->iColorScheme.foreground();
+    return QColor(qRed(rgb), qGreen(rgb), qBlue(rgb), 192);
+}
+
 BooksColorScheme
 BooksSettingsBase::colorScheme() const
 {

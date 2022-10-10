@@ -75,10 +75,6 @@
 #define DEFAULT_VOLUME_DOWN_ACTION  (BooksSettings::ActionPreviousPage)
 #define DEFAULT_ORIENTATION         (BooksSettings::OrientationAny)
 
-#define PAGETOOL_COLOR                      QColor(128,128,128) // any bg
-#define NORMAL_PAGETOOL_HIGHLIGHT_COLOR     QColor(64,64,64)    // on white
-#define INVERTED_PAGETOOL_HIGHLIGHT_COLOR   QColor(192,192,192) // on black
-
 // ==========================================================================
 // BooksSettings::TextStyle
 // ==========================================================================
@@ -366,7 +362,6 @@ BooksSettings::Private::onNightModeChanged()
     if (updateBrightness()) {
         Q_EMIT settings->brightnessChanged();
     }
-    Q_EMIT settings->highlightPageToolColorChanged();
 }
 
 void
@@ -818,20 +813,6 @@ BooksSettings::orientation() const
         return value;
     }
     return DEFAULT_ORIENTATION;
-}
-
-QColor
-BooksSettings::primaryPageToolColor() const
-{
-    return PAGETOOL_COLOR;
-}
-
-QColor
-BooksSettings::highlightPageToolColor() const
-{
-    return nightMode() ?
-        INVERTED_PAGETOOL_HIGHLIGHT_COLOR :
-        NORMAL_PAGETOOL_HIGHLIGHT_COLOR;
 }
 
 void
