@@ -48,6 +48,7 @@
 #include <QPainter>
 
 static const QString IMAGE_URL("image://%1/%2");
+static const int REPAINT_DELAY_MSEC = 250;
 
 // ==========================================================================
 // BooksPageWidget::Data
@@ -533,7 +534,6 @@ BooksPageWidget::BooksPageWidget(QQuickItem* aParent) :
     iSettings(BooksSettings::sharedInstance()),
     iTaskQueue(BooksTaskQueue::defaultQueue()),
     iTextStyle(BooksTextStyle::defaults()),
-    iResizeTimer(new QTimer(this)),
     iModel(NULL),
     iResetTask(NULL),
     iRenderTask(NULL),
@@ -551,9 +551,6 @@ BooksPageWidget::BooksPageWidget(QQuickItem* aParent) :
 {
     connect(iSettings.data(), SIGNAL(colorSchemeChanged()), SLOT(onColorsChanged()));
     setFlag(ItemHasContents, true);
-    iResizeTimer->setSingleShot(true);
-    iResizeTimer->setInterval(0);
-    connect(iResizeTimer, SIGNAL(timeout()), SLOT(onResizeTimeout()));
     connect(this, SIGNAL(widthChanged()), SLOT(onWidthChanged()));
     connect(this, SIGNAL(heightChanged()), SLOT(onHeightChanged()));
 }
@@ -650,7 +647,7 @@ BooksPageWidget::onColorsChanged()
 {
     HDEBUG(iPage);
     HASSERT(sender() == iSettings);
-    scheduleRepaint();
+    scheduleRepaintDelayUpdate();
 }
 
 void
@@ -797,7 +794,7 @@ BooksPageWidget::resetView()
         }
     }
     if (!iEmpty) {
-        update();
+        updateNow();
     }
 }
 
@@ -816,16 +813,38 @@ BooksPageWidget::scheduleRepaint()
 {
     BooksLoadingSignalBlocker block(this);
     cancelRepaint();
-    const int w = width();
-    const int h = height();
-    if (w > 0 && h > 0 && !iData.isNull() && !iData->iView.isNull()) {
-        const shared_ptr<BooksTextView> view(iData->iView);
-        (iRenderTask = new RenderTask(iTaskQueue->pool(), thread(),
-            iData, iSettings->colorScheme()))->
-                submit(this, SLOT(onRenderTaskDone()));
-    } else {
-        update();
+    if (width() > 0 && height() > 0) {
+        if (!iData.isNull() && !iData->iView.isNull()) {
+            (iRenderTask = new RenderTask(iTaskQueue->pool(), thread(),
+                iData, iSettings->colorScheme()))->submit(this,
+                SLOT(onRenderTaskDone()));
+        } else {
+            updateNow();
+        }
     }
+}
+
+void
+BooksPageWidget::scheduleRepaintDelayUpdate()
+{
+    BooksLoadingSignalBlocker block(this);
+    cancelRepaint();
+    if (width() > 0 && height() > 0) {
+        if (!iData.isNull() && !iData->iView.isNull()) {
+            (iRenderTask = new RenderTask(iTaskQueue->pool(), thread(),
+                iData, iSettings->colorScheme()))->submit(this,
+                SLOT(onRenderTaskDoneDelayUpdate()));
+        } else if (!iDelayUpdateTimer.isActive()) {
+            iDelayUpdateTimer.start(REPAINT_DELAY_MSEC, this);
+        }
+    }
+}
+
+void
+BooksPageWidget::updateNow()
+{
+    iDelayUpdateTimer.stop();
+    update();
 }
 
 void
@@ -841,14 +860,47 @@ BooksPageWidget::onResetTaskDone()
 }
 
 void
-BooksPageWidget::onRenderTaskDone()
+BooksPageWidget::renderTaskDone()
 {
-    BooksLoadingSignalBlocker block(this);
     HASSERT(sender() == iRenderTask);
     iImage = iRenderTask->iImage;
     iRenderTask->release(this);
     iRenderTask = NULL;
-    update();
+}
+
+void
+BooksPageWidget::onRenderTaskDone()
+{
+    BooksLoadingSignalBlocker block(this);
+    renderTaskDone();
+    updateNow();
+}
+
+void
+BooksPageWidget::onRenderTaskDoneDelayUpdate()
+{
+    BooksLoadingSignalBlocker block(this);
+    renderTaskDone();
+    if (!iDelayUpdateTimer.isActive()) {
+        iDelayUpdateTimer.start(REPAINT_DELAY_MSEC, this);
+    }
+}
+
+void
+BooksPageWidget::timerEvent(
+    QTimerEvent* aEvent)
+{
+    const int timerId = aEvent->timerId();
+    if (timerId == iResizeTimer.timerId()) {
+        // This can only happen if only width or height has changed.
+        // Normally, width change is followed by height change and
+        // the size is updated from the setHeight() method
+        updateSize();
+    } else if (timerId == iDelayUpdateTimer.timerId()) {
+        updateNow();
+    } else {
+        return QQuickPaintedItem::timerEvent(aEvent);
+    }
 }
 
 void
@@ -882,7 +934,7 @@ BooksPageWidget::onClearSelectionTaskDone()
 
     if (task->iImageUpdated) {
         iImage = task->iImage;
-        update();
+        updateNow();
     }
 
     task->release(this);
@@ -913,7 +965,7 @@ BooksPageWidget::onStartSelectionTaskDone()
         if (emitSelectionEmpty) {
             Q_EMIT selectionEmptyChanged();
         }
-        update();
+        updateNow();
     }
 
     task->release(this);
@@ -933,7 +985,7 @@ BooksPageWidget::onExtendSelectionTaskDone()
             HDEBUG("selection" << iSelectionEmpty);
             Q_EMIT selectionEmptyChanged();
         }
-        update();
+        updateNow();
     }
 
     task->release(this);
@@ -1042,6 +1094,7 @@ void
 BooksPageWidget::updateSize()
 {
     HDEBUG("page" << iPage << QSize(width(), height()));
+    iResizeTimer.stop();
     iImage = QImage();
     resetView();
 }
@@ -1051,33 +1104,23 @@ BooksPageWidget::onWidthChanged()
 {
     HVERBOSE((int)width());
     // Width change will probably be followed by height change
-    iResizeTimer->start();
+    iResizeTimer.start(0, this);
     iImage = QImage();
-    update();
+    updateNow();
 }
 
 void
 BooksPageWidget::onHeightChanged()
 {
     HVERBOSE((int)height());
-    if (iResizeTimer->isActive()) {
+    if (iResizeTimer.isActive()) { // Started by onWidthChanged()
         // Height is usually changed after width, repaint right away
-        iResizeTimer->stop();
         updateSize();
     } else {
-        iResizeTimer->start();
+        iResizeTimer.start(0, this);
         iImage = QImage();
-        update();
+        updateNow();
     }
-}
-
-void
-BooksPageWidget::onResizeTimeout()
-{
-    // This can only happen if only width or height has changed. Normally,
-    // width change is followed by height change and view is reset from the
-    // setHeight() method
-    updateSize();
 }
 
 void

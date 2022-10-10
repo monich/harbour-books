@@ -45,7 +45,7 @@
 #include "ZLTextStyle.h"
 
 #include <QQuickPaintedItem>
-#include <QTimer>
+#include <QBasicTimer>
 #include <QList>
 
 class BooksPageWidget: public QQuickPaintedItem, private BooksLoadingProperty
@@ -129,12 +129,12 @@ Q_SIGNALS:
 private Q_SLOTS:
     void onWidthChanged();
     void onHeightChanged();
-    void onResizeTimeout();
     void onBookModelDestroyed();
     void onTextStyleChanged();
     void onColorsChanged();
     void onResetTaskDone();
     void onRenderTaskDone();
+    void onRenderTaskDoneDelayUpdate();
     void onClearSelectionTaskDone();
     void onStartSelectionTaskDone();
     void onExtendSelectionTaskDone();
@@ -142,13 +142,19 @@ private Q_SLOTS:
     void onLongPressTaskDone();
     void onFootnoteTaskDone();
 
-private:
+protected:
+    void timerEvent(QTimerEvent*) Q_DECL_OVERRIDE;
     void paint(QPainter*) Q_DECL_OVERRIDE;
+
+private:
     void updateSize();
     void resetView();
     void releaseExtendSelectionTasks();
     void scheduleRepaint();
+    void scheduleRepaintDelayUpdate();
     void cancelRepaint();
+    void renderTaskDone();
+    void updateNow();
 
 private:
     class ResetTask;
@@ -163,7 +169,8 @@ private:
     shared_ptr<BooksTaskQueue> iTaskQueue;
     shared_ptr<ZLTextStyle> iTextStyle;
     BooksPos iBookPos;
-    QTimer* iResizeTimer;
+    QBasicTimer iResizeTimer;
+    QBasicTimer iDelayUpdateTimer;
     BooksBookModel* iModel;
     BooksMargins iMargins;
     shared_ptr<Data> iData;
