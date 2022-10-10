@@ -319,6 +319,7 @@ BooksStorage::set(
 #define STORAGE_PARTITION       "partition"
 
 #define STORAGE_ACTION_ADD      "add"
+#define STORAGE_ACTION_CHANGE   "change"
 #define STORAGE_ACTION_REMOVE   "remove"
 
 #define STORAGE_SCAN_INTERVAL   100
@@ -599,11 +600,15 @@ BooksStorageManager::Private::onDeviceEvent(
         HDEBUG("   devtype:" << udev_device_get_devtype(dev));
         HDEBUG("   action:" << action);
         if (devnode && action) {
-            if (!strcmp(action, STORAGE_ACTION_ADD)) {
-                // Mount list isn't updated yet when we receive this
-                // notification. It takes hundreds of milliseconds until
-                // it gets mounted and becomes accessible.
-                if (!scanMounts()) {
+            if (!strcmp(action, STORAGE_ACTION_ADD) ||
+                !strcmp(action, STORAGE_ACTION_CHANGE)) {
+                // Mount list may not be updated yet when we receive a
+                // notification.
+                if (scanMounts()) {
+                    if (iScanMountsTimer) {
+                        iScanMountsTimer->stop();
+                    }
+                } else {
                     HDEBUG("no new mounts found");
                     if (!iScanMountsTimer) {
                         QTimer* timer = new QTimer(this);
