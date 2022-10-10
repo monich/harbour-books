@@ -49,6 +49,9 @@ desktop-file-install --delete-original \
   --dir %{buildroot}%{_datadir}/applications \
    %{buildroot}%{_datadir}/applications/*.desktop
 
+%check
+make -C test test
+
 %preun
 if [ "$1" == 0 ] ; then \
   getent passwd | grep -v '/nologin$' | \
@@ -65,89 +68,3 @@ if [ "$1" == 0 ] ; then \
 %{_datadir}/dbus-1/services/%{name}.service
 %{_datadir}/jolla-settings/entries/%{name}.json
 %{_libdir}/qt5/qml/openrepos/books/settings
-
-%check
-make -C test test
-
-%changelog
-* Sat Nov 13 2021 Slava Monich <slava.monich@jolla.com> 1.0.46
-- Added option to remove pulley menu from the book view
-- Tweaked book opening and closing animations
-- Remove cached files during uninstallation of OpenRepos app
-- Register OpenRepos app as a file handler
-
-* Sat Nov 06 2021 Slava Monich <slava.monich@jolla.com> 1.0.45
-- Tweaked rendering of book covers
-- Fixed opening external links
-
-* Mon Nov 01 2021 Slava Monich <slava.monich@jolla.com> 1.0.44
-- Improved rendering of book covers
-- Show book count as menu label when appropriate
-- Perserve settings layout when keyboard opens
-- Minor content rendering tweaks
-
-* Sat May 15 2021 Slava Monich <slava.monich@jolla.com> 1.0.43
-- Integration with My Backup
-- Updated Hungarian translation
-- Updated Chinese translation
-- Tweaked settings layout
-
-* Tue Nov 3 2020 Slava Monich <slava.monich@jolla.com> 1.0.42
-- Fixed detection of removable media on new fresh installs of Sailfish OS 3.4.0
-- Implemented a fancy way of closing the book by swiping it up
-- Optimized settings page for landscape orientation
-- Made night mode brightness configurable
-- Resolved a few issues with saving/restoring last page
-- Eliminated unpleasant flicking when pages are being dragged
-
-* Wed Feb 5 2020 Slava Monich <slava.monich@jolla.com> 1.0.41
-- Fixed a problem with books opening at unexpected page
-- Handle data: scheme for xhtml
-- Various UI tweaks
-
-* Wed Dec 4 2019 Slava Monich <slava.monich@jolla.com> 1.0.40
-- Chinese translation
-
-* Wed Dec 4 2019 Slava Monich <slava.monich@jolla.com> 1.0.39
-- Fixed a permacrash
-
-* Sun Mar 31 2019 Slava Monich <slava.monich@jolla.com> 1.0.38
-- Fixed a problem with encoding in some format/language combinations
-- Create sample book on the first time run
-- Minor UI tweaks
-
-* Fri Jul 27 2018 Slava Monich <slava.monich@jolla.com> 1.0.37
-- Fixed a few CSS issues affecting layout
-
-* Tue Jul 24 2018 Slava Monich <slava.monich@jolla.com> 1.0.36
-- Updated Polish translations
-- Updated Swedish translations
-
-* Tue Jul 24 2018 Slava Monich <slava.monich@jolla.com> 1.0.35
-- Added page layout option
-- Added "turn page by tap" option
-
-* Fri Jun 8 2018 Slava Monich <slava.monich@jolla.com> 1.0.34
-- Support for SD-card labels containing spaces
-
-* Fri Jun 8 2018 Slava Monich <slava.monich@jolla.com> 1.0.33
-- Fixed SD-card support on Sailfish OS 2.2.0
-
-* Mon May 21 2018 Slava Monich <slava.monich@jolla.com> 1.0.32
-- Added Polish translations
-
-* Mon May 21 2018 Slava Monich <slava.monich@jolla.com> 1.0.31
-- Fixed "Keep display on while reading" on older systems
-
-* Sat May 19 2018 Slava Monich <slava.monich@jolla.com> 1.0.30
-- Added Brazilian Portuguese translations
-
-* Sat May 19 2018 Slava Monich <slava.monich@jolla.com> 1.0.29
-- Updated Swedish and Hungarian translations
-
-* Thu May 17 2018 Slava Monich <slava.monich@jolla.com> 1.0.28
-- Added "Keep display on while reading" option
-- Fixed a few memory leaks
-
-* Fri Apr 27 2018 Slava Monich <slava.monich@jolla.com> 1.0.27
-- Added openrepos variant
