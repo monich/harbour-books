@@ -14,6 +14,9 @@ Exec=harbour-books
 Icon=harbour-books
 X-Nemo-Application-Type=silica-qt5
 
+[X-Sailjail]
+Permissions=Documents;Downloads;RemovableMedia
+
 [X-HarbourBackup]
 BackupPathList=.local/share/harbour-books/:Documents/Books/
 BackupConfigList=/apps/harbour-books/
