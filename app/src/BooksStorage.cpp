@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2015-2021 Jolla Ltd.
- * Copyright (C) 2015-2021 Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2015-2022 Jolla Ltd.
+ * Copyright (C) 2015-2022 Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
  *
@@ -68,15 +68,14 @@ class BooksStorage::Private: public QObject
     Q_OBJECT
 
 public:
-    Private(QString aDevice, QString aMountPoint, QString aBooksDir,
-        Type aType);
+    Private(QString, QString, QString, Type);
 
     bool isRemoved() const;
-    bool equal(const Private& aData) const;
+    bool equal(const Private&) const;
 
-    static QString fullPath(QDir aDir, QString aRelativePath);
-    static QString mountPoint(QString aPath);
-    static bool isMountPoint(QString aPath);
+    static QString fullPath(QDir, const QString);
+    static QString mountPoint(const QString);
+    static bool isMountPoint(const QString);
 
 Q_SIGNALS:
     void removed();
@@ -128,7 +127,9 @@ BooksStorage::Private::Private(
     iConfigDir.setPath(cfgDir);
 }
 
-bool BooksStorage::Private::equal(const BooksStorage::Private& aData) const
+bool
+BooksStorage::Private::equal(
+    const BooksStorage::Private& aData) const
 {
     return iType == aData.iType &&
            iPresent == aData.iPresent &&
@@ -138,7 +139,9 @@ bool BooksStorage::Private::equal(const BooksStorage::Private& aData) const
            iConfigDir == aData.iConfigDir;
 }
 
-bool BooksStorage::Private::isMountPoint(QString aPath)
+bool
+BooksStorage::Private::isMountPoint(
+    const QString aPath)
 {
     std::string path = aPath.toStdString();
     std::string parent = path + "/..";
@@ -148,7 +151,9 @@ bool BooksStorage::Private::isMountPoint(QString aPath)
         stPath.st_dev != stParent.st_dev;
 }
 
-QString BooksStorage::Private::mountPoint(QString aPath)
+QString
+BooksStorage::Private::mountPoint(
+    const QString aPath)
 {
     QFileInfo info(aPath);
     QDir dir = info.isDir() ? QDir(aPath) : info.dir();
@@ -160,7 +165,10 @@ QString BooksStorage::Private::mountPoint(QString aPath)
     return dir.path();
 }
 
-QString BooksStorage::Private::fullPath(QDir aDir, QString aRelativePath)
+QString
+BooksStorage::Private::fullPath(
+    QDir aDir,
+    const QString aRelativePath)
 {
     QString path(aDir.path());
     if (!aRelativePath.isEmpty()) {
@@ -181,7 +189,8 @@ BooksStorage::BooksStorage() :
 {
 }
 
-BooksStorage::BooksStorage(const BooksStorage& aStorage) :
+BooksStorage::BooksStorage(
+    const BooksStorage& aStorage) :
     QObject(NULL),
     iPrivate(aStorage.iPrivate),
     iPassThrough(false)
@@ -189,7 +198,10 @@ BooksStorage::BooksStorage(const BooksStorage& aStorage) :
     if (iPrivate) iPrivate->iRef.ref();
 }
 
-BooksStorage::BooksStorage(QString aDevice, QString aMount, QString aBooksDir,
+BooksStorage::BooksStorage(
+    const QString aDevice,
+    const QString aMount,
+    const QString aBooksDir,
     Type aType) : QObject(NULL),
     iPrivate(new Private(aDevice, aMount, aBooksDir, aType)),
     iPassThrough(false)
@@ -202,12 +214,15 @@ BooksStorage::~BooksStorage()
     if (iPrivate && !iPrivate->iRef.deref()) delete iPrivate;
 }
 
-BooksStorage BooksStorage::tmpStorage()
+BooksStorage
+BooksStorage::tmpStorage()
 {
     return BooksStorage("tmpfs", "/tmp", "/", BooksStorage::TmpStorage);
 }
 
-void BooksStorage::connectNotify(const QMetaMethod& aSignal)
+void
+BooksStorage::connectNotify(
+    const QMetaMethod& aSignal)
 {
     if (iPrivate && !iPassThrough) {
         iPassThrough = true;
@@ -219,32 +234,39 @@ void BooksStorage::connectNotify(const QMetaMethod& aSignal)
     QObject::connectNotify(aSignal);
 }
 
-QString BooksStorage::device() const
+QString
+BooksStorage::device() const
 {
     return iPrivate ? iPrivate->iDevice : QString();
 }
 
-QDir BooksStorage::booksDir() const
+QDir
+BooksStorage::booksDir() const
 {
     return iPrivate ? iPrivate->iBooksDir : QDir();
 }
 
-QDir BooksStorage::configDir() const
+QDir
+BooksStorage::configDir() const
 {
     return iPrivate ? iPrivate->iConfigDir : QDir();
 }
 
-bool BooksStorage::isInternal() const
+bool
+BooksStorage::isInternal() const
 {
     return iPrivate && iPrivate->iType == InternalStorage;
 }
 
-bool BooksStorage::isPresent() const
+bool
+BooksStorage::isPresent() const
 {
     return iPrivate && iPrivate->iPresent;
 }
 
-QString BooksStorage::fullPath(QString aRelativePath) const
+QString
+BooksStorage::fullPath(
+    const QString aRelativePath) const
 {
     if (iPrivate) {
         return Private::fullPath(iPrivate->iBooksDir, aRelativePath);
@@ -252,7 +274,9 @@ QString BooksStorage::fullPath(QString aRelativePath) const
     return QString();
 }
 
-QString BooksStorage::fullConfigPath(QString aRelativePath) const
+QString
+BooksStorage::fullConfigPath(
+    const QString aRelativePath) const
 {
     if (iPrivate) {
         return Private::fullPath(iPrivate->iConfigDir, aRelativePath);
@@ -260,7 +284,9 @@ QString BooksStorage::fullConfigPath(QString aRelativePath) const
     return QString();
 }
 
-bool BooksStorage::equal(const BooksStorage& aStorage) const
+bool
+BooksStorage::equal(
+    const BooksStorage& aStorage) const
 {
     if (iPrivate == aStorage.iPrivate) {
         return true;
@@ -271,7 +297,9 @@ bool BooksStorage::equal(const BooksStorage& aStorage) const
     }
 }
 
-void BooksStorage::set(const BooksStorage& aStorage)
+void
+BooksStorage::set(
+    const BooksStorage& aStorage)
 {
     if (iPrivate != aStorage.iPrivate) {
         if (iPrivate && !iPrivate->iRef.deref()) delete iPrivate;
@@ -296,7 +324,8 @@ void BooksStorage::set(const BooksStorage& aStorage)
 #define STORAGE_SCAN_INTERVAL   100
 #define STORAGE_SCAN_TIMEOUT    5000
 
-class BooksStorageManager::Private : public QObject {
+class BooksStorageManager::Private : public QObject
+{
     Q_OBJECT
 public:
     static BooksStorageManager* gInstance;
@@ -305,16 +334,16 @@ public:
         QString dev;
         QString path;
 
-        bool parse(QString aLine);
+        bool parse(const QString);
     };
 
-    Private(BooksStorageManager* aParent);
+    Private(BooksStorageManager*);
     ~Private();
 
     BooksStorage internalStorage() const;
-    int findDevice(QString aDevice) const;
-    int findPath(QString aPath, QString* aRelPath) const;
-    bool isMediaMount(const MountEntry* aEntry);
+    int findDevice(const QString) const;
+    int findPath(const QString, QString*) const;
+    bool isMediaMount(const MountEntry*);
     bool scanMounts();
 
 public Q_SLOTS:
@@ -337,7 +366,9 @@ public:
 
 BooksStorageManager* BooksStorageManager::Private::gInstance = NULL;
 
-bool BooksStorageManager::Private::MountEntry::parse(QString aLine)
+bool
+BooksStorageManager::Private::MountEntry::parse(
+    const QString aLine)
 {
     QStringList entries = aLine.split(' ', QString::SkipEmptyParts);
     if (entries.count() > 2) {
@@ -354,7 +385,8 @@ bool BooksStorageManager::Private::MountEntry::parse(QString aLine)
     }
 }
 
-BooksStorageManager::Private::Private(BooksStorageManager* aParent) :
+BooksStorageManager::Private::Private(
+    BooksStorageManager* aParent) :
     QObject(aParent),
     iParent(aParent),
     iSettings(BooksSettings::sharedInstance()),
@@ -445,7 +477,8 @@ BooksStorageManager::Private::~Private()
     }
 }
 
-BooksStorage BooksStorageManager::Private::internalStorage() const
+BooksStorage
+BooksStorageManager::Private::internalStorage() const
 {
     const int n = iStorageList.count();
     for (int i = 0; i < n; i++) {
@@ -457,7 +490,9 @@ BooksStorage BooksStorageManager::Private::internalStorage() const
     return BooksStorage();
 }
 
-int BooksStorageManager::Private::findDevice(QString aDevice) const
+int
+BooksStorageManager::Private::findDevice(
+    const QString aDevice) const
 {
     const int n = iStorageList.count();
     for (int i=0; i<n; i++) {
@@ -469,7 +504,10 @@ int BooksStorageManager::Private::findDevice(QString aDevice) const
     return -1;
 }
 
-int BooksStorageManager::Private::findPath(QString aPath, QString* aRelPath) const
+int
+BooksStorageManager::Private::findPath(
+    const QString aPath,
+    QString* aRelPath) const
 {
     if (!aPath.isEmpty()) {
         const int n = iStorageList.count();
@@ -492,7 +530,8 @@ int BooksStorageManager::Private::findPath(QString aPath, QString* aRelPath) con
     return -1;
 }
 
-bool BooksStorageManager::Private::scanMounts()
+bool
+BooksStorageManager::Private::scanMounts()
 {
     bool newStorageFound = false;
     QList<BooksStorage> newMounts;
@@ -522,13 +561,16 @@ bool BooksStorageManager::Private::scanMounts()
     return newStorageFound;
 }
 
-bool BooksStorageManager::Private::isMediaMount(const MountEntry* aEntry)
+bool
+BooksStorageManager::Private::isMediaMount(
+    const MountEntry* aEntry)
 {
     return aEntry->path.startsWith(QStringLiteral("/media/")) ||
         aEntry->path.startsWith(iRunMediaPrefix);
 }
 
-void BooksStorageManager::Private::onScanMounts()
+void
+BooksStorageManager::Private::onScanMounts()
 {
     if (scanMounts()) {
         iScanMountsTimer->stop();
@@ -543,7 +585,9 @@ void BooksStorageManager::Private::onScanMounts()
     }
 }
 
-void BooksStorageManager::Private::onDeviceEvent(int)
+void
+BooksStorageManager::Private::onDeviceEvent(
+    int)
 {
     struct udev_device* dev = udev_monitor_receive_device(iMonitor);
     if (dev) {
@@ -555,7 +599,7 @@ void BooksStorageManager::Private::onDeviceEvent(int)
         HDEBUG("   devtype:" << udev_device_get_devtype(dev));
         HDEBUG("   action:" << action);
         if (devnode && action) {
-            if (!(strcmp(action, STORAGE_ACTION_ADD))) {
+            if (!strcmp(action, STORAGE_ACTION_ADD)) {
                 // Mount list isn't updated yet when we receive this
                 // notification. It takes hundreds of milliseconds until
                 // it gets mounted and becomes accessible.
@@ -589,7 +633,8 @@ void BooksStorageManager::Private::onDeviceEvent(int)
     }
 }
 
-void BooksStorageManager::Private::onRemovableRootChanged()
+void
+BooksStorageManager::Private::onRemovableRootChanged()
 {
     int i;
     HDEBUG(iSettings->removableRoot());
@@ -621,7 +666,8 @@ void BooksStorageManager::Private::onRemovableRootChanged()
 // BooksStorageManager
 // ==========================================================================
 
-BooksStorageManager* BooksStorageManager::instance()
+BooksStorageManager*
+BooksStorageManager::instance()
 {
     if (!Private::gInstance) {
         Private::gInstance = new BooksStorageManager;
@@ -629,7 +675,8 @@ BooksStorageManager* BooksStorageManager::instance()
     return Private::gInstance;
 }
 
-void BooksStorageManager::deleteInstance()
+void
+BooksStorageManager::deleteInstance()
 {
     delete Private::gInstance;
     HASSERT(!Private::gInstance);
@@ -647,28 +694,36 @@ BooksStorageManager::~BooksStorageManager()
     }
 }
 
-int BooksStorageManager::count() const
+int
+BooksStorageManager::count() const
 {
     return iPrivate->iStorageList.count();
 }
 
-QList<BooksStorage> BooksStorageManager::storageList() const
+QList<BooksStorage>
+BooksStorageManager::storageList() const
 {
     return iPrivate->iStorageList;
 }
 
-BooksStorage BooksStorageManager::internalStorage() const
+BooksStorage
+BooksStorageManager::internalStorage() const
 {
     return iPrivate->internalStorage();
 }
 
-BooksStorage BooksStorageManager::storageForDevice(QString aDevice) const
+BooksStorage
+BooksStorageManager::storageForDevice(
+    const QString aDevice) const
 {
     int index = iPrivate->findDevice(aDevice);
     return (index >= 0) ? iPrivate->iStorageList.at(index) : BooksStorage();
 }
 
-BooksStorage BooksStorageManager::storageForPath(QString aPath, QString* aRelPath) const
+BooksStorage
+BooksStorageManager::storageForPath(
+    const QString aPath,
+    QString* aRelPath) const
 {
     int index = iPrivate->findPath(aPath, aRelPath);
     return (index >= 0) ? iPrivate->iStorageList.at(index) : BooksStorage();

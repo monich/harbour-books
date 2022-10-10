@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2015-2021 Jolla Ltd.
- * Copyright (C) 2015-2021 Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2015-2022 Jolla Ltd.
+ * Copyright (C) 2015-2022 Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
  *
@@ -56,7 +56,7 @@ class BooksStorage: public QObject
 
 public:
     BooksStorage();
-    BooksStorage(const BooksStorage& aStorage);
+    BooksStorage(const BooksStorage&);
     ~BooksStorage();
 
     QString device() const;
@@ -64,14 +64,14 @@ public:
     QDir configDir() const;
     QString label() const { return booksDir().dirName(); }
     QString root() const { return booksDir().path(); }
-    QString fullConfigPath(QString aRelativePath) const;
-    QString fullPath(QString aRelativePath) const;
+    QString fullConfigPath(const QString) const;
+    QString fullPath(const QString) const;
 
     bool isValid() const { return iPrivate != NULL; }
     bool isInternal() const;
     bool isPresent() const;
-    bool equal(const BooksStorage& aStorage) const;
-    void set(const BooksStorage& aStorage);
+    bool equal(const BooksStorage&) const;
+    void set(const BooksStorage&);
 
     BooksStorage& operator = (const BooksStorage& aStorage)
         { set(aStorage); return *this; }
@@ -85,8 +85,8 @@ Q_SIGNALS:
 
 private:
     friend class BooksStorageManager;
-    BooksStorage(QString, QString, QString, Type);
-    void connectNotify(const QMetaMethod& aSignal);
+    BooksStorage(const QString, const QString, const QString, Type);
+    void connectNotify(const QMetaMethod&) Q_DECL_OVERRIDE;
 
 private:
     class Private;
@@ -106,13 +106,13 @@ public:
     int count() const;
     QList<BooksStorage> storageList() const;
     BooksStorage internalStorage() const;
-    BooksStorage storageForDevice(QString aDevice) const;
-    BooksStorage storageForPath(QString aPath, QString* aRelPath = NULL) const;
+    BooksStorage storageForDevice(const QString) const;
+    BooksStorage storageForPath(const QString, QString* aRelPath = NULL) const;
 
 Q_SIGNALS:
-    void storageAdded(BooksStorage aStorage);
-    void storageRemoved(BooksStorage aStorage);
-    void storageReplaced(BooksStorage aOldStorage, BooksStorage aNewStorage);
+    void storageAdded(BooksStorage);
+    void storageRemoved(BooksStorage);
+    void storageReplaced(BooksStorage, BooksStorage);
 
 private:
     BooksStorageManager();
