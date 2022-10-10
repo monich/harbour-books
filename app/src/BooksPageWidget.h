@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2015-2020 Jolla Ltd.
- * Copyright (C) 2015-2020 Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2015-2022 Jolla Ltd.
+ * Copyright (C) 2015-2022 Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
  *
@@ -70,40 +70,40 @@ public:
     explicit BooksPageWidget(QQuickItem* aParent = NULL);
     ~BooksPageWidget();
 
-    bool loading() const;
+    bool loading() const Q_DECL_OVERRIDE;
     bool selecting() const;
     bool selectionEmpty() const;
 
     bool pressed() const;
-    void setPressed(bool aPressed);
+    void setPressed(bool);
 
     bool currentPage() const;
-    void setCurrentPage(bool aCurrentPage);
+    void setCurrentPage(bool);
 
     int page() const;
-    void setPage(int aPage);
+    void setPage(int);
 
     BooksBookModel* model() const;
-    void setModel(BooksBookModel* aModel);
+    void setModel(BooksBookModel*);
 
     const BooksPos& bookPos() const;
-    void setBookPos(const BooksPos& aBookPos);
+    void setBookPos(const BooksPos&);
 
     int leftMargin() const;
     int rightMargin() const;
     int topMargin() const;
     int bottomMargin() const;
 
-    void setLeftMargin(int aMargin);
-    void setRightMargin(int aMargin);
-    void setTopMargin(int aMargin);
-    void setBottomMargin(int aMargin);
+    void setLeftMargin(int);
+    void setRightMargin(int);
+    void setTopMargin(int);
+    void setBottomMargin(int);
 
     BooksMargins margins() const;
 
-    Q_INVOKABLE void handlePress(int aX, int aY);
-    Q_INVOKABLE void handleLongPress(int aX, int aY);
-    Q_INVOKABLE void handlePositionChanged(int aX, int aY);
+    Q_INVOKABLE void handlePress(int, int);
+    Q_INVOKABLE void handleLongPress(int, int);
+    Q_INVOKABLE void handlePositionChanged(int, int);
     Q_INVOKABLE void clearSelection();
 
 Q_SIGNALS:
@@ -143,7 +143,7 @@ private Q_SLOTS:
     void onFootnoteTaskDone();
 
 private:
-    void paint(QPainter *painter) Q_DECL_OVERRIDE;
+    void paint(QPainter*) Q_DECL_OVERRIDE;
     void updateSize();
     void resetView();
     void releaseExtendSelectionTasks();

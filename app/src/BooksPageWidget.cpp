@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2015-2021 Jolla Ltd.
- * Copyright (C) 2015-2021 Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2015-2022 Jolla Ltd.
+ * Copyright (C) 2015-2022 Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
  *
@@ -53,14 +53,15 @@ static const QString IMAGE_URL("image://%1/%2");
 // BooksPageWidget::Data
 // ==========================================================================
 
-class BooksPageWidget::Data {
+class BooksPageWidget::Data
+{
 public:
     typedef shared_ptr<Data> Ptr;
 
     Data(shared_ptr<ZLTextModel> aModel, int aWidth, int aHeight) :
         iModel(aModel), iPaintContext(aWidth, aHeight) {}
 
-    bool paint(QPainter* aPainter, BooksColorScheme aColors);
+    bool paint(QPainter*, BooksColorScheme);
     inline int width() const { return iPaintContext.width(); }
     inline int height() const { return iPaintContext.height(); }
 
@@ -70,7 +71,10 @@ public:
     BooksPaintContext iPaintContext;
 };
 
-bool BooksPageWidget::Data::paint(QPainter* aPainter, BooksColorScheme aColors)
+bool
+BooksPageWidget::Data::paint(
+    QPainter* aPainter,
+    BooksColorScheme aColors)
 {
     if (!iView.isNull()) {
         iPaintContext.iColors = aColors;
@@ -86,14 +90,14 @@ bool BooksPageWidget::Data::paint(QPainter* aPainter, BooksColorScheme aColors)
 // BooksPageWidget::ResetTask
 // ==========================================================================
 
-class BooksPageWidget::ResetTask : public HarbourTask {
+class BooksPageWidget::ResetTask : public HarbourTask
+{
 public:
-    ResetTask(QThreadPool* aPool, shared_ptr<ZLTextModel> aModel,
-        shared_ptr<ZLTextStyle> aTextStyle, int aWidth, int aHeight,
-        const BooksMargins& aMargins, const BooksPos& aPosition);
+    ResetTask(QThreadPool*, shared_ptr<ZLTextModel>, shared_ptr<ZLTextStyle>,
+        int, int, const BooksMargins&, const BooksPos&);
     ~ResetTask();
 
-    void performTask();
+    void performTask() Q_DECL_OVERRIDE;
 
 public:
     BooksPageWidget::Data* iData;
@@ -102,10 +106,15 @@ public:
     BooksPos iPosition;
 };
 
-BooksPageWidget::ResetTask::ResetTask(QThreadPool* aPool,
-    shared_ptr<ZLTextModel> aModel, shared_ptr<ZLTextStyle> aTextStyle,
-    int aWidth, int aHeight, const BooksMargins& aMargins,
-    const BooksPos& aPosition) : HarbourTask(aPool),
+BooksPageWidget::ResetTask::ResetTask(
+    QThreadPool* aPool,
+    shared_ptr<ZLTextModel> aModel,
+    shared_ptr<ZLTextStyle> aTextStyle,
+    int aWidth,
+    int aHeight,
+    const BooksMargins& aMargins,
+    const BooksPos& aPosition) :
+    HarbourTask(aPool),
     iData(new BooksPageWidget::Data(aModel, aWidth, aHeight)),
     iTextStyle(aTextStyle),
     iMargins(aMargins),
@@ -118,7 +127,8 @@ BooksPageWidget::ResetTask::~ResetTask()
     delete iData;
 }
 
-void BooksPageWidget::ResetTask::performTask()
+void
+BooksPageWidget::ResetTask::performTask()
 {
     if (!isCanceled()) {
         BooksTextView* view = new BooksTextView(iData->iPaintContext,
@@ -141,13 +151,14 @@ void BooksPageWidget::ResetTask::performTask()
 // BooksPageWidget::RenderTask
 // ==========================================================================
 
-class BooksPageWidget::RenderTask : public HarbourTask {
+class BooksPageWidget::RenderTask : public HarbourTask
+{
 public:
     RenderTask(QThreadPool* aPool, QThread* aTargetThread, Data::Ptr aData,
         BooksColorScheme aColors) : HarbourTask(aPool, aTargetThread),
         iData(aData), iColors(aColors) {}
 
-    void performTask();
+    void performTask() Q_DECL_OVERRIDE;
 
 public:
     Data::Ptr iData;
@@ -155,7 +166,8 @@ public:
     QImage iImage;
 };
 
-void BooksPageWidget::RenderTask::performTask()
+void
+BooksPageWidget::RenderTask::performTask()
 {
     if (!iData.isNull() && !iData->iView.isNull()) {
         const int width = iData->width();
@@ -174,12 +186,13 @@ void BooksPageWidget::RenderTask::performTask()
 // BooksPageWidget::ClearSelectionTask
 // ==========================================================================
 
-class BooksPageWidget::ClearSelectionTask : public HarbourTask {
+class BooksPageWidget::ClearSelectionTask : public HarbourTask
+{
 public:
     ClearSelectionTask(QThreadPool* aPool, Data::Ptr aData, BooksColorScheme aColors) :
         HarbourTask(aPool), iData(aData), iColors(aColors), iImageUpdated(false) {}
 
-    void performTask();
+    void performTask() Q_DECL_OVERRIDE;
 
 public:
     Data::Ptr iData;
@@ -188,7 +201,8 @@ public:
     bool iImageUpdated;
 };
 
-void BooksPageWidget::ClearSelectionTask::performTask()
+void
+BooksPageWidget::ClearSelectionTask::performTask()
 {
     if (!iData.isNull() && !iData->iView.isNull()) {
         iData->iView->endSelection();
@@ -213,14 +227,14 @@ void BooksPageWidget::ClearSelectionTask::performTask()
 // BooksPageWidget::StartSelectionTask
 // ==========================================================================
 
-class BooksPageWidget::StartSelectionTask : public HarbourTask {
+class BooksPageWidget::StartSelectionTask : public HarbourTask
+{
 public:
     StartSelectionTask(QThreadPool* aPool, Data::Ptr aData, int aX, int aY,
-        BooksColorScheme aColors) : HarbourTask(aPool),
-        iData(aData), iX(aX), iY(aY), iColors(aColors),
-        iSelectionEmpty(true) {}
+        BooksColorScheme aColors) : HarbourTask(aPool), iData(aData),
+        iX(aX), iY(aY), iColors(aColors), iSelectionEmpty(true) {}
 
-    void performTask();
+    void performTask() Q_DECL_OVERRIDE;
 
 public:
     Data::Ptr iData;
@@ -231,7 +245,8 @@ public:
     bool iSelectionEmpty;
 };
 
-void BooksPageWidget::StartSelectionTask::performTask()
+void
+BooksPageWidget::StartSelectionTask::performTask()
 {
     if (!iData.isNull() && !iData->iView.isNull()) {
         const int width = iData->width();
@@ -254,14 +269,15 @@ void BooksPageWidget::StartSelectionTask::performTask()
 // BooksPageWidget::ExtendSelectionTask
 // ==========================================================================
 
-class BooksPageWidget::ExtendSelectionTask : public HarbourTask {
+class BooksPageWidget::ExtendSelectionTask : public HarbourTask
+{
 public:
     ExtendSelectionTask(QThreadPool* aPool, Data::Ptr aData, int aX, int aY,
-        BooksColorScheme aColors) : HarbourTask(aPool),
-        iData(aData), iX(aX), iY(aY), iColors(aColors),
-        iSelectionChanged(false), iSelectionEmpty(true) {}
+        BooksColorScheme aColors) : HarbourTask(aPool), iData(aData),
+        iX(aX), iY(aY), iColors(aColors), iSelectionChanged(false),
+        iSelectionEmpty(true) {}
 
-    void performTask();
+    void performTask() Q_DECL_OVERRIDE;
 
 public:
     Data::Ptr iData;
@@ -273,7 +289,8 @@ public:
     bool iSelectionEmpty;
 };
 
-void BooksPageWidget::ExtendSelectionTask::performTask()
+void
+BooksPageWidget::ExtendSelectionTask::performTask()
 {
     if (!iData.isNull() && !iData->iView.isNull()) {
         const int width = iData->width();
@@ -296,7 +313,8 @@ void BooksPageWidget::ExtendSelectionTask::performTask()
 // BooksPageWidget::FootnoteTask
 // ==========================================================================
 
-class BooksPageWidget::FootnoteTask : public HarbourTask, ZLTextArea::Properties {
+class BooksPageWidget::FootnoteTask : public HarbourTask, ZLTextArea::Properties
+{
 public:
     FootnoteTask(QThreadPool* aPool, int aX, int aY, int aMaxWidth, int aMaxHeight,
         QString aPath, QString aLinkText, QString aRef,
@@ -308,12 +326,12 @@ public:
         iRef(aRef), iLinkText(aLinkText), iPath(aPath) {}
     ~FootnoteTask();
 
-    void performTask();
+    void performTask() Q_DECL_OVERRIDE;
 
     // ZLTextArea::Properties
-    shared_ptr<ZLTextStyle> baseStyle() const;
-    ZLColor color(const std::string& aStyle) const;
-    bool isSelectionEnabled() const;
+    shared_ptr<ZLTextStyle> baseStyle() const Q_DECL_OVERRIDE;
+    ZLColor color(const std::string&) const Q_DECL_OVERRIDE;
+    bool isSelectionEnabled() const Q_DECL_OVERRIDE;
 
 public:
     shared_ptr<ZLTextModel> iTextModel;
@@ -333,22 +351,27 @@ BooksPageWidget::FootnoteTask::~FootnoteTask()
 {
 }
 
-shared_ptr<ZLTextStyle> BooksPageWidget::FootnoteTask::baseStyle() const
+shared_ptr<ZLTextStyle>
+BooksPageWidget::FootnoteTask::baseStyle() const
 {
     return iTextStyle;
 }
 
-ZLColor BooksPageWidget::FootnoteTask::color(const std::string& aStyle) const
+ZLColor
+BooksPageWidget::FootnoteTask::color(
+    const std::string& aStyle) const
 {
     return BooksPaintContext::realColor(aStyle, iColors);
 }
 
-bool BooksPageWidget::FootnoteTask::isSelectionEnabled() const
+bool
+BooksPageWidget::FootnoteTask::isSelectionEnabled() const
 {
     return false;
 }
 
-void BooksPageWidget::FootnoteTask::performTask()
+void
+BooksPageWidget::FootnoteTask::performTask()
 {
     if (!isCanceled()) {
         // Determine the size of the footnote canvas
@@ -382,13 +405,14 @@ void BooksPageWidget::FootnoteTask::performTask()
 // BooksPageWidget::PressTask
 // ==========================================================================
 
-class BooksPageWidget::PressTask : public HarbourTask {
+class BooksPageWidget::PressTask : public HarbourTask
+{
 public:
     PressTask(QThreadPool* aPool, Data::Ptr aData, int aX, int aY) :
         HarbourTask(aPool), iData(aData), iX(aX), iY(aY), iKind(REGULAR) {}
 
-    void performTask();
-    QString getLinkText(ZLTextWordCursor& aCursor);
+    void performTask() Q_DECL_OVERRIDE;
+    QString getLinkText(ZLTextWordCursor&);
 
 public:
     Data::Ptr iData;
@@ -403,7 +427,9 @@ public:
     QImage iImage;
 };
 
-QString BooksPageWidget::PressTask::getLinkText(ZLTextWordCursor& aCursor)
+QString
+BooksPageWidget::PressTask::getLinkText(
+    ZLTextWordCursor& aCursor)
 {
     QString text;
     while (!aCursor.isEndOfParagraph() && !isCanceled() &&
@@ -420,7 +446,8 @@ QString BooksPageWidget::PressTask::getLinkText(ZLTextWordCursor& aCursor)
     return text;
 }
 
-void BooksPageWidget::PressTask::performTask()
+void
+BooksPageWidget::PressTask::performTask()
 {
     if (!isCanceled()) {
         const BooksTextView& view = *iData->iView;
@@ -544,7 +571,8 @@ BooksPageWidget::~BooksPageWidget()
     if (iFootnoteTask) iFootnoteTask->release(this);
 }
 
-void BooksPageWidget::releaseExtendSelectionTasks()
+void
+BooksPageWidget::releaseExtendSelectionTasks()
 {
     while (!iExtendSelectionTasks.isEmpty()) {
         const int i = iExtendSelectionTasks.count()-1;
@@ -553,7 +581,9 @@ void BooksPageWidget::releaseExtendSelectionTasks()
     }
 }
 
-void BooksPageWidget::setPressed(bool aPressed)
+void
+BooksPageWidget::setPressed(
+    bool aPressed)
 {
     if (iPressed != aPressed) {
         iPressed = aPressed;
@@ -566,7 +596,9 @@ void BooksPageWidget::setPressed(bool aPressed)
     }
 }
 
-void BooksPageWidget::setCurrentPage(bool aCurrentPage)
+void
+BooksPageWidget::setCurrentPage(
+    bool aCurrentPage)
 {
     if (iCurrentPage != aCurrentPage) {
         iCurrentPage = aCurrentPage;
@@ -576,7 +608,9 @@ void BooksPageWidget::setCurrentPage(bool aCurrentPage)
     }
 }
 
-void BooksPageWidget::setModel(BooksBookModel* aModel)
+void
+BooksPageWidget::setModel(
+    BooksBookModel* aModel)
 {
     if (iModel != aModel) {
         if (iModel) iModel->disconnect(this);
@@ -602,7 +636,8 @@ void BooksPageWidget::setModel(BooksBookModel* aModel)
     }
 }
 
-void BooksPageWidget::onTextStyleChanged()
+void
+BooksPageWidget::onTextStyleChanged()
 {
     HDEBUG(iPage);
     HASSERT(sender() == iModel);
@@ -610,14 +645,16 @@ void BooksPageWidget::onTextStyleChanged()
     resetView();
 }
 
-void BooksPageWidget::onColorsChanged()
+void
+BooksPageWidget::onColorsChanged()
 {
     HDEBUG(iPage);
     HASSERT(sender() == iSettings);
     scheduleRepaint();
 }
 
-void BooksPageWidget::onBookModelDestroyed()
+void
+BooksPageWidget::onBookModelDestroyed()
 {
     HDEBUG("model destroyed");
     HASSERT(iModel == sender());
@@ -627,7 +664,9 @@ void BooksPageWidget::onBookModelDestroyed()
     resetView();
 }
 
-void BooksPageWidget::setPage(int aPage)
+void
+BooksPageWidget::setPage(
+    int aPage)
 {
     if (iPage != aPage) {
         BooksLoadingSignalBlocker block(this);
@@ -637,7 +676,9 @@ void BooksPageWidget::setPage(int aPage)
     }
 }
 
-void BooksPageWidget::setBookPos(const BooksPos& aBookPos)
+void
+BooksPageWidget::setBookPos(
+    const BooksPos& aBookPos)
 {
     if (iBookPos != aBookPos) {
         iBookPos = aBookPos;
@@ -647,7 +688,9 @@ void BooksPageWidget::setBookPos(const BooksPos& aBookPos)
     }
 }
 
-void BooksPageWidget::setLeftMargin(int aMargin)
+void
+BooksPageWidget::setLeftMargin(
+    int aMargin)
 {
     if (iMargins.iLeft != aMargin) {
         iMargins.iLeft = aMargin;
@@ -657,7 +700,9 @@ void BooksPageWidget::setLeftMargin(int aMargin)
     }
 }
 
-void BooksPageWidget::setRightMargin(int aMargin)
+void
+BooksPageWidget::setRightMargin(
+    int aMargin)
 {
     if (iMargins.iRight != aMargin) {
         iMargins.iRight = aMargin;
@@ -667,7 +712,9 @@ void BooksPageWidget::setRightMargin(int aMargin)
     }
 }
 
-void BooksPageWidget::setTopMargin(int aMargin)
+void
+BooksPageWidget::setTopMargin(
+    int aMargin)
 {
     if (iMargins.iTop != aMargin) {
         iMargins.iTop = aMargin;
@@ -677,7 +724,9 @@ void BooksPageWidget::setTopMargin(int aMargin)
     }
 }
 
-void BooksPageWidget::setBottomMargin(int aMargin)
+void
+BooksPageWidget::setBottomMargin(
+    int aMargin)
 {
     if (iMargins.iBottom != aMargin) {
         iMargins.iBottom = aMargin;
@@ -687,7 +736,9 @@ void BooksPageWidget::setBottomMargin(int aMargin)
     }
 }
 
-void BooksPageWidget::paint(QPainter* aPainter)
+void
+BooksPageWidget::paint(
+    QPainter* aPainter)
 {
     if (!iImage.isNull()) {
         HDEBUG("page" << iPage);
@@ -707,12 +758,14 @@ void BooksPageWidget::paint(QPainter* aPainter)
     }
 }
 
-bool BooksPageWidget::loading() const
+bool
+BooksPageWidget::loading() const
 {
     return iPage >= 0 && iImage.isNull() && (iResetTask || iRenderTask);
 }
 
-void BooksPageWidget::resetView()
+void
+BooksPageWidget::resetView()
 {
     BooksLoadingSignalBlocker block(this);
     if (iResetTask) {
@@ -748,7 +801,8 @@ void BooksPageWidget::resetView()
     }
 }
 
-void BooksPageWidget::cancelRepaint()
+void
+BooksPageWidget::cancelRepaint()
 {
     BooksLoadingSignalBlocker block(this);
     if (iRenderTask) {
@@ -757,7 +811,8 @@ void BooksPageWidget::cancelRepaint()
     }
 }
 
-void BooksPageWidget::scheduleRepaint()
+void
+BooksPageWidget::scheduleRepaint()
 {
     BooksLoadingSignalBlocker block(this);
     cancelRepaint();
@@ -773,7 +828,8 @@ void BooksPageWidget::scheduleRepaint()
     }
 }
 
-void BooksPageWidget::onResetTaskDone()
+void
+BooksPageWidget::onResetTaskDone()
 {
     BooksLoadingSignalBlocker block(this);
     HASSERT(sender() == iResetTask);
@@ -784,7 +840,8 @@ void BooksPageWidget::onResetTaskDone()
     scheduleRepaint();
 }
 
-void BooksPageWidget::onRenderTaskDone()
+void
+BooksPageWidget::onRenderTaskDone()
 {
     BooksLoadingSignalBlocker block(this);
     HASSERT(sender() == iRenderTask);
@@ -794,7 +851,8 @@ void BooksPageWidget::onRenderTaskDone()
     update();
 }
 
-void BooksPageWidget::onPressTaskDone()
+void
+BooksPageWidget::onPressTaskDone()
 {
     HASSERT(sender() == iPressTask);
     HDEBUG(iPressTask->iKind);
@@ -809,7 +867,8 @@ void BooksPageWidget::onPressTaskDone()
     task->release(this);
 }
 
-void BooksPageWidget::onClearSelectionTaskDone()
+void
+BooksPageWidget::onClearSelectionTaskDone()
 {
     HASSERT(sender() == iClearSelectionTask);
     ClearSelectionTask* task = iClearSelectionTask;
@@ -829,7 +888,8 @@ void BooksPageWidget::onClearSelectionTaskDone()
     task->release(this);
 }
 
-void BooksPageWidget::onStartSelectionTaskDone()
+void
+BooksPageWidget::onStartSelectionTaskDone()
 {
     HASSERT(sender() == iStartSelectionTask);
     StartSelectionTask* task = iStartSelectionTask;
@@ -859,7 +919,8 @@ void BooksPageWidget::onStartSelectionTaskDone()
     task->release(this);
 }
 
-void BooksPageWidget::onExtendSelectionTaskDone()
+void
+BooksPageWidget::onExtendSelectionTaskDone()
 {
     ExtendSelectionTask* task = (ExtendSelectionTask*)sender();
     HASSERT(iExtendSelectionTasks.contains(task));
@@ -878,7 +939,8 @@ void BooksPageWidget::onExtendSelectionTaskDone()
     task->release(this);
 }
 
-void BooksPageWidget::onFootnoteTaskDone()
+void
+BooksPageWidget::onFootnoteTaskDone()
 {
     HASSERT(sender() == iFootnoteTask);
 
@@ -901,7 +963,8 @@ void BooksPageWidget::onFootnoteTaskDone()
     task->release(this);
 }
 
-void BooksPageWidget::onLongPressTaskDone()
+void
+BooksPageWidget::onLongPressTaskDone()
 {
     HASSERT(sender() == iLongPressTask);
     HDEBUG(iLongPressTask->iKind);
@@ -975,14 +1038,16 @@ void BooksPageWidget::onLongPressTaskDone()
     task->release(this);
 }
 
-void BooksPageWidget::updateSize()
+void
+BooksPageWidget::updateSize()
 {
     HDEBUG("page" << iPage << QSize(width(), height()));
     iImage = QImage();
     resetView();
 }
 
-void BooksPageWidget::onWidthChanged()
+void
+BooksPageWidget::onWidthChanged()
 {
     HVERBOSE((int)width());
     // Width change will probably be followed by height change
@@ -991,7 +1056,8 @@ void BooksPageWidget::onWidthChanged()
     update();
 }
 
-void BooksPageWidget::onHeightChanged()
+void
+BooksPageWidget::onHeightChanged()
 {
     HVERBOSE((int)height());
     if (iResizeTimer->isActive()) {
@@ -1005,7 +1071,8 @@ void BooksPageWidget::onHeightChanged()
     }
 }
 
-void BooksPageWidget::onResizeTimeout()
+void
+BooksPageWidget::onResizeTimeout()
 {
     // This can only happen if only width or height has changed. Normally,
     // width change is followed by height change and view is reset from the
@@ -1013,7 +1080,10 @@ void BooksPageWidget::onResizeTimeout()
     updateSize();
 }
 
-void BooksPageWidget::handleLongPress(int aX, int aY)
+void
+BooksPageWidget::handleLongPress(
+    int aX,
+    int aY)
 {
     HDEBUG(aX << aY);
     if (!iResetTask && !iRenderTask && !iData.isNull()) {
@@ -1023,7 +1093,10 @@ void BooksPageWidget::handleLongPress(int aX, int aY)
     }
 }
 
-void BooksPageWidget::handlePress(int aX, int aY)
+void
+BooksPageWidget::handlePress(
+    int aX,
+    int aY)
 {
     HDEBUG(aX << aY);
     if (!iResetTask && !iRenderTask && !iData.isNull()) {
@@ -1033,7 +1106,10 @@ void BooksPageWidget::handlePress(int aX, int aY)
     }
 }
 
-void BooksPageWidget::handlePositionChanged(int aX, int aY)
+void
+BooksPageWidget::handlePositionChanged(
+    int aX,
+    int aY)
 {
     if (iSelecting && !iData.isNull()) {
         HDEBUG(aX << aY);
@@ -1063,7 +1139,8 @@ void BooksPageWidget::handlePositionChanged(int aX, int aY)
     }
 }
 
-void BooksPageWidget::clearSelection()
+void
+BooksPageWidget::clearSelection()
 {
     if (!iData.isNull()) {
         if (iClearSelectionTask) iClearSelectionTask->release(this);
