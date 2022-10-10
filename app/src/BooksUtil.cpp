@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2015-2018 Jolla Ltd.
- * Copyright (C) 2015-2018 Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2015-2022 Jolla Ltd.
+ * Copyright (C) 2015-2022 Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
  *
@@ -8,15 +8,15 @@
  * modification, are permitted provided that the following conditions
  * are met:
  *
- *   * Redistributions of source code must retain the above copyright
- *     notice, this list of conditions and the following disclaimer.
- *   * Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in
- *     the documentation and/or other materials provided with the
- *     distribution.
- *   * Neither the name of Jolla Ltd nor the names of its contributors
- *     may be used to endorse or promote products derived from this
- *     software without specific prior written permission.
+ *   1. Redistributions of source code must retain the above copyright
+ *      notice, this list of conditions and the following disclaimer.
+ *   2. Redistributions in binary form must reproduce the above copyright
+ *      notice, this list of conditions and the following disclaimer
+ *      in the documentation and/or other materials provided with the
+ *      distribution.
+ *   3. Neither the names of the copyright holders nor the names of its
+ *      contributors may be used to endorse or promote products derived
+ *      from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -34,6 +34,7 @@
 #include "BooksUtil.h"
 #include "BooksDefs.h"
 
+#include "HarbourBase45.h"
 #include "HarbourDebug.h"
 #include "HarbourTask.h"
 
@@ -52,7 +53,49 @@
 #define DIGEST_TYPE     (QCryptographicHash::Md5)
 #define DIGEST_SIZE     (16)
 
-shared_ptr<Book> BooksUtil::bookFromFile(std::string aPath)
+// import Sailfish.Media 1.0; MediaKey{}
+#define MEDIA_KEY_BASE45 \
+    "YEDS9E5LE+347ECUVD+EDU7DDZ9AVCOCCZ96H46DZ9AVCMDCC$CNRF"
+
+// import org.nemomobile.policy 1.0;Permissions{
+//   autoRelease:true;applicationClass:"camera";
+//   Resource{type:Resource.ScaleButton;optional:true}}
+#define PERMISSIONS_BASE45 \
+    "YEDS9E5LEN44$KE6*50$C+3ET3EXEDRZCS9EXVD+PC634Y$5JM75$CJ$DZQE EDF/" \
+    "D+QF8%ED3E: CX CLQEOH76LE+ZCEECP9EOEDIEC EDC.DPVDZQEWF7GPCF$DVKEX" \
+    "E4XIAVQE6%EKPCERF%FF*ZCXIAVQE6%EKPCO%5GPCTVD3I8MWE-3E5N7X9E ED..D" \
+    "VUDKWE%$E+%F"
+
+BooksUtil::BooksUtil(
+    QObject* aParent) :
+    QObject(aParent)
+{
+}
+
+// Callback for qmlRegisterSingletonType<BooksUtil>
+QObject*
+BooksUtil::createSingleton(
+    QQmlEngine*,
+    QJSEngine*)
+{
+    return new BooksUtil();
+}
+
+QString
+BooksUtil::mediaKeyQml()
+{
+    return HarbourBase45::fromBase45(QString::fromLatin1(MEDIA_KEY_BASE45));
+}
+
+QString
+BooksUtil::permissionsQml()
+{
+    return HarbourBase45::fromBase45(QString::fromLatin1(PERMISSIONS_BASE45));
+}
+
+shared_ptr<Book>
+BooksUtil::bookFromFile(
+    const std::string& aPath)
 {
     shared_ptr<Book> book;
     const ZLFile file(aPath);
@@ -91,7 +134,10 @@ shared_ptr<Book> BooksUtil::bookFromFile(std::string aPath)
     return book;
 }
 
-QByteArray BooksUtil::computeFileHash(QString aPath, const HarbourTask* aTask)
+QByteArray
+BooksUtil::computeFileHash(
+    const QString aPath,
+    const HarbourTask* aTask)
 {
     QByteArray result;
     QFile file(aPath);
@@ -110,10 +156,10 @@ QByteArray BooksUtil::computeFileHash(QString aPath, const HarbourTask* aTask)
                     ptr += DIGEST_SIZE;
                 }
             } else {
-                while (bytesLeft > DIGEST_SIZE) {
-                    hash.addData(ptr, DIGEST_SIZE);
-                    bytesLeft -= DIGEST_SIZE;
-                    ptr += DIGEST_SIZE;
+                while (bytesLeft > (qint64)INT_MAX) {
+                    hash.addData(ptr, INT_MAX);
+                    bytesLeft -= INT_MAX;
+                    ptr += INT_MAX;
                 }
             }
             if (!aTask || !aTask->isCanceled()) {
@@ -133,10 +179,12 @@ QByteArray BooksUtil::computeFileHash(QString aPath, const HarbourTask* aTask)
     return result;
 }
 
-QByteArray BooksUtil::fileHashAttr(QString aPath)
+QByteArray
+BooksUtil::fileHashAttr(
+    const QString aPath)
 {
     QByteArray hash;
-    QByteArray fname(aPath.toLocal8Bit());
+    const QByteArray fname(aPath.toLocal8Bit());
     char attr[DIGEST_SIZE];
     if (getxattr(fname, DIGEST_XATTR, attr, sizeof(attr)) == DIGEST_SIZE) {
         hash = QByteArray(attr, sizeof(attr));
@@ -145,7 +193,10 @@ QByteArray BooksUtil::fileHashAttr(QString aPath)
     return hash;
 }
 
-bool BooksUtil::setFileHashAttr(QString aPath, QByteArray aHash)
+bool
+BooksUtil::setFileHashAttr(
+    const QString aPath,
+    const QByteArray aHash)
 {
     if (aHash.size() == DIGEST_SIZE) {
         QByteArray fname(aPath.toLocal8Bit());
@@ -158,7 +209,10 @@ bool BooksUtil::setFileHashAttr(QString aPath, QByteArray aHash)
     return false;
 }
 
-QByteArray BooksUtil::computeFileHashAndSetAttr(QString aPath, const HarbourTask* aTask)
+QByteArray
+BooksUtil::computeFileHashAndSetAttr(
+    const QString aPath,
+    const HarbourTask* aTask)
 {
     QByteArray hash = computeFileHash(aPath, aTask);
     if (!hash.isEmpty()) {
@@ -167,7 +221,9 @@ QByteArray BooksUtil::computeFileHashAndSetAttr(QString aPath, const HarbourTask
     return hash;
 }
 
-bool BooksUtil::isValidFileName(QString aName)
+bool
+BooksUtil::isValidFileName(
+    const QString aName)
 {
     return !aName.isEmpty() &&
         aName != QStringLiteral(".") &&

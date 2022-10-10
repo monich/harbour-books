@@ -193,12 +193,10 @@ openrepos {
 # harbour-lib
 
 HEADERS += \
+  $$HARBOUR_INCLUDE_DIR/HarbourBase45.h \
   $$HARBOUR_INCLUDE_DIR/HarbourColorEditorModel.h \
   $$HARBOUR_INCLUDE_DIR/HarbourDisplayBlanking.h \
   $$HARBOUR_INCLUDE_DIR/HarbourJson.h \
-  $$HARBOUR_INCLUDE_DIR/HarbourMediaPlugin.h \
-  $$HARBOUR_INCLUDE_DIR/HarbourPluginLoader.h \
-  $$HARBOUR_INCLUDE_DIR/HarbourPolicyPlugin.h \
   $$HARBOUR_INCLUDE_DIR/HarbourSystem.h \
   $$HARBOUR_INCLUDE_DIR/HarbourTask.h \
   $$HARBOUR_INCLUDE_DIR/HarbourUtil.h
@@ -207,13 +205,11 @@ HEADERS += \
   $$HARBOUR_SRC_DIR/HarbourMce.h
 
 SOURCES += \
+  $$HARBOUR_SRC_DIR/HarbourBase45.cpp \
   $$HARBOUR_SRC_DIR/HarbourColorEditorModel.cpp \
   $$HARBOUR_SRC_DIR/HarbourDisplayBlanking.cpp \
   $$HARBOUR_SRC_DIR/HarbourJson.cpp \
   $$HARBOUR_SRC_DIR/HarbourMce.cpp \
-  $$HARBOUR_SRC_DIR/HarbourMediaPlugin.cpp \
-  $$HARBOUR_SRC_DIR/HarbourPluginLoader.cpp \
-  $$HARBOUR_SRC_DIR/HarbourPolicyPlugin.cpp \
   $$HARBOUR_SRC_DIR/HarbourSystem.cpp \
   $$HARBOUR_SRC_DIR/HarbourTask.cpp \
   $$HARBOUR_SRC_DIR/HarbourUtil.cpp

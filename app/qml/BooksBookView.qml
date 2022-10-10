@@ -37,9 +37,6 @@ import Sailfish.Silica 1.0
 import org.nemomobile.notifications 1.0
 import harbour.books 1.0
 
-//import Sailfish.Media 1.0         // Not allowed
-//import org.nemomobile.policy 1.0  // Not allowed
-
 import "harbour"
 
 Item {
@@ -69,16 +66,41 @@ Item {
     property bool isCurrentView
     property bool pageActive
 
-    readonly property bool viewActive: pageActive && Qt.application.active && !!book
-    readonly property bool haveVolumeUpAction: Settings.volumeUpAction !== BooksSettings.ActionNone
-    readonly property bool haveVolumeDownAction: Settings.volumeDownAction !== BooksSettings.ActionNone
-    readonly property bool haveKeyAction: haveVolumeUpAction || haveVolumeDownAction
-
     property var hapticFeedback
     property var linkMenu
     property var imageView
     property var footnoteView
     property var settingsComponent
+
+    readonly property bool viewActive: pageActive && Qt.application.active && !!book
+    readonly property bool haveVolumeUpAction: Settings.volumeUpAction !== BooksSettings.ActionNone
+    readonly property bool haveVolumeDownAction: Settings.volumeDownAction !== BooksSettings.ActionNone
+    readonly property bool haveKeyAction: haveVolumeUpAction || haveVolumeDownAction
+
+    readonly property string mediaKeyQml: BooksUtil.mediaKeyQml
+    readonly property var permissions: Qt.createQmlObject(BooksUtil.permissionsQml, root, "Permissions")
+    readonly property var volumeUp: Qt.createQmlObject(mediaKeyQml, root, "VolumeKey")
+    readonly property var volumeDown: Qt.createQmlObject(mediaKeyQml, root, "VolumeKey")
+
+    Binding { target: permissions; property: "enabled"; value: viewActive && haveKeyAction }
+    Binding { target: volumeUp; property: "enabled"; value: viewActive && haveVolumeUpAction }
+    Binding { target: volumeUp;  property: "key"; value: Qt.Key_VolumeUp }
+    Binding { target: volumeDown; property: "enabled"; value: viewActive && haveVolumeDownAction }
+    Binding { target: volumeDown;  property: "key"; value: Qt.Key_VolumeDown }
+
+    Connections {
+        target: volumeUp
+        ignoreUnknownSignals: true
+        onPressed: performAction(Settings.volumeUpAction)
+        onRepeat: performAction(Settings.volumeUpAction)
+    }
+
+    Connections {
+        target: volumeDown
+        ignoreUnknownSignals: true
+        onPressed: performAction(Settings.volumeDownAction)
+        onRepeat: performAction(Settings.volumeDownAction)
+    }
 
     function hideViews() {
         if (linkMenu) linkMenu.hide()
@@ -493,43 +515,6 @@ Item {
         case BooksSettings.ActionNextPage:
             bookView.nextPage()
             return
-        }
-    }
-
-    MediaKey {
-        enabled: viewActive && haveVolumeUpAction
-        key: Qt.Key_VolumeUp
-
-        onPressed: volumeUpAction()
-        onRepeat: volumeUpAction()
-
-        function volumeUpAction() {
-            performAction(Settings.volumeUpAction)
-        }
-    }
-
-    MediaKey {
-        enabled: viewActive && haveVolumeDownAction
-        key: Qt.Key_VolumeDown
-
-        onPressed: volumeDownAction()
-        onRepeat: volumeDownAction()
-
-        function volumeDownAction() {
-            performAction(Settings.volumeDownAction)
-        }
-    }
-
-    Permissions {
-        enabled: viewActive && haveKeyAction
-        autoRelease: true
-        applicationClass: "camera"
-
-        Resource {
-            id: volumeKeysResource
-
-            type: Resource.ScaleButton
-            optional: true
         }
     }
 }

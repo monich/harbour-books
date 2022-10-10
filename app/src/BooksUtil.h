@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2015-2018 Jolla Ltd.
- * Copyright (C) 2015-2018 Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2015-2022 Jolla Ltd.
+ * Copyright (C) 2015-2022 Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
  *
@@ -8,15 +8,15 @@
  * modification, are permitted provided that the following conditions
  * are met:
  *
- *   * Redistributions of source code must retain the above copyright
- *     notice, this list of conditions and the following disclaimer.
- *   * Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in
- *     the documentation and/or other materials provided with the
- *     distribution.
- *   * Neither the name of Jolla Ltd nor the names of its contributors
- *     may be used to endorse or promote products derived from this
- *     software without specific prior written permission.
+ *   1. Redistributions of source code must retain the above copyright
+ *      notice, this list of conditions and the following disclaimer.
+ *   2. Redistributions in binary form must reproduce the above copyright
+ *      notice, this list of conditions and the following disclaimer
+ *      in the documentation and/or other materials provided with the
+ *      distribution.
+ *   3. Neither the names of the copyright holders nor the names of its
+ *      contributors may be used to endorse or promote products derived
+ *      from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -38,21 +38,49 @@
 
 #include "library/Book.h"
 
+#include <QByteArray>
 #include <QString>
+#include <QObject>
 
 class HarbourTask;
+class QQmlEngine;
+class QJSEngine;
 
-namespace BooksUtil {
-    shared_ptr<Book> bookFromFile(std::string aPath);
-    shared_ptr<Book> bookFromFile(QString aPath);
-    bool isValidFileName(QString aName);
-    QByteArray fileHashAttr(QString aPath);
-    bool setFileHashAttr(QString aPath, QByteArray aHash);
-    QByteArray computeFileHash(QString aPath, const HarbourTask* aTask = NULL);
-    QByteArray computeFileHashAndSetAttr(QString aPath, const HarbourTask* aTask = NULL);
-}
+class BooksUtil : public QObject
+{
+    Q_OBJECT
+    Q_DISABLE_COPY(BooksUtil)
+    Q_PROPERTY(QString mediaKeyQml READ mediaKeyQml CONSTANT)
+    Q_PROPERTY(QString permissionsQml READ permissionsQml CONSTANT)
+    Q_PROPERTY(qreal opacityFaint READ opacityFaint CONSTANT)
+    Q_PROPERTY(qreal opacityLow READ opacityLow CONSTANT)
+    Q_PROPERTY(qreal opacityHigh READ opacityHigh CONSTANT)
+    Q_PROPERTY(qreal opacityOverlay READ opacityOverlay CONSTANT)
+    class Private;
 
-inline shared_ptr<Book> BooksUtil::bookFromFile(QString aPath)
-    { return BooksUtil::bookFromFile(aPath.toStdString()); }
+public:
+    explicit BooksUtil(QObject* aParent = Q_NULLPTR);
+
+    // Callback for qmlRegisterSingletonType<BooksUtil>
+    static QObject* createSingleton(QQmlEngine*, QJSEngine*);
+
+    // Getters
+    static QString mediaKeyQml();
+    static QString permissionsQml();
+    static qreal opacityFaint() { return 0.2; }
+    static qreal opacityLow() { return 0.4; }
+    static qreal opacityHigh() { return 0.6; }
+    static qreal opacityOverlay() { return 0.8; }
+
+    // Static utilities
+    static shared_ptr<Book> bookFromFile(const std::string&);
+    static shared_ptr<Book> bookFromFile(const QString aPath)
+        { return BooksUtil::bookFromFile(aPath.toStdString()); }
+    static bool isValidFileName(const QString);
+    static QByteArray fileHashAttr(const QString);
+    static bool setFileHashAttr(const QString, const QByteArray);
+    static QByteArray computeFileHash(const QString, const HarbourTask* aTask = NULL);
+    static QByteArray computeFileHashAndSetAttr(const QString, const HarbourTask* aTask = NULL);
+};
 
 #endif // BOOKS_UTIL_H

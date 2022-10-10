@@ -50,12 +50,11 @@
 #include "BooksCoverWidget.h"
 #include "BooksTaskQueue.h"
 #include "BooksHints.h"
+#include "BooksUtil.h"
 
 #include "HarbourColorEditorModel.h"
 #include "HarbourDisplayBlanking.h"
 #include "HarbourDebug.h"
-#include "HarbourMediaPlugin.h"
-#include "HarbourPolicyPlugin.h"
 #include "HarbourUtil.h"
 
 #include "ZLibrary.h"
@@ -107,6 +106,7 @@ Q_DECL_EXPORT int main(int argc, char **argv)
     BOOKS_QML_REGISTER(BooksPageStack);
     BOOKS_QML_REGISTER_SINGLETON(HarbourUtil);
     BOOKS_QML_REGISTER_SINGLETON(BooksHints);
+    BOOKS_QML_REGISTER_SINGLETON(BooksUtil);
     BOOKS_QML_REGISTER_UNCREATABLE(BooksSettings);
 
     QLocale locale;
@@ -139,10 +139,6 @@ Q_DECL_EXPORT int main(int argc, char **argv)
         QQmlContext* root = view->rootContext();
         QQmlEngine* engine = root->engine();
         QSharedPointer<BooksSettings> settings = BooksSettings::sharedInstance();
-        HarbourPolicyPlugin::registerTypes(engine, BOOKS_QML_PLUGIN,
-            BOOKS_QML_PLUGIN_V1, BOOKS_QML_PLUGIN_V2);
-        HarbourMediaPlugin::registerTypes(engine, BOOKS_QML_PLUGIN,
-            BOOKS_QML_PLUGIN_V1, BOOKS_QML_PLUGIN_V2);
         engine->addImageProvider(BooksImageProvider::PROVIDER_ID,
             new BooksImageProvider(root));
 
