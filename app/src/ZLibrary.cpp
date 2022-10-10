@@ -98,12 +98,6 @@ void ZLibrary::initLocale()
     }
 }
 
-ZLPaintContext* ZLibrary::createContext()
-{
-    HDEBUG("creating context");
-    return new BooksPaintContext();
-}
-
 bool ZLibrary::init(int& aArgc, char** &aArgv)
 {
     HDEBUG("initializing");

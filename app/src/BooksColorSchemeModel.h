@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2015-2022 Jolla Ltd.
- * Copyright (C) 2015-2022 Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2022 Jolla Ltd.
+ * Copyright (C) 2022 Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
  *
@@ -31,24 +31,39 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BOOKS_TYPES_H
-#define BOOKS_TYPES_H
+#ifndef BOOKS_COLOR_SCHEME_MODEL_H
+#define BOOKS_COLOR_SCHEME_MODEL_H
 
-#include <QFile>
+#include "BooksColorScheme.h"
 
-class BooksBook;
-class BooksShelf;
+#include <QAbstractListModel>
 
-struct BooksMargins {
-    int iLeft;
-    int iRight;
-    int iTop;
-    int iBottom;
-    BooksMargins() : iLeft(0), iRight(0), iTop(0), iBottom(0) {}
+// Represents BooksColorScheme as a list model
+class BooksColorSchemeModel: public QAbstractListModel
+{
+    Q_OBJECT
+    Q_PROPERTY(BooksColorScheme colorScheme READ colorScheme WRITE setColorScheme NOTIFY colorSchemeChanged)
+
+public:
+    explicit BooksColorSchemeModel(QObject* aParent = Q_NULLPTR);
+    ~BooksColorSchemeModel();
+
+    BooksColorScheme colorScheme() const;
+    void setColorScheme(BooksColorScheme);
+
+    // QAbstractItemModel
+    Qt::ItemFlags flags(const QModelIndex&) const Q_DECL_OVERRIDE;
+    QHash<int,QByteArray> roleNames() const Q_DECL_OVERRIDE;
+    int rowCount(const QModelIndex& aParent) const Q_DECL_OVERRIDE;
+    QVariant data(const QModelIndex&, int) const Q_DECL_OVERRIDE;
+    bool setData(const QModelIndex&, const QVariant&, int) Q_DECL_OVERRIDE;
+
+Q_SIGNALS:
+    void colorSchemeChanged();
+
+private:
+    class Private;
+    Private* iPrivate;
 };
 
-#define BOOKS_FILE_PERMISSIONS \
-    (QFile::ReadOwner | QFile::WriteOwner | \
-     QFile::ReadGroup | QFile::ReadOther)
-
-#endif // BOOKS_TYPES_H
+#endif // BOOKS_COLOR_SCHEME_MODEL_H

@@ -1,6 +1,6 @@
 /*
-  Copyright (C) 2015-2021 Jolla Ltd.
-  Copyright (C) 2015-2021 Slava Monich <slava.monich@jolla.com>
+  Copyright (C) 2022 Jolla Ltd.
+  Copyright (C) 2022 Slava Monich <slava.monich@jolla.com>
 
   You may use this file under the terms of BSD license as follows:
 
@@ -32,44 +32,18 @@
 */
 
 import QtQuick 2.0
-import Sailfish.Silica 1.0
-import harbour.books 1.0
+import openrepos.books.settings 1.0
 
-ApplicationWindow {
-    id: window
-    allowedOrientations: {
-        switch (Settings.orientation) {
-        default:
-        case BooksSettings.OrientationAny: return Orientation.All
-        case BooksSettings.OrientationPortrait: return Orientation.Portrait
-        case BooksSettings.OrientationLandscape: return Orientation.Landscape
-        }
+// In-app settings
+BooksSettingsBase {
+    BooksSettings { id: settings }
+    colorSchemeModel: BooksColorSchemeModel {
+        Component.onCompleted: colorScheme = settings.customColorScheme
+        onColorSchemeChanged: settings.customColorScheme = colorScheme
     }
-
-    // Application title
-    //% "Books"
-    readonly property string title: qsTrId("harbour-books-app-name")
-
-    property variant currentShelf: mainPage.currentShelf
-
-    DisplayBlanking {
-        pauseRequested: Qt.application.active &&
-            Settings.currentBook &&
-            Settings.keepDisplayOn
+    colorEditorModel: HarbourColorEditorModel {
+        Component.onCompleted: colors = settings.availableColors
+        onColorsChanged: settings.availableColors = colors
     }
-
-    Binding {
-        target: Settings
-        property: "theme"
-        value: Theme
-    }
-
-    initialPage: BooksMainPage { id: mainPage }
-
-    cover: Component {
-        BooksCoverPage {
-            book: Settings.currentBook
-            shelf: currentShelf
-        }
-    }
+    onResetColors: colorEditorModel.colors = settings.defaultColors
 }

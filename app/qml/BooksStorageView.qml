@@ -1,6 +1,6 @@
 /*
-  Copyright (C) 2015-2021 Jolla Ltd.
-  Copyright (C) 2015-2021 Slava Monich <slava.monich@jolla.com>
+  Copyright (C) 2015-2022 Jolla Ltd.
+  Copyright (C) 2015-2022 Slava Monich <slava.monich@jolla.com>
 
   You may use this file under the terms of BSD license as follows:
 
@@ -113,7 +113,7 @@ Item {
                 pageStack.push(_settingsComponent, {
                     "title" : text,
                     "allowedOrientations": window.allowedOrientations,
-                    "inApp": true
+                    "inApp": true,
                 })
             }
         }

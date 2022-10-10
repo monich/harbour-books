@@ -293,6 +293,21 @@
         <extracomment>Text switch description</extracomment>
         <translation type="unfinished"></translation>
     </message>
+    <message id="harbour-books-settings-page-colors-section_header">
+        <source>Colors</source>
+        <extracomment>Section header for colors</extracomment>
+        <translation type="unfinished">颜色</translation>
+    </message>
+    <message id="harbour-books-settings-page-standard_colors">
+        <source>Use standard colors</source>
+        <extracomment>Text switch label</extracomment>
+        <translation type="unfinished">使用标准颜色</translation>
+    </message>
+    <message id="harbour-books-settings-page-standard_colors-description">
+        <source>Note that colors hardcoded in the book override the color scheme.</source>
+        <extracomment>Text switch description</extracomment>
+        <translation type="unfinished">请注意，书籍定义的颜色会覆盖标准颜色。</translation>
+    </message>
     <message id="harbour-books-settings-page-removable-section_header">
         <source>Memory card</source>
         <extracomment>Section header for memory card settings</extracomment>
@@ -307,6 +322,66 @@
         <source>Leave the folder name empty to scan the entire memory card for books.</source>
         <extracomment>Settings field description</extracomment>
         <translation>不填写文件夹名称以扫描SD卡中的全部书籍</translation>
+    </message>
+    <message id="harbour-books-color-page_background">
+        <source>Page background</source>
+        <extracomment>List item label (description of a color scheme element)</extracomment>
+        <translation type="unfinished">页面背景</translation>
+    </message>
+    <message id="harbour-books-color-text">
+        <source>Regular text</source>
+        <extracomment>List item label (description of a color scheme element)</extracomment>
+        <translation type="unfinished">常规文本</translation>
+    </message>
+    <message id="harbour-books-color-selection_background">
+        <source>Selection background</source>
+        <extracomment>List item label (description of a color scheme element)</extracomment>
+        <translation type="unfinished">选拔背景</translation>
+    </message>
+    <message id="harbour-books-color-highlighted_text">
+        <source>Highlighted text</source>
+        <extracomment>List item label (description of a color scheme element)</extracomment>
+        <translation type="unfinished">突出显示的文本</translation>
+    </message>
+    <message id="harbour-books-color-internal_hyperlink">
+        <source>Internal hyperlink</source>
+        <extracomment>List item label (description of a color scheme element)</extracomment>
+        <translation type="unfinished">内部链接</translation>
+    </message>
+    <message id="harbour-books-color-external_hyperlink">
+        <source>External hyperlink</source>
+        <extracomment>List item label (description of a color scheme element)</extracomment>
+        <translation type="unfinished">外部链接</translation>
+    </message>
+    <message id="harbour-books-color_picker-menu-reset_colors">
+        <source>Reset colors</source>
+        <extracomment>Pulley menu item</extracomment>
+        <translation type="unfinished">重置颜色</translation>
+    </message>
+    <message id="harbour-books-color_picker-action-select_color">
+        <source>Select color</source>
+        <extracomment>Dialog title label</extracomment>
+        <translation type="unfinished">选择颜色</translation>
+    </message>
+    <message id="harbour-books-color_picker-action-add_color">
+        <source>Add color</source>
+        <extracomment>Dialog title label</extracomment>
+        <translation type="unfinished">添加颜色</translation>
+    </message>
+    <message id="harbour-books-color_picker-slider-hue">
+        <source>Color</source>
+        <extracomment>Hue slider label</extracomment>
+        <translation type="unfinished">颜色</translation>
+    </message>
+    <message id="harbour-books-color_picker-slider-brightness">
+        <source>Brightness</source>
+        <extracomment>Brightness slider label</extracomment>
+        <translation type="unfinished">亮度</translation>
+    </message>
+    <message id="harbour-books-color_picker-text-hex_notation">
+        <source>Hex notation</source>
+        <extracomment>Text field description</extracomment>
+        <translation type="unfinished">十六进制表示法</translation>
     </message>
 </context>
 </TS>

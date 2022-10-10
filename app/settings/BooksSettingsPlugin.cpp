@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2015-2022 Jolla Ltd.
- * Copyright (C) 2015-2022 Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2022 Jolla Ltd.
+ * Copyright (C) 2022 Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
  *
@@ -31,24 +31,48 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BOOKS_TYPES_H
-#define BOOKS_TYPES_H
+#include "BooksColorSchemeModel.h"
+#include "BooksSettingsBase.h"
 
-#include <QFile>
+#include "HarbourColorEditorModel.h"
+#include "HarbourDebug.h"
 
-class BooksBook;
-class BooksShelf;
+#include <QtQml>
 
-struct BooksMargins {
-    int iLeft;
-    int iRight;
-    int iTop;
-    int iBottom;
-    BooksMargins() : iLeft(0), iRight(0), iTop(0), iBottom(0) {}
+#define SETTINGS_QML_PLUGIN "openrepos.books.settings"
+
+#define SETTINGS_QML_REGISTER_(klass,name) \
+    qmlRegisterType<klass>(SETTINGS_QML_PLUGIN, 1, 0, name)
+#define SETTINGS_QML_REGISTER(klass) \
+    SETTINGS_QML_REGISTER_(klass,#klass)
+
+class BooksSettingsPlugin : public QQmlExtensionPlugin
+{
+    Q_OBJECT
+    Q_PLUGIN_METADATA(IID SETTINGS_QML_PLUGIN)
+
+public:
+    void initializeEngine(QQmlEngine*, const char*) Q_DECL_OVERRIDE;
+    void registerTypes(const char*) Q_DECL_OVERRIDE;
 };
 
-#define BOOKS_FILE_PERMISSIONS \
-    (QFile::ReadOwner | QFile::WriteOwner | \
-     QFile::ReadGroup | QFile::ReadOther)
+void
+BooksSettingsPlugin::initializeEngine(
+    QQmlEngine*,
+    const char* aUri)
+{
+    HDEBUG(aUri);
+}
 
-#endif // BOOKS_TYPES_H
+void
+BooksSettingsPlugin::registerTypes(
+    const char* aUri)
+{
+    HDEBUG(aUri);
+    HASSERT(QLatin1String(aUri) == QLatin1String(SETTINGS_QML_PLUGIN));
+    SETTINGS_QML_REGISTER_(BooksSettingsBase, "BooksSettings");
+    SETTINGS_QML_REGISTER(BooksColorSchemeModel);
+    SETTINGS_QML_REGISTER(HarbourColorEditorModel);
+}
+
+#include "BooksSettingsPlugin.moc"

@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2015-2021 Jolla Ltd.
- * Copyright (C) 2015-2021 Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2015-2022 Jolla Ltd.
+ * Copyright (C) 2015-2022 Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
  *
@@ -44,21 +44,21 @@
 #include <MGConfItem>
 
 #define DCONF_PATH                  BOOKS_DCONF_ROOT
-#define KEY_FONT_SIZE               "fontSize"
-#define KEY_PAGE_DETAILS            "pageDetails"
-#define KEY_NIGHT_MODE_BRIGHTNESS   "nightModeBrightness"
-#define KEY_PAGE_DETAILS_FIXED      "pageDetailsFixed"
-#define KEY_TURN_PAGE_BY_TAP        "turnPageByTap"
-#define KEY_SAMPLE_BOOK_COPIED      "sampleBookCopied"
-#define KEY_CURRENT_BOOK            "currentBook"
-#define KEY_CURRENT_FOLDER          "currentFolder"
-#define KEY_REMOVABLE_ROOT          "removableRoot"
-#define KEY_INVERT_COLORS           "invertColors"
-#define KEY_KEEP_DISPLAY_ON         "keepDisplayOn"
-#define KEY_BOOK_PULL_DOWN_MENU     "bookPullDownMenu"
-#define KEY_VOLUME_UP_ACTION        "volumeUpAction"
-#define KEY_VOLUME_DOWN_ACTION      "volumeDownAction"
-#define KEY_ORIENTATION             "orientation"
+#define DCONF_PATH_(x)              BOOKS_DCONF_ROOT x
+#define KEY_FONT_SIZE               DCONF_PATH_("fontSize")
+#define KEY_PAGE_DETAILS            DCONF_PATH_("pageDetails")
+#define KEY_NIGHT_MODE_BRIGHTNESS   DCONF_PATH_("nightModeBrightness")
+#define KEY_PAGE_DETAILS_FIXED      DCONF_PATH_("pageDetailsFixed")
+#define KEY_TURN_PAGE_BY_TAP        DCONF_PATH_("turnPageByTap")
+#define KEY_SAMPLE_BOOK_COPIED      DCONF_PATH_("sampleBookCopied")
+#define KEY_CURRENT_BOOK            DCONF_PATH_("currentBook")
+#define KEY_CURRENT_FOLDER          DCONF_PATH_("currentFolder")
+#define KEY_REMOVABLE_ROOT          DCONF_PATH_("removableRoot")
+#define KEY_KEEP_DISPLAY_ON         DCONF_PATH_("keepDisplayOn")
+#define KEY_BOOK_PULL_DOWN_MENU     DCONF_PATH_("bookPullDownMenu")
+#define KEY_VOLUME_UP_ACTION        DCONF_PATH_("volumeUpAction")
+#define KEY_VOLUME_DOWN_ACTION      DCONF_PATH_("volumeDownAction")
+#define KEY_ORIENTATION             DCONF_PATH_("orientation")
 
 #define DEFAULT_FONT_SIZE           0
 #define DEFAULT_NIGHT_BRIGHTNESS    1.0
@@ -69,15 +69,12 @@
 #define DEFAULT_CURRENT_BOOK        QString()
 #define DEFAULT_CURRENT_FOLDER      QString()
 #define DEFAULT_REMOVABLE_ROOT      "Books"
-#define DEFAULT_INVERT_COLORS       false
 #define DEFAULT_KEEP_DISPLAY_ON     false
 #define DEFAULT_BOOK_PULL_DOWN_MENU true
 #define DEFAULT_VOLUME_UP_ACTION    (BooksSettings::ActionNextPage)
 #define DEFAULT_VOLUME_DOWN_ACTION  (BooksSettings::ActionPreviousPage)
 #define DEFAULT_ORIENTATION         (BooksSettings::OrientationAny)
 
-#define DEFAULT_BACKGROUND                  QColor(Qt::white)
-#define INVERTED_BACKGROUND                 QColor(Qt::black)
 #define PAGETOOL_COLOR                      QColor(128,128,128) // any bg
 #define NORMAL_PAGETOOL_HIGHLIGHT_COLOR     QColor(64,64,64)    // on white
 #define INVERTED_PAGETOOL_HIGHLIGHT_COLOR   QColor(192,192,192) // on black
@@ -94,27 +91,27 @@ public:
         iFontSize(iDefaultStyle->fontSize() + 2*aFontSizeModifier)
         { HDEBUG(iFontSize); }
 
-    bool isDecorated() const;
+    bool isDecorated() const Q_DECL_OVERRIDE;
 
-    const std::vector<std::string> &fontFamilies() const;
+    const std::vector<std::string> &fontFamilies() const Q_DECL_OVERRIDE;
 
-    int fontSize() const;
-    bool bold() const;
-    bool italic() const;
+    int fontSize() const Q_DECL_OVERRIDE;
+    bool bold() const Q_DECL_OVERRIDE;
+    bool italic() const Q_DECL_OVERRIDE;
 
-    const std::string &colorStyle() const;
+    const std::string &colorStyle() const Q_DECL_OVERRIDE;
 
-    short spaceBefore(const ZLTextStyleEntry::Metrics& aMetrics) const;
-    short spaceAfter(const ZLTextStyleEntry::Metrics& aMetrics) const;
-    short lineStartIndent(const ZLTextStyleEntry::Metrics& aMetrics, bool aRtl) const;
-    short lineEndIndent(const ZLTextStyleEntry::Metrics& aMetrics, bool aRtl) const;
-    short firstLineIndentDelta(const ZLTextStyleEntry::Metrics& aMetrics) const;
-    int verticalShift() const;
+    short spaceBefore(const ZLTextStyleEntry::Metrics&) const Q_DECL_OVERRIDE;
+    short spaceAfter(const ZLTextStyleEntry::Metrics&) const Q_DECL_OVERRIDE;
+    short lineStartIndent(const ZLTextStyleEntry::Metrics&, bool) const Q_DECL_OVERRIDE;
+    short lineEndIndent(const ZLTextStyleEntry::Metrics&, bool) const Q_DECL_OVERRIDE;
+    short firstLineIndentDelta(const ZLTextStyleEntry::Metrics&) const Q_DECL_OVERRIDE;
+    int verticalShift() const Q_DECL_OVERRIDE;
 
-    ZLTextAlignmentType alignment() const;
+    ZLTextAlignmentType alignment() const Q_DECL_OVERRIDE;
 
-    double lineSpace() const;
-    bool allowHyphenations() const;
+    double lineSpace() const Q_DECL_OVERRIDE;
+    bool allowHyphenations() const Q_DECL_OVERRIDE;
 
 private:
     shared_ptr<ZLTextStyle> iDefaultStyle;
@@ -222,28 +219,35 @@ BooksSettings::TextStyle::allowHyphenations() const
 // BooksSettings::Private
 // ==========================================================================
 
-class BooksSettings::Private : public QObject {
+class BooksSettings::Private : public QObject
+{
     Q_OBJECT
 public:
-    Private(BooksSettings* aParent);
+    // Matches Silica::Theme::ColorScheme
+    enum ColorScheme {
+        LightOnDark,
+        DarkOnLight
+    };
 
-    BooksSettings* parentSettings() const;
+    Private(BooksSettings* aParent);
+    ~Private();
+
+    BooksSettings* parentObject() const;
     bool updateCurrentBook();
     bool updateCurrentStorage();
     bool updateBrightness();
-    bool invertColors() const;
     int fontSizeValue() const;
     int fontSize(int aFontSizeAdjust) const;
     qreal brightnessValue() const;
     qreal nightModeBrightness() const;
     QString currentFolder() const;
     shared_ptr<ZLTextStyle> textStyle(int aFontSizeAdjust) const;
-    void setCurrentBook(QObject* aBook);
-    static Action getAction(MGConfItem* aItem, Action aDefault);
-    static qreal normalizeBrightness(qreal aBrightness);
+    void setCurrentBook(QObject*);
+    static Action getAction(MGConfItem*, Action);
+    static qreal normalizeBrightness(qreal);
 
-private Q_SLOTS:
-    void onInvertColorsChanged();
+public Q_SLOTS:
+    void onNightModeChanged();
     void onNightModeBrightnessChanged();
     void onFontSizeValueChanged();
     void onCurrentBookPathChanged();
@@ -256,7 +260,6 @@ public:
     MGConfItem* iPageDetailsConf;
     MGConfItem* iPageDetailsFixedConf;
     MGConfItem* iTurnPageByTapConf;
-    MGConfItem* iInvertColorsConf;
     MGConfItem* iSampleBookCopiedConf;
     MGConfItem* iKeepDisplayOnConf;
     MGConfItem* iBookPullDownMenuConf;
@@ -277,29 +280,28 @@ QWeakPointer<BooksSettings> BooksSettings::Private::sSharedInstance;
 
 BooksSettings::Private::Private(BooksSettings* aParent) :
     QObject(aParent),
-    iFontSizeConf(new MGConfItem(DCONF_PATH KEY_FONT_SIZE, this)),
-    iNightModeBrightnessConf(new MGConfItem(DCONF_PATH KEY_NIGHT_MODE_BRIGHTNESS, this)),
-    iPageDetailsConf(new MGConfItem(DCONF_PATH KEY_PAGE_DETAILS, this)),
-    iPageDetailsFixedConf(new MGConfItem(DCONF_PATH KEY_PAGE_DETAILS_FIXED, this)),
-    iTurnPageByTapConf(new MGConfItem(DCONF_PATH KEY_TURN_PAGE_BY_TAP, this)),
-    iInvertColorsConf(new MGConfItem(DCONF_PATH KEY_INVERT_COLORS, this)),
-    iSampleBookCopiedConf(new MGConfItem(DCONF_PATH KEY_SAMPLE_BOOK_COPIED, this)),
-    iKeepDisplayOnConf(new MGConfItem(DCONF_PATH KEY_KEEP_DISPLAY_ON, this)),
-    iBookPullDownMenuConf(new MGConfItem(DCONF_PATH KEY_BOOK_PULL_DOWN_MENU, this)),
-    iVolumeUpActionConf(new MGConfItem(DCONF_PATH KEY_VOLUME_UP_ACTION, this)),
-    iVolumeDownActionConf(new MGConfItem(DCONF_PATH KEY_VOLUME_DOWN_ACTION, this)),
-    iCurrentFolderConf(new MGConfItem(DCONF_PATH KEY_CURRENT_FOLDER, this)),
-    iCurrentBookPathConf(new MGConfItem(DCONF_PATH KEY_CURRENT_BOOK, this)),
-    iOrientationConf(new MGConfItem(DCONF_PATH KEY_ORIENTATION, this)),
-    iRemovableRootConf(new MGConfItem(DCONF_PATH KEY_REMOVABLE_ROOT, this)),
-    iCurrentBook(NULL)
+    iFontSizeConf(new MGConfItem(KEY_FONT_SIZE, this)),
+    iNightModeBrightnessConf(new MGConfItem(KEY_NIGHT_MODE_BRIGHTNESS, this)),
+    iPageDetailsConf(new MGConfItem(KEY_PAGE_DETAILS, this)),
+    iPageDetailsFixedConf(new MGConfItem(KEY_PAGE_DETAILS_FIXED, this)),
+    iTurnPageByTapConf(new MGConfItem(KEY_TURN_PAGE_BY_TAP, this)),
+    iSampleBookCopiedConf(new MGConfItem(KEY_SAMPLE_BOOK_COPIED, this)),
+    iKeepDisplayOnConf(new MGConfItem(KEY_KEEP_DISPLAY_ON, this)),
+    iBookPullDownMenuConf(new MGConfItem(KEY_BOOK_PULL_DOWN_MENU, this)),
+    iVolumeUpActionConf(new MGConfItem(KEY_VOLUME_UP_ACTION, this)),
+    iVolumeDownActionConf(new MGConfItem(KEY_VOLUME_DOWN_ACTION, this)),
+    iCurrentFolderConf(new MGConfItem(KEY_CURRENT_FOLDER, this)),
+    iCurrentBookPathConf(new MGConfItem(KEY_CURRENT_BOOK, this)),
+    iOrientationConf(new MGConfItem(KEY_ORIENTATION, this)),
+    iRemovableRootConf(new MGConfItem(KEY_REMOVABLE_ROOT, this)),
+    iCurrentBook(Q_NULLPTR)
 {
     iFontSize = fontSizeValue();
     iBrightness = brightnessValue();
+    connect(aParent, SIGNAL(nightModeChanged()), SLOT(onNightModeChanged()));
     connect(iFontSizeConf, SIGNAL(valueChanged()), SLOT(onFontSizeValueChanged()));
     connect(iCurrentFolderConf, SIGNAL(valueChanged()), SLOT(onCurrentFolderChanged()));
     connect(iCurrentBookPathConf, SIGNAL(valueChanged()), SLOT(onCurrentBookPathChanged()));
-    connect(iInvertColorsConf, SIGNAL(valueChanged()), SLOT(onInvertColorsChanged()));
     connect(iNightModeBrightnessConf, SIGNAL(valueChanged()), SLOT(onNightModeBrightnessChanged()));
     connect(iPageDetailsConf, SIGNAL(valueChanged()), aParent, SIGNAL(pageDetailsChanged()));
     connect(iPageDetailsFixedConf, SIGNAL(valueChanged()), aParent, SIGNAL(pageDetailsFixedChanged()));
@@ -313,16 +315,14 @@ BooksSettings::Private::Private(BooksSettings* aParent) :
     connect(iRemovableRootConf, SIGNAL(valueChanged()), aParent, SIGNAL(removableRootChanged()));
 }
 
-inline BooksSettings*
-BooksSettings::Private::parentSettings() const
+BooksSettings::Private::~Private()
 {
-    return qobject_cast<BooksSettings*>(parent());
 }
 
-inline bool
-BooksSettings::Private::invertColors() const
+inline BooksSettings*
+BooksSettings::Private::parentObject() const
 {
-    return iInvertColorsConf->value(DEFAULT_INVERT_COLORS).toBool();
+    return qobject_cast<BooksSettings*>(parent());
 }
 
 inline qreal
@@ -344,7 +344,7 @@ BooksSettings::Private::nightModeBrightness() const
 inline qreal
 BooksSettings::Private::brightnessValue() const
 {
-    return invertColors() ? nightModeBrightness() : 1.0;
+    return parentObject()->nightMode() ? nightModeBrightness() : 1.0;
 }
 
 bool
@@ -360,20 +360,19 @@ BooksSettings::Private::updateBrightness()
 }
 
 void
-BooksSettings::Private::onInvertColorsChanged()
+BooksSettings::Private::onNightModeChanged()
 {
-    BooksSettings* settings = parentSettings();
+    BooksSettings* settings = parentObject();
     if (updateBrightness()) {
         Q_EMIT settings->brightnessChanged();
     }
-    Q_EMIT settings->invertColorsChanged();
-    Q_EMIT settings->pageBackgroundColorChanged();
+    Q_EMIT settings->highlightPageToolColorChanged();
 }
 
 void
 BooksSettings::Private::onNightModeBrightnessChanged()
 {
-    BooksSettings* settings = parentSettings();
+    BooksSettings* settings = parentObject();
     if (updateBrightness()) {
         Q_EMIT settings->brightnessChanged();
     }
@@ -444,10 +443,10 @@ BooksSettings::Private::setCurrentBook(
             (iCurrentBook = book)->retain();
             iCurrentBookPathConf->set(book->path());
         } else {
-            iCurrentBook = NULL;
+            iCurrentBook = Q_NULLPTR;
             iCurrentBookPathConf->set(QString());
         }
-        Q_EMIT parentSettings()->currentBookChanged();
+        Q_EMIT parentObject()->currentBookChanged();
     }
 }
 
@@ -507,7 +506,7 @@ BooksSettings::Private::onFontSizeValueChanged()
         for (int i=0; i<=FontSizeSteps; i++) {
             iTextStyle[i].reset();
         }
-        BooksSettings* settings = parentSettings();
+        BooksSettings* settings = parentObject();
         Q_EMIT settings->fontSizeChanged();
         Q_EMIT settings->textStyleChanged();
     }
@@ -516,7 +515,7 @@ BooksSettings::Private::onFontSizeValueChanged()
 void
 BooksSettings::Private::onCurrentFolderChanged()
 {
-    BooksSettings* settings = parentSettings();
+    BooksSettings* settings = parentObject();
     if (updateCurrentStorage()) {
         Q_EMIT settings->currentStorageChanged();
     }
@@ -528,7 +527,7 @@ void
 BooksSettings::Private::onCurrentBookPathChanged()
 {
     if (updateCurrentBook()) {
-        Q_EMIT parentSettings()->currentBookChanged();
+        Q_EMIT parentObject()->currentBookChanged();
     }
 }
 
@@ -554,7 +553,7 @@ BooksSettings::Private::getAction(
 // ==========================================================================
 
 BooksSettings::BooksSettings(QObject* aParent) :
-    QObject(aParent),
+    BooksSettingsBase(aParent),
     iPrivate(new Private(this))
 {
 }
@@ -693,20 +692,6 @@ BooksSettings::setTurnPageByTap(
 }
 
 bool
-BooksSettings::invertColors() const
-{
-    return iPrivate->invertColors();
-}
-
-void
-BooksSettings::setInvertColors(
-    bool aValue)
-{
-    HDEBUG(aValue);
-    iPrivate->iInvertColorsConf->set(aValue);
-}
-
-bool
 BooksSettings::keepDisplayOn() const
 {
     return iPrivate->iKeepDisplayOnConf->value(DEFAULT_KEEP_DISPLAY_ON).toBool();
@@ -800,7 +785,7 @@ BooksSettings::currentFolder() const
 
 void
 BooksSettings::setCurrentFolder(
-    QString aValue)
+    const QString aValue)
 {
     HDEBUG(aValue);
     iPrivate->iCurrentFolderConf->set(aValue);
@@ -819,28 +804,6 @@ BooksSettings::setCurrentBook(
     iPrivate->setCurrentBook(aBook);
 }
 
-QColor
-BooksSettings::primaryPageToolColor() const
-{
-    return PAGETOOL_COLOR;
-}
-
-QColor
-BooksSettings::highlightPageToolColor() const
-{
-    return iPrivate->invertColors() ?
-        INVERTED_PAGETOOL_HIGHLIGHT_COLOR :
-        NORMAL_PAGETOOL_HIGHLIGHT_COLOR;
-}
-
-QColor
-BooksSettings::pageBackgroundColor() const
-{
-    return iPrivate->invertColors() ?
-        INVERTED_BACKGROUND :
-        DEFAULT_BACKGROUND;
-}
-
 BooksSettings::Orientation
 BooksSettings::orientation() const
 {
@@ -857,8 +820,23 @@ BooksSettings::orientation() const
     return DEFAULT_ORIENTATION;
 }
 
+QColor
+BooksSettings::primaryPageToolColor() const
+{
+    return PAGETOOL_COLOR;
+}
+
+QColor
+BooksSettings::highlightPageToolColor() const
+{
+    return nightMode() ?
+        INVERTED_PAGETOOL_HIGHLIGHT_COLOR :
+        NORMAL_PAGETOOL_HIGHLIGHT_COLOR;
+}
+
 void
-BooksSettings::setCurrentBookPath(QString aPath)
+BooksSettings::setCurrentBookPath(
+    QString aPath)
 {
     HDEBUG(aPath);
     iPrivate->iCurrentBookPathConf->set(aPath);

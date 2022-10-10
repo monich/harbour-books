@@ -294,6 +294,21 @@
         <extracomment>Text switch description</extracomment>
         <translation type="unfinished">Sem o menu deslizante, o livro deve ser fechado deslizando-o para cima.</translation>
     </message>
+    <message id="harbour-books-settings-page-colors-section_header">
+        <source>Colors</source>
+        <extracomment>Section header for colors</extracomment>
+        <translation type="unfinished">Cores</translation>
+    </message>
+    <message id="harbour-books-settings-page-standard_colors">
+        <source>Use standard colors</source>
+        <extracomment>Text switch label</extracomment>
+        <translation type="unfinished">Use cores padrão</translation>
+    </message>
+    <message id="harbour-books-settings-page-standard_colors-description">
+        <source>Note that colors hardcoded in the book override the color scheme.</source>
+        <extracomment>Text switch description</extracomment>
+        <translation type="unfinished">Observe que as cores definidas pelo livro substituem as cores padrão.</translation>
+    </message>
     <message id="harbour-books-settings-page-removable-section_header">
         <source>Memory card</source>
         <extracomment>Section header for memory card settings</extracomment>
@@ -308,6 +323,66 @@
         <source>Leave the folder name empty to scan the entire memory card for books.</source>
         <extracomment>Settings field description</extracomment>
         <translation>Deixe este campo vazio para escanear todo o cartão de memória.</translation>
+    </message>
+    <message id="harbour-books-color-page_background">
+        <source>Page background</source>
+        <extracomment>List item label (description of a color scheme element)</extracomment>
+        <translation type="unfinished">Plano de fundo da página</translation>
+    </message>
+    <message id="harbour-books-color-text">
+        <source>Regular text</source>
+        <extracomment>List item label (description of a color scheme element)</extracomment>
+        <translation type="unfinished">Texto normal</translation>
+    </message>
+    <message id="harbour-books-color-selection_background">
+        <source>Selection background</source>
+        <extracomment>List item label (description of a color scheme element)</extracomment>
+        <translation type="unfinished">Plano de fundo da seleção</translation>
+    </message>
+    <message id="harbour-books-color-highlighted_text">
+        <source>Highlighted text</source>
+        <extracomment>List item label (description of a color scheme element)</extracomment>
+        <translation type="unfinished">Texto destacado</translation>
+    </message>
+    <message id="harbour-books-color-internal_hyperlink">
+        <source>Internal hyperlink</source>
+        <extracomment>List item label (description of a color scheme element)</extracomment>
+        <translation type="unfinished">Link interno</translation>
+    </message>
+    <message id="harbour-books-color-external_hyperlink">
+        <source>External hyperlink</source>
+        <extracomment>List item label (description of a color scheme element)</extracomment>
+        <translation type="unfinished">Link externo</translation>
+    </message>
+    <message id="harbour-books-color_picker-menu-reset_colors">
+        <source>Reset colors</source>
+        <extracomment>Pulley menu item</extracomment>
+        <translation type="unfinished">Repor cores</translation>
+    </message>
+    <message id="harbour-books-color_picker-action-select_color">
+        <source>Select color</source>
+        <extracomment>Dialog title label</extracomment>
+        <translation type="unfinished">Selecione a cor</translation>
+    </message>
+    <message id="harbour-books-color_picker-action-add_color">
+        <source>Add color</source>
+        <extracomment>Dialog title label</extracomment>
+        <translation type="unfinished">Adicione cor</translation>
+    </message>
+    <message id="harbour-books-color_picker-slider-hue">
+        <source>Color</source>
+        <extracomment>Hue slider label</extracomment>
+        <translation type="unfinished">Cor</translation>
+    </message>
+    <message id="harbour-books-color_picker-slider-brightness">
+        <source>Brightness</source>
+        <extracomment>Brightness slider label</extracomment>
+        <translation type="unfinished">Luminocidade</translation>
+    </message>
+    <message id="harbour-books-color_picker-text-hex_notation">
+        <source>Hex notation</source>
+        <extracomment>Text field description</extracomment>
+        <translation type="unfinished">Notação hexadecimal</translation>
     </message>
 </context>
 </TS>

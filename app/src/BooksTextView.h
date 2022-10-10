@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2015-2020 Jolla Ltd.
- * Copyright (C) 2015-2020 Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2015-2021 Jolla Ltd.
+ * Copyright (C) 2015-2021 Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
  *
@@ -57,7 +57,6 @@ public:
     void startSelection(int aX, int aY);
     bool extendSelection(int aX, int aY);
     void endSelection();
-    void setInvertColors(bool aInvertColors);
     void gotoPosition(const BooksPos& aPos);
     bool nextPage();
     void paint();
@@ -88,7 +87,5 @@ private:
 
 inline BooksPos BooksTextView::position() const
     { return BooksPos(textArea().startCursor()); }
-inline void BooksTextView::setInvertColors(bool aInvertColors)
-    { iPaintContext.setInvertColors(aInvertColors); }
 
 #endif // BOOKS_TEXT_VIEW_H

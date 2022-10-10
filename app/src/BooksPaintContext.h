@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2015-2020 Jolla Ltd.
- * Copyright (C) 2015-2020 Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2015-2021 Jolla Ltd.
+ * Copyright (C) 2015-2021 Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
  *
@@ -35,6 +35,7 @@
 #define BOOKS_PAINT_CONTEXT_H
 
 #include "BooksTypes.h"
+#include "BooksColorScheme.h"
 
 #include "ZLColor.h"
 #include "ZLPaintContext.h"
@@ -46,73 +47,63 @@
 class QPainter;
 
 class BooksPaintContext : public ZLPaintContext {
-public:
-    BooksPaintContext(int aWidth, int aHeight);
+protected:
     BooksPaintContext();
+
+public:
+    BooksPaintContext(int aWidth, int aHeight, BooksColorScheme aColors = BooksColorScheme());
     ~BooksPaintContext();
 
-    void setWidth(int aWidth);
-    void setHeight(int aHeight);
-    void setSize(int aWidth, int aHeight);
     bool isEmpty() const;
     QSize size() const;
 
-    // ZLPaintContext
     void beginPaint(QPainter* painter);
     void endPaint();
 
-    int width() const;
-    int height() const;
+    // ZLPaintContext
+    int width() const Q_DECL_OVERRIDE;
+    int height() const Q_DECL_OVERRIDE;
 
-    void clear(ZLColor color);
+    void clear(ZLColor color) Q_DECL_OVERRIDE;
 
-    void fillFamiliesList(std::vector<std::string>& families) const;
-    const std::string realFontFamilyName(std::string& fontFamily) const;
+    void fillFamiliesList(std::vector<std::string>& families) const Q_DECL_OVERRIDE;
+    const std::string realFontFamilyName(std::string& fontFamily) const Q_DECL_OVERRIDE;
 
-    void setFont(const std::string& family, int size, bool bold, bool italic);
-    void setColor(ZLColor color, LineStyle style);
-    void setFillColor(ZLColor color, FillStyle style);
+    void setFont(const std::string& family, int size, bool bold, bool italic) Q_DECL_OVERRIDE;
+    void setColor(ZLColor color, LineStyle style) Q_DECL_OVERRIDE;
+    void setFillColor(ZLColor color, FillStyle style) Q_DECL_OVERRIDE;
 
-    int stringWidth(const char* str, int len, bool rtl) const;
-    int spaceWidth() const;
-    int stringHeight() const;
-    int descent() const;
-    void drawString(int x, int y, const char* str, int len, bool rtl);
+    int stringWidth(const char* str, int len, bool rtl) const Q_DECL_OVERRIDE;
+    int spaceWidth() const Q_DECL_OVERRIDE;
+    int stringHeight() const Q_DECL_OVERRIDE;
+    int descent() const Q_DECL_OVERRIDE;
+    void drawString(int x, int y, const char* str, int len, bool rtl) Q_DECL_OVERRIDE;
 
-    void drawImage(int x, int y, const ZLImageData& image);
-    void drawImage(int x, int y, const ZLImageData& image, int width, int height, ScalingType type);
+    void drawImage(int x, int y, const ZLImageData& image) Q_DECL_OVERRIDE;
+    void drawImage(int x, int y, const ZLImageData& image, int width, int height, ScalingType type) Q_DECL_OVERRIDE;
 
-    void drawLine(int x0, int y0, int x1, int y1);
-    void fillRectangle(int x0, int y0, int x1, int y1);
-    void drawFilledCircle(int x, int y, int r);
-
-    void setInvertColors(bool aInvertColors);
+    void drawLine(int x0, int y0, int x1, int y1) Q_DECL_OVERRIDE;
+    void fillRectangle(int x0, int y0, int x1, int y1) Q_DECL_OVERRIDE;
+    void drawFilledCircle(int x, int y, int r) Q_DECL_OVERRIDE;
 
     ZLColor realColor(const ZLColor aColor) const;
     ZLColor realColor(const std::string& aStyle) const;
-    static ZLColor realColor(const std::string& aStyle, bool aInvert);
-
-private:
-    ZLColor realColor(uchar aRed, uchar aGreen, uchar aBlue, uchar aAlpha) const;
-    static ZLColor realColor(uchar aRed, uchar aGreen, uchar aBlue, uchar aAlpha, bool aInvert);
-    static ZLColor realColor(const ZLColor aColor, bool aInvert);
+    static ZLColor realColor(const std::string& aStyle, BooksColorScheme aColors);
 
 private:
     QPainter* iPainter;
-    int iWidth;
-    int iHeight;
     mutable int iSpaceWidth;
     int iDescent;
-    bool iInvertColors;
     QFont iFont;
+
+protected:
+    int iWidth;
+    int iHeight;
+
+public:
+    BooksColorScheme iColors;
 };
 
-inline void BooksPaintContext::setWidth(int aWidth)
-    { iWidth = aWidth; }
-inline void BooksPaintContext::setHeight(int aHeight)
-    { iHeight = aHeight; }
-inline void BooksPaintContext::setSize(int aWidth, int aHeight)
-    { iWidth = aWidth; iHeight = aHeight; }
 inline bool BooksPaintContext::isEmpty() const
     { return (iWidth <= 0 || iHeight <= 0); }
 inline QSize BooksPaintContext::size() const
@@ -120,15 +111,7 @@ inline QSize BooksPaintContext::size() const
 
 inline QColor qtColor(const ZLColor& aColor)
     { return QColor(aColor.Red, aColor.Green, aColor.Blue, aColor.Alpha); }
-inline ZLColor BooksPaintContext::realColor(const ZLColor aColor) const
-    { return realColor(aColor.Red, aColor.Green, aColor.Blue, aColor.Alpha); }
-inline ZLColor BooksPaintContext::realColor(uchar aRed, uchar aGreen, uchar aBlue, uchar aAlpha) const
-    { return realColor(aRed, aGreen, aBlue, aAlpha, iInvertColors); }
-inline ZLColor BooksPaintContext::realColor(const ZLColor aColor, bool aInvert)
-    { return realColor(aColor.Red, aColor.Green, aColor.Blue, aColor.Alpha, aInvert); }
 inline ZLColor BooksPaintContext::realColor(const std::string& aStyle) const
-    { return realColor(aStyle, iInvertColors); }
-inline void BooksPaintContext::setInvertColors(bool aInvertColors)
-    { iInvertColors = aInvertColors; }
+    { return realColor(aStyle, iColors); }
 
 #endif /* BOOKS_PAINT_CONTEXT_H */

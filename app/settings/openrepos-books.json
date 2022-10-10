@@ -1,0 +1,14 @@
+{
+    "translation_catalog" : "openrepos-books",
+    "entries": [
+        {
+            "path": "applications/openrepos-books.desktop",
+            "title": "Books",
+            "type": "page",
+            "icon": "openrepos-books",
+            "params": {
+                "source": "/usr/share/openrepos-books/settings/SystemSettings.qml"
+            }
+        }
+    ]
+}

@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2015-2020 Jolla Ltd.
- * Copyright (C) 2015-2020 Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2015-2022 Jolla Ltd.
+ * Copyright (C) 2015-2022 Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
  *
@@ -48,14 +48,13 @@
 static const std::string HELVETICA = "Helvetica";
 
 BooksPaintContext::BooksPaintContext() :
-    iPainter(NULL), iWidth(0), iHeight(0),
-    iSpaceWidth(0), iDescent(0), iInvertColors(false)
+    iPainter(Q_NULLPTR), iSpaceWidth(0), iDescent(0), iWidth(0), iHeight(0)
 {
 }
 
-BooksPaintContext::BooksPaintContext(int aWidth, int aHeight) :
-    iPainter(NULL), iWidth(aWidth), iHeight(aHeight),
-    iSpaceWidth(0), iDescent(0), iInvertColors(false)
+BooksPaintContext::BooksPaintContext(int aWidth, int aHeight, BooksColorScheme aColors) :
+    iPainter(Q_NULLPTR), iSpaceWidth(0), iDescent(0),
+    iWidth(aWidth), iHeight(aHeight), iColors(aColors)
 {
 }
 
@@ -71,7 +70,7 @@ void BooksPaintContext::beginPaint(QPainter *aPainter)
 
 void BooksPaintContext::endPaint()
 {
-    iPainter = NULL;
+    iPainter = Q_NULLPTR;
 }
 
 void BooksPaintContext::fillFamiliesList(std::vector<std::string> &families) const
@@ -259,23 +258,12 @@ int BooksPaintContext::height() const
     return iHeight;
 }
 
-ZLColor BooksPaintContext::realColor(uchar aRed, uchar aGreen, uchar aBlue, uchar aAlpha,
-    bool aInvertColors)
-{
-    if (aInvertColors) {
-        aRed = 255 - aRed;
-        aGreen = 255 - aGreen;
-        aBlue = 255 - aBlue;
-    }
-    return ZLColor(aRed, aGreen, aBlue, aAlpha);
-}
-
-ZLColor BooksPaintContext::realColor(const std::string& aStyle, bool aInvert)
+ZLColor BooksPaintContext::realColor(const std::string& aStyle, BooksColorScheme aColors)
 {
     static const std::string INTERNAL_HYPERLINK("internal");
     static const std::string EXTERNAL_HYPERLINK("external");
     static const std::string BOOK_HYPERLINK("book");
-    unsigned long argb = ZLColor::rgbValue(0);
+    unsigned long argb = ZLColor::rgbValue(aColors.foreground());
 
     if (ZLStringUtil::startsWith(aStyle, '#')) {
         const size_t len = aStyle.length();
@@ -306,15 +294,13 @@ ZLColor BooksPaintContext::realColor(const std::string& aStyle, bool aInvert)
             }
         }
     } else if (aStyle == INTERNAL_HYPERLINK) {
-        argb =  ZLColor::rgbValue(0x2160b4);
-    } else if (aStyle == EXTERNAL_HYPERLINK) {
-        argb = ZLColor::rgbValue(0x2160b4);
-    } else if (aStyle == BOOK_HYPERLINK) {
-        argb = ZLColor::rgbValue(0x174480);
+        argb =  ZLColor::rgbValue(aColors.internalHyperlink());
+    } else if (aStyle == EXTERNAL_HYPERLINK || aStyle == BOOK_HYPERLINK) {
+        argb = ZLColor::rgbValue(aColors.externalHyperlink());
     } else if (aStyle == ZLTextStyle::SELECTION_BACKGROUND) {
-        argb = ZLColor::rgbValue(0x3c8bff);
+        argb = ZLColor::rgbValue(aColors.selectionBackground());
     } else if (aStyle == ZLTextStyle::HIGHLIGHTED_TEXT) {
-        argb = ZLColor::rgbValue(0x3c8bff);
+        argb = ZLColor::rgbValue(aColors.highlightedText());
     }
-    return realColor(ZLColor(argb), aInvert);
+    return ZLColor(argb);
 }

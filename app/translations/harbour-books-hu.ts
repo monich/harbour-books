@@ -292,6 +292,21 @@
         <extracomment>Text switch description</extracomment>
         <translation type="unfinished">Lehúzható menü nélkül a könyvet felfelé húzással kell bezárni.</translation>
     </message>
+    <message id="harbour-books-settings-page-colors-section_header">
+        <source>Colors</source>
+        <extracomment>Section header for colors</extracomment>
+        <translation type="unfinished">Színek</translation>
+    </message>
+    <message id="harbour-books-settings-page-standard_colors">
+        <source>Use standard colors</source>
+        <extracomment>Text switch label</extracomment>
+        <translation type="unfinished">Használjon szabványos színeket</translation>
+    </message>
+    <message id="harbour-books-settings-page-standard_colors-description">
+        <source>Note that colors hardcoded in the book override the color scheme.</source>
+        <extracomment>Text switch description</extracomment>
+        <translation type="unfinished">Vegye figyelembe, hogy a könyv által meghatározott színek felülírják a szabványos színeket.</translation>
+    </message>
     <message id="harbour-books-settings-page-removable-section_header">
         <source>Memory card</source>
         <extracomment>Section header for memory card settings</extracomment>
@@ -306,6 +321,66 @@
         <source>Leave the folder name empty to scan the entire memory card for books.</source>
         <extracomment>Settings field description</extracomment>
         <translation>Hagyd üresen a mappanevet a teljes memóriakártya könyvek utáni pásztázásához.</translation>
+    </message>
+    <message id="harbour-books-color-page_background">
+        <source>Page background</source>
+        <extracomment>List item label (description of a color scheme element)</extracomment>
+        <translation type="unfinished">Oldal háttere</translation>
+    </message>
+    <message id="harbour-books-color-text">
+        <source>Regular text</source>
+        <extracomment>List item label (description of a color scheme element)</extracomment>
+        <translation type="unfinished">Normál szöveg</translation>
+    </message>
+    <message id="harbour-books-color-selection_background">
+        <source>Selection background</source>
+        <extracomment>List item label (description of a color scheme element)</extracomment>
+        <translation type="unfinished">Kiválasztás háttér</translation>
+    </message>
+    <message id="harbour-books-color-highlighted_text">
+        <source>Highlighted text</source>
+        <extracomment>List item label (description of a color scheme element)</extracomment>
+        <translation type="unfinished">Kiemelt szöveg</translation>
+    </message>
+    <message id="harbour-books-color-internal_hyperlink">
+        <source>Internal hyperlink</source>
+        <extracomment>List item label (description of a color scheme element)</extracomment>
+        <translation type="unfinished">Belső hivatkozás</translation>
+    </message>
+    <message id="harbour-books-color-external_hyperlink">
+        <source>External hyperlink</source>
+        <extracomment>List item label (description of a color scheme element)</extracomment>
+        <translation type="unfinished">Külső hivatkozás</translation>
+    </message>
+    <message id="harbour-books-color_picker-menu-reset_colors">
+        <source>Reset colors</source>
+        <extracomment>Pulley menu item</extracomment>
+        <translation type="unfinished">Állítsa vissza a színeket</translation>
+    </message>
+    <message id="harbour-books-color_picker-action-select_color">
+        <source>Select color</source>
+        <extracomment>Dialog title label</extracomment>
+        <translation type="unfinished">Válasszon színt</translation>
+    </message>
+    <message id="harbour-books-color_picker-action-add_color">
+        <source>Add color</source>
+        <extracomment>Dialog title label</extracomment>
+        <translation type="unfinished">Add színt</translation>
+    </message>
+    <message id="harbour-books-color_picker-slider-hue">
+        <source>Color</source>
+        <extracomment>Hue slider label</extracomment>
+        <translation type="unfinished">Szín</translation>
+    </message>
+    <message id="harbour-books-color_picker-slider-brightness">
+        <source>Brightness</source>
+        <extracomment>Brightness slider label</extracomment>
+        <translation type="unfinished">Fényerősség</translation>
+    </message>
+    <message id="harbour-books-color_picker-text-hex_notation">
+        <source>Hex notation</source>
+        <extracomment>Text field description</extracomment>
+        <translation type="unfinished">Hex jelölés</translation>
     </message>
 </context>
 </TS>

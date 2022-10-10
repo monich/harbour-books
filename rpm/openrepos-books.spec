@@ -42,6 +42,8 @@ FBReader-based e-book reader.
 rm -rf %{buildroot}
 cd app
 %qmake5_install
+cd settings
+%qmake5_install
 
 desktop-file-install --delete-original \
   --dir %{buildroot}%{_datadir}/applications \
@@ -60,8 +62,9 @@ if [ "$1" == 0 ] ; then \
 %{_datadir}/applications/%{name}.desktop
 %{_datadir}/icons/hicolor/*/apps/%{name}.png
 %{_datadir}/translations/%{name}*.qm
+%{_datadir}/dbus-1/services/%{name}.service
 %{_datadir}/jolla-settings/entries/%{name}.json
- %{_datadir}/dbus-1/services/%{name}.service
+%{_libdir}/qt5/qml/openrepos/books/settings
 
 %check
 make -C test test

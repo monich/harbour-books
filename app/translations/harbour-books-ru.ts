@@ -244,22 +244,12 @@
     <message id="harbour-books-settings-page-keep_display_on_description">
         <source>Prevent the display from blanking while reading the book.</source>
         <extracomment>Text switch description</extracomment>
-        <translation>Не гасить экран, пока открыта книга. Это не очень хорошо для батареи, зато удобно для чтения. Главное - не уснуть.</translation>
+        <translation>То есть не гасить экран, пока открыта книга. Это не очень хорошо для батареи, зато удобно для чтения. Главное - не уснуть.</translation>
     </message>
     <message id="harbour-books-settings-page-navigation-section_header">
         <source>Navigation</source>
         <extracomment>Section header for media keys</extracomment>
         <translation>Навигация</translation>
-    </message>
-    <message id="harbour-books-settings-page-turn_pages_by_tap">
-        <source>Turn pages by tapping the screen</source>
-        <extracomment>Text switch label</extracomment>
-        <translation>Листать страницы касанием экрана</translation>
-    </message>
-    <message id="harbour-books-settings-page-turn_pages_by_tap-description">
-        <source>Tapping near the left edge of the screen returns to the previous page, tapping near the right edge gets you to the next page.</source>
-        <extracomment>Text switch description</extracomment>
-        <translation>Касание ближе к левому краю экрана вызывает переход на предыдущую страницу, ближе к правому краю - на следующую.</translation>
     </message>
     <message id="harbour-books-settings-page-action-none">
         <source>No action</source>
@@ -286,10 +276,15 @@
         <extracomment>Combo box label</extracomment>
         <translation>Громкость вниз</translation>
     </message>
-    <message id="harbour-books-settings-page-removable-section_header">
-        <source>Memory card</source>
-        <extracomment>Section header for memory card settings</extracomment>
-        <translation>Карта памяти</translation>
+    <message id="harbour-books-settings-page-turn_pages_by_tap">
+        <source>Turn pages by tapping the screen</source>
+        <extracomment>Text switch label</extracomment>
+        <translation>Листать страницы касанием экрана</translation>
+    </message>
+    <message id="harbour-books-settings-page-turn_pages_by_tap-description">
+        <source>Tapping near the left edge of the screen returns to the previous page, tapping near the right edge gets you to the next page.</source>
+        <extracomment>Text switch description</extracomment>
+        <translation>Касание ближе к левому краю экрана вызывает переход на предыдущую страницу, ближе к правому краю - на следующую.</translation>
     </message>
     <message id="harbour-books-settings-page-book_pulldown_menu">
         <source>Show pulley menu when the book is open</source>
@@ -301,6 +296,26 @@
         <extracomment>Text switch description</extracomment>
         <translation>Чтобы закрыть книгу в отсутствие вытягиваемого меню, её надо будет сдвинуть вверх больше, чем на пол-экрана.</translation>
     </message>
+    <message id="harbour-books-settings-page-colors-section_header">
+        <source>Colors</source>
+        <extracomment>Section header for colors</extracomment>
+        <translation>Цвета</translation>
+    </message>
+    <message id="harbour-books-settings-page-standard_colors">
+        <source>Use standard colors</source>
+        <extracomment>Text switch label</extracomment>
+        <translation>Использовать стандартные цвета</translation>
+    </message>
+    <message id="harbour-books-settings-page-standard_colors-description">
+        <source>Note that colors hardcoded in the book override the color scheme.</source>
+        <extracomment>Text switch description</extracomment>
+        <translation>Имейте в виду, что некоторые или даже все цвета могут быть прописаны в самой книге и в этом случае цветовая схема игнорируется.</translation>
+    </message>
+    <message id="harbour-books-settings-page-removable-section_header">
+        <source>Memory card</source>
+        <extracomment>Section header for memory card settings</extracomment>
+        <translation>Карта памяти</translation>
+    </message>
     <message id="harbour-books-settings-page-removable_root-label">
         <source>Books folder</source>
         <extracomment>Settings field label</extracomment>
@@ -310,6 +325,66 @@
         <source>Leave the folder name empty to scan the entire memory card for books.</source>
         <extracomment>Settings field description</extracomment>
         <translation>Если оставить имя папки пустым, то можно будет найти книгу в любой папке на карте памяти. Особого смысла в этой настройке нет, просто так исторически сложилось, что по умолчанию книги искались только в папке Books, а теперь можно вообще где угодно.</translation>
+    </message>
+    <message id="harbour-books-color-page_background">
+        <source>Page background</source>
+        <extracomment>List item label (description of a color scheme element)</extracomment>
+        <translation>Фон страницы</translation>
+    </message>
+    <message id="harbour-books-color-text">
+        <source>Regular text</source>
+        <extracomment>List item label (description of a color scheme element)</extracomment>
+        <translation>Обычный текст</translation>
+    </message>
+    <message id="harbour-books-color-selection_background">
+        <source>Selection background</source>
+        <extracomment>List item label (description of a color scheme element)</extracomment>
+        <translation>Выделенный фон</translation>
+    </message>
+    <message id="harbour-books-color-highlighted_text">
+        <source>Highlighted text</source>
+        <extracomment>List item label (description of a color scheme element)</extracomment>
+        <translation>Выделенный текст</translation>
+    </message>
+    <message id="harbour-books-color-internal_hyperlink">
+        <source>Internal hyperlink</source>
+        <extracomment>List item label (description of a color scheme element)</extracomment>
+        <translation>Внутренняя ссылка</translation>
+    </message>
+    <message id="harbour-books-color-external_hyperlink">
+        <source>External hyperlink</source>
+        <extracomment>List item label (description of a color scheme element)</extracomment>
+        <translation>Внешняя ссылка</translation>
+    </message>
+    <message id="harbour-books-color_picker-menu-reset_colors">
+        <source>Reset colors</source>
+        <extracomment>Pulley menu item</extracomment>
+        <translation>Сбросить цвета</translation>
+    </message>
+    <message id="harbour-books-color_picker-action-select_color">
+        <source>Select color</source>
+        <extracomment>Dialog title label</extracomment>
+        <translation>Выбрать цвет</translation>
+    </message>
+    <message id="harbour-books-color_picker-action-add_color">
+        <source>Add color</source>
+        <extracomment>Dialog title label</extracomment>
+        <translation>Добавить цвет</translation>
+    </message>
+    <message id="harbour-books-color_picker-slider-hue">
+        <source>Color</source>
+        <extracomment>Hue slider label</extracomment>
+        <translation>Цвет</translation>
+    </message>
+    <message id="harbour-books-color_picker-slider-brightness">
+        <source>Brightness</source>
+        <extracomment>Brightness slider label</extracomment>
+        <translation>Яркость</translation>
+    </message>
+    <message id="harbour-books-color_picker-text-hex_notation">
+        <source>Hex notation</source>
+        <extracomment>Text field description</extracomment>
+        <translation>Текстовый формат</translation>
     </message>
 </context>
 </TS>

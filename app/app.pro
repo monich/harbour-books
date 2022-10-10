@@ -55,12 +55,15 @@ OTHER_FILES += \
   qml/*.qml \
   qml/*.js \
   qml/images/* \
-  settings/*.qml \
-  settings/*.json \
+  settings/Books*.qml \
   settings/images/* \
   data/default/* \
   data/zlibrary/core/encodings/* \
   data/zlibrary/core/resources/*
+
+app_settings {
+    OTHER_FILES += settings/SystemSettings.qml
+}
 
 TARGET_DATA_DIR = /usr/share/$$TARGET
 TARGET_DEFAULT_DATA_DIR = $$TARGET_DATA_DIR/data
@@ -107,6 +110,8 @@ INCLUDEPATH += \
 SOURCES += \
   src/BooksBook.cpp \
   src/BooksBookModel.cpp \
+  src/BooksColorScheme.cpp \
+  src/BooksColorSchemeModel.cpp \
   src/BooksConfig.cpp \
   src/BooksCoverModel.cpp \
   src/BooksCoverWidget.cpp \
@@ -123,6 +128,7 @@ SOURCES += \
   src/BooksPos.cpp \
   src/BooksSaveTimer.cpp \
   src/BooksSettings.cpp \
+  src/BooksSettingsBase.cpp \
   src/BooksShelf.cpp \
   src/BooksStorage.cpp \
   src/BooksStorageModel.cpp \
@@ -137,6 +143,8 @@ SOURCES += \
 HEADERS += \
   src/BooksBook.h \
   src/BooksBookModel.h \
+  src/BooksColorScheme.h \
+  src/BooksColorSchemeModel.h \
   src/BooksConfig.h \
   src/BooksCoverModel.h \
   src/BooksCoverWidget.h \
@@ -155,6 +163,7 @@ HEADERS += \
   src/BooksPos.h \
   src/BooksSaveTimer.h \
   src/BooksSettings.h \
+  src/BooksSettingsBase.h \
   src/BooksShelf.h \
   src/BooksStorage.h \
   src/BooksStorageModel.h \
@@ -184,6 +193,7 @@ openrepos {
 # harbour-lib
 
 HEADERS += \
+  $$HARBOUR_INCLUDE_DIR/HarbourColorEditorModel.h \
   $$HARBOUR_INCLUDE_DIR/HarbourDisplayBlanking.h \
   $$HARBOUR_INCLUDE_DIR/HarbourJson.h \
   $$HARBOUR_INCLUDE_DIR/HarbourMediaPlugin.h \
@@ -191,12 +201,13 @@ HEADERS += \
   $$HARBOUR_INCLUDE_DIR/HarbourPolicyPlugin.h \
   $$HARBOUR_INCLUDE_DIR/HarbourSystem.h \
   $$HARBOUR_INCLUDE_DIR/HarbourTask.h \
-  $$HARBOUR_INCLUDE_DIR/HarbourTheme.h
+  $$HARBOUR_INCLUDE_DIR/HarbourUtil.h
 
 HEADERS += \
   $$HARBOUR_SRC_DIR/HarbourMce.h
 
 SOURCES += \
+  $$HARBOUR_SRC_DIR/HarbourColorEditorModel.cpp \
   $$HARBOUR_SRC_DIR/HarbourDisplayBlanking.cpp \
   $$HARBOUR_SRC_DIR/HarbourJson.cpp \
   $$HARBOUR_SRC_DIR/HarbourMce.cpp \
@@ -205,13 +216,16 @@ SOURCES += \
   $$HARBOUR_SRC_DIR/HarbourPolicyPlugin.cpp \
   $$HARBOUR_SRC_DIR/HarbourSystem.cpp \
   $$HARBOUR_SRC_DIR/HarbourTask.cpp \
-  $$HARBOUR_SRC_DIR/HarbourTheme.cpp
+  $$HARBOUR_SRC_DIR/HarbourUtil.cpp
 
 HARBOUR_QML_COMPONENTS = \
-    $$HARBOUR_LIB_QML/HarbourFitLabel.qml \
-    $$HARBOUR_LIB_QML/HarbourHighlightIcon.qml \
-    $$HARBOUR_LIB_QML/HarbourHorizontalSwipeHint.qml \
-    $$HARBOUR_LIB_QML/HarbourPressEffect.qml
+  $$HARBOUR_LIB_QML/HarbourColorEditorDialog.qml \
+  $$HARBOUR_LIB_QML/HarbourColorHueItem.qml \
+  $$HARBOUR_LIB_QML/HarbourColorPickerDialog.qml \
+  $$HARBOUR_LIB_QML/HarbourFitLabel.qml \
+  $$HARBOUR_LIB_QML/HarbourHighlightIcon.qml \
+  $$HARBOUR_LIB_QML/HarbourHorizontalSwipeHint.qml \
+  $$HARBOUR_LIB_QML/HarbourPressEffect.qml
 
 OTHER_FILES += $${HARBOUR_QML_COMPONENTS}
 
@@ -233,17 +247,6 @@ for(s, ICON_SIZES) {
     INSTALLS += $${icon_target}
 }
 
-# Settings
-app_settings {
-    settings_json.files = settings/$${TARGET}.json
-    settings_json.path = /usr/share/jolla-settings/entries/
-    equals(PREFIX, "openrepos") {
-        settings_json.extra = sed s/harbour/openrepos/g settings/harbour-$${NAME}.json > $$eval(settings_json.files)
-        settings_json.CONFIG += no_check_exist
-    }
-    INSTALLS += settings_json
-}
-
 settings_qml.files = settings/*.qml
 settings_qml.path = /usr/share/$${TARGET}/settings/
 INSTALLS += settings_qml
@@ -262,6 +265,7 @@ openrepos {
 # Translations
 TRANSLATION_IDBASED=-idbased
 TRANSLATION_SOURCES = \
+  $${_PRO_FILE_PWD_}/src \
   $${_PRO_FILE_PWD_}/qml \
   $${_PRO_FILE_PWD_}/settings
 

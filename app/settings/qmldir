@@ -1,0 +1,2 @@
+module openrepos.books.settings
+plugin bookssettings

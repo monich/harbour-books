@@ -1,6 +1,6 @@
 /*
-  Copyright (C) 2015-2020 Jolla Ltd.
-  Copyright (C) 2015-2020 Slava Monich <slava.monich@jolla.com>
+  Copyright (C) 2015-2021 Jolla Ltd.
+  Copyright (C) 2015-2021 Slava Monich <slava.monich@jolla.com>
 
   You may use this file under the terms of BSD license as follows:
 
@@ -109,7 +109,7 @@ Rectangle {
     Image {
         id: pressImage
 
-        source: Settings.invertColors ?  "images/press-invert.svg" : "images/press.svg"
+        source: Settings.nightMode ?  "images/press-invert.svg" : "images/press.svg"
         visible: opacity > 0
         opacity: 0
         readonly property int maxsize: Math.max(view.width, view.height)

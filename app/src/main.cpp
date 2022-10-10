@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2015-2021 Jolla Ltd.
- * Copyright (C) 2015-2021 Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2015-2022 Jolla Ltd.
+ * Copyright (C) 2015-2022 Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
  *
@@ -36,6 +36,8 @@
 #include "BooksShelf.h"
 #include "BooksBook.h"
 #include "BooksBookModel.h"
+#include "BooksColorScheme.h"
+#include "BooksColorSchemeModel.h"
 #include "BooksCoverModel.h"
 #include "BooksConfig.h"
 #include "BooksImageProvider.h"
@@ -49,11 +51,12 @@
 #include "BooksTaskQueue.h"
 #include "BooksHints.h"
 
+#include "HarbourColorEditorModel.h"
 #include "HarbourDisplayBlanking.h"
 #include "HarbourDebug.h"
 #include "HarbourMediaPlugin.h"
 #include "HarbourPolicyPlugin.h"
-#include "HarbourTheme.h"
+#include "HarbourUtil.h"
 
 #include "ZLibrary.h"
 #include "ZLLanguageUtil.h"
@@ -81,22 +84,30 @@
 Q_DECL_EXPORT int main(int argc, char **argv)
 {
     QGuiApplication* app = SailfishApp::application(argc, argv);
+
     qRegisterMetaType<BooksPos>();
-    BOOKS_QML_REGISTER(BooksShelf, "Shelf");
-    BOOKS_QML_REGISTER(BooksBook, "Book");
-    BOOKS_QML_REGISTER(BooksBookModel, "BookModel");
-    BOOKS_QML_REGISTER(BooksCoverModel, "CoverModel");
-    BOOKS_QML_REGISTER(BooksImportModel, "BooksImportModel");
-    BOOKS_QML_REGISTER(BooksPathModel, "BooksPathModel");
-    BOOKS_QML_REGISTER(BooksPageStack, "BooksPageStack");
-    BOOKS_QML_REGISTER(BooksStorageModel, "BookStorage");
-    BOOKS_QML_REGISTER(BooksPageWidget, "PageWidget");
-    BOOKS_QML_REGISTER(BooksListWatcher, "ListWatcher");
-    BOOKS_QML_REGISTER(BooksCoverWidget, "BookCover");
-    BOOKS_QML_REGISTER(BooksSettings, "BooksSettings");
-    BOOKS_QML_REGISTER(HarbourDisplayBlanking, "DisplayBlanking");
-    BOOKS_QML_REGISTER_SINGLETON(HarbourTheme, "HarbourTheme");
-    BOOKS_QML_REGISTER_SINGLETON(BooksHints, "BooksHints");
+    qRegisterMetaType<BooksColorScheme>();
+
+    // For historical reasons these QML and C++ names don't match:
+    BOOKS_QML_REGISTER_(BooksShelf, "Shelf");
+    BOOKS_QML_REGISTER_(BooksBook, "Book");
+    BOOKS_QML_REGISTER_(BooksBookModel, "BookModel");
+    BOOKS_QML_REGISTER_(BooksCoverModel, "CoverModel");
+    BOOKS_QML_REGISTER_(BooksStorageModel, "BookStorage");
+    BOOKS_QML_REGISTER_(BooksPageWidget, "PageWidget");
+    BOOKS_QML_REGISTER_(BooksListWatcher, "ListWatcher");
+    BOOKS_QML_REGISTER_(BooksCoverWidget, "BookCover");
+    BOOKS_QML_REGISTER_(HarbourDisplayBlanking, "DisplayBlanking");
+
+    // But these do (and I think it's a good idea)
+    BOOKS_QML_REGISTER(HarbourColorEditorModel);
+    BOOKS_QML_REGISTER(BooksColorSchemeModel);
+    BOOKS_QML_REGISTER(BooksImportModel);
+    BOOKS_QML_REGISTER(BooksPathModel);
+    BOOKS_QML_REGISTER(BooksPageStack);
+    BOOKS_QML_REGISTER_SINGLETON(HarbourUtil);
+    BOOKS_QML_REGISTER_SINGLETON(BooksHints);
+    BOOKS_QML_REGISTER_UNCREATABLE(BooksSettings);
 
     QLocale locale;
     QTranslator* translator = new QTranslator(app);

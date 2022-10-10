@@ -1,6 +1,6 @@
 /*
-  Copyright (C) 2015-2019 Jolla Ltd.
-  Copyright (C) 2015-2019 Slava Monich <slava.monich@jolla.com>
+  Copyright (C) 2015-2021 Jolla Ltd.
+  Copyright (C) 2015-2021 Slava Monich <slava.monich@jolla.com>
 
   You may use this file under the terms of BSD license as follows:
 
@@ -57,7 +57,7 @@ Item {
             left: parent.left
             verticalCenter: parent.verticalCenter
         }
-        onClicked: Settings.invertColors = !Settings.invertColors
+        onClicked: Settings.nightMode = !Settings.nightMode
 
         Image {
             id: dayModeImage
@@ -68,7 +68,7 @@ Item {
                 verticalCenter: parent.verticalCenter
             }
             sourceSize.height: Theme.iconSizeSmall
-            opacity: Settings.invertColors ? 0.5 : 0
+            opacity: Settings.nightMode ? 0.5 : 0
             visible: opacity > 0
             Behavior on opacity { FadeAnimation {} }
         }
@@ -77,7 +77,7 @@ Item {
             source: "images/night-mode.svg"
             anchors.centerIn: dayModeImage
             sourceSize.height: Theme.iconSizeSmall
-            opacity: Settings.invertColors ? 0 : 0.25
+            opacity: Settings.nightMode ? 0 : 0.25
             visible: opacity > 0
             Behavior on opacity { FadeAnimation {} }
         }
@@ -101,7 +101,7 @@ Item {
                 verticalCenter: parent.verticalCenter
             }
             sourceSize.height: Theme.iconSizeSmall
-            opacity: Settings.invertColors ? 1 : 0.5
+            opacity: Settings.nightMode ? 1 : 0.5
             Behavior on opacity { FadeAnimation {} }
         }
         onClicked: pageTools.increaseFontSize()
@@ -123,7 +123,7 @@ Item {
                 verticalCenter: parent.verticalCenter
             }
             sourceSize.height: increaseFontSizeButtonImage.height
-            opacity: Settings.invertColors ? 1 : 0.5
+            opacity: Settings.nightMode ? 1 : 0.5
             Behavior on opacity { FadeAnimation {} }
         }
         onClicked: pageTools.decreaseFontSize()

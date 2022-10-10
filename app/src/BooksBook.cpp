@@ -98,8 +98,8 @@ BooksBook::CoverPaintContext::CoverPaintContext()
         }
     }
 
-    setWidth(gMaxScreenSize.width());
-    setHeight(gMaxScreenSize.height());
+    iWidth = gMaxScreenSize.width();
+    iHeight = gMaxScreenSize.height();
 }
 
 void BooksBook::CoverPaintContext::drawImage(int x, int y, const ZLImageData& image)

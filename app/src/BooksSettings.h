@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2015-2021 Jolla Ltd.
- * Copyright (C) 2015-2021 Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2015-2022 Jolla Ltd.
+ * Copyright (C) 2015-2022 Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
  *
@@ -34,13 +34,14 @@
 #ifndef BOOKS_SETTINGS_H
 #define BOOKS_SETTINGS_H
 
-#include "BooksTypes.h"
+#include "shared_ptr.h"
 #include "ZLTextStyle.h"
-#include <QObject>
-#include <QColor>
+
+#include "BooksSettingsBase.h"
+
 #include <QSharedPointer>
 
-class BooksSettings : public QObject
+class BooksSettings : public BooksSettingsBase
 {
     Q_OBJECT
     Q_ENUMS(FontSize)
@@ -52,7 +53,6 @@ class BooksSettings : public QObject
     Q_PROPERTY(int pageDetails READ pageDetails WRITE setPageDetails NOTIFY pageDetailsChanged)
     Q_PROPERTY(bool pageDetailsFixed READ pageDetailsFixed WRITE setPageDetailsFixed NOTIFY pageDetailsFixedChanged)
     Q_PROPERTY(bool turnPageByTap READ turnPageByTap WRITE setTurnPageByTap NOTIFY turnPageByTapChanged)
-    Q_PROPERTY(bool invertColors READ invertColors WRITE setInvertColors NOTIFY invertColorsChanged)
     Q_PROPERTY(bool sampleBookCopied READ sampleBookCopied NOTIFY sampleBookCopiedChanged)
     Q_PROPERTY(bool keepDisplayOn READ keepDisplayOn WRITE setKeepDisplayOn NOTIFY keepDisplayOnChanged)
     Q_PROPERTY(bool bookPullDownMenu READ bookPullDownMenu WRITE setBookPullDownMenu NOTIFY bookPullDownMenuChanged)
@@ -63,11 +63,9 @@ class BooksSettings : public QObject
     Q_PROPERTY(QString currentStorage READ currentStorage NOTIFY currentStorageChanged)
     Q_PROPERTY(QString relativePath READ relativePath NOTIFY relativePathChanged)
     Q_PROPERTY(QString removableRoot READ removableRoot NOTIFY removableRootChanged)
-    Q_PROPERTY(QColor primaryPageToolColor READ primaryPageToolColor CONSTANT)
-    Q_PROPERTY(QColor highlightPageToolColor READ highlightPageToolColor NOTIFY invertColorsChanged)
-    Q_PROPERTY(QColor invertedPageBackgroundColor READ highlightPageToolColor NOTIFY invertColorsChanged)
-    Q_PROPERTY(QColor pageBackgroundColor READ pageBackgroundColor NOTIFY pageBackgroundColorChanged)
     Q_PROPERTY(int orientation READ orientation NOTIFY orientationChanged)
+    Q_PROPERTY(QColor primaryPageToolColor READ primaryPageToolColor CONSTANT)
+    Q_PROPERTY(QColor highlightPageToolColor READ highlightPageToolColor NOTIFY highlightPageToolColorChanged)
     class TextStyle;
 
 public:
@@ -115,9 +113,6 @@ public:
     bool turnPageByTap() const;
     void setTurnPageByTap(bool aValue);
 
-    bool invertColors() const; // Night mode
-    void setInvertColors(bool aValue);
-
     bool keepDisplayOn() const;
     void setKeepDisplayOn(bool aValue);
 
@@ -139,12 +134,11 @@ public:
     QString relativePath() const;
     QString removableRoot() const;
     QString currentFolder() const;
-    void setCurrentFolder(QString aValue);
+    void setCurrentFolder(const QString aValue);
 
     QString currentStorage() const;
     QColor primaryPageToolColor() const;
     QColor highlightPageToolColor() const;
-    QColor pageBackgroundColor() const;
 
     Orientation orientation() const;
 
@@ -154,12 +148,12 @@ public Q_SLOTS:
 Q_SIGNALS:
     void fontSizeChanged();
     void nightModeBrightnessChanged();
+    void highlightPageToolColorChanged();
     void brightnessChanged();
     void textStyleChanged();
     void pageDetailsChanged();
     void pageDetailsFixedChanged();
     void turnPageByTapChanged();
-    void invertColorsChanged();
     void sampleBookCopiedChanged();
     void keepDisplayOnChanged();
     void bookPullDownMenuChanged();
@@ -170,7 +164,6 @@ Q_SIGNALS:
     void currentStorageChanged();
     void relativePathChanged();
     void removableRootChanged();
-    void pageBackgroundColorChanged();
     void orientationChanged();
 
 private:

@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2015-2021 Jolla Ltd.
- * Copyright (C) 2015-2021 Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2015-2022 Jolla Ltd.
+ * Copyright (C) 2015-2022 Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
  *
@@ -58,12 +58,23 @@
 #define BOOKS_QML_PLUGIN        "harbour.books"
 #define BOOKS_QML_PLUGIN_V1     1
 #define BOOKS_QML_PLUGIN_V2     0
-#define BOOKS_QML_REGISTER(klass,name) \
+
+#define BOOKS_QML_REGISTER_(klass,name) \
     qmlRegisterType<klass>(BOOKS_QML_PLUGIN, BOOKS_QML_PLUGIN_V1, \
     BOOKS_QML_PLUGIN_V2, name)
-#define BOOKS_QML_REGISTER_SINGLETON(klass,name) \
+#define BOOKS_QML_REGISTER_UNCREATABLE_(klass,name) \
+    qmlRegisterUncreatableType<klass>(BOOKS_QML_PLUGIN, BOOKS_QML_PLUGIN_V1, \
+    BOOKS_QML_PLUGIN_V2, name, QString())
+#define BOOKS_QML_REGISTER_SINGLETON_(klass,name) \
     qmlRegisterSingletonType<klass>(BOOKS_QML_PLUGIN, BOOKS_QML_PLUGIN_V1, \
     BOOKS_QML_PLUGIN_V2, name, klass::createSingleton)
+
+#define BOOKS_QML_REGISTER(klass) \
+    BOOKS_QML_REGISTER_(klass,#klass)
+#define BOOKS_QML_REGISTER_UNCREATABLE(klass) \
+    BOOKS_QML_REGISTER_UNCREATABLE_(klass,#klass)
+#define BOOKS_QML_REGISTER_SINGLETON(klass) \
+    BOOKS_QML_REGISTER_SINGLETON_(klass,#klass)
 
 #define BOOKS_STATE_FILE_SUFFIX ".state"
 #define BOOKS_MARKS_FILE_SUFFIX ".marks"

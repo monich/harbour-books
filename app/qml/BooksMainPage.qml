@@ -1,6 +1,6 @@
 /*
-  Copyright (C) 2015-2021 Jolla Ltd.
-  Copyright (C) 2015-2021 Slava Monich <slava.monich@jolla.com>
+  Copyright (C) 2015-2022 Jolla Ltd.
+  Copyright (C) 2015-2022 Slava Monich <slava.monich@jolla.com>
 
   You may use this file under the terms of BSD license as follows:
 
@@ -124,7 +124,7 @@ Page {
             isCurrentView: currentView === bookView
             pageActive: page.pageActive
             book: Settings.currentBook ? Settings.currentBook : null
-            loadingBackgroundOpacity: HarbourTheme.opacityOverlay * storageView.opacity
+            loadingBackgroundOpacity: 0.8 /* opacityOverlay */ * storageView.opacity
 
             onCloseBook: Settings.currentBook = null
             onVisibleChanged: if (visible) opacity = 1
