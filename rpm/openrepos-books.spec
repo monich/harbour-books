@@ -31,6 +31,18 @@ BuildRequires:  qt5-qttools-linguist
 %description
 FBReader-based e-book reader.
 
+%if "%{?vendor}" == "chum"
+Categories:
+ - Office
+Icon: https://raw.githubusercontent.com/monich/harbour-books/master/app/icons/harbour-books.svg
+Screenshots:
+- https://home.monich.net/chum/harbour-books/screenshots/screenshot-001.png
+- https://home.monich.net/chum/harbour-books/screenshots/screenshot-002.png
+- https://home.monich.net/chum/harbour-books/screenshots/screenshot-003.png
+Url:
+  Homepage: https://openrepos.net/content/slava/books
+%endif
+
 %prep
 %setup -q -n %{name}-%{version}
 
