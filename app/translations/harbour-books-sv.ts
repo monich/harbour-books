@@ -297,17 +297,17 @@
     <message id="harbour-books-settings-page-colors-section_header">
         <source>Colors</source>
         <extracomment>Section header for colors</extracomment>
-        <translation type="unfinished">Färger</translation>
+        <translation>Färger</translation>
     </message>
     <message id="harbour-books-settings-page-standard_colors">
         <source>Use standard colors</source>
         <extracomment>Text switch label</extracomment>
-        <translation type="unfinished">Använd standardfärger</translation>
+        <translation>Använd standardfärger</translation>
     </message>
     <message id="harbour-books-settings-page-standard_colors-description">
         <source>Note that colors hardcoded in the book override the color scheme.</source>
         <extracomment>Text switch description</extracomment>
-        <translation type="unfinished">Notera att färger som definieras av boken åsidosätter standardfärgerna.</translation>
+        <translation>Notera att färger som definieras av boken åsidosätter färgschemat.</translation>
     </message>
     <message id="harbour-books-settings-page-removable-section_header">
         <source>Memory card</source>
@@ -327,62 +327,62 @@
     <message id="harbour-books-color-page_background">
         <source>Page background</source>
         <extracomment>List item label (description of a color scheme element)</extracomment>
-        <translation type="unfinished">Sidans bakgrund</translation>
+        <translation>Sidbakgrund</translation>
     </message>
     <message id="harbour-books-color-text">
         <source>Regular text</source>
         <extracomment>List item label (description of a color scheme element)</extracomment>
-        <translation type="unfinished">Vanlig text</translation>
+        <translation>Vanlig text</translation>
     </message>
     <message id="harbour-books-color-selection_background">
         <source>Selection background</source>
         <extracomment>List item label (description of a color scheme element)</extracomment>
-        <translation type="unfinished">Urval bakgrund</translation>
+        <translation>Markeringsbakgrund</translation>
     </message>
     <message id="harbour-books-color-highlighted_text">
         <source>Highlighted text</source>
         <extracomment>List item label (description of a color scheme element)</extracomment>
-        <translation type="unfinished">Markerad text</translation>
+        <translation>Markerad text</translation>
     </message>
     <message id="harbour-books-color-internal_hyperlink">
         <source>Internal hyperlink</source>
         <extracomment>List item label (description of a color scheme element)</extracomment>
-        <translation type="unfinished">Intern länk</translation>
+        <translation>Intern länk</translation>
     </message>
     <message id="harbour-books-color-external_hyperlink">
         <source>External hyperlink</source>
         <extracomment>List item label (description of a color scheme element)</extracomment>
-        <translation type="unfinished">Extern länk</translation>
+        <translation>Extern länk</translation>
     </message>
     <message id="harbour-books-color_picker-menu-reset_colors">
         <source>Reset colors</source>
         <extracomment>Pulley menu item</extracomment>
-        <translation type="unfinished">Återställ färger</translation>
+        <translation>Återställ färger</translation>
     </message>
     <message id="harbour-books-color_picker-action-select_color">
         <source>Select color</source>
         <extracomment>Dialog title label</extracomment>
-        <translation type="unfinished">Välj färg</translation>
+        <translation>Välj färg</translation>
     </message>
     <message id="harbour-books-color_picker-action-add_color">
         <source>Add color</source>
         <extracomment>Dialog title label</extracomment>
-        <translation type="unfinished">Lägg till färg</translation>
+        <translation>Lägg till färg</translation>
     </message>
     <message id="harbour-books-color_picker-slider-hue">
         <source>Color</source>
         <extracomment>Hue slider label</extracomment>
-        <translation type="unfinished">Färg</translation>
+        <translation>Färg</translation>
     </message>
     <message id="harbour-books-color_picker-slider-brightness">
         <source>Brightness</source>
         <extracomment>Brightness slider label</extracomment>
-        <translation type="unfinished">Ljusstyrka</translation>
+        <translation>Ljusstyrka</translation>
     </message>
     <message id="harbour-books-color_picker-text-hex_notation">
         <source>Hex notation</source>
         <extracomment>Text field description</extracomment>
-        <translation type="unfinished">Hex notation</translation>
+        <translation>Hex-notering</translation>
     </message>
 </context>
 </TS>
