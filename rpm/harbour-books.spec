@@ -1,6 +1,6 @@
 Name:           harbour-books
 Summary:        E-book reader
-Version:        1.1.1
+Version:        1.1.2
 Release:        1
 License:        BSD
 Group:          Applications/File
