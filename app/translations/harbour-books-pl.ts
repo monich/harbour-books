@@ -299,17 +299,17 @@
     <message id="harbour-books-settings-page-colors-section_header">
         <source>Colors</source>
         <extracomment>Section header for colors</extracomment>
-        <translation type="unfinished">Kolory</translation>
+        <translation>Kolory</translation>
     </message>
     <message id="harbour-books-settings-page-standard_colors">
         <source>Use standard colors</source>
         <extracomment>Text switch label</extracomment>
-        <translation type="unfinished">Użyj standardowych kolorów</translation>
+        <translation>Użyj standardowych kolorów</translation>
     </message>
     <message id="harbour-books-settings-page-standard_colors-description">
         <source>Note that colors hardcoded in the book override the color scheme.</source>
         <extracomment>Text switch description</extracomment>
-        <translation type="unfinished">Należy pamiętać, że niektóre lub nawet wszystkie kolory mogą być określone w samej książce, w którym to przypadku schemat kolorów jest ignorowany.</translation>
+        <translation>Należy pamiętać, że niektóre lub nawet wszystkie kolory mogą być określone w samej książce, w którym to przypadku schemat kolorów jest ignorowany.</translation>
     </message>
     <message id="harbour-books-settings-page-removable-section_header">
         <source>Memory card</source>
@@ -329,32 +329,32 @@
     <message id="harbour-books-color-page_background">
         <source>Page background</source>
         <extracomment>List item label (description of a color scheme element)</extracomment>
-        <translation type="unfinished">Tło strony</translation>
+        <translation>Tło strony</translation>
     </message>
     <message id="harbour-books-color-text">
         <source>Regular text</source>
         <extracomment>List item label (description of a color scheme element)</extracomment>
-        <translation type="unfinished">Zwykły tekst</translation>
+        <translation>Zwykły tekst</translation>
     </message>
     <message id="harbour-books-color-selection_background">
         <source>Selection background</source>
         <extracomment>List item label (description of a color scheme element)</extracomment>
-        <translation type="unfinished">Dedykowane tło</translation>
+        <translation>Wybór tła</translation>
     </message>
     <message id="harbour-books-color-highlighted_text">
         <source>Highlighted text</source>
         <extracomment>List item label (description of a color scheme element)</extracomment>
-        <translation type="unfinished">Wyróżniony tekst</translation>
+        <translation>Wyróżniony tekst</translation>
     </message>
     <message id="harbour-books-color-internal_hyperlink">
         <source>Internal hyperlink</source>
         <extracomment>List item label (description of a color scheme element)</extracomment>
-        <translation type="unfinished">Link wewnętrzny</translation>
+        <translation>Link wewnętrzny</translation>
     </message>
     <message id="harbour-books-color-external_hyperlink">
         <source>External hyperlink</source>
         <extracomment>List item label (description of a color scheme element)</extracomment>
-        <translation type="unfinished">Link zewnętrzny</translation>
+        <translation>Link zewnętrzny</translation>
     </message>
     <message id="harbour-books-color_picker-menu-reset_colors">
         <source>Reset colors</source>
