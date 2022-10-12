@@ -74,7 +74,7 @@
     <message id="harbour-books-storage-menu-scan_downloads">
         <source>Scan downloads</source>
         <extracomment>Pulley menu item</extracomment>
-        <translation>Letöltések pásztázása</translation>
+        <translation>Letöltések átnézése</translation>
     </message>
     <message id="harbour-books-storage-menu-delete_everything">
         <source>Delete all books</source>
@@ -130,7 +130,7 @@
     <message id="harbour-books-settings-version">
         <source>Version %1</source>
         <extracomment>Settings page header description (app version)</extracomment>
-        <translation type="unfinished">%1 verzió</translation>
+        <translation>%1 verzió</translation>
     </message>
     <message id="harbour-books-settings-page-display-section_header">
         <source>Display</source>
@@ -150,12 +150,12 @@
     <message id="harbour-books-settings-page-night_mode_example">
         <source>Night mode</source>
         <extracomment>Night mode example label</extracomment>
-        <translation type="unfinished">Éjszakai mód</translation>
+        <translation>Éjszakai mód</translation>
     </message>
     <message id="harbour-books-settings-page-night_mode_brightness_label">
         <source>Brightness in night mode</source>
         <extracomment>Slider label</extracomment>
-        <translation type="unfinished">Fényerő éjszakai üzemmódban</translation>
+        <translation>Az éjszakai mód fényereje</translation>
     </message>
     <message id="harbour-books-settings-page-orientation_label">
         <source>Orientation</source>
@@ -180,57 +180,57 @@
     <message id="harbour-books-settings-page-page_layout">
         <source>Page layout</source>
         <extracomment>Combo box label</extracomment>
-        <translation type="unfinished">Oldal elrendezés</translation>
+        <translation>Oldalelrendezés</translation>
     </message>
     <message id="harbour-books-settings-page-layout-dynamic">
         <source>Dynamic</source>
         <extracomment>Combo box value for dynamic page layout</extracomment>
-        <translation type="unfinished">Dinamikus</translation>
+        <translation>Dinamikus</translation>
     </message>
     <message id="harbour-books-settings-page-layout-dynamic-detail">
         <source>(toggle on tap)</source>
         <extracomment>Combo box detail for dynamic page layout</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>(váltás érintésre)</translation>
     </message>
     <message id="harbour-books-settings-page-layout-clean">
         <source>Clean</source>
         <extracomment>Combo box value for clean page layout (just the content)</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Tiszta</translation>
     </message>
     <message id="harbour-books-settings-page-layout-clean-detail">
         <source>(just the content)</source>
         <extracomment>Combo box detail for clean page layout (just the content)</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>(csak a tartalom)</translation>
     </message>
     <message id="harbour-books-settings-page-layout-minimal">
         <source>Minimal</source>
         <extracomment>Combo box value for minimal page layout (title + page)</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Egyszerű</translation>
     </message>
     <message id="harbour-books-settings-page-layout-minimal-detail">
         <source>(title, page)</source>
         <extracomment>Combo box detail for minimal page layout (title + page)</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>(cím, oldal)</translation>
     </message>
     <message id="harbour-books-settings-page-layout-normal">
         <source>Regular</source>
         <extracomment>Combo box value for normal page layout (title + page + slider)</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Általános</translation>
     </message>
     <message id="harbour-books-settings-page-layout-normal-detail">
         <source>(title, page, slider)</source>
         <extracomment>Combo box detail for normal page layout (title + page + slider)</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>(cím, oldal, csúszka)</translation>
     </message>
     <message id="harbour-books-settings-page-layout-full">
         <source>Full</source>
         <extracomment>Combo box value for full page layout (title + page + slider)</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Teljes</translation>
     </message>
     <message id="harbour-books-settings-page-layout-full-detail">
         <source>(everything)</source>
         <extracomment>Combo box detail for full page layout (title + page + slider)</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>(minden)</translation>
     </message>
     <message id="harbour-books-settings-page-keep_display_on">
         <source>Keep display on while reading</source>
@@ -245,7 +245,7 @@
     <message id="harbour-books-settings-page-navigation-section_header">
         <source>Navigation</source>
         <extracomment>Section header for media keys</extracomment>
-        <translation type="unfinished">Navigáció</translation>
+        <translation>Navigáció</translation>
     </message>
     <message id="harbour-books-settings-page-volume_up-label">
         <source>Volume up</source>
@@ -275,7 +275,7 @@
     <message id="harbour-books-settings-page-turn_pages_by_tap">
         <source>Turn pages by tapping the screen</source>
         <extracomment>Text switch label</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>Lapozás a képernyő érintésével</translation>
     </message>
     <message id="harbour-books-settings-page-turn_pages_by_tap-description">
         <source>Tapping near the left edge of the screen returns to the previous page, tapping near the right edge gets you to the next page.</source>
@@ -285,27 +285,27 @@
     <message id="harbour-books-settings-page-book_pulldown_menu">
         <source>Show pulley menu when the book is open</source>
         <extracomment>Text switch label</extracomment>
-        <translation type="unfinished">A  lehúzható menü megjelenítése, amikor a könyv nyitva van</translation>
+        <translation>A lehúzható menü megjelenítése, amikor a könyv nyitva van</translation>
     </message>
     <message id="harbour-books-settings-page-book_pulldown_menu-description">
         <source>Without the pulley menu, the book has to be closed by swiping it up.</source>
         <extracomment>Text switch description</extracomment>
-        <translation type="unfinished">Lehúzható menü nélkül a könyvet felfelé húzással kell bezárni.</translation>
+        <translation>A lehúzható menü hiányában a könyvet felfelé húzással kell bezárni.</translation>
     </message>
     <message id="harbour-books-settings-page-colors-section_header">
         <source>Colors</source>
         <extracomment>Section header for colors</extracomment>
-        <translation type="unfinished">Színek</translation>
+        <translation>Színek</translation>
     </message>
     <message id="harbour-books-settings-page-standard_colors">
         <source>Use standard colors</source>
         <extracomment>Text switch label</extracomment>
-        <translation type="unfinished">Használjon szabványos színeket</translation>
+        <translation>Szabványos színek használata</translation>
     </message>
     <message id="harbour-books-settings-page-standard_colors-description">
         <source>Note that colors hardcoded in the book override the color scheme.</source>
         <extracomment>Text switch description</extracomment>
-        <translation type="unfinished">Vegye figyelembe, hogy a könyv által meghatározott színek felülírják a szabványos színeket.</translation>
+        <translation>Vedd figyelembe, hogy a könyvben kódolt színek felülírják a színsémát.</translation>
     </message>
     <message id="harbour-books-settings-page-removable-section_header">
         <source>Memory card</source>
@@ -320,67 +320,67 @@
     <message id="harbour-books-settings-page-removable_root-description">
         <source>Leave the folder name empty to scan the entire memory card for books.</source>
         <extracomment>Settings field description</extracomment>
-        <translation>Hagyd üresen a mappanevet a teljes memóriakártya könyvek utáni pásztázásához.</translation>
+        <translation>Hagyd üresen a mappanevet, ha a teljes memóriakártyán szeretnél könyveket keresni.</translation>
     </message>
     <message id="harbour-books-color-page_background">
         <source>Page background</source>
         <extracomment>List item label (description of a color scheme element)</extracomment>
-        <translation type="unfinished">Oldal háttere</translation>
+        <translation>Oldal háttere</translation>
     </message>
     <message id="harbour-books-color-text">
         <source>Regular text</source>
         <extracomment>List item label (description of a color scheme element)</extracomment>
-        <translation type="unfinished">Normál szöveg</translation>
+        <translation>Normál szöveg</translation>
     </message>
     <message id="harbour-books-color-selection_background">
         <source>Selection background</source>
         <extracomment>List item label (description of a color scheme element)</extracomment>
-        <translation type="unfinished">Kiválasztás háttér</translation>
+        <translation>Kiválasztás háttere</translation>
     </message>
     <message id="harbour-books-color-highlighted_text">
         <source>Highlighted text</source>
         <extracomment>List item label (description of a color scheme element)</extracomment>
-        <translation type="unfinished">Kiemelt szöveg</translation>
+        <translation>Kiemelt szöveg</translation>
     </message>
     <message id="harbour-books-color-internal_hyperlink">
         <source>Internal hyperlink</source>
         <extracomment>List item label (description of a color scheme element)</extracomment>
-        <translation type="unfinished">Belső hivatkozás</translation>
+        <translation>Belső hivatkozás</translation>
     </message>
     <message id="harbour-books-color-external_hyperlink">
         <source>External hyperlink</source>
         <extracomment>List item label (description of a color scheme element)</extracomment>
-        <translation type="unfinished">Külső hivatkozás</translation>
+        <translation>Külső hivatkozás</translation>
     </message>
     <message id="harbour-books-color_picker-menu-reset_colors">
         <source>Reset colors</source>
         <extracomment>Pulley menu item</extracomment>
-        <translation type="unfinished">Állítsa vissza a színeket</translation>
+        <translation>Színek visszaállítása</translation>
     </message>
     <message id="harbour-books-color_picker-action-select_color">
         <source>Select color</source>
         <extracomment>Dialog title label</extracomment>
-        <translation type="unfinished">Válasszon színt</translation>
+        <translation>Szín kiválasztása</translation>
     </message>
     <message id="harbour-books-color_picker-action-add_color">
         <source>Add color</source>
         <extracomment>Dialog title label</extracomment>
-        <translation type="unfinished">Add színt</translation>
+        <translation>Szín hozzáadása</translation>
     </message>
     <message id="harbour-books-color_picker-slider-hue">
         <source>Color</source>
         <extracomment>Hue slider label</extracomment>
-        <translation type="unfinished">Szín</translation>
+        <translation>Szín</translation>
     </message>
     <message id="harbour-books-color_picker-slider-brightness">
         <source>Brightness</source>
         <extracomment>Brightness slider label</extracomment>
-        <translation type="unfinished">Fényerősség</translation>
+        <translation>Fényerő</translation>
     </message>
     <message id="harbour-books-color_picker-text-hex_notation">
         <source>Hex notation</source>
         <extracomment>Text field description</extracomment>
-        <translation type="unfinished">Hex jelölés</translation>
+        <translation>Hex jelölés</translation>
     </message>
 </context>
 </TS>
