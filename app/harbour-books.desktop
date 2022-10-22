@@ -15,7 +15,7 @@ Icon=harbour-books
 X-Nemo-Application-Type=silica-qt5
 
 [X-Sailjail]
-Permissions=Documents;Downloads;RemovableMedia
+Permissions=Documents;Downloads;RemovableMedia;Audio
 
 [X-HarbourBackup]
 BackupPathList=.local/share/harbour-books/:Documents/Books/
