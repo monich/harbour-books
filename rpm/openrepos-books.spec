@@ -1,6 +1,6 @@
 Name:           openrepos-books
 Summary:        E-book reader
-Version:        1.1.2
+Version:        1.1.3
 Release:        1
 License:        BSD
 Vendor:         slava
