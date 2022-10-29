@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2004-2010 Geometer Plus <contact@geometerplus.com>
- * Copyright (C) 2015-2020 Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2015-2022 Slava Monich <slava.monich@jolla.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +28,7 @@ struct ZLColor {
 	unsigned char Blue;
 
 	static const unsigned long ALPHA_MASK = 0xff000000;
+	static const unsigned long RGB_MASK = 0x00ffffff;
 
 	ZLColor(unsigned char r, unsigned char g, unsigned char b, unsigned char a);
 	ZLColor(unsigned char r, unsigned char g, unsigned char b);
@@ -37,7 +38,7 @@ struct ZLColor {
 	unsigned long intValue();
 	static unsigned long rgbValue(unsigned long rgb, unsigned char a = 0xff);
 
-	bool equals(const ZLColor color) const;
+	bool equals(const ZLColor& color) const;
 	bool operator == (const ZLColor &color) const;
 	bool operator != (const ZLColor &color) const;
 };
@@ -48,7 +49,7 @@ inline ZLColor::ZLColor(unsigned long argb) :  Alpha((unsigned char)(argb >> 24)
 inline void ZLColor::setIntValue(unsigned long argb) { Alpha = (unsigned char)(argb >> 24); Red = (unsigned char)(argb >> 16); Green = (unsigned char)(argb >> 8); Blue = (unsigned char)argb; }
 inline unsigned long ZLColor::intValue() { return (((unsigned long)Alpha) << 24) | (((unsigned long)Red) << 16) | (((unsigned long)Green) << 8) | (unsigned long)Blue; }
 inline unsigned long ZLColor::rgbValue(unsigned long rgb, unsigned char a) { return (((unsigned long)a) << 24) | rgb; }
-inline bool ZLColor::equals(const ZLColor color) const { return (Red == color.Red) && (Green == color.Green) && (Blue == color.Blue) && (Alpha == color.Alpha); }
+inline bool ZLColor::equals(const ZLColor& color) const { return (Red == color.Red) && (Green == color.Green) && (Blue == color.Blue) && (Alpha == color.Alpha); }
 inline bool ZLColor::operator == (const ZLColor &color) const { return equals(color); }
 inline bool ZLColor::operator != (const ZLColor &color) const { return !equals(color); }
 
