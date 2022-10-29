@@ -46,6 +46,7 @@
 
 #include <QQuickPaintedItem>
 #include <QBasicTimer>
+#include <QColor>
 #include <QList>
 
 class BooksPageWidget: public QQuickPaintedItem, private BooksLoadingProperty
@@ -61,6 +62,7 @@ class BooksPageWidget: public QQuickPaintedItem, private BooksLoadingProperty
     Q_PROPERTY(int rightMargin READ rightMargin WRITE setRightMargin NOTIFY rightMarginChanged)
     Q_PROPERTY(int topMargin READ topMargin WRITE setTopMargin NOTIFY topMarginChanged)
     Q_PROPERTY(int bottomMargin READ bottomMargin WRITE setBottomMargin NOTIFY bottomMarginChanged)
+    Q_PROPERTY(QColor backgroundColor READ backgroundColor NOTIFY backgroundColorChanged)
     Q_PROPERTY(BooksBookModel* model READ model WRITE setModel NOTIFY modelChanged)
     Q_PROPERTY(BooksPos bookPos READ bookPos WRITE setBookPos NOTIFY bookPosChanged)
 
@@ -82,6 +84,8 @@ public:
 
     int page() const;
     void setPage(int);
+
+    QColor backgroundColor() const;
 
     BooksBookModel* model() const;
     void setModel(BooksBookModel*);
@@ -119,6 +123,7 @@ Q_SIGNALS:
     void rightMarginChanged();
     void topMarginChanged();
     void bottomMarginChanged();
+    void backgroundColorChanged();
     void browserLinkPressed(QString url);
     void imagePressed(QString imageId, QRect rect);
     void activeTouch(int touchX, int touchY);
@@ -134,7 +139,6 @@ private Q_SLOTS:
     void onColorsChanged();
     void onResetTaskDone();
     void onRenderTaskDone();
-    void onRenderTaskDoneDelayUpdate();
     void onClearSelectionTaskDone();
     void onStartSelectionTaskDone();
     void onExtendSelectionTaskDone();
@@ -151,7 +155,6 @@ private:
     void resetView();
     void releaseExtendSelectionTasks();
     void scheduleRepaint();
-    void scheduleRepaintDelayUpdate();
     void cancelRepaint();
     void renderTaskDone();
     void updateNow();
@@ -169,6 +172,7 @@ private:
     shared_ptr<BooksTaskQueue> iTaskQueue;
     shared_ptr<ZLTextStyle> iTextStyle;
     BooksPos iBookPos;
+    QColor iBackgroundColor;
     QBasicTimer iResizeTimer;
     QBasicTimer iDelayUpdateTimer;
     BooksBookModel* iModel;
@@ -203,6 +207,8 @@ inline int BooksPageWidget::page() const
     { return iPage; }
 inline const BooksPos& BooksPageWidget::bookPos() const
     { return iBookPos; }
+inline QColor BooksPageWidget::backgroundColor() const
+    { return iBackgroundColor; }
 inline BooksBookModel* BooksPageWidget::model() const
     { return iModel; }
 inline int BooksPageWidget::leftMargin() const

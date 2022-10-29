@@ -48,7 +48,6 @@
 #include <QPainter>
 
 static const QString IMAGE_URL("image://%1/%2");
-static const int REPAINT_DELAY_MSEC = 250;
 
 // ==========================================================================
 // BooksPageWidget::Data
@@ -534,6 +533,7 @@ BooksPageWidget::BooksPageWidget(QQuickItem* aParent) :
     iSettings(BooksSettings::sharedInstance()),
     iTaskQueue(BooksTaskQueue::defaultQueue()),
     iTextStyle(BooksTextStyle::defaults()),
+    iBackgroundColor(iSettings->pageBackgroundColor()),
     iModel(NULL),
     iResetTask(NULL),
     iRenderTask(NULL),
@@ -647,7 +647,7 @@ BooksPageWidget::onColorsChanged()
 {
     HDEBUG(iPage);
     HASSERT(sender() == iSettings);
-    scheduleRepaintDelayUpdate();
+    scheduleRepaint();
 }
 
 void
@@ -825,22 +825,6 @@ BooksPageWidget::scheduleRepaint()
 }
 
 void
-BooksPageWidget::scheduleRepaintDelayUpdate()
-{
-    BooksLoadingSignalBlocker block(this);
-    cancelRepaint();
-    if (width() > 0 && height() > 0) {
-        if (!iData.isNull() && !iData->iView.isNull()) {
-            (iRenderTask = new RenderTask(iTaskQueue->pool(), thread(),
-                iData, iSettings->colorScheme()))->submit(this,
-                SLOT(onRenderTaskDoneDelayUpdate()));
-        } else if (!iDelayUpdateTimer.isActive()) {
-            iDelayUpdateTimer.start(REPAINT_DELAY_MSEC, this);
-        }
-    }
-}
-
-void
 BooksPageWidget::updateNow()
 {
     iDelayUpdateTimer.stop();
@@ -862,10 +846,16 @@ BooksPageWidget::onResetTaskDone()
 void
 BooksPageWidget::renderTaskDone()
 {
-    HASSERT(sender() == iRenderTask);
-    iImage = iRenderTask->iImage;
-    iRenderTask->release(this);
+    RenderTask* task = iRenderTask;
+    HASSERT(sender() == task);
     iRenderTask = NULL;
+    iImage = task->iImage;
+    const QColor bg(task->iColors.background());
+    if (iBackgroundColor != bg) {
+        iBackgroundColor = bg;
+        Q_EMIT backgroundColorChanged();
+    }
+    task->release(this);
 }
 
 void
@@ -874,16 +864,6 @@ BooksPageWidget::onRenderTaskDone()
     BooksLoadingSignalBlocker block(this);
     renderTaskDone();
     updateNow();
-}
-
-void
-BooksPageWidget::onRenderTaskDoneDelayUpdate()
-{
-    BooksLoadingSignalBlocker block(this);
-    renderTaskDone();
-    if (!iDelayUpdateTimer.isActive()) {
-        iDelayUpdateTimer.start(REPAINT_DELAY_MSEC, this);
-    }
 }
 
 void
