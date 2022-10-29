@@ -61,20 +61,21 @@ public:
     static const Colors DEFAULT_COLORS;
     static const QString DEFAULT_SCHEME_ID;
 
-    Private(const Colors*);
+    Private(const Colors*, bool);
     ~Private();
 
     void updateSchemeId();
 
-    static QString generateSchemeId(const Colors*);
-    static QString defaultSchemeId() { return generateSchemeId(&DEFAULT_COLORS); }
+    static QString generateSchemeId(const Colors*, bool);
+    static QString defaultSchemeId() { return generateSchemeId(&DEFAULT_COLORS, false); }
     static void parseRgb(QRgb*, const QString&);
     static uint rgb(QRgb);
 
 public:
     QAtomicInt iRef;
-    Colors iColors;
     QString iSchemeId;
+    Colors iColors;
+    bool iInverted;
 };
 
 const BooksColorScheme::Private::Colors BooksColorScheme::Private::DEFAULT_COLORS = {
@@ -86,9 +87,11 @@ const QString BooksColorScheme::Private::DEFAULT_SCHEME_ID
     (BooksColorScheme::Private::defaultSchemeId());
 
 BooksColorScheme::Private::Private(
-    const Colors* aColors) :
+    const Colors* aColors,
+    bool aInverted) :
     iRef(1),
-    iColors(*aColors)
+    iColors(*aColors),
+    iInverted(aInverted)
 {
     // Note: leaving iSchemeId empty. Caller must do updateSchemeId()
 }
@@ -99,13 +102,15 @@ BooksColorScheme::Private::~Private()
 
 QString
 BooksColorScheme::Private::generateSchemeId(
-    const Colors* aColors)
+    const Colors* aColors,
+    bool aInverted)
 {
     QCryptographicHash md5(QCryptographicHash::Md5);
     #define HASH_COLOR(colorName,ColorName,key,default) \
     md5.addData((const char*)&aColors->MEMBER_VAR(ColorName), sizeof(aColors->MEMBER_VAR(ColorName)));
     BOOKS_COLORS(HASH_COLOR)
     #undef HASH_COLOR
+    md5.addData((const char*)&aInverted, sizeof(aInverted));
     return QString(QLatin1String(md5.result().toHex()));
 }
 
@@ -128,7 +133,7 @@ inline
 void
 BooksColorScheme::Private::updateSchemeId()
 {
-    iSchemeId = generateSchemeId(&iColors);
+    iSchemeId = generateSchemeId(&iColors, iInverted);
 }
 
 void
@@ -201,7 +206,7 @@ BooksColorScheme::BooksColorScheme(
     #undef PARSE_KEY
 
     if (!colors.isDefault()) {
-        (iPrivate = new Private(&colors))->updateSchemeId();
+        (iPrivate = new Private(&colors, false))->updateSchemeId();
     }
 }
 
@@ -219,6 +224,12 @@ BooksColorScheme::~BooksColorScheme()
     if (iPrivate && !iPrivate->iRef.deref()) {
         delete iPrivate;
     }
+}
+
+bool
+BooksColorScheme::isInverted() const
+{
+    return iPrivate && iPrivate->iInverted;
 }
 
 const QString
@@ -295,11 +306,11 @@ BooksColorScheme BooksColorScheme::with##ColorName(QRgb aColor) const { \
         if (iPrivate) { \
             Private::Colors colors(iPrivate->iColors); \
             colors.MEMBER_VAR(ColorName) = aColor; \
-            if (!colors.isDefault()) { \
-                (scheme.iPrivate = new Private(&colors))->updateSchemeId(); \
+            if (isInverted() || !colors.isDefault()) { \
+                (scheme.iPrivate = new Private(&colors, isInverted()))->updateSchemeId(); \
             } \
         } else { \
-            scheme.iPrivate = new Private(&Private::DEFAULT_COLORS); \
+            scheme.iPrivate = new Private(&Private::DEFAULT_COLORS, isInverted()); \
             scheme.iPrivate->iColors.MEMBER_VAR(ColorName) = aColor; \
             scheme.iPrivate->updateSchemeId(); \
         } \
@@ -315,8 +326,8 @@ BooksColorScheme::inverted() const
     BooksColorScheme scheme;
     Private::Colors colors = iPrivate ? iPrivate->iColors : Private::DEFAULT_COLORS;
     colors.invert();
-    if (!colors.isDefault()) {
-        (scheme.iPrivate = new Private(&colors))->updateSchemeId();
+    if (!isInverted() || !colors.isDefault()) {
+        (scheme.iPrivate = new Private(&colors, !isInverted()))->updateSchemeId();
     }
     return scheme;
 }
@@ -329,8 +340,8 @@ BooksColorScheme::invertedWithSelectionBackground(
     Private::Colors colors = iPrivate ? iPrivate->iColors : Private::DEFAULT_COLORS;
     colors.invert();
     colors.iSelectionBackground = aColor;
-    if (!colors.isDefault()) {
-        (scheme.iPrivate = new Private(&colors))->updateSchemeId();
+    if (!isInverted() || !colors.isDefault()) {
+        (scheme.iPrivate = new Private(&colors, !isInverted()))->updateSchemeId();
     }
     return scheme;
 }

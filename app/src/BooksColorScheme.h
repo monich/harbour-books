@@ -62,6 +62,7 @@ public:
     bool operator != (const BooksColorScheme&) const;
     bool equals(const BooksColorScheme&) const;
 
+    bool isInverted() const;
     const QString schemeId() const;
     const QString toString() const;
 

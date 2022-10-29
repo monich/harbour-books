@@ -291,6 +291,10 @@ ZLColor BooksPaintContext::realColor(const std::string& aStyle, BooksColorScheme
                 } else {
                     argb = ZLColor::rgbValue(rgb);
                 }
+                if (aColors.isInverted()) {
+                    argb = ((~(argb & ZLColor::RGB_MASK)) & ZLColor::RGB_MASK) |
+                        (argb & ZLColor::ALPHA_MASK);
+                }
             }
         }
     } else if (aStyle == INTERNAL_HYPERLINK) {
