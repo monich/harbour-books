@@ -1,6 +1,6 @@
 /*
-  Copyright (C) 2015-2020 Jolla Ltd.
-  Copyright (C) 2015-2020 Slava Monich <slava.monich@jolla.com>
+  Copyright (C) 2015-2022 Jolla Ltd.
+  Copyright (C) 2015-2022 Slava Monich <slava.monich@jolla.com>
 
   You may use this file under the terms of BSD license as follows:
 
@@ -34,6 +34,8 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 import harbour.books 1.0
+
+import "Books.js" as Books
 
 Item {
     id: root
@@ -127,6 +129,7 @@ Item {
         maximumValue: pageCount > 0 ? pageCount - 1 : 0
         leftMargin: Theme.horizontalPageMargin
         rightMargin: Theme.horizontalPageMargin
+        opacity: Books.contentOpacity(Settings.brightness)
         primaryColor: Settings.primaryPageToolColor
         secondaryColor: Settings.primaryPageToolColor
         highlightColor: Settings.highlightPageToolColor
