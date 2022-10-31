@@ -1,6 +1,6 @@
 /*
-  Copyright (C) 2015-2021 Jolla Ltd.
-  Copyright (C) 2015-2021 Slava Monich <slava.monich@jolla.com>
+  Copyright (C) 2015-2022 Jolla Ltd.
+  Copyright (C) 2015-2022 Slava Monich <slava.monich@jolla.com>
 
   You may use this file under the terms of the BSD license as follows:
 
@@ -38,10 +38,10 @@ CoverBackground {
     id: root
     transparent: !_haveBook || grid.count < 6
 
-    property variant book
-    property variant shelf
+    property var book
+    property var shelf
 
-    property bool _haveBook: book ? true : false
+    readonly property bool _haveBook: book ? true : false
 
     CoverModel {
         id: coverModel
@@ -105,7 +105,7 @@ CoverBackground {
             fill: parent
         }
         text: book ? book.title : ""
-        visible: bookCover.empty
-        color: "#FFE898"
+        visible: book && !book.hasCover
+        color: "#ffe898" // Derived from the default cover image
     }
 }

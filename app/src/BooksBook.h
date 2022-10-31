@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2015-2021 Jolla Ltd.
- * Copyright (C) 2015-2021 Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2015-2022 Jolla Ltd.
+ * Copyright (C) 2015-2022 Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
  *
@@ -47,7 +47,9 @@
 #include <QImage>
 #include <QtQml>
 
-class BooksBook : public QObject, public BooksItem
+class BooksBook :
+    public QObject,
+    public BooksItem
 {
     class HashTask;
     class CoverTask;
@@ -63,6 +65,7 @@ class BooksBook : public QObject, public BooksItem
     Q_PROPERTY(BooksBook* book READ book CONSTANT)
     Q_PROPERTY(bool accessible READ accessible NOTIFY accessibleChanged)
     Q_PROPERTY(bool loadingCover READ loadingCover NOTIFY loadingCoverChanged)
+    Q_PROPERTY(bool hasCover READ hasCoverImage NOTIFY hasCoverChanged)
     Q_PROPERTY(bool copyingOut READ copyingOut NOTIFY copyingOutChanged)
     Q_PROPERTY(bool fontSizeAdjust READ fontSizeAdjust WRITE setFontSizeAdjust NOTIFY fontSizeAdjustChanged)
 
@@ -80,7 +83,7 @@ public:
     QString authors() const;
     QByteArray hash() const;
     int fontSizeAdjust() const;
-    bool setFontSizeAdjust(int aFontSizeAdjust);
+    bool setFontSizeAdjust(int);
     int pageStackPos() const;
     BooksPos::List pageStack() const;
     void setPageStack(BooksPos::List aStack, int aStackPos);
@@ -92,25 +95,25 @@ public:
     bool hasCoverImage() const;
     bool requestCoverImage();
     void cancelCoverRequest();
-    void setCoverImage(QImage aImage);
+    void setCoverImage(const QImage);
     QImage coverImage() const;
-    void setCopyingOut(bool aValue);
+    void setCopyingOut(bool);
 
     // BooksItem
-    virtual BooksItem* retain();
-    virtual void release();
-    virtual QObject* object();
-    virtual BooksShelf* shelf();
-    virtual BooksBook* book();
-    virtual QString name() const;
-    virtual QString fileName() const;
-    virtual QString path() const;
-    virtual bool accessible() const;
-    virtual void deleteFiles();
-    virtual BooksItem* copyTo(const BooksStorage& aStorage, QString aRelPath,
-        CopyOperation* aObserver);
+    BooksItem* retain() Q_DECL_OVERRIDE;
+    void release() Q_DECL_OVERRIDE;
+    QObject* object() Q_DECL_OVERRIDE;
+    BooksShelf* shelf() Q_DECL_OVERRIDE;
+    BooksBook* book() Q_DECL_OVERRIDE;
+    QString name() const Q_DECL_OVERRIDE;
+    QString fileName() const Q_DECL_OVERRIDE;
+    QString path() const Q_DECL_OVERRIDE;
+    bool accessible() const Q_DECL_OVERRIDE;
+    void deleteFiles() Q_DECL_OVERRIDE;
+    BooksItem* copyTo(const BooksStorage&, QString, CopyOperation*) Q_DECL_OVERRIDE;
 
 Q_SIGNALS:
+    void hasCoverChanged();
     void coverImageChanged();
     void loadingCoverChanged();
     void accessibleChanged();
@@ -128,10 +131,10 @@ private Q_SLOTS:
 private:
     void init();
     bool coverTaskDone();
-    bool makeLink(QString aDestPath);
+    bool makeLink(QString);
     void requestSave();
     QString cachedImagePath() const;
-    static bool isCanceled(CopyOperation* aOperation);
+    static bool isCanceled(CopyOperation*);
 
 private:
     QAtomicInt iRef;

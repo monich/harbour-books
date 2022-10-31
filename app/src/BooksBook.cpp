@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2015-2021 Jolla Ltd.
- * Copyright (C) 2015-2021 Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2015-2022 Jolla Ltd.
+ * Copyright (C) 2015-2022 Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
  *
@@ -71,9 +71,9 @@ class BooksBook::CoverPaintContext : public BooksPaintContext {
 public:
     CoverPaintContext();
 
-    void drawImage(int x, int y, const ZLImageData& image);
-    void drawImage(int x, int y, const ZLImageData& image, int width, int height, ScalingType type);
-    void handleImage(const ZLImageData& image);
+    void drawImage(int, int, const ZLImageData&) Q_DECL_OVERRIDE;
+    void drawImage(int, int, const ZLImageData&, int, int, ScalingType) Q_DECL_OVERRIDE;
+    void handleImage(const ZLImageData&);
     bool gotIt() const;
 
 public:
@@ -532,11 +532,15 @@ bool BooksBook::hasCoverImage() const
     return iCoverImage.width() > 0 && iCoverImage.height() > 0;
 }
 
-void BooksBook::setCoverImage(QImage aImage)
+void BooksBook::setCoverImage(const QImage aImage)
 {
     if (iCoverImage != aImage) {
+        const bool hadCover = hasCoverImage();
         iCoverImage = aImage;
         Q_EMIT coverImageChanged();
+        if (hadCover != hasCoverImage()) {
+            Q_EMIT hasCoverChanged();
+        }
     }
 }
 
@@ -568,8 +572,7 @@ bool BooksBook::coverTaskDone()
     HDEBUG(iTitle << iCoverTask->hasImage());
     const bool gotCover = iCoverTask->hasImage();
     if (gotCover) {
-        iCoverImage = iCoverTask->iCoverImage;
-        Q_EMIT coverImageChanged();
+        setCoverImage(iCoverTask->iCoverImage);
     }
     iCoverTask->release(this);
     iCoverTask = NULL;
