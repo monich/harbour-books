@@ -1,6 +1,6 @@
 /*
+  Copyright (C) 2015-2023 Slava Monich <slava@monich.com>
   Copyright (C) 2015-2022 Jolla Ltd.
-  Copyright (C) 2015-2022 Slava Monich <slava.monich@jolla.com>
 
   You may use this file under the terms of BSD license as follows:
 
@@ -280,8 +280,6 @@ Item {
             pager.setPage(currentPage)
         }
 
-        onCurrentIndexChanged: updateModel()
-
         onMovingChanged: updateModel()
 
         delegate: BooksPageView {
@@ -368,9 +366,9 @@ Item {
         }
 
         function updateModel() {
-            if (completed && !moving && currentIndex >= 0 && !bookViewWatcher.updatingViewPosition) {
+            if (completed && !moving && bookViewWatcher.currentIndex >= 0 && !bookViewWatcher.updatingViewPosition) {
                 hideViews()
-                stackModel.currentPage = currentIndex
+                stackModel.currentPage = bookViewWatcher.currentIndex
             }
         }
 
@@ -378,6 +376,7 @@ Item {
             id: bookViewWatcher
 
             listView: bookView
+            onCurrentIndexChanged: bookView.updateModel()
         }
 
         NumberAnimation {
