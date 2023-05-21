@@ -1,6 +1,6 @@
 /*
   Copyright (C) 2015-2021 Jolla Ltd.
-  Copyright (C) 2015-2021 Slava Monich <slava.monich@jolla.com>
+  Copyright (C) 2015-2023 Slava Monich <slava@monich.com>
 
   You may use this file under the terms of BSD license as follows:
 
@@ -52,10 +52,12 @@ ApplicationWindow {
 
     property variant currentShelf: mainPage.currentShelf
 
-    DisplayBlanking {
+    HarbourDisplayBlanking {
         pauseRequested: Qt.application.active &&
-            Settings.currentBook &&
-            Settings.keepDisplayOn
+            Settings.currentBook && Settings.keepDisplayOn &&
+            (HarbourBattery.batteryState === HarbourBattery.BatteryStateCharging ||
+             HarbourBattery.batteryLevel === 0 || // Zero if unknown (not reported by mce)
+             HarbourBattery.batteryLevel >= 20)
     }
 
     Binding {

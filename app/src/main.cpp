@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2015-2022 Jolla Ltd.
- * Copyright (C) 2015-2022 Slava Monich <slava.monich@jolla.com>
+ * Copyright (C) 2015-2023 Slava Monich <slava@monich.com>
  *
  * You may use this file under the terms of the BSD license as follows:
  *
@@ -52,6 +52,7 @@
 #include "BooksHints.h"
 #include "BooksUtil.h"
 
+#include "HarbourBattery.h"
 #include "HarbourColorEditorModel.h"
 #include "HarbourDisplayBlanking.h"
 #include "HarbourDebug.h"
@@ -96,14 +97,15 @@ Q_DECL_EXPORT int main(int argc, char **argv)
     BOOKS_QML_REGISTER_(BooksPageWidget, "PageWidget");
     BOOKS_QML_REGISTER_(BooksListWatcher, "ListWatcher");
     BOOKS_QML_REGISTER_(BooksCoverWidget, "BookCover");
-    BOOKS_QML_REGISTER_(HarbourDisplayBlanking, "DisplayBlanking");
 
     // But these do (and I think it's a good idea)
     BOOKS_QML_REGISTER(HarbourColorEditorModel);
+    BOOKS_QML_REGISTER(HarbourDisplayBlanking);
     BOOKS_QML_REGISTER(BooksColorSchemeModel);
     BOOKS_QML_REGISTER(BooksImportModel);
     BOOKS_QML_REGISTER(BooksPathModel);
     BOOKS_QML_REGISTER(BooksPageStack);
+    BOOKS_QML_REGISTER_SINGLETON(HarbourBattery);
     BOOKS_QML_REGISTER_SINGLETON(HarbourUtil);
     BOOKS_QML_REGISTER_SINGLETON(BooksHints);
     BOOKS_QML_REGISTER_SINGLETON(BooksUtil);

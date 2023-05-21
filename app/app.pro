@@ -25,10 +25,10 @@ CONFIG(debug, debug|release) {
 }
 
 # Directories
-FBREADER_DIR = $$_PRO_FILE_PWD_/../fbreader
-FRIBIDI_DIR = $$_PRO_FILE_PWD_/../fribidi
-LINEBREAK_DIR = $$_PRO_FILE_PWD_/../linebreak
-HARBOUR_LIB_DIR = $$_PRO_FILE_PWD_/../harbour-lib
+FBREADER_DIR = ../fbreader
+FRIBIDI_DIR = ../fribidi
+LINEBREAK_DIR = ../linebreak
+HARBOUR_LIB_DIR = ../harbour-lib
 
 HARBOUR_INCLUDE_DIR = $$HARBOUR_LIB_DIR/include
 HARBOUR_SRC_DIR = $$HARBOUR_LIB_DIR/src
@@ -194,6 +194,7 @@ openrepos {
 
 HEADERS += \
   $$HARBOUR_INCLUDE_DIR/HarbourBase45.h \
+  $$HARBOUR_INCLUDE_DIR/HarbourBattery.h \
   $$HARBOUR_INCLUDE_DIR/HarbourColorEditorModel.h \
   $$HARBOUR_INCLUDE_DIR/HarbourDisplayBlanking.h \
   $$HARBOUR_INCLUDE_DIR/HarbourJson.h \
@@ -206,6 +207,7 @@ HEADERS += \
 
 SOURCES += \
   $$HARBOUR_SRC_DIR/HarbourBase45.cpp \
+  $$HARBOUR_SRC_DIR/HarbourBattery.cpp \
   $$HARBOUR_SRC_DIR/HarbourColorEditorModel.cpp \
   $$HARBOUR_SRC_DIR/HarbourDisplayBlanking.cpp \
   $$HARBOUR_SRC_DIR/HarbourJson.cpp \
