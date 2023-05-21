@@ -1,6 +1,6 @@
 /*
+ * Copyright (C) 2015-2023 Slava Monich <slava@monich.com>
  * Copyright (C) 2015-2022 Jolla Ltd.
- * Copyright (C) 2015-2022 Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
  *
@@ -8,27 +8,25 @@
  * modification, are permitted provided that the following conditions
  * are met:
  *
- *   1. Redistributions of source code must retain the above copyright
- *      notice, this list of conditions and the following disclaimer.
- *   2. Redistributions in binary form must reproduce the above copyright
- *      notice, this list of conditions and the following disclaimer
- *      in the documentation and/or other materials provided with the
- *      distribution.
- *   3. Neither the names of the copyright holders nor the names of its
- *      contributors may be used to endorse or promote products derived
- *      from this software without specific prior written permission.
+ *  1. Redistributions of source code must retain the above copyright
+ *     notice, this list of conditions and the following disclaimer.
+ *  2. Redistributions in binary form must reproduce the above copyright
+ *     notice, this list of conditions and the following disclaimer
+ *     in the documentation and/or other materials provided with the
+ *     distribution.
+ *  3. Neither the names of the copyright holders nor the names of its
+ *     contributors may be used to endorse or promote products derived
+ *     from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
- * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED
+ * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+ * IN NO EVENT SHALL THE CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) ARISING
+ * IN ANY WAY OUT OF THE USE OR INABILITY TO USE THIS SOFTWARE, EVEN
+ * IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 #include "BooksSettings.h"
@@ -54,8 +52,9 @@
 #define KEY_CURRENT_BOOK            DCONF_PATH_("currentBook")
 #define KEY_CURRENT_FOLDER          DCONF_PATH_("currentFolder")
 #define KEY_REMOVABLE_ROOT          DCONF_PATH_("removableRoot")
-#define KEY_KEEP_DISPLAY_ON         DCONF_PATH_("keepDisplayOn")
 #define KEY_BOOK_PULL_DOWN_MENU     DCONF_PATH_("bookPullDownMenu")
+#define KEY_KEEP_DISPLAY_ON         DCONF_PATH_("keepDisplayOn")
+#define KEY_LOW_BATTERY_LEVEL       DCONF_PATH_("lowBatteryLevel")
 #define KEY_VOLUME_UP_ACTION        DCONF_PATH_("volumeUpAction")
 #define KEY_VOLUME_DOWN_ACTION      DCONF_PATH_("volumeDownAction")
 #define KEY_ORIENTATION             DCONF_PATH_("orientation")
@@ -69,11 +68,12 @@
 #define DEFAULT_CURRENT_BOOK        QString()
 #define DEFAULT_CURRENT_FOLDER      QString()
 #define DEFAULT_REMOVABLE_ROOT      "Books"
-#define DEFAULT_KEEP_DISPLAY_ON     false
 #define DEFAULT_BOOK_PULL_DOWN_MENU true
-#define DEFAULT_VOLUME_UP_ACTION    (BooksSettings::ActionNextPage)
-#define DEFAULT_VOLUME_DOWN_ACTION  (BooksSettings::ActionPreviousPage)
-#define DEFAULT_ORIENTATION         (BooksSettings::OrientationAny)
+#define DEFAULT_KEEP_DISPLAY_ON     false
+#define DEFAULT_LOW_BATTERY_LEVEL   20 // percent
+#define DEFAULT_VOLUME_UP_ACTION    BooksSettings::ActionNextPage
+#define DEFAULT_VOLUME_DOWN_ACTION  BooksSettings::ActionPreviousPage
+#define DEFAULT_ORIENTATION         BooksSettings::OrientationAny
 
 // ==========================================================================
 // BooksSettings::TextStyle
@@ -257,8 +257,9 @@ public:
     MGConfItem* iPageDetailsFixedConf;
     MGConfItem* iTurnPageByTapConf;
     MGConfItem* iSampleBookCopiedConf;
-    MGConfItem* iKeepDisplayOnConf;
     MGConfItem* iBookPullDownMenuConf;
+    MGConfItem* iKeepDisplayOnConf;
+    MGConfItem* iLowBatteryLevelConf;
     MGConfItem* iVolumeUpActionConf;
     MGConfItem* iVolumeDownActionConf;
     MGConfItem* iCurrentFolderConf;
@@ -282,8 +283,9 @@ BooksSettings::Private::Private(BooksSettings* aParent) :
     iPageDetailsFixedConf(new MGConfItem(KEY_PAGE_DETAILS_FIXED, this)),
     iTurnPageByTapConf(new MGConfItem(KEY_TURN_PAGE_BY_TAP, this)),
     iSampleBookCopiedConf(new MGConfItem(KEY_SAMPLE_BOOK_COPIED, this)),
-    iKeepDisplayOnConf(new MGConfItem(KEY_KEEP_DISPLAY_ON, this)),
     iBookPullDownMenuConf(new MGConfItem(KEY_BOOK_PULL_DOWN_MENU, this)),
+    iKeepDisplayOnConf(new MGConfItem(KEY_KEEP_DISPLAY_ON, this)),
+    iLowBatteryLevelConf(new MGConfItem(KEY_LOW_BATTERY_LEVEL, this)),
     iVolumeUpActionConf(new MGConfItem(KEY_VOLUME_UP_ACTION, this)),
     iVolumeDownActionConf(new MGConfItem(KEY_VOLUME_DOWN_ACTION, this)),
     iCurrentFolderConf(new MGConfItem(KEY_CURRENT_FOLDER, this)),
@@ -303,8 +305,9 @@ BooksSettings::Private::Private(BooksSettings* aParent) :
     connect(iPageDetailsFixedConf, SIGNAL(valueChanged()), aParent, SIGNAL(pageDetailsFixedChanged()));
     connect(iTurnPageByTapConf, SIGNAL(valueChanged()), aParent, SIGNAL(turnPageByTapChanged()));
     connect(iSampleBookCopiedConf, SIGNAL(valueChanged()), aParent, SIGNAL(sampleBookCopiedChanged()));
-    connect(iKeepDisplayOnConf, SIGNAL(valueChanged()), aParent, SIGNAL(keepDisplayOnChanged()));
     connect(iBookPullDownMenuConf, SIGNAL(valueChanged()), aParent, SIGNAL(bookPullDownMenuChanged()));
+    connect(iKeepDisplayOnConf, SIGNAL(valueChanged()), aParent, SIGNAL(keepDisplayOnChanged()));
+    connect(iLowBatteryLevelConf, SIGNAL(valueChanged()), aParent, SIGNAL(lowBatteryLevelChanged()));
     connect(iVolumeUpActionConf, SIGNAL(valueChanged()), aParent, SIGNAL(volumeUpActionChanged()));
     connect(iVolumeDownActionConf, SIGNAL(valueChanged()), aParent, SIGNAL(volumeDownActionChanged()));
     connect(iOrientationConf, SIGNAL(valueChanged()), aParent, SIGNAL(orientationChanged()));
@@ -687,20 +690,6 @@ BooksSettings::setTurnPageByTap(
 }
 
 bool
-BooksSettings::keepDisplayOn() const
-{
-    return iPrivate->iKeepDisplayOnConf->value(DEFAULT_KEEP_DISPLAY_ON).toBool();
-}
-
-void
-BooksSettings::setKeepDisplayOn(
-    bool aValue)
-{
-    HDEBUG(aValue);
-    iPrivate->iKeepDisplayOnConf->set(aValue);
-}
-
-bool
 BooksSettings::bookPullDownMenu() const
 {
     return iPrivate->iBookPullDownMenuConf->value(DEFAULT_BOOK_PULL_DOWN_MENU).toBool();
@@ -727,6 +716,33 @@ BooksSettings::setSampleBookCopied()
     iPrivate->iSampleBookCopiedConf->set(true);
 }
 
+bool
+BooksSettings::keepDisplayOn() const
+{
+    return iPrivate->iKeepDisplayOnConf->value(DEFAULT_KEEP_DISPLAY_ON).toBool();
+}
+
+void
+BooksSettings::setKeepDisplayOn(
+    bool aValue)
+{
+    HDEBUG(aValue);
+    iPrivate->iKeepDisplayOnConf->set(aValue);
+}
+
+int
+BooksSettings::lowBatteryLevel() const
+{
+    return iPrivate->iLowBatteryLevelConf->value(DEFAULT_LOW_BATTERY_LEVEL).toInt();
+}
+
+void
+BooksSettings::setLowBatteryLevel(
+    int aValue)
+{
+    HDEBUG(aValue);
+    iPrivate->iLowBatteryLevelConf->set(aValue);
+}
 
 BooksSettings::Action
 BooksSettings::volumeUpAction() const

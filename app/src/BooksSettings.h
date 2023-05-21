@@ -1,6 +1,6 @@
 /*
+ * Copyright (C) 2015-2023 Slava Monich <slava@monich.com>
  * Copyright (C) 2015-2022 Jolla Ltd.
- * Copyright (C) 2015-2022 Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
  *
@@ -8,27 +8,25 @@
  * modification, are permitted provided that the following conditions
  * are met:
  *
- *   1. Redistributions of source code must retain the above copyright
- *      notice, this list of conditions and the following disclaimer.
- *   2. Redistributions in binary form must reproduce the above copyright
- *      notice, this list of conditions and the following disclaimer
- *      in the documentation and/or other materials provided with the
- *      distribution.
- *   3. Neither the names of the copyright holders nor the names of its
- *      contributors may be used to endorse or promote products derived
- *      from this software without specific prior written permission.
+ *  1. Redistributions of source code must retain the above copyright
+ *     notice, this list of conditions and the following disclaimer.
+ *  2. Redistributions in binary form must reproduce the above copyright
+ *     notice, this list of conditions and the following disclaimer
+ *     in the documentation and/or other materials provided with the
+ *     distribution.
+ *  3. Neither the names of the copyright holders nor the names of its
+ *     contributors may be used to endorse or promote products derived
+ *     from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
- * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
- * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED
+ * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+ * IN NO EVENT SHALL THE CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) ARISING
+ * IN ANY WAY OUT OF THE USE OR INABILITY TO USE THIS SOFTWARE, EVEN
+ * IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 #ifndef BOOKS_SETTINGS_H
@@ -54,8 +52,9 @@ class BooksSettings : public BooksSettingsBase
     Q_PROPERTY(bool pageDetailsFixed READ pageDetailsFixed WRITE setPageDetailsFixed NOTIFY pageDetailsFixedChanged)
     Q_PROPERTY(bool turnPageByTap READ turnPageByTap WRITE setTurnPageByTap NOTIFY turnPageByTapChanged)
     Q_PROPERTY(bool sampleBookCopied READ sampleBookCopied NOTIFY sampleBookCopiedChanged)
-    Q_PROPERTY(bool keepDisplayOn READ keepDisplayOn WRITE setKeepDisplayOn NOTIFY keepDisplayOnChanged)
     Q_PROPERTY(bool bookPullDownMenu READ bookPullDownMenu WRITE setBookPullDownMenu NOTIFY bookPullDownMenuChanged)
+    Q_PROPERTY(bool keepDisplayOn READ keepDisplayOn WRITE setKeepDisplayOn NOTIFY keepDisplayOnChanged)
+    Q_PROPERTY(int lowBatteryLevel READ lowBatteryLevel WRITE setLowBatteryLevel NOTIFY lowBatteryLevelChanged)
     Q_PROPERTY(int volumeUpAction READ volumeUpAction WRITE setVolumeUpAction NOTIFY volumeUpActionChanged)
     Q_PROPERTY(int volumeDownAction READ volumeDownAction WRITE setVolumeDownAction NOTIFY volumeDownActionChanged)
     Q_PROPERTY(QObject* currentBook READ currentBook WRITE setCurrentBook NOTIFY currentBookChanged)
@@ -111,14 +110,17 @@ public:
     bool turnPageByTap() const;
     void setTurnPageByTap(bool);
 
-    bool keepDisplayOn() const;
-    void setKeepDisplayOn(bool);
-
     bool bookPullDownMenu() const;
     void setBookPullDownMenu(bool);
 
     bool sampleBookCopied() const;
     void setSampleBookCopied();
+
+    bool keepDisplayOn() const;
+    void setKeepDisplayOn(bool);
+
+    int lowBatteryLevel() const;
+    void setLowBatteryLevel(int);
 
     Action volumeUpAction() const;
     void setVolumeUpAction(int);
@@ -150,8 +152,9 @@ Q_SIGNALS:
     void pageDetailsFixedChanged();
     void turnPageByTapChanged();
     void sampleBookCopiedChanged();
-    void keepDisplayOnChanged();
     void bookPullDownMenuChanged();
+    void keepDisplayOnChanged();
+    void lowBatteryLevelChanged();
     void volumeUpActionChanged();
     void volumeDownActionChanged();
     void currentBookChanged();
