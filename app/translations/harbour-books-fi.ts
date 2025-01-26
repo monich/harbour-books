@@ -14,7 +14,7 @@
     </message>
     <message id="harbour-books-book-view-back">
         <source>Back to library</source>
-        <translation>Takaisin kirjalistaan</translation>
+        <translation>Takaisin kirjastoon</translation>
     </message>
     <message id="harbour-books-book-view-loading">
         <source>Loading...</source>
@@ -52,7 +52,7 @@
     <message id="harbour-books-shelf-title-placeholder">
         <source>Enter folder name</source>
         <extracomment>Placeholder for the bookshelf title</extracomment>
-        <translation type="unfinished">Anna kansion nimi</translation>
+        <translation>Anna kansion nimi</translation>
     </message>
     <message id="harbour-books-storage-removable">
         <source>Memory card</source>
@@ -75,7 +75,7 @@
     <message id="harbour-books-storage-menu-scan_downloads">
         <source>Scan downloads</source>
         <extracomment>Pulley menu item</extracomment>
-        <translation>Tarkista lataukset</translation>
+        <translation>Etsi latauksista</translation>
     </message>
     <message id="harbour-books-storage-menu-delete_everything">
         <source>Delete all books</source>
@@ -112,12 +112,12 @@
     <message id="harbour-books-book-browser_link-title">
         <source>Link</source>
         <extracomment>External link menu title</extracomment>
-        <translation type="unfinished">Linkki</translation>
+        <translation>Linkki</translation>
     </message>
     <message id="harbour-books-book-browser_link-open_in_browser">
         <source>Open in browser</source>
         <extracomment>Open link in browser</extracomment>
-        <translation type="unfinished">Avaa selaimessa</translation>
+        <translation>Avaa selaimessa</translation>
     </message>
     <message id="harbour-books-book-browser_link-copy_to_clipboard">
         <source>Copy to clipboard</source>
@@ -137,27 +137,27 @@
     <message id="harbour-books-settings-page-display-section_header">
         <source>Display</source>
         <extracomment>Section header for display settings</extracomment>
-        <translation type="unfinished">Näyttö</translation>
+        <translation>Näyttö</translation>
     </message>
     <message id="harbour-books-settings-page-font_size_label">
         <source>Font size</source>
         <extracomment>Slider label</extracomment>
-        <translation type="unfinished">Fonttikoko</translation>
+        <translation>Fonttikoko</translation>
     </message>
     <message id="harbour-books-settings-page-font_size_label-default">
         <source>Default</source>
         <extracomment>Slider value label for the standard font size</extracomment>
-        <translation type="unfinished">Oletus</translation>
+        <translation>Oletus</translation>
     </message>
     <message id="harbour-books-settings-page-night_mode_example">
         <source>Night mode</source>
         <extracomment>Night mode example label</extracomment>
-        <translation type="unfinished">Yötila</translation>
+        <translation>Yötila</translation>
     </message>
     <message id="harbour-books-settings-page-night_mode_brightness_label">
         <source>Brightness in night mode</source>
         <extracomment>Slider label</extracomment>
-        <translation type="unfinished">Kirkkaus yötilassa</translation>
+        <translation>Kirkkaus yötilassa</translation>
     </message>
     <message id="harbour-books-settings-page-orientation_label">
         <source>Orientation</source>
@@ -182,57 +182,57 @@
     <message id="harbour-books-settings-page-page_layout">
         <source>Page layout</source>
         <extracomment>Combo box label</extracomment>
-        <translation type="unfinished">Sivun asettelu</translation>
+        <translation>Sivun asettelu</translation>
     </message>
     <message id="harbour-books-settings-page-layout-dynamic">
         <source>Dynamic</source>
         <extracomment>Combo box value for dynamic page layout</extracomment>
-        <translation type="unfinished">Dynaaminen</translation>
+        <translation>Dynaaminen</translation>
     </message>
     <message id="harbour-books-settings-page-layout-dynamic-detail">
         <source>(toggle on tap)</source>
         <extracomment>Combo box detail for dynamic page layout</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>(vaihda napauttamalla)</translation>
     </message>
     <message id="harbour-books-settings-page-layout-clean">
         <source>Clean</source>
         <extracomment>Combo box value for clean page layout (just the content)</extracomment>
-        <translation type="unfinished">Puhdas sivu</translation>
+        <translation>Puhdas</translation>
     </message>
     <message id="harbour-books-settings-page-layout-clean-detail">
         <source>(just the content)</source>
         <extracomment>Combo box detail for clean page layout (just the content)</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>(pelkkä leipäteksti)</translation>
     </message>
     <message id="harbour-books-settings-page-layout-minimal">
         <source>Minimal</source>
         <extracomment>Combo box value for minimal page layout (title + page)</extracomment>
-        <translation type="unfinished">Minimaalinen</translation>
+        <translation>Minimaalinen</translation>
     </message>
     <message id="harbour-books-settings-page-layout-minimal-detail">
         <source>(title, page)</source>
         <extracomment>Combo box detail for minimal page layout (title + page)</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>(otsikko, sivu)</translation>
     </message>
     <message id="harbour-books-settings-page-layout-normal">
         <source>Regular</source>
         <extracomment>Combo box value for normal page layout (title + page + slider)</extracomment>
-        <translation type="unfinished">Säännöllinen</translation>
+        <translation>Tavallinen</translation>
     </message>
     <message id="harbour-books-settings-page-layout-normal-detail">
         <source>(title, page, slider)</source>
         <extracomment>Combo box detail for normal page layout (title + page + slider)</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>(otsikko, sivu, liukusäädin)</translation>
     </message>
     <message id="harbour-books-settings-page-layout-full">
         <source>Full</source>
         <extracomment>Combo box value for full page layout (title + page + slider)</extracomment>
-        <translation type="unfinished">Kokonainen</translation>
+        <translation>Kokonainen</translation>
     </message>
     <message id="harbour-books-settings-page-layout-full-detail">
         <source>(everything)</source>
         <extracomment>Combo box detail for full page layout (title + page + slider)</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>(kaikki)</translation>
     </message>
     <message id="harbour-books-settings-page-keep_display_on">
         <source>Keep display on while reading</source>
@@ -247,67 +247,67 @@
     <message id="harbour-books-settings-page-navigation-section_header">
         <source>Navigation</source>
         <extracomment>Section header for media keys</extracomment>
-        <translation type="unfinished">Navigointi</translation>
+        <translation>Navigointi</translation>
     </message>
     <message id="harbour-books-settings-page-action-none">
         <source>No action</source>
         <extracomment>Combo box value for no action</extracomment>
-        <translation type="unfinished">Ei käytössä</translation>
+        <translation>Ei käytössä</translation>
     </message>
     <message id="harbour-books-settings-page-action-previous_page">
         <source>Previous page</source>
         <extracomment>Combo box value for previous page action</extracomment>
-        <translation type="unfinished">Edelliselle sivulle</translation>
+        <translation>Edellinen sivu</translation>
     </message>
     <message id="harbour-books-settings-page-action-next_page">
         <source>Next page</source>
         <extracomment>Combo box value for next page action</extracomment>
-        <translation type="unfinished">Seuraavalle sivulle</translation>
+        <translation>Seuraava sivu</translation>
     </message>
     <message id="harbour-books-settings-page-volume_up-label">
         <source>Volume up</source>
         <extracomment>Combo box label</extracomment>
-        <translation type="unfinished">Äänenvoimakkuus ylös</translation>
+        <translation>Äänenvoimakkuuden lisäyspainike</translation>
     </message>
     <message id="harbour-books-settings-page-volume_down-label">
         <source>Volume down</source>
         <extracomment>Combo box label</extracomment>
-        <translation type="unfinished">Äänenvoimakkuus alas</translation>
+        <translation>Äänenvoimakkuuden vähennyspainike</translation>
     </message>
     <message id="harbour-books-settings-page-turn_pages_by_tap">
         <source>Turn pages by tapping the screen</source>
         <extracomment>Text switch label</extracomment>
-        <translation type="unfinished">Käännä sivuja napauttamalla näyttöä</translation>
+        <translation>Käännä sivuja napauttamalla näyttöä</translation>
     </message>
     <message id="harbour-books-settings-page-turn_pages_by_tap-description">
         <source>Tapping near the left edge of the screen returns to the previous page, tapping near the right edge gets you to the next page.</source>
         <extracomment>Text switch description</extracomment>
-        <translation type="unfinished">Napauttamalla lähellä näytön vasenta reunaa palaat edelliselle sivulle, napauttamalla lähellä oikeaa reunaa siirryt seuraavalle sivulle.</translation>
+        <translation>Napauttamalla näytön vasenta reunaa palaat edelliselle sivulle, napauttamalla oikeaa reunaa siirryt seuraavalle sivulle.</translation>
     </message>
     <message id="harbour-books-settings-page-book_pulldown_menu">
         <source>Show pulley menu when the book is open</source>
         <extracomment>Text switch label</extracomment>
-        <translation type="unfinished">Näytä vetovalikko kun kirja on auki</translation>
+        <translation>Näytä vetovalikko kirjan ollessa auki</translation>
     </message>
     <message id="harbour-books-settings-page-book_pulldown_menu-description">
         <source>Without the pulley menu, the book has to be closed by swiping it up.</source>
         <extracomment>Text switch description</extracomment>
-        <translation type="unfinished">Ilman vetovalikkoa kirja on suljettava pyyhkäisemällä sitä ylös.</translation>
+        <translation>Ilman vetovalikkoa kirja on suljettava pyyhkäisemällä ylös.</translation>
     </message>
     <message id="harbour-books-settings-page-colors-section_header">
         <source>Colors</source>
         <extracomment>Section header for colors</extracomment>
-        <translation type="unfinished">Värit</translation>
+        <translation>Värit</translation>
     </message>
     <message id="harbour-books-settings-page-standard_colors">
         <source>Use standard colors</source>
         <extracomment>Text switch label</extracomment>
-        <translation type="unfinished">Käytä vakiovärejä</translation>
+        <translation>Käytä vakiovärejä</translation>
     </message>
     <message id="harbour-books-settings-page-standard_colors-description">
         <source>Note that colors hardcoded in the book override the color scheme.</source>
         <extracomment>Text switch description</extracomment>
-        <translation type="unfinished">Pitää mielessä, että kirjassa määritellyt värit syrjäyttävät vakiovärit.</translation>
+        <translation>Huomaa, että kirjalle määritellyt värit syrjäyttävät vakiovärit.</translation>
     </message>
     <message id="harbour-books-settings-page-removable-section_header">
         <source>Memory card</source>
@@ -317,72 +317,72 @@
     <message id="harbour-books-settings-page-removable_root-label">
         <source>Books folder</source>
         <extracomment>Settings field label</extracomment>
-        <translation type="unfinished">Kansion nimi</translation>
+        <translation>Kirjakansio</translation>
     </message>
     <message id="harbour-books-settings-page-removable_root-description">
         <source>Leave the folder name empty to scan the entire memory card for books.</source>
         <extracomment>Settings field description</extracomment>
-        <translation type="unfinished">Jätä kenttä tyhjäksi käyttää kokonaista muistikorttia.</translation>
+        <translation>Jätä kenttä tyhjäksi etsiäksesi kirjoja koko muistikortilta.</translation>
     </message>
     <message id="harbour-books-color-page_background">
         <source>Page background</source>
         <extracomment>List item label (description of a color scheme element)</extracomment>
-        <translation type="unfinished">Sivun tausta</translation>
+        <translation>Sivun tausta</translation>
     </message>
     <message id="harbour-books-color-text">
         <source>Regular text</source>
         <extracomment>List item label (description of a color scheme element)</extracomment>
-        <translation type="unfinished">Tavallinen teksti</translation>
+        <translation>Tavallinen teksti</translation>
     </message>
     <message id="harbour-books-color-selection_background">
         <source>Selection background</source>
         <extracomment>List item label (description of a color scheme element)</extracomment>
-        <translation type="unfinished">Valinta tausta</translation>
+        <translation>Valinnan tausta</translation>
     </message>
     <message id="harbour-books-color-highlighted_text">
         <source>Highlighted text</source>
         <extracomment>List item label (description of a color scheme element)</extracomment>
-        <translation type="unfinished">Korostettu teksti</translation>
+        <translation>Korostettu teksti</translation>
     </message>
     <message id="harbour-books-color-internal_hyperlink">
         <source>Internal hyperlink</source>
         <extracomment>List item label (description of a color scheme element)</extracomment>
-        <translation type="unfinished">Sisäinen linkki</translation>
+        <translation>Sisäinen linkki</translation>
     </message>
     <message id="harbour-books-color-external_hyperlink">
         <source>External hyperlink</source>
         <extracomment>List item label (description of a color scheme element)</extracomment>
-        <translation type="unfinished">Ulkoinen linkki</translation>
+        <translation>Ulkoinen linkki</translation>
     </message>
     <message id="harbour-books-color_picker-menu-reset_colors">
         <source>Reset colors</source>
         <extracomment>Pulley menu item</extracomment>
-        <translation type="unfinished">Palauttaa värit alkutilaan</translation>
+        <translation>Palauta oletusvärit</translation>
     </message>
     <message id="harbour-books-color_picker-action-select_color">
         <source>Select color</source>
         <extracomment>Dialog title label</extracomment>
-        <translation type="unfinished">Valitse väri</translation>
+        <translation>Valitse väri</translation>
     </message>
     <message id="harbour-books-color_picker-action-add_color">
         <source>Add color</source>
         <extracomment>Dialog title label</extracomment>
-        <translation type="unfinished">Lisää väri</translation>
+        <translation>Lisää väri</translation>
     </message>
     <message id="harbour-books-color_picker-slider-hue">
         <source>Color</source>
         <extracomment>Hue slider label</extracomment>
-        <translation type="unfinished">Väri</translation>
+        <translation>Väri</translation>
     </message>
     <message id="harbour-books-color_picker-slider-brightness">
         <source>Brightness</source>
         <extracomment>Brightness slider label</extracomment>
-        <translation type="unfinished">Kirkkaus</translation>
+        <translation>Kirkkaus</translation>
     </message>
     <message id="harbour-books-color_picker-text-hex_notation">
         <source>Hex notation</source>
         <extracomment>Text field description</extracomment>
-        <translation type="unfinished">Hex-merkintä</translation>
+        <translation>Hex-arvo</translation>
     </message>
 </context>
 </TS>
