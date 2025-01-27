@@ -306,11 +306,12 @@ Item {
             onPageClicked: {
                 root.pageClicked(index)
                 if (Settings.turnPageByTap && mouseY > bookModel.topMargin && mouseY < (pageView.height - bookModel.topMargin)) {
-                    if (mouseX < pageView.width/4) {
+                    var touchMargin = Math.min(pageView.width/4, Theme.itemSizeHuge)
+                    if (mouseX < touchMargin) {
                         bookView.prevPage()
                         return
                     }
-                    if (mouseX > pageView.width*3/4) {
+                    if (mouseX > (pageView.width - touchMargin)) {
                         bookView.nextPage()
                         return
                     }
