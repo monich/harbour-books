@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2015-2023 Slava Monich <slava@monich.com>
+  Copyright (C) 2015-2025 Slava Monich <slava@monich.com>
   Copyright (C) 2015-2022 Jolla Ltd.
 
-  You may use this file under the terms of BSD license as follows:
+  You may use this file under the terms of the BSD license as follows:
 
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions
@@ -263,7 +263,7 @@ Item {
             (!imageView || !imageView.visible) &&
             (!footnoteView || !footnoteView.visible)
 
-        readonly property real maxContentX: Math.max(0, contentWidth - width)
+        readonly property real maxContentX: originX + Math.max(0, contentWidth - width)
         readonly property int currentPage: stackModel.currentPage
         property bool completed
 
@@ -348,7 +348,7 @@ Item {
         }
 
         function prevPage() {
-            if (!scrollAnimation.running && contentX > 0) {
+            if (!scrollAnimation.running && contentX > originX) {
                 hideViews();
                 scrollAnimation.from = contentX
                 scrollAnimation.to = Math.max(0, contentX - width - spacing)
