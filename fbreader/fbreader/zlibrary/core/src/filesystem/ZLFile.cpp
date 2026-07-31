@@ -19,6 +19,7 @@
  */
 
 #include <cstring>
+#include <pthread.h>
 
 #include <ZLStringUtil.h>
 #include <ZLUnicodeUtil.h>
