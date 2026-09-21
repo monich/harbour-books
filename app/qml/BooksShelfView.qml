@@ -1,6 +1,6 @@
 /*
+  Copyright (C) 2015-2026 Slava Monich <slava@monich.com>
   Copyright (C) 2015-2021 Jolla Ltd.
-  Copyright (C) 2015-2021 Slava Monich <slava.monich@jolla.com>
 
   You may use this file under the terms of BSD license as follows:
 
@@ -64,6 +64,7 @@ Item {
 
     readonly property bool _haveBooks: shelfModel.count > 0
     readonly property int _cellsPerRow: Math.floor(width/cellWidth)
+    readonly property int _gridWidth: _cellsPerRow * shelfView.cellWidth
     readonly property int _remorseTimeout: 5000
     readonly property bool _loading: shelfModel.loading || startAnimationTimer.running
     property var _remorse
@@ -174,12 +175,12 @@ Item {
 
     SilicaGridView {
         id: grid
+
+        x: Math.floor((shelfView.width - _gridWidth)/2)
+        width: _gridWidth
         anchors {
             top: storageHeader.bottom
-            left: parent.left
-            right: parent.right
             bottom: parent.bottom
-            leftMargin: Math.floor((shelfView.width - _cellsPerRow * shelfView.cellWidth)/2)
         }
         model: shelfModel
         interactive: !dragInProgress && !scrollToTopAnimation.running
