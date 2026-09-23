@@ -1,36 +1,3 @@
-/*
-  Copyright (C) 2015-2022 Jolla Ltd.
-  Copyright (C) 2015-2022 Slava Monich <slava.monich@jolla.com>
-
-  You may use this file under the terms of BSD license as follows:
-
-  Redistribution and use in source and binary forms, with or without
-  modification, are permitted provided that the following conditions
-  are met:
-
-    1. Redistributions of source code must retain the above copyright
-       notice, this list of conditions and the following disclaimer.
-    2. Redistributions in binary form must reproduce the above copyright
-       notice, this list of conditions and the following disclaimer
-       in the documentation and/or other materials provided with the
-       distribution.
-    3. Neither the names of the copyright holders nor the names of its
-       contributors may be used to endorse or promote products derived
-       from this software without specific prior written permission.
-
-  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-  ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR CONTRIBUTORS
-  BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-  INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
-  THE POSSIBILITY OF SUCH DAMAGE.
-*/
-
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 import org.nemomobile.configuration 1.0
@@ -273,52 +240,31 @@ Page {
                         //: Combo box label
                         //% "Orientation"
                         label: qsTrId("harbour-books-settings-page-orientation_label")
-                        value: currentItem ? currentItem.text : ""
+                        currentIndex: orientation.value
                         menu: ContextMenu {
-                            id: orientationMenu
-
                             x: 0
                             width: orientationComboBox.width
-                            readonly property int defaultIndex: 0
-                            MenuItem {
-                                readonly property int value: 0
-                                //: Combo box value for dynamic orientation
-                                //% "Dynamic"
-                                text: qsTrId("harbour-books-settings-page-orientation-dynamic")
-                                onClicked: orientation.value = value
-                            }
-                            MenuItem {
-                                readonly property int value: 1
-                                //: Combo box value for portrait orientation
-                                //% "Portrait"
-                                text: qsTrId("harbour-books-settings-page-orientation-portrait")
-                                onClicked: orientation.value = value
-                            }
-                            MenuItem {
-                                readonly property int value: 2
-                                //: Combo box value for landscape orientation
-                                //% "Landscape"
-                                text: qsTrId("harbour-books-settings-page-orientation-landscape")
-                                onClicked: orientation.value = value
-                            }
+
+                            onActivated: orientation.value = index
+
+                            //: Combo box value for dynamic orientation
+                            //% "Dynamic"
+                            MenuItem { text: qsTrId("harbour-books-settings-page-orientation-dynamic") }
+                            //: Combo box value for portrait orientation
+                            //% "Portrait"
+                            MenuItem { text: qsTrId("harbour-books-settings-page-orientation-portrait") }
+                            //: Combo box value for landscape orientation
+                            //% "Landscape"
+                            MenuItem { text: qsTrId("harbour-books-settings-page-orientation-landscape") }
                         }
-                        Component.onCompleted: orientation.updateControls()
+
                         ConfigurationValue {
                             id: orientation
+
                             key: _rootPath + "orientation"
                             defaultValue: 0
-                            onValueChanged: updateControls()
-                            function updateControls() {
-                                var n = orientationMenu.children.length
-                                var index = orientationMenu.defaultIndex
-                                for (var i=0; i<n; i++) {
-                                    if (orientationMenu.children[i].value === value) {
-                                        index = i
-                                        break
-                                    }
-                                }
-                                orientationComboBox.currentIndex = index
-                            }
+                            // For some reason, the currentIndex: orientation.value binding doesn't always work
+                            onValueChanged: orientationComboBox.currentIndex = value
                         }
                     }
 
@@ -329,11 +275,12 @@ Page {
                         //% "Page layout"
                         label: qsTrId("harbour-books-settings-page-page_layout")
                         value: currentItem ? currentItem.valueText : ""
-                        readonly property int yBottom: y + Theme.itemSizeSmall
+                        currentIndex: getCurrentIndex()
+
                         menu: ContextMenu {
                             x: 0
                             width: layoutComboBox.width
-                            readonly property int defaultIndex: 0
+
                             BooksDetailMenuItem {
                                 //: Combo box value for dynamic page layout
                                 //% "Dynamic"
@@ -392,21 +339,27 @@ Page {
                                 }
                             }
                         }
-                        Component.onCompleted: updateSelectedItem()
-                        function updateSelectedItem() {
-                            currentIndex = pageDetailsFixed.value ? (pageDetails.value + 1) : 0
+
+                        function getCurrentIndex() {
+                            return pageDetailsFixed.value ? (pageDetails.value + 1) : 0
                         }
+
                         ConfigurationValue {
                             id: pageDetails
+
                             key: _rootPath + "pageDetails"
                             defaultValue: 0
-                            onValueChanged: layoutComboBox.updateSelectedItem()
+                            // For some reason, straight binding doesn't always work
+                            onValueChanged: layoutComboBox.currentIndex = layoutComboBox.getCurrentIndex()
                         }
+
                         ConfigurationValue {
                             id: pageDetailsFixed
+
                             key: _rootPath + "pageDetailsFixed"
                             defaultValue: false
-                            onValueChanged: layoutComboBox.updateSelectedItem()
+                            // For some reason, straight binding doesn't always work
+                            onValueChanged: layoutComboBox.currentIndex = layoutComboBox.getCurrentIndex()
                         }
                     }
                 }
@@ -464,7 +417,6 @@ Page {
                         label: qsTrId("harbour-books-settings-page-volume_down-label")
                         key: _rootPath + "volumeDownAction"
                         defaultValue: 1 // BooksSettings.ActionPreviousPage
-                        readonly property int yBottom: y + Theme.itemSizeSmall
                     }
                 }
 
