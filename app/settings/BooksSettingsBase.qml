@@ -131,7 +131,12 @@ Page {
 
             PageHeader {
                 id: pageHeader
-                rightMargin: Theme.horizontalPageMargin + (appIcon.visible ? (height - appIcon.padding) : 0)
+
+                // Try to align the bottom of the app icon with the bottom of the version label
+                readonly property Item _versionLabel: '_descriptionLabel' in pageHeader ? _descriptionLabel : null
+                readonly property int _iconBottom: _versionLabel ? (_versionLabel.y + _versionLabel.height) : (height - Theme.paddingLarge)
+
+                rightMargin: Theme.horizontalPageMargin + (appIcon.visible ? (appIcon.width + Theme.paddingLarge) : 0)
                 title: applicationName ? applicationName :
                     //: Settings page header (app name)
                     //% "Books"
@@ -143,10 +148,11 @@ Page {
 
                 Image {
                     id: appIcon
-                    readonly property int padding: Theme.paddingLarge
-                    readonly property int size: pageHeader.height - 2 * padding
+
+                    readonly property int size: Theme.iconSizeLauncher
+
                     x: pageHeader.width - width - Theme.horizontalPageMargin
-                    y: padding
+                    y: Math.max(0, pageHeader._iconBottom -  height)
                     width: size
                     height: size
                     sourceSize: Qt.size(size,size)
