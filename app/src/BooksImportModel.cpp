@@ -1,6 +1,6 @@
 /*
+ * Copyright (C) 2015-2026 Slava Monich <slava@monich.com>
  * Copyright (C) 2015-2018 Jolla Ltd.
- * Copyright (C) 2015-2018 Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
  *
@@ -8,27 +8,33 @@
  * modification, are permitted provided that the following conditions
  * are met:
  *
- *   * Redistributions of source code must retain the above copyright
+ *  1. Redistributions of source code must retain the above copyright
  *     notice, this list of conditions and the following disclaimer.
- *   * Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in
- *     the documentation and/or other materials provided with the
+ *
+ *  2. Redistributions in binary form must reproduce the above copyright
+ *     notice, this list of conditions and the following disclaimer
+ *     in the documentation and/or other materials provided with the
  *     distribution.
- *   * Neither the name of Jolla Ltd nor the names of its contributors
- *     may be used to endorse or promote products derived from this
- *     software without specific prior written permission.
+ *
+ *  3. Neither the names of the copyright holders nor the names of its
+ *     contributors may be used to endorse or promote products derived
+ *     from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
  * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
- * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
  * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
  * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
  * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
  * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ * The views and conclusions contained in the software and documentation
+ * are those of the authors and should not be interpreted as representing
+ * any official policies, either expressed or implied.
  */
 
 #include "BooksImportModel.h"
@@ -38,7 +44,7 @@
 #include "HarbourDebug.h"
 #include "HarbourTask.h"
 
-#include <QDir>
+#include <QtCore/QDir>
 
 enum BooksImportRole {
     BooksImportRoleTitle = Qt::UserRole,
@@ -54,7 +60,7 @@ enum BooksImportRole {
 
 class BooksImportModel::Data {
 public:
-    Data(BooksBook* iBook);
+    Data(BooksBook*);
     ~Data();
 
     QString title() { return iBook->title(); }
@@ -66,7 +72,8 @@ public:
     bool iSelected;
 };
 
-BooksImportModel::Data::Data(BooksBook* aBook) :
+BooksImportModel::Data::Data(
+    BooksBook* aBook) :
     iBook(aBook),
     iSelected(false)
 {
@@ -82,21 +89,23 @@ BooksImportModel::Data::~Data()
 // BooksImportModel::Task
 // ==========================================================================
 
-class BooksImportModel::Task : public HarbourTask {
+class BooksImportModel::Task :
+    public HarbourTask
+{
     Q_OBJECT
 
 public:
-    Task(QThreadPool* aPool, QString aDest);
+    Task(QThreadPool*, QString dest);
     ~Task();
 
     void performTask();
-    void scanDir(QDir aDir);
-    bool isDuplicate(QString aPath, QFileInfoList aFileList);
-    QByteArray getFileHash(QString aPath);
+    void scanDir(QDir);
+    bool isDuplicate(QString path, QFileInfoList);
+    QByteArray getFileHash(QString path);
 
 Q_SIGNALS:
-    void bookFound(BooksBook* aBook);
-    void progress(int aCount);
+    void bookFound(BooksBook*);
+    void progress(int count);
 
 public:
     QList<BooksBook*> iBooks;
@@ -104,31 +113,39 @@ public:
     QHash<QByteArray,QString> iHashFile;
     QFileInfoList iDestFiles;
     QFileInfoList iSrcFiles;
-    QString iDestDir;
+    const QString iDestDir;
     qint64 iBufSize;
     char* iBuf;
     int iProgress;
 };
 
-BooksImportModel::Task::Task(QThreadPool* aPool, QString aDest) :
+BooksImportModel::Task::Task(
+    QThreadPool* aPool,
+    QString aDest) :
     HarbourTask(aPool),
-    iDestDir(aDest), iBufSize(0x1000), iBuf(NULL), iProgress(0)
-{
-}
+    iDestDir(aDest),
+    iBufSize(0x1000),
+    iBuf(Q_NULLPTR),
+    iProgress(0)
+{}
 
 BooksImportModel::Task::~Task()
 {
     const int n = iBooks.count();
-    for (int i=0; i<n; i++) iBooks.at(i)->release();
+
+    for (int i = 0; i < n; i++) iBooks.at(i)->release();
     delete [] iBuf;
 }
 
-QByteArray BooksImportModel::Task::getFileHash(QString aPath)
+QByteArray
+BooksImportModel::Task::getFileHash(
+    QString aPath)
 {
     if (iFileHash.contains(aPath)) {
         return iFileHash.value(aPath);
     } else {
         QByteArray hash(BooksUtil::fileHashAttr(aPath));
+
         if (hash.isEmpty()) {
             hash = BooksUtil::computeFileHashAndSetAttr(aPath, this);
         }
@@ -140,16 +157,23 @@ QByteArray BooksImportModel::Task::getFileHash(QString aPath)
     }
 }
 
-bool BooksImportModel::Task::isDuplicate(QString aPath, QFileInfoList aList)
+bool
+BooksImportModel::Task::isDuplicate(
+    QString aPath,
+    QFileInfoList aList)
 {
     const int n = aList.count();
+
     if (n > 0) {
         QFileInfo file(aPath);
         QByteArray fileHash;
-        for (int i=0; i<n && !isCanceled(); i++) {
+
+        for (int i = 0; i < n && !isCanceled(); i++) {
             QFileInfo other = aList.at(i);
+
             if (other.size() == file.size()) {
-                QByteArray otherHash(getFileHash(other.filePath()));
+                const QByteArray otherHash(getFileHash(other.filePath()));
+
                 if (!otherHash.isEmpty() && !isCanceled()) {
                     if (fileHash.isEmpty()) fileHash = getFileHash(aPath);
                     if (fileHash == otherHash) {
@@ -165,7 +189,8 @@ bool BooksImportModel::Task::isDuplicate(QString aPath, QFileInfoList aList)
     return false;
 }
 
-void BooksImportModel::Task::performTask()
+void
+BooksImportModel::Task::performTask()
 {
     if (!isCanceled()) {
         if (!iDestDir.isEmpty()) {
@@ -176,7 +201,9 @@ void BooksImportModel::Task::performTask()
     }
 }
 
-void BooksImportModel::Task::scanDir(QDir aDir)
+void
+BooksImportModel::Task::scanDir(
+    QDir aDir)
 {
     // Files first
     if (!isCanceled()) {
@@ -185,15 +212,18 @@ void BooksImportModel::Task::scanDir(QDir aDir)
         QFileInfoList fileList = aDir.entryInfoList(QDir::Files |
             QDir::Readable, QDir::Time);
         const int n = fileList.count();
-        for (int i=0; i<n && !isCanceled(); i++) {
+
+        for (int i = 0; i < n && !isCanceled(); i++) {
             QFileInfo fileInfo(fileList.at(i));
-            QString filePath(fileInfo.canonicalFilePath());
-            std::string path(filePath.toStdString());
+            const QString filePath(fileInfo.canonicalFilePath());
+            const std::string path(filePath.toStdString());
             shared_ptr<Book> book = BooksUtil::bookFromFile(path);
+
             if (!book.isNull()) {
                 if (!isDuplicate(filePath, iDestFiles) &&
                     !isDuplicate(filePath, iSrcFiles)) {
                     BooksBook* newBook = new BooksBook(dummy, QString(), book);
+
                     iBooks.append(newBook);
                     iSrcFiles.append(fileInfo);
                     HDEBUG("found" << path.c_str() << newBook->title());
@@ -212,8 +242,10 @@ void BooksImportModel::Task::scanDir(QDir aDir)
         QFileInfoList dirList = aDir.entryInfoList(QDir::Dirs |
             QDir::NoDotAndDotDot | QDir::Readable, QDir::Time);
         const int n = dirList.count();
-        for (int i=0; i<n && !isCanceled(); i++) {
-            QString dirPath(dirList.at(i).canonicalFilePath());
+
+        for (int i = 0; i < n && !isCanceled(); i++) {
+            const QString dirPath(dirList.at(i).canonicalFilePath());
+
             HDEBUG(dirPath);
             if (!dirPath.isEmpty()) {
                 scanDir(QDir(dirPath));
@@ -226,13 +258,14 @@ void BooksImportModel::Task::scanDir(QDir aDir)
 // BooksImportModel
 // ==========================================================================
 
-BooksImportModel::BooksImportModel(QObject* aParent) :
+BooksImportModel::BooksImportModel(
+    QObject* aParent) :
     QAbstractListModel(aParent),
     iProgress(0),
     iSelectedCount(0),
     iAutoRefresh(false),
     iTaskQueue(BooksTaskQueue::defaultQueue()),
-    iTask(NULL)
+    iTask(Q_NULLPTR)
 {
     iSelectedRole.append(BooksImportRoleSelected);
     HDEBUG("created");
@@ -245,10 +278,12 @@ BooksImportModel::~BooksImportModel()
 {
     HDEBUG("destroyed");
     qDeleteAll(iList);
-    if (iTask) iTask->release(this);
+    if (iTask) iTask->release();
 }
 
-void BooksImportModel::setDestination(QString aDestination)
+void
+BooksImportModel::setDestination(
+    QString aDestination)
 {
     if (iDestination != aDestination) {
         iDestination = aDestination;
@@ -256,15 +291,16 @@ void BooksImportModel::setDestination(QString aDestination)
         Q_EMIT destinationChanged();
         if (iAutoRefresh) {
             if (iTask) {
-                iTask->release(this);
-                iTask = NULL;
+                iTask->release();
+                iTask = Q_NULLPTR;
             }
             refresh();
         }
     }
 }
 
-void BooksImportModel::refresh()
+void
+BooksImportModel::refresh()
 {
     iAutoRefresh = true;
     if (!iTask) {
@@ -294,16 +330,21 @@ void BooksImportModel::refresh()
     }
 }
 
-void BooksImportModel::selectAll()
+void
+BooksImportModel::selectAll()
 {
     const int oldSelectedCount = iSelectedCount;
     const int n = iList.count();
-    for (int i=0; i<n; i++) {
+
+    for (int i = 0; i < n; i++) {
         Data* data = iList.at(i);
+
         if (!data->iSelected) {
             data->iSelected = true;
             iSelectedCount++;
-            QModelIndex index(createIndex(i, 0));
+
+            const QModelIndex index(createIndex(i, 0));
+
             Q_EMIT dataChanged(index, index, iSelectedRole);
         }
     }
@@ -312,28 +353,37 @@ void BooksImportModel::selectAll()
     }
 }
 
-void BooksImportModel::setSelected(int aIndex, bool aSelected)
+void
+BooksImportModel::setSelected(
+    int aIndex,
+    bool aSelected)
 {
     if (validIndex(aIndex)) {
         Data* data = iList.at(aIndex);
+
         if (data->iSelected != aSelected) {
             HDEBUG(data->path() << aSelected);
             if (data->iSelected) iSelectedCount--;
             if (aSelected) iSelectedCount++;
             data->iSelected = aSelected;
 
-            QModelIndex index(createIndex(aIndex, 0));
+            const QModelIndex index(createIndex(aIndex, 0));
+
             Q_EMIT dataChanged(index, index, iSelectedRole);
             Q_EMIT selectedCountChanged();
         }
     }
 }
 
-QObject* BooksImportModel::selectedBook(int aIndex)
+QObject*
+BooksImportModel::selectedBook(
+    int aIndex)
 {
     const int n = iList.count();
-    for (int i=0, k=0; i<n; i++) {
+
+    for (int i = 0, k = 0; i<n; i++) {
         Data* data = iList.at(i);
+
         if (data->iSelected) {
             if (k == aIndex) {
                 return data->iBook;
@@ -341,10 +391,12 @@ QObject* BooksImportModel::selectedBook(int aIndex)
             k++;
         }
     }
-    return NULL;
+    return Q_NULLPTR;
 }
 
-void BooksImportModel::onScanProgress(int aProgress)
+void
+BooksImportModel::onScanProgress(
+    int aProgress)
 {
     if (iTask && iTask == sender()) {
         iProgress = aProgress;
@@ -352,7 +404,9 @@ void BooksImportModel::onScanProgress(int aProgress)
     }
 }
 
-void BooksImportModel::onBookFound(BooksBook* aBook)
+void
+BooksImportModel::onBookFound(
+    BooksBook* aBook)
 {
     if (iTask && iTask == sender()) {
         // When we find the first book, we add two items. The second item
@@ -361,6 +415,7 @@ void BooksImportModel::onBookFound(BooksBook* aBook)
         // is to show the busy indicator at the end of the list (that's how
         // QML represents the dummy item) while we keep on scanning.
         const int n1 = iList.count();
+
         beginInsertRows(QModelIndex(), n1, n1 ? n1 : 1);
         iList.append(new Data(aBook));
         endInsertRows();
@@ -368,12 +423,13 @@ void BooksImportModel::onBookFound(BooksBook* aBook)
     }
 }
 
-void BooksImportModel::onTaskDone()
+void
+BooksImportModel::onTaskDone()
 {
     HASSERT(iTask);
     HASSERT(iTask == sender());
-    iTask->release(this);
-    iTask = NULL;
+    iTask->release();
+    iTask = Q_NULLPTR;
     if (iList.count() > 0) {
         // Remove the "virtual" item at the end of the list
         beginRemoveRows(QModelIndex(),iList.count(), iList.count());
@@ -382,9 +438,11 @@ void BooksImportModel::onTaskDone()
     Q_EMIT busyChanged();
 }
 
-QHash<int,QByteArray> BooksImportModel::roleNames() const
+QHash<int,QByteArray>
+BooksImportModel::roleNames() const
 {
     QHash<int, QByteArray> roles;
+
     roles.insert(BooksImportRoleTitle, "title");
     roles.insert(BooksImportRoleBook, "book");
     roles.insert(BooksImportRolePath, "path");
@@ -393,16 +451,23 @@ QHash<int,QByteArray> BooksImportModel::roleNames() const
     return roles;
 }
 
-int BooksImportModel::rowCount(const QModelIndex&) const
+int
+BooksImportModel::rowCount(
+    const QModelIndex&) const
 {
     return iTask ? (iList.count() + 1) : iList.count();
 }
 
-QVariant BooksImportModel::data(const QModelIndex& aIndex, int aRole) const
+QVariant
+BooksImportModel::data(
+    const QModelIndex& aIndex,
+    int aRole) const
 {
     const int i = aIndex.row();
+
     if (validIndex(i)) {
         Data* data = iList.at(i);
+
         switch (aRole) {
         case BooksImportRoleTitle: return data->title();
         case BooksImportRoleBook: return QVariant::fromValue(data->iBook);
@@ -415,7 +480,7 @@ QVariant BooksImportModel::data(const QModelIndex& aIndex, int aRole) const
         case BooksImportRoleTitle:
         case BooksImportRolePath:
         case BooksImportRoleFileName: return QString();
-        case BooksImportRoleBook: return QVariant::fromValue((QObject*)NULL);
+        case BooksImportRoleBook: return QVariant::fromValue((QObject*)Q_NULLPTR);
         case BooksImportRoleSelected: return false;
         }
     }

@@ -1,6 +1,6 @@
 /*
+ * Copyright (C) 2015-2026 Slava Monich <slava@monich.com>
  * Copyright (C) 2015-2022 Jolla Ltd.
- * Copyright (C) 2015-2022 Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
  *
@@ -8,27 +8,33 @@
  * modification, are permitted provided that the following conditions
  * are met:
  *
- *   1. Redistributions of source code must retain the above copyright
- *      notice, this list of conditions and the following disclaimer.
- *   2. Redistributions in binary form must reproduce the above copyright
- *      notice, this list of conditions and the following disclaimer
- *      in the documentation and/or other materials provided with the
- *      distribution.
- *   3. Neither the names of the copyright holders nor the names of its
- *      contributors may be used to endorse or promote products derived
- *      from this software without specific prior written permission.
+ *  1. Redistributions of source code must retain the above copyright
+ *     notice, this list of conditions and the following disclaimer.
+ *
+ *  2. Redistributions in binary form must reproduce the above copyright
+ *     notice, this list of conditions and the following disclaimer
+ *     in the documentation and/or other materials provided with the
+ *     distribution.
+ *
+ *  3. Neither the names of the copyright holders nor the names of its
+ *     contributors may be used to endorse or promote products derived
+ *     from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
  * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
- * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
  * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
  * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
  * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
  * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ * The views and conclusions contained in the software and documentation
+ * are those of the authors and should not be interpreted as representing
+ * any official policies, either expressed or implied.
  */
 
 #include "BooksBook.h"
@@ -67,7 +73,9 @@
 // BooksBook::CoverContext
 // ==========================================================================
 
-class BooksBook::CoverPaintContext : public BooksPaintContext {
+class BooksBook::CoverPaintContext :
+    public BooksPaintContext
+{
 public:
     CoverPaintContext();
 
@@ -91,8 +99,10 @@ BooksBook::CoverPaintContext::CoverPaintContext()
     if (!gMaxScreenSizeKnown) {
         QList<QScreen*> screens = qGuiApp->screens();
         const int n = screens.count();
-        for (int i=0; i<n; i++) {
-            QSize s = screens.at(i)->size();
+
+        for (int i = 0; i < n; i++) {
+            const QSize s = screens.at(i)->size();
+
             gMaxScreenSize.setWidth(qMax(s.width(), gMaxScreenSize.width()));
             gMaxScreenSize.setHeight(qMax(s.width(), gMaxScreenSize.height()));
         }
@@ -102,21 +112,34 @@ BooksBook::CoverPaintContext::CoverPaintContext()
     iHeight = gMaxScreenSize.height();
 }
 
-void BooksBook::CoverPaintContext::drawImage(int x, int y, const ZLImageData& image)
+void
+BooksBook::CoverPaintContext::drawImage(
+    int, // x
+    int, // y
+    const ZLImageData& aImage)
 {
-    handleImage(image);
+    handleImage(aImage);
 }
 
-void BooksBook::CoverPaintContext::drawImage(int x, int y, const ZLImageData& image,
-    int width, int height, ScalingType type)
+void
+BooksBook::CoverPaintContext::drawImage(
+    int, // x
+    int, // y
+    const ZLImageData& aImage,
+    int, // width
+    int, // height
+    ScalingType)
 {
-    handleImage(image);
+    handleImage(aImage);
 }
 
-void BooksBook::CoverPaintContext::handleImage(const ZLImageData& image)
+void
+BooksBook::CoverPaintContext::handleImage(
+    const ZLImageData& aImage)
 {
-    const QImage* qImage = ((ZLQtImageData&)image).image();
-    HDEBUG(image.width() << 'x' << image.height());
+    const QImage* qImage = ((ZLQtImageData&)aImage).image();
+
+    HDEBUG(aImage.width() << 'x' << aImage.height());
     if (qImage->height() > qImage->width() &&
         qImage->width() > iImage.width() &&
         qImage->height() > iImage.height()) {
@@ -124,7 +147,8 @@ void BooksBook::CoverPaintContext::handleImage(const ZLImageData& image)
     }
 }
 
-bool BooksBook::CoverPaintContext::gotIt() const
+bool
+BooksBook::CoverPaintContext::gotIt() const
 {
     return iImage.width() >= 50 &&
            iImage.height() >= 80 &&
@@ -135,7 +159,8 @@ bool BooksBook::CoverPaintContext::gotIt() const
 // BooksBook::CoverTask
 // ==========================================================================
 
-class BooksBook::CoverTask : public HarbourTask
+class BooksBook::CoverTask :
+    public HarbourTask
 {
 public:
     CoverTask(QThreadPool* aPool, QString aStateDir, shared_ptr<Book> aBook,
@@ -146,14 +171,16 @@ public:
     bool hasImage() const;
 
 public:
-    QString iStateDir;
+    const QString iStateDir;
     shared_ptr<Book> iBook;
-    QString iImagePath;
+    const QString iImagePath;
     QImage iCoverImage;
     bool iCoverMissing;
 };
 
-inline bool BooksBook::CoverTask::hasImage() const
+inline
+bool
+BooksBook::CoverTask::hasImage() const
 {
     return iCoverImage.width() > 0 && iCoverImage.height() > 0;
 }
@@ -162,7 +189,8 @@ inline bool BooksBook::CoverTask::hasImage() const
 // BooksBook::LoadCoverTask
 // ==========================================================================
 
-class BooksBook::LoadCoverTask : public BooksBook::CoverTask
+class BooksBook::LoadCoverTask :
+    public BooksBook::CoverTask
 {
 public:
     LoadCoverTask(QThreadPool* aPool, QString aStateDir,
@@ -171,22 +199,25 @@ public:
         BooksBook::CoverTask(aPool, aStateDir, aBook, aImagePath),
         iFormatPlugin(aFormatPlugin) {}
 
-    virtual void performTask();
+        void performTask() Q_DECL_OVERRIDE;
 
 public:
     shared_ptr<FormatPlugin> iFormatPlugin;
 };
 
-void BooksBook::LoadCoverTask::performTask()
+void
+BooksBook::LoadCoverTask::performTask()
 {
     if (!isCanceled()) {
         // Try to load cached (or custom) cover
         if (!iStateDir.isEmpty()) {
-            QString coverPrefix(QString::fromStdString(
+            const QString coverPrefix(QString::fromStdString(
                 iBook->file().name(false)) + BOOK_COVER_SUFFIX);
             QDirIterator it(iStateDir);
+
             while (it.hasNext()) {
                 QString path(it.next());
+
                 if (it.fileName().startsWith(coverPrefix)) {
                     if (QFile(path).size() == 0) {
                         HDEBUG("no cover for" << iBook->title().c_str());
@@ -206,6 +237,7 @@ void BooksBook::LoadCoverTask::performTask()
         // OK, fetch one from the book file
         shared_ptr<ZLImageData> imageData;
         shared_ptr<ZLImage> image = iFormatPlugin->coverImage(iBook->file());
+
         if (!image.isNull()) {
             imageData = ZLImageManager::Instance().imageData(*image);
         }
@@ -230,17 +262,19 @@ void BooksBook::LoadCoverTask::performTask()
 // BooksBook::GuessCoverTask
 // ==========================================================================
 
-class BooksBook::GuessCoverTask : public BooksBook::CoverTask
+class BooksBook::GuessCoverTask :
+    public BooksBook::CoverTask
 {
 public:
     GuessCoverTask(QThreadPool* aPool, QString aStateDir,
         shared_ptr<Book> aBook, QString aImagePath) :
         BooksBook::CoverTask(aPool, aStateDir, aBook, aImagePath) {}
 
-    virtual void performTask();
+        void performTask() Q_DECL_OVERRIDE;
 };
 
-void BooksBook::GuessCoverTask::performTask()
+void
+BooksBook::GuessCoverTask::performTask()
 {
     if (!isCanceled()) {
         BooksMargins margins;
@@ -248,6 +282,7 @@ void BooksBook::GuessCoverTask::performTask()
         BookModel bookModel(iBook);
         shared_ptr<ZLTextModel> model(bookModel.bookTextModel());
         BooksTextView view(context, BooksTextStyle::defaults(), margins);
+
         view.setModel(model);
         view.rewind();
         if (!isCanceled()) {
@@ -267,6 +302,7 @@ void BooksBook::GuessCoverTask::performTask()
         if (!iImagePath.isEmpty()) {
             QFileInfo file(iImagePath);
             QDir dir(file.dir());
+
             if (!dir.mkpath(dir.absolutePath())) {
                 HWARN("failed to create" << qPrintable(dir.absolutePath()));
             }
@@ -297,24 +333,28 @@ void BooksBook::GuessCoverTask::performTask()
 // BooksBook::HashTask
 // ==========================================================================
 
-class BooksBook::HashTask : public HarbourTask
+class BooksBook::HashTask :
+    public HarbourTask
 {
 public:
-    HashTask(QThreadPool* aPool, QThread* aTargetThread, QString aPath);
+    HashTask(QThreadPool*, const QString&);
 
-    virtual void performTask();
+    void performTask() Q_DECL_OVERRIDE;
 
 public:
-    QString iPath;
+    const QString iPath;
     QByteArray iHash;
 };
 
-BooksBook::HashTask::HashTask(QThreadPool* aPool, QThread* aTargetThread,
-    QString aPath) : HarbourTask(aPool, aTargetThread), iPath(aPath)
-{
-}
+BooksBook::HashTask::HashTask(
+    QThreadPool* aPool,
+    const QString& aPath) :
+    HarbourTask(aPool),
+    iPath(aPath)
+{}
 
-void BooksBook::HashTask::performTask()
+void
+BooksBook::HashTask::performTask()
 {
     iHash = BooksUtil::computeFileHashAndSetAttr(iPath, this);
 }
@@ -324,14 +364,17 @@ void BooksBook::HashTask::performTask()
 // ==========================================================================
 
 // This constructor isn't really used, but is required by qmlRegisterType
-BooksBook::BooksBook(QObject* aParent) :
+BooksBook::BooksBook(
+    QObject* aParent) :
     QObject(aParent),
     iRef(-1)
 {
     init();
 }
 
-BooksBook::BooksBook(const BooksStorage& aStorage, QString aRelativePath,
+BooksBook::BooksBook(
+    const BooksStorage& aStorage,
+    QString aRelativePath,
     shared_ptr<Book> aBook) :
     QObject(Q_NULLPTR),
     iRef(1),
@@ -345,9 +388,11 @@ BooksBook::BooksBook(const BooksStorage& aStorage, QString aRelativePath,
     iHash(BooksUtil::fileHashAttr(iPath))
 {
     init();
+
     AuthorList authors(iBook->authors());
     const int n = authors.size();
-    for (int i=0; i<n; i++) {
+
+    for (int i = 0; i < n; i++) {
         if (i > 0) iAuthors += ", ";
         iAuthors += QString::fromStdString(authors[i]->name());
     }
@@ -369,6 +414,7 @@ BooksBook::BooksBook(const BooksStorage& aStorage, QString aRelativePath,
             // We have to detect which one we are dealing with
             QVariant position(state.value(BOOK_STATE_POSITION));
             BooksPos bookPos(BooksPos::fromVariant(position));
+
             if (bookPos.valid()) {
                 // Old format (single position)
                 iPageStack.append(bookPos);
@@ -390,7 +436,7 @@ BooksBook::BooksBook(const BooksStorage& aStorage, QString aRelativePath,
     if (iHash.isEmpty()) {
         HDEBUG("need to calculate hash for" << qPrintable(iPath));
         iHashTaskQueue = BooksTaskQueue::hashQueue();
-        iHashTask = new HashTask(iHashTaskQueue->pool(), thread(), iPath);
+        iHashTask = new HashTask(iHashTaskQueue->pool(), iPath);
         iHashTask->submit(this, SLOT(onHashTaskDone()));
     }
     // Refcounted BooksBook objects are managed by C++ code
@@ -401,11 +447,11 @@ void BooksBook::init()
 {
     iFontSizeAdjust = 0;
     iPageStackPos = 0;
-    iCoverTask = NULL;
-    iHashTask = NULL;
+    iCoverTask = Q_NULLPTR;
+    iHashTask = Q_NULLPTR;
     iCoverTasksDone = false;
     iCopyingOut = false;
-    iSaveTimer = NULL;
+    iSaveTimer = Q_NULLPTR;
     moveToThread(qApp->thread());
 }
 
@@ -413,11 +459,12 @@ BooksBook::~BooksBook()
 {
     HDEBUG(qPrintable(iPath));
     HASSERT(!iRef.load());
-    if (iCoverTask) iCoverTask->release(this);
-    if (iHashTask) iHashTask->release(this);
+    if (iCoverTask) iCoverTask->release();
+    if (iHashTask) iHashTask->release();
 }
 
-BooksItem* BooksBook::retain()
+BooksItem*
+BooksBook::retain()
 {
     if (iRef.load() >= 0) {
         iRef.ref();
@@ -425,49 +472,59 @@ BooksItem* BooksBook::retain()
     return this;
 }
 
-void BooksBook::release()
+void
+BooksBook::release()
 {
     if (iRef.load() >= 0 && !iRef.deref()) {
         delete this;
     }
 }
 
-QObject* BooksBook::object()
+QObject*
+BooksBook::object()
 {
     return this;
 }
 
-BooksShelf* BooksBook::shelf()
+BooksShelf*
+BooksBook::shelf()
 {
-    return NULL;
+    return Q_NULLPTR;
 }
 
-BooksBook* BooksBook::book()
+BooksBook*
+BooksBook::book()
 {
     return this;
 }
 
-QString BooksBook::name() const
+QString
+BooksBook::name() const
 {
     return iTitle;
 }
 
-QString BooksBook::fileName() const
+QString
+BooksBook::fileName() const
 {
     return iFileName;
 }
 
-QString BooksBook::path() const
+QString
+BooksBook::path() const
 {
     return iPath;
 }
 
-bool BooksBook::accessible() const
+bool
+BooksBook::accessible() const
 {
     return !iCopyingOut;
 }
 
-bool BooksBook::setFontSizeAdjust(int aFontSizeAdjust)
+bool
+BooksBook::setFontSizeAdjust(
+    int aFontSizeAdjust)
 {
     if (aFontSizeAdjust > BooksSettings::FontSizeSteps) {
         aFontSizeAdjust = BooksSettings::FontSizeSteps;
@@ -484,14 +541,19 @@ bool BooksBook::setFontSizeAdjust(int aFontSizeAdjust)
     }
 }
 
-void BooksBook::setPageStack(BooksPos::List aStack, int aStackPos)
+void
+BooksBook::setPageStack(
+    BooksPos::List aStack,
+    int aStackPos)
 {
     if (aStackPos < 0) {
         aStackPos = 0;
     } else if (aStackPos >= aStack.count()) {
         aStackPos = aStack.count() - 1;
     }
+
     bool changed = false;
+
     if (iPageStack != aStack) {
         iPageStack = aStack;
         changed = true;
@@ -505,7 +567,8 @@ void BooksBook::setPageStack(BooksPos::List aStack, int aStackPos)
     }
 }
 
-void BooksBook::requestSave()
+void
+BooksBook::requestSave()
 {
     // We only need save timer if we have the state file
     if (!iSaveTimer && iStorage.isValid()) {
@@ -515,10 +578,13 @@ void BooksBook::requestSave()
     if (iSaveTimer) iSaveTimer->requestSave();
 }
 
-void BooksBook::setCopyingOut(bool aValue)
+void
+BooksBook::setCopyingOut(
+    bool aValue)
 {
     if (iCopyingOut != aValue) {
         const bool wasAccessible = accessible();
+
         iCopyingOut = aValue;
         Q_EMIT copyingOutChanged();
         if (wasAccessible != accessible()) {
@@ -527,15 +593,19 @@ void BooksBook::setCopyingOut(bool aValue)
     }
 }
 
-bool BooksBook::hasCoverImage() const
+bool
+BooksBook::hasCoverImage() const
 {
     return iCoverImage.width() > 0 && iCoverImage.height() > 0;
 }
 
-void BooksBook::setCoverImage(const QImage aImage)
+void
+BooksBook::setCoverImage(
+    const QImage aImage)
 {
     if (iCoverImage != aImage) {
         const bool hadCover = hasCoverImage();
+
         iCoverImage = aImage;
         Q_EMIT coverImageChanged();
         if (hadCover != hasCoverImage()) {
@@ -544,7 +614,8 @@ void BooksBook::setCoverImage(const QImage aImage)
     }
 }
 
-bool BooksBook::requestCoverImage()
+bool
+BooksBook::requestCoverImage()
 {
     if (!iBook.isNull() && !iFormatPlugin.isNull() &&
         !iCoverTasksDone && !iCoverTask) {
@@ -554,35 +625,40 @@ bool BooksBook::requestCoverImage()
             SLOT(onLoadCoverTaskDone()));
         Q_EMIT loadingCoverChanged();
     }
-    return iCoverTask != NULL;
+    return iCoverTask != Q_NULLPTR;
 }
 
-void BooksBook::cancelCoverRequest()
+void
+BooksBook::cancelCoverRequest()
 {
     if (iCoverTask) {
-        iCoverTask->release(this);
-        iCoverTask = NULL;
+        iCoverTask->release();
+        iCoverTask = Q_NULLPTR;
     }
 }
 
 bool BooksBook::coverTaskDone()
 {
+    const bool gotCover = iCoverTask->hasImage();
+
     HASSERT(sender() == iCoverTask);
     HASSERT(!iCoverTasksDone);
     HDEBUG(iTitle << iCoverTask->hasImage());
-    const bool gotCover = iCoverTask->hasImage();
+
     if (gotCover) {
         setCoverImage(iCoverTask->iCoverImage);
     }
-    iCoverTask->release(this);
-    iCoverTask = NULL;
+    iCoverTask->release();
+    iCoverTask = Q_NULLPTR;
     return gotCover;
 }
 
-void BooksBook::onLoadCoverTaskDone()
+void
+BooksBook::onLoadCoverTaskDone()
 {
-    HDEBUG(iTitle);
     const bool coverMissing = iCoverTask->iCoverMissing;
+
+    HDEBUG(iTitle);
     if (coverTaskDone() || coverMissing) {
         iCoverTasksDone = true;
         Q_EMIT loadingCoverChanged();
@@ -593,7 +669,8 @@ void BooksBook::onLoadCoverTaskDone()
     }
 }
 
-void BooksBook::onGuessCoverTaskDone()
+void
+BooksBook::onGuessCoverTaskDone()
 {
     HDEBUG(iTitle);
     coverTaskDone();
@@ -605,13 +682,14 @@ void BooksBook::onHashTaskDone()
 {
     iHash = iHashTask->iHash;
     HDEBUG(QString(iHash.toHex()));
-    iHashTask->release(this);
-    iHashTask = NULL;
+    iHashTask->release();
+    iHashTask = Q_NULLPTR;
     iHashTaskQueue.reset();
     Q_EMIT hashChanged();
 }
 
-QString BooksBook::cachedImagePath() const
+QString
+BooksBook::cachedImagePath() const
 {
     if (!iStateDir.isEmpty() && !iBook.isNull()) {
         return QDir::cleanPath(iStateDir + QDir::separator() +
@@ -621,11 +699,13 @@ QString BooksBook::cachedImagePath() const
     return QString();
 }
 
-void BooksBook::saveState()
+void
+BooksBook::saveState()
 {
     if (!iStateFilePath.isEmpty()) {
         QVariantMap state;
         HarbourJson::load(iStateFilePath, state);
+
         state.insert(BOOK_STATE_POSITION, iPageStack.toVariantList());
         state.insert(BOOK_STATE_FONT_SIZE_ADJUST, iFontSizeAdjust);
 #ifdef BOOK_STATE_PAGE_STACK_INDEX
@@ -637,7 +717,8 @@ void BooksBook::saveState()
     }
 }
 
-void BooksBook::deleteFiles()
+void
+BooksBook::deleteFiles()
 {
     if (iStorage.isValid()) {
         if (QFile::remove(iPath)) {
@@ -645,9 +726,9 @@ void BooksBook::deleteFiles()
         } else {
             HWARN("failed to delete" << qPrintable(iPath));
         }
-        QDirIterator it(iStateDir);
-        while (it.hasNext()) {
-            QString path(it.next());
+        for (QDirIterator it(iStateDir); it.hasNext();) {
+            const QString path(it.next());
+
             if (it.fileName().startsWith(iFileName)) {
                 if (QFile::remove(path)) {
                     HDEBUG(qPrintable(path));
@@ -659,35 +740,45 @@ void BooksBook::deleteFiles()
     }
 }
 
-BooksBook* BooksBook::newBook(QString aFullPath)
+BooksBook*
+BooksBook::newBook(
+    QString aFullPath)
 {
     shared_ptr<Book> ref = BooksUtil::bookFromFile(aFullPath);
+
     if (!ref.isNull()) {
         return new BooksBook(BooksStorage::tmpStorage(),
             QFileInfo(aFullPath).dir().absolutePath(), ref);
     } else {
-        return NULL;
+        return Q_NULLPTR;
     }
 }
 
-BooksBook* BooksBook::newBook(const BooksStorage& aStorage, QString aRelPath,
+BooksBook*
+BooksBook::newBook(
+    const BooksStorage& aStorage,
+    QString aRelPath,
     QString aFileName)
 {
     shared_ptr<Book> ref = BooksUtil::bookFromFile(
         QFileInfo(QDir(aStorage.fullPath(aRelPath)), aFileName).
         absoluteFilePath());
+
     if (!ref.isNull()) {
         return new BooksBook(aStorage, aRelPath, ref);
     } else {
-        return NULL;
+        return Q_NULLPTR;
     }
 }
 
 // NOTE: below methods are invoked on the worker thread
-bool BooksBook::makeLink(QString aDestPath)
+bool
+BooksBook::makeLink(
+    QString aDestPath)
 {
-    QByteArray oldp(iPath.toLocal8Bit());
-    QByteArray newp(aDestPath.toLocal8Bit());
+    const QByteArray oldp(iPath.toLocal8Bit());
+    const QByteArray newp(aDestPath.toLocal8Bit());
+
     if (!oldp.isEmpty()) {
         if (!newp.isEmpty()) {
             int err = link(oldp.data(), newp.data());
@@ -706,30 +797,39 @@ bool BooksBook::makeLink(QString aDestPath)
     return false;
 }
 
-BooksItem* BooksBook::copyTo(const BooksStorage& aStorage, QString aRelPath,
+BooksItem*
+BooksBook::copyTo(
+    const BooksStorage& aStorage,
+    QString aRelPath,
     CopyOperation* aOperation)
 {
     QDir destDir(aStorage.fullPath(aRelPath));
+
     destDir.mkpath(destDir.path());
+
     const QString absDestPath(QFileInfo(QDir(aStorage.fullPath(aRelPath)),
         iFileName).absoluteFilePath());
+
     if (!isCanceled(aOperation) && makeLink(absDestPath)) {
         return newBook(aStorage, aRelPath, iFileName);
     } else if (isCanceled(aOperation)) {
-        return NULL;
+        return Q_NULLPTR;
     } else {
-        BooksBook* copy = NULL;
+        BooksBook* copy = Q_NULLPTR;
         QFile src(iPath);
         const qint64 total = src.size();
         qint64 copied = 0;
+
         if (src.open(QIODevice::ReadOnly)) {
             QFile dest(absDestPath);
+
             if (dest.open(QIODevice::WriteOnly)) {
                 QDateTime lastTime;
                 const qint64 bufsiz = 0x1000;
                 char* buf = new char[bufsiz];
                 int progress = 0;
                 qint64 len;
+
                 while (!isCanceled(aOperation) &&
                        (len = src.read(buf, bufsiz)) > 0 &&
                        !isCanceled(aOperation) &&

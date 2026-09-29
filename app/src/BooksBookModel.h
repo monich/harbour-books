@@ -1,6 +1,6 @@
 /*
+ * Copyright (C) 2015-2026 Slava Monich <slava@monich.com>
  * Copyright (C) 2015-2020 Jolla Ltd.
- * Copyright (C) 2015-2020 Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
  *
@@ -8,27 +8,33 @@
  * modification, are permitted provided that the following conditions
  * are met:
  *
- *   1. Redistributions of source code must retain the above copyright
- *      notice, this list of conditions and the following disclaimer.
- *   2. Redistributions in binary form must reproduce the above copyright
- *      notice, this list of conditions and the following disclaimer
- *      in the documentation and/or other materials provided with the
- *      distribution.
- *   3. Neither the names of the copyright holders nor the names of its
- *      contributors may be used to endorse or promote products derived
- *      from this software without specific prior written permission.
+ *  1. Redistributions of source code must retain the above copyright
+ *     notice, this list of conditions and the following disclaimer.
+ *
+ *  2. Redistributions in binary form must reproduce the above copyright
+ *     notice, this list of conditions and the following disclaimer
+ *     in the documentation and/or other materials provided with the
+ *     distribution.
+ *
+ *  3. Neither the names of the copyright holders nor the names of its
+ *     contributors may be used to endorse or promote products derived
+ *     from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
  * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
- * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
  * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
  * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
  * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
  * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ * The views and conclusions contained in the software and documentation
+ * are those of the authors and should not be interpreted as representing
+ * any official policies, either expressed or implied.
  */
 
 #ifndef BOOKS_BOOK_MODEL_H
@@ -46,15 +52,13 @@
 #include "ZLTextStyle.h"
 #include "bookmodel/BookModel.h"
 
-#include <QHash>
-#include <QList>
-#include <QVariant>
-#include <QByteArray>
-#include <QAbstractListModel>
+#include <QtCore/QAbstractListModel>
 #include <QtQml>
-#include <QQuickItem>
+#include <QtQuick/QQuickItem>
 
-class BooksBookModel: public QAbstractListModel, private BooksLoadingProperty
+class BooksBookModel:
+    public QAbstractListModel,
+    private BooksLoadingProperty
 {
     Q_OBJECT
     Q_ENUMS(ResetReason)
@@ -83,7 +87,7 @@ public:
     Q_INVOKABLE bool increaseFontSize();
     Q_INVOKABLE bool decreaseFontSize();
 
-    explicit BooksBookModel(QObject* aParent = NULL);
+    explicit BooksBookModel(QObject* parent = Q_NULLPTR);
     ~BooksBookModel();
 
     bool loading() const;
@@ -99,43 +103,43 @@ public:
     void setSize(QSize aSize);
 
     BooksBook* book() const;
-    void setBook(BooksBook* aBook);
+    void setBook(BooksBook*);
 
     int leftMargin() const;
     int rightMargin() const;
     int topMargin() const;
     int bottomMargin() const;
 
-    void setLeftMargin(int aMargin);
-    void setRightMargin(int aMargin);
-    void setTopMargin(int aMargin);
-    void setBottomMargin(int aMargin);
+    void setLeftMargin(int);
+    void setRightMargin(int);
+    void setTopMargin(int);
+    void setBottomMargin(int);
 
     BooksPos::List pageMarks() const;
-    BooksPos pageMark(int aPage) const;
+    BooksPos pageMark(int page) const;
     BooksMargins margins() const;
     shared_ptr<Book> bookRef() const;
     shared_ptr<BookModel> bookModel() const;
     shared_ptr<ZLTextModel> bookTextModel() const;
     shared_ptr<ZLTextModel> contentsModel() const;
-    shared_ptr<ZLTextModel> footnoteModel(const std::string& aId) const;
+    shared_ptr<ZLTextModel> footnoteModel(const std::string& id) const;
     shared_ptr<ZLTextStyle> textStyle() const;
-    BooksPos linkPosition(const std::string& aLink) const;
+    BooksPos linkPosition(const std::string& link) const;
     int fontSizeAdjust() const;
 
     // QAbstractListModel
-    virtual QHash<int,QByteArray> roleNames() const Q_DECL_OVERRIDE;
-    virtual int rowCount(const QModelIndex& aParent) const Q_DECL_OVERRIDE;
-    virtual QVariant data(const QModelIndex& aIndex, int aRole) const Q_DECL_OVERRIDE;
+    QHash<int,QByteArray> roleNames() const Q_DECL_OVERRIDE;
+    int rowCount(const QModelIndex&) const Q_DECL_OVERRIDE;
+    QVariant data(const QModelIndex&, int) const Q_DECL_OVERRIDE;
 
 private:
     void updateSize();
-    void updateModel(int aPrevPageCount);
-    void startReset(ResetReason aReason = ReasonUnknown, bool aFull = true);
+    void updateModel(int prevPageCount);
+    void startReset(ResetReason reason = ReasonUnknown, bool full = true);
     void emitBookPosChanged();
 
 private Q_SLOTS:
-    void onResetProgress(int aProgress);
+    void onResetProgress(int progress);
     void onResetDone();
     void onTextStyleChanged();
     void onPageStackChanged();

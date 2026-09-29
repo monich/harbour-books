@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015-2023 Slava Monich <slava@monich.com>
+ * Copyright (C) 2015-2026 Slava Monich <slava@monich.com>
  * Copyright (C) 2015-2022 Jolla Ltd.
  *
  * You may use this file under the terms of the BSD license as follows:
@@ -10,23 +10,31 @@
  *
  *  1. Redistributions of source code must retain the above copyright
  *     notice, this list of conditions and the following disclaimer.
+ *
  *  2. Redistributions in binary form must reproduce the above copyright
  *     notice, this list of conditions and the following disclaimer
  *     in the documentation and/or other materials provided with the
  *     distribution.
+ *
  *  3. Neither the names of the copyright holders nor the names of its
  *     contributors may be used to endorse or promote products derived
  *     from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED
- * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
- * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
- * IN NO EVENT SHALL THE CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) ARISING
- * IN ANY WAY OUT OF THE USE OR INABILITY TO USE THIS SOFTWARE, EVEN
- * IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ * The views and conclusions contained in the software and documentation
+ * are those of the authors and should not be interpreted as representing
+ * any official policies, either expressed or implied.
  */
 
 #include "BooksBookModel.h"
@@ -43,13 +51,14 @@
 // BooksBookModel::Data
 // ==========================================================================
 
-class BooksBookModel::Data {
+class BooksBookModel::Data
+{
 public:
     Data(int aWidth, int aHeight) : iWidth(aWidth), iHeight(aHeight) {}
 
 public:
-    int iWidth;
-    int iHeight;
+    const int iWidth;
+    const int iHeight;
     shared_ptr<BookModel> iBookModel;
     BooksPos::List iPageMarks;
     QByteArray iHash;
@@ -59,7 +68,8 @@ public:
 // BooksBookModel::PagingTask
 // ==========================================================================
 
-class BooksBookModel::PagingTask : public HarbourTask
+class BooksBookModel::PagingTask :
+    public HarbourTask
 {
     Q_OBJECT
 
@@ -78,19 +88,18 @@ public:
         quint32 count;
     } __attribute__((packed));
 
-    PagingTask(QThreadPool* aPool, BooksBookModel* aModel,
-        shared_ptr<Book> aBook);
+    PagingTask(QThreadPool*, BooksBookModel*, shared_ptr<Book>);
     ~PagingTask();
 
     void performTask();
 
-    static QString pageMarksFile(BooksBookModel* aModel);
+    static QString pageMarksFile(BooksBookModel*);
     BooksPos::List loadPageMarks() const;
-    bool acceptHash(const MarksHeader* aHeader) const;
+    bool acceptHash(const MarksHeader*) const;
     void savePageMarks() const;
 
 Q_SIGNALS:
-    void progress(int aProgress);
+    void progress(int progress);
 
 public:
     shared_ptr<Book> iBook;
@@ -105,8 +114,10 @@ public:
 
 const char BooksBookModel::PagingTask::MarksFileMagic[] = "MARK";
 
-BooksBookModel::PagingTask::PagingTask(QThreadPool* aPool,
-    BooksBookModel* aModel, shared_ptr<Book> aBook) :
+BooksBookModel::PagingTask::PagingTask(
+    QThreadPool* aPool,
+    BooksBookModel* aModel,
+    shared_ptr<Book> aBook) :
     HarbourTask(aPool),
     iBook(aBook),
     iTextStyle(aModel->textStyle()),
@@ -115,7 +126,7 @@ BooksBookModel::PagingTask::PagingTask(QThreadPool* aPool,
     iPageMarksFile(pageMarksFile(aModel)),
     iHash(aModel->book()->hash()),
     iPath(aModel->book()->path()),
-    iData(NULL)
+    iData(Q_NULLPTR)
 {
     aModel->connect(this, SIGNAL(done()), SLOT(onResetDone()));
     aModel->connect(this, SIGNAL(progress(int)), SLOT(onResetProgress(int)),
@@ -127,13 +138,17 @@ BooksBookModel::PagingTask::~PagingTask()
     delete iData;
 }
 
-QString BooksBookModel::PagingTask::pageMarksFile(BooksBookModel* aModel)
+QString
+BooksBookModel::PagingTask::pageMarksFile(
+    BooksBookModel* aModel)
 {
     return aModel->book()->storageFile(QString(".%1x%2" BOOKS_MARKS_FILE_SUFFIX).
         arg(aModel->width()).arg(aModel->height()));
 }
 
-bool BooksBookModel::PagingTask::acceptHash(const MarksHeader* aHeader) const
+bool
+BooksBookModel::PagingTask::acceptHash(
+    const MarksHeader* aHeader) const
 {
     // If the real hash is unknown, we accept any. The real one will
     // be later compared with the one we fetch from the .marks file
@@ -142,18 +157,22 @@ bool BooksBookModel::PagingTask::acceptHash(const MarksHeader* aHeader) const
         !memcmp(iHash.constData(), aHeader->hash, sizeof(aHeader->hash)));
 }
 
-BooksPos::List BooksBookModel::PagingTask::loadPageMarks() const
+BooksPos::List
+BooksBookModel::PagingTask::loadPageMarks() const
 {
     BooksPos::List list;
     QFile file(iPageMarksFile);
+
     if (file.open(QIODevice::ReadOnly)) {
         const qint64 size = file.size();
         uchar* map = file.map(0, size);
+
         if (map) {
             HDEBUG("reading" << qPrintable(iPageMarksFile));
             if (size > (int) sizeof(MarksHeader)) {
                 const qint64 dataSize = size - sizeof(MarksHeader);
                 const MarksHeader* hdr = (MarksHeader*)map;
+
                 if (!memcmp(hdr->magic, MarksFileMagic, sizeof(hdr->magic)) &&
                     hdr->version == MarksFileVersion &&
                     acceptHash(hdr) &&
@@ -164,11 +183,13 @@ BooksPos::List BooksBookModel::PagingTask::loadPageMarks() const
                     hdr->bottomMargin == iMargins.iBottom &&
                     hdr->count > 0 && hdr->count * 12 == dataSize) {
                     const quint32* ptr = (quint32*)(hdr + 1);
+
                     for (quint32 i = 0; i < hdr->count; i++) {
                         quint32 para = *ptr++;
                         quint32 elem = *ptr++;
                         quint32 charIndex = *ptr++;
                         BooksPos pos(para, elem, charIndex);
+
                         if (!list.isEmpty()) {
                             const BooksPos& last = list.last();
                             if (last >= pos) {
@@ -199,26 +220,31 @@ BooksPos::List BooksBookModel::PagingTask::loadPageMarks() const
     return list;
 }
 
-void BooksBookModel::PagingTask::savePageMarks() const
+void
+BooksBookModel::PagingTask::savePageMarks() const
 {
     MarksHeader hdr;
     QByteArray hash(iData->iHash);
+
     if (hash.size() == sizeof(hdr.hash) &&
         !iData->iPageMarks.isEmpty() &&
         !isCanceled()) {
         QFile file(iPageMarksFile);
         bool opened = file.open(QIODevice::ReadWrite);
+
         if (!opened) {
             // Most likely, the directory doesn't exist
             QDir dir = QFileInfo(iPageMarksFile).dir();
+
             if (dir.mkpath(dir.path())) {
                 HDEBUG("created" << qPrintable(dir.path()));
                 opened = file.open(QIODevice::ReadWrite);
             }
         }
         if (opened) {
-            HDEBUG("writing" << qPrintable(iPageMarksFile));
             const int n = iData->iPageMarks.count();
+
+            HDEBUG("writing" << qPrintable(iPageMarksFile));
             memset(&hdr, 0, sizeof(hdr));
             memcpy(hdr.magic, MarksFileMagic, sizeof(hdr.magic));
             hdr.version = MarksFileVersion;
@@ -245,14 +271,17 @@ void BooksBookModel::PagingTask::savePageMarks() const
     }
 }
 
-void BooksBookModel::PagingTask::performTask()
+void
+BooksBookModel::PagingTask::performTask()
 {
     if (!isCanceled()) {
         iData = new Data(iPaint.width(), iPaint.height());
         iData->iBookModel = new BookModel(iBook);
         iData->iHash = iHash;
+
         shared_ptr<ZLTextModel> model(iData->iBookModel->bookTextModel());
         ZLTextHyphenator::Instance().load(iBook->language());
+
         if (iData->iHash.isEmpty() && !isCanceled()) {
             // If hash is unknown then we need to compute it here and now.
             // It's a very rare occasion though.
@@ -267,8 +296,10 @@ void BooksBookModel::PagingTask::performTask()
                 // large books).
                 BooksTextView view(iPaint, iTextStyle, iMargins);
                 view.setModel(model);
+
                 if (model->paragraphsNumber() > 0) {
                     BooksPos mark = view.rewind();
+
                     iData->iPageMarks.append(mark);
                     Q_EMIT progress(iData->iPageMarks.count());
                     while (!isCanceled() && view.nextPage()) {
@@ -302,14 +333,15 @@ enum BooksBookModelRole {
     BooksBookModelBookPos
 };
 
-BooksBookModel::BooksBookModel(QObject* aParent) :
+BooksBookModel::BooksBookModel(
+    QObject* aParent) :
     QAbstractListModel(aParent),
     iResetReason(ReasonUnknown),
     iProgress(0),
-    iBook(NULL),
-    iPagingTask(NULL),
-    iData(NULL),
-    iData2(NULL),
+    iBook(Q_NULLPTR),
+    iPagingTask(Q_NULLPTR),
+    iData(Q_NULLPTR),
+    iData2(Q_NULLPTR),
     iSettings(BooksSettings::sharedInstance()),
     iTaskQueue(BooksTaskQueue::defaultQueue()),
     iPageStack(new BooksPageStack(this))
@@ -326,11 +358,13 @@ BooksBookModel::BooksBookModel(QObject* aParent) :
 
 BooksBookModel::~BooksBookModel()
 {
-    if (iPagingTask) iPagingTask->release(this);
+    if (iPagingTask) {
+        iPagingTask->release();
+    }
     if (iBook) {
         iBook->disconnect(this);
         iBook->release();
-        iBook = NULL;
+        iBook = Q_NULLPTR;
     }
     delete iData;
     delete iData2;
@@ -340,8 +374,10 @@ BooksBookModel::~BooksBookModel()
 void BooksBookModel::setBook(BooksBook* aBook)
 {
     shared_ptr<Book> newBook;
+
     if (iBook != aBook) {
         const QString oldTitle(iTitle);
+
         if (iBook) {
             iBook->disconnect(this);
             iBook->release();
@@ -356,9 +392,9 @@ void BooksBookModel::setBook(BooksBook* aBook)
             connect(aBook, SIGNAL(hashChanged()), SLOT(onHashChanged()));
             HDEBUG(iTitle);
         } else {
-            iBook = NULL;
+            iBook = Q_NULLPTR;
             iBookRef.reset();
-            iTitle = QString();
+            iTitle.clear();
             iPageStack->clear();
             iPageStack->setPageMarks(BooksPos::List());
             HDEBUG("<none>");
@@ -373,33 +409,40 @@ void BooksBookModel::setBook(BooksBook* aBook)
     }
 }
 
-bool BooksBookModel::loading() const
+bool
+BooksBookModel::loading() const
 {
-    return (iPagingTask != NULL);
+    return (iPagingTask != Q_NULLPTR);
 }
 
-bool BooksBookModel::increaseFontSize()
+bool
+BooksBookModel::increaseFontSize()
 {
     return iBook && iBook->setFontSizeAdjust(iBook->fontSizeAdjust()+1);
 }
 
-bool BooksBookModel::decreaseFontSize()
+bool
+BooksBookModel::decreaseFontSize()
 {
     return iBook && iBook->setFontSizeAdjust(iBook->fontSizeAdjust()-1);
 }
 
-void BooksBookModel::onPageStackChanged()
+void
+BooksBookModel::onPageStackChanged()
 {
     if (iBook) {
         BooksPos::Stack stack = iPageStack->getStack();
+
         HDEBUG(stack.iList << stack.iPos);
         iBook->setPageStack(stack.iList, stack.iPos);
     }
 }
 
-void BooksBookModel::onHashChanged()
+void
+BooksBookModel::onHashChanged()
 {
     const QByteArray hash(iBook->hash());
+
     HDEBUG(QString(hash.toHex()));
     if (!hash.isEmpty()) {
         if (iData2 && iData2->iHash != hash) {
@@ -407,17 +450,17 @@ void BooksBookModel::onHashChanged()
             // by the paging task. Deleting files on the UI thread is not a
             // very bright idea - the call may block for quite some time.
             delete iData2;
-            iData2 = NULL;
+            iData2 = Q_NULLPTR;
         }
         if (iPagingTask &&
             !iPagingTask->iHash.isEmpty() &&
             iPagingTask->iHash != hash) {
-            iPagingTask->release(this);
-            iPagingTask = NULL;
+            iPagingTask->release();
+            iPagingTask = Q_NULLPTR;
             startReset(iResetReason);
         } else if (iData && iData->iHash != hash) {
             delete iData;
-            iData = NULL;
+            iData = Q_NULLPTR;
             startReset(ReasonLoading);
         } else {
             HDEBUG("we are all set!");
@@ -425,30 +468,38 @@ void BooksBookModel::onHashChanged()
     }
 }
 
-int BooksBookModel::pageCount() const
+int
+BooksBookModel::pageCount() const
 {
     return iData ? iData->iPageMarks.count() : 0;
 }
 
-BooksPos::List BooksBookModel::pageMarks() const
+BooksPos::List
+BooksBookModel::pageMarks() const
 {
     return iData ? iData->iPageMarks : BooksPos::List();
 }
 
-int BooksBookModel::fontSizeAdjust() const
+int
+BooksBookModel::fontSizeAdjust() const
 {
     return iBook ? iBook->fontSizeAdjust() : 0;
 }
 
-BooksPos BooksBookModel::pageMark(int aPage) const
+BooksPos
+BooksBookModel::pageMark(
+    int aPage) const
 {
     return iData ? BooksPos::posAt(iData->iPageMarks, aPage) : BooksPos();
 }
 
-BooksPos BooksBookModel::linkPosition(const std::string& aLink) const
+BooksPos
+BooksBookModel::linkPosition(
+    const std::string& aLink) const
 {
     if (iData && !iData->iBookModel.isNull()) {
-        BookModel::Label label = iData->iBookModel->label(aLink);
+        const BookModel::Label label = iData->iBookModel->label(aLink);
+
         if (label.ParagraphNumber >= 0) {
             return BooksPos(label.ParagraphNumber, 0, 0);
         }
@@ -456,39 +507,49 @@ BooksPos BooksBookModel::linkPosition(const std::string& aLink) const
     return BooksPos();
 }
 
-shared_ptr<BookModel> BooksBookModel::bookModel() const
+shared_ptr<BookModel>
+BooksBookModel::bookModel() const
 {
-    return iData ? iData->iBookModel : NULL;
+    return iData ? iData->iBookModel : Q_NULLPTR;
 }
 
-shared_ptr<ZLTextModel> BooksBookModel::bookTextModel() const
+shared_ptr<ZLTextModel>
+BooksBookModel::bookTextModel() const
 {
     shared_ptr<ZLTextModel> model;
+
     if (iData && !iData->iBookModel.isNull()) {
         model = iData->iBookModel->bookTextModel();
     }
     return model;
 }
 
-shared_ptr<ZLTextModel> BooksBookModel::footnoteModel(const std::string& aId) const
+shared_ptr<ZLTextModel>
+BooksBookModel::footnoteModel(
+    const std::string& aId) const
 {
     shared_ptr<ZLTextModel> model;
+
     if (iData && !iData->iBookModel.isNull()) {
         model = iData->iBookModel->footnoteModel(aId);
     }
     return model;
 }
 
-shared_ptr<ZLTextModel> BooksBookModel::contentsModel() const
+shared_ptr<ZLTextModel>
+BooksBookModel::contentsModel() const
 {
     shared_ptr<ZLTextModel> model;
+
     if (iData && !iData->iBookModel.isNull()) {
         model = iData->iBookModel->contentsModel();
     }
     return model;
 }
 
-void BooksBookModel::setLeftMargin(int aMargin)
+void
+BooksBookModel::setLeftMargin(
+    int aMargin)
 {
     if (iMargins.iLeft != aMargin) {
         iMargins.iLeft = aMargin;
@@ -498,7 +559,9 @@ void BooksBookModel::setLeftMargin(int aMargin)
     }
 }
 
-void BooksBookModel::setRightMargin(int aMargin)
+void
+BooksBookModel::setRightMargin(
+    int aMargin)
 {
     if (iMargins.iRight != aMargin) {
         iMargins.iRight = aMargin;
@@ -508,7 +571,9 @@ void BooksBookModel::setRightMargin(int aMargin)
     }
 }
 
-void BooksBookModel::setTopMargin(int aMargin)
+void
+BooksBookModel::setTopMargin(
+    int aMargin)
 {
     if (iMargins.iTop != aMargin) {
         iMargins.iTop = aMargin;
@@ -518,7 +583,9 @@ void BooksBookModel::setTopMargin(int aMargin)
     }
 }
 
-void BooksBookModel::setBottomMargin(int aMargin)
+void
+BooksBookModel::setBottomMargin(
+    int aMargin)
 {
     if (iMargins.iBottom != aMargin) {
         iMargins.iBottom = aMargin;
@@ -528,20 +595,25 @@ void BooksBookModel::setBottomMargin(int aMargin)
     }
 }
 
-void BooksBookModel::emitBookPosChanged()
+void
+BooksBookModel::emitBookPosChanged()
 {
     const int n = pageCount();
     if (n > 0) {
         const QModelIndex topLeft(index(0));
         const QModelIndex bottomRight(index(n - 1));
         const QVector<int> roles(1, BooksBookModelBookPos);
+
         Q_EMIT dataChanged(topLeft, bottomRight, roles);
     }
 }
 
-void BooksBookModel::updateModel(int aPrevPageCount)
+void
+BooksBookModel::updateModel(
+    int aPrevPageCount)
 {
     const int newPageCount = pageCount();
+
     if (aPrevPageCount != newPageCount) {
         HDEBUG(aPrevPageCount << "->" << newPageCount);
         emitBookPosChanged();
@@ -556,27 +628,35 @@ void BooksBookModel::updateModel(int aPrevPageCount)
     }
 }
 
-void BooksBookModel::setSize(QSize aSize)
+void
+BooksBookModel::setSize(
+    QSize aSize)
 {
     if (iSize != aSize) {
         iSize = aSize;
+
         const int w = width();
         const int h = height();
+
         HDEBUG(aSize);
         if (iData && iData->iWidth == w && iData->iHeight == h) {
             HDEBUG("size didn't change");
         } else if (iData2 && iData2->iWidth == w && iData2->iHeight == h) {
             HDEBUG("switching to backup layout");
+
             const int oldModelPageCount = pageCount();
             Data* tmp = iData;
+
             iData = iData2;
             iData2 = tmp;
+
             // Cancel unnecessary paging task
             BooksLoadingSignalBlocker block(this);
+
             if (iPagingTask) {
                 HDEBUG("not so fast please...");
-                iPagingTask->release(this);
-                iPagingTask = NULL;
+                iPagingTask->release();
+                iPagingTask = Q_NULLPTR;
             }
             updateModel(oldModelPageCount);
             iPageStack->setPageMarks(iData->iPageMarks);
@@ -589,9 +669,9 @@ void BooksBookModel::setSize(QSize aSize)
     }
 }
 
-void BooksBookModel::onTextStyleChanged()
+void
+BooksBookModel::onTextStyleChanged()
 {
-    HDEBUG(iTitle);
     shared_ptr<ZLTextStyle> newStyle = iSettings->textStyle(fontSizeAdjust());
     const int newFontSize = newStyle->fontSize();
     const int oldFontSize = iTextStyle->fontSize();
@@ -599,14 +679,20 @@ void BooksBookModel::onTextStyleChanged()
         (newFontSize > oldFontSize) ? ReasonIncreasingFontSize :
         (newFontSize < oldFontSize) ? ReasonDecreasingFontSize :
         ReasonUnknown;
+
+    HDEBUG(iTitle);
     iTextStyle = newStyle;
     startReset(reason);
     Q_EMIT textStyleChanged();
 }
 
-void BooksBookModel::startReset(ResetReason aResetReason, bool aFullReset)
+void
+BooksBookModel::startReset(
+    ResetReason aResetReason,
+    bool aFullReset)
 {
     BooksLoadingSignalBlocker block(this);
+
     if (aResetReason == ReasonUnknown) {
         if (iResetReason == ReasonUnknown) {
             if (!iData && !iData2) {
@@ -617,10 +703,12 @@ void BooksBookModel::startReset(ResetReason aResetReason, bool aFullReset)
         }
     }
     if (iPagingTask) {
-        iPagingTask->release(this);
-        iPagingTask = NULL;
+        iPagingTask->release();
+        iPagingTask = Q_NULLPTR;
     }
+
     const int oldPageCount(pageCount());
+
     if (oldPageCount > 0) {
         beginResetModel();
     }
@@ -628,11 +716,11 @@ void BooksBookModel::startReset(ResetReason aResetReason, bool aFullReset)
     delete iData2;
     if (aFullReset) {
         delete iData;
-        iData2 = NULL;
+        iData2 = Q_NULLPTR;
     } else {
         iData2 = iData;
     }
-    iData = NULL;
+    iData = Q_NULLPTR;
 
     if (iBook && width() > 0 && height() > 0) {
         HDEBUG("starting" << qPrintable(QString("%1x%2").arg(width()).
@@ -658,7 +746,9 @@ void BooksBookModel::startReset(ResetReason aResetReason, bool aFullReset)
     }
 }
 
-void BooksBookModel::onResetProgress(int aProgress)
+void
+BooksBookModel::onResetProgress(
+    int aProgress)
 {
     // progress -> onResetProgress is a queued connection, we may received
     // this event from the task that has already been canceled.
@@ -668,22 +758,24 @@ void BooksBookModel::onResetProgress(int aProgress)
     }
 }
 
-void BooksBookModel::onResetDone()
+void
+BooksBookModel::onResetDone()
 {
     HASSERT(sender() == iPagingTask);
     HASSERT(iPagingTask->iData);
     HASSERT(!iData);
 
     const QByteArray hash(iBook->hash());
+
     if (hash.isEmpty() || iPagingTask->iData->iHash == hash) {
         const int oldPageCount(pageCount());
         shared_ptr<BookModel> oldBookModel(bookModel());
         BooksLoadingSignalBlocker block(this);
 
         iData = iPagingTask->iData;
-        iPagingTask->iData = NULL;
-        iPagingTask->release(this);
-        iPagingTask = NULL;
+        iPagingTask->iData = Q_NULLPTR;
+        iPagingTask->release();
+        iPagingTask = Q_NULLPTR;
 
         updateModel(oldPageCount);
         iPageStack->setPageMarks(iData->iPageMarks);
@@ -698,12 +790,13 @@ void BooksBookModel::onResetDone()
         }
     } else {
         HDEBUG("oops");
-        iPagingTask->release(this);
-        iPagingTask = NULL;
+        iPagingTask->release();
+        iPagingTask = Q_NULLPTR;
     }
 }
 
-QHash<int,QByteArray> BooksBookModel::roleNames() const
+QHash<int,QByteArray>
+BooksBookModel::roleNames() const
 {
     QHash<int, QByteArray> roles;
     roles.insert(BooksBookModelPageIndex, "pageIndex");
@@ -711,14 +804,20 @@ QHash<int,QByteArray> BooksBookModel::roleNames() const
     return roles;
 }
 
-int BooksBookModel::rowCount(const QModelIndex&) const
+int
+BooksBookModel::rowCount(
+    const QModelIndex&) const
 {
     return pageCount();
 }
 
-QVariant BooksBookModel::data(const QModelIndex& aIndex, int aRole) const
+QVariant
+BooksBookModel::data(
+    const QModelIndex& aIndex,
+    int aRole) const
 {
     const int row = aIndex.row();
+
     if (row >= 0 && row < pageCount()) {
         switch ((BooksBookModelRole)aRole) {
         case BooksBookModelPageIndex:

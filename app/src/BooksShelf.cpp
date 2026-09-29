@@ -1,6 +1,6 @@
 /*
+ * Copyright (C) 2015-2026 Slava Monich <slava@monich.com>
  * Copyright (C) 2015-2021 Jolla Ltd.
- * Copyright (C) 2015-2021 Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
  *
@@ -8,27 +8,33 @@
  * modification, are permitted provided that the following conditions
  * are met:
  *
- *   1. Redistributions of source code must retain the above copyright
- *      notice, this list of conditions and the following disclaimer.
- *   2. Redistributions in binary form must reproduce the above copyright
- *      notice, this list of conditions and the following disclaimer
- *      in the documentation and/or other materials provided with the
- *      distribution.
- *   3. Neither the names of the copyright holders nor the names of its
- *      contributors may be used to endorse or promote products derived
- *      from this software without specific prior written permission.
+ *  1. Redistributions of source code must retain the above copyright
+ *     notice, this list of conditions and the following disclaimer.
+ *
+ *  2. Redistributions in binary form must reproduce the above copyright
+ *     notice, this list of conditions and the following disclaimer
+ *     in the documentation and/or other materials provided with the
+ *     distribution.
+ *
+ *  3. Neither the names of the copyright holders nor the names of its
+ *     contributors may be used to endorse or promote products derived
+ *     from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
  * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
- * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
  * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
  * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
  * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
  * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ * The views and conclusions contained in the software and documentation
+ * are those of the authors and should not be interpreted as representing
+ * any official policies, either expressed or implied.
  */
 
 #include "BooksShelf.h"
@@ -39,6 +45,8 @@
 #include "HarbourDebug.h"
 #include "HarbourJson.h"
 #include "HarbourTask.h"
+
+#include <QtCore/QDir>
 
 #include <errno.h>
 
@@ -57,30 +65,31 @@ enum BooksItemRole {
 #define SHELF_STATE_FILE    BOOKS_STATE_FILE_SUFFIX
 #define SHELF_STATE_ORDER   "order"
 
-class BooksShelf::CopyTask : public HarbourTask, BooksItem::CopyOperation {
+class BooksShelf::CopyTask :
+    public HarbourTask, BooksItem::CopyOperation
+{
     Q_OBJECT
 
 public:
-    CopyTask(QThreadPool* aPool, BooksShelf::Data* aDestData,
-        BooksItem* aSrcItem);
+    CopyTask(QThreadPool*, BooksShelf::Data*, BooksItem*);
     ~CopyTask();
 
-    void performTask();
+    void performTask() Q_DECL_OVERRIDE;
     QString srcPath() const;
     QString destPath() const;
 
     // BooksItem::CopyOperation
-    virtual bool isCanceled() const;
-    virtual void copyProgressChanged(int aProgress);
+    bool isCanceled() const Q_DECL_OVERRIDE;
+    void copyProgressChanged(int progress) Q_DECL_OVERRIDE;
 
 Q_SIGNALS:
     void copyProgressChanged();
 
 public:
     BooksShelf::Data* iDestData;
-    BooksStorage iDestStorage;
-    QString iDestRelPath;
-    QString iDestAbsPath;
+    const BooksStorage iDestStorage;
+    const QString iDestRelPath;
+    const QString iDestAbsPath;
     BooksItem* iSrcItem;
     BooksItem* iDestItem;
     int iCopyProgress;
@@ -90,7 +99,9 @@ public:
 // BooksShelf::LoadTask
 // ==========================================================================
 
-class BooksShelf::LoadTask : public HarbourTask {
+class BooksShelf::LoadTask :
+    public HarbourTask
+{
 public:
     LoadTask(QThreadPool* aPool, BooksStorage aStorage, QString aRelPath,
         QString aStateFile) : HarbourTask(aPool),
@@ -98,29 +109,35 @@ public:
         iStateFilePath(aStateFile) {}
     ~LoadTask();
 
-    void performTask();
+    void performTask() Q_DECL_OVERRIDE;
 
-    int findBook(const QStringRef* aFileName) const;
-    static int find(QFileInfoList aList, QString aFileName, int aStart);
+    int findBook(const QStringRef& fileName) const;
+    static int find(QFileInfoList, QString fileName, int start);
 
 public:
-    BooksStorage iStorage;
-    QString iRelativePath;
-    QString iStateFilePath;
+    const BooksStorage iStorage;
+    const QString iRelativePath;
+    const QString iStateFilePath;
     QList<BooksItem*> iItems;
 };
 
 BooksShelf::LoadTask::~LoadTask()
 {
     const int n = iItems.count();
-    for (int i=0; i<n; i++) iItems.at(i)->release();
+
+    for (int i = 0; i < n; i++) iItems.at(i)->release();
 }
 
-int BooksShelf::LoadTask::find(QFileInfoList aList, QString aName, int aStart)
+int
+BooksShelf::LoadTask::find(
+    QFileInfoList aList,
+    QString aName,
+    int aStart)
 {
     if (!aName.isEmpty()) {
         const int n = aList.count();
-        for (int i=aStart; i<n; i++) {
+
+        for (int i = aStart; i < n; i++) {
             if (aList.at(i).fileName() == aName) {
                 return i;
             }
@@ -129,35 +146,44 @@ int BooksShelf::LoadTask::find(QFileInfoList aList, QString aName, int aStart)
     return -1;
 }
 
-int BooksShelf::LoadTask::findBook(const QStringRef* aFileName) const
+int
+BooksShelf::LoadTask::findBook(
+    const QStringRef& aFileName) const
 {
     // Caller makes sure that aFileName is not empty
     const int n = iItems.count();
-    for (int i=0; i<n; i++) {
+
+    for (int i = 0; i < n; i++) {
         BooksItem* item = iItems.at(i);
-        if (item->book() && aFileName->compare(item->fileName()) == 0) {
+
+        if (item->book() && aFileName.compare(item->fileName()) == 0) {
             return i;
         }
     }
     return -1;
 }
 
-void BooksShelf::LoadTask::performTask()
+void
+BooksShelf::LoadTask::performTask()
 {
     if (!isCanceled()) {
+        QVariantMap state;
         QString path(iStorage.fullPath(iRelativePath));
+
         HDEBUG("checking" << path);
+
         QDir dir(path);
         QFileInfoList list = dir.entryInfoList(QDir::Files |
             QDir::Dirs | QDir::NoDotAndDotDot, QDir::Time);
 
         // Restore the order
-        QVariantMap state;
         if (HarbourJson::load(iStateFilePath, state)) {
             QVariantList order = state.value(SHELF_STATE_ORDER).toList();
             const int n = order.count();
-            for (int i=0, dest=0; i<n; i++) {
-                int index = find(list, order.at(i).toString(), dest);
+
+            for (int i = 0, dest = 0; i < n; i++) {
+                const int index = find(list, order.at(i).toString(), dest);
+
                 if (index >= 0) {
                     if (index != dest) {
                         HDEBUG(order.at(i).toString() << index << "->" << dest);
@@ -173,23 +199,28 @@ void BooksShelf::LoadTask::performTask()
         }
 
         const int n = list.count();
-        for (int i=0; i<n && !isCanceled(); i++) {
+
+        for (int i = 0; i < n && !isCanceled(); i++) {
             const QFileInfo& info = list.at(i);
             QString path(info.filePath());
+
             if (info.isDir()) {
-                HDEBUG("directory:" << qPrintable(path));
                 QString folderPath(iRelativePath);
+
+                HDEBUG("directory:" << qPrintable(path));
                 if (!folderPath.isEmpty() && !folderPath.endsWith('/')) {
                     folderPath += '/';
                 }
                 folderPath += info.fileName();
-                BooksShelf* newShelf = new BooksShelf(iStorage, folderPath);
-                iItems.append(newShelf);
+
+                iItems.append(new BooksShelf(iStorage, folderPath));
             } else {
                 shared_ptr<Book> book = BooksUtil::bookFromFile(path);
+
                 if (!book.isNull()) {
                     BooksBook* newBook = new BooksBook(iStorage,
                         iRelativePath, book);
+
                     iItems.append(newBook);
                     HDEBUG("[" << iItems.size() << "]" <<
                         qPrintable(newBook->fileName()) <<
@@ -207,13 +238,16 @@ void BooksShelf::LoadTask::performTask()
         static const QString marksSuffix(BOOKS_MARKS_FILE_SUFFIX);
         QStringList deleteMe;
         QDirIterator configIt(iStorage.fullConfigPath(iRelativePath));
+
         while (configIt.hasNext() && !isCanceled()) {
             const QString path(configIt.next());
+
             if (path.endsWith(stateSuffix)) {
                 const QString fileName(configIt.fileName());
                 // State file is named <BOOK>.state
                 QStringRef name(fileName.leftRef(fileName.length() - stateSuffix.length()));
-                if (!name.isEmpty() && findBook(&name) < 0) {
+
+                if (!name.isEmpty() && findBook(name) < 0) {
                     deleteMe.append(path);
                 }
             } else if (path.endsWith(marksSuffix)) {
@@ -221,9 +255,10 @@ void BooksShelf::LoadTask::performTask()
                 // Marks file is named <BOOK>.<width>x<height>.marks
                 QStringRef name(fileName.leftRef(fileName.length() - stateSuffix.length()));
                 const int nextSeparator = name.lastIndexOf('.');
+
                 if (nextSeparator > 0) {
                     name = name.left(nextSeparator);
-                    if (findBook(&name) < 0) {
+                    if (findBook(name) < 0) {
                         deleteMe.append(path);
                     }
                 }
@@ -246,20 +281,20 @@ void BooksShelf::LoadTask::performTask()
 
 class BooksShelf::Data {
 public:
-    Data(BooksShelf* aShelf, BooksItem* aItem, bool aExternal);
+    Data(BooksShelf*, BooksItem*, bool external);
     ~Data();
 
     QString name() { return iItem ? iItem->name() : QString(); }
     QString fileName() { return iItem ? iItem->fileName() : QString(); }
     QString path() { return iItem ? iItem->path() : QString(); }
-    QObject* object() { return iItem ? iItem->object() : NULL; }
-    BooksBook* book() { return iItem ? iItem->book() : NULL; }
-    BooksShelf* shelf() { return iItem ? iItem->shelf() : NULL; }
+    QObject* object() { return iItem ? iItem->object() : Q_NULLPTR; }
+    BooksBook* book() { return iItem ? iItem->book() : Q_NULLPTR; }
+    BooksShelf* shelf() { return iItem ? iItem->shelf() : Q_NULLPTR; }
     bool accessible() const { return !iCopyTask && iItem && iItem->accessible(); }
     bool isBook() const { return iItem && iItem->book(); }
     bool isShelf() const { return iItem && iItem->shelf(); }
     bool copyingOut();
-    bool copyingIn() { return iCopyTask != NULL; }
+    bool copyingIn() { return iCopyTask != Q_NULLPTR; }
     double copyProgress() { return iCopyTask ? (iCopyTask->iCopyProgress/
         ((double)PROGRESS_PRECISION)) : 0.0; }
 
@@ -273,10 +308,13 @@ public:
     bool iDeleteRequested;
 };
 
-BooksShelf::Data::Data(BooksShelf* aShelf, BooksItem* aItem, bool aExternal) :
+BooksShelf::Data::Data(
+    BooksShelf* aShelf,
+    BooksItem* aItem,
+    bool aExternal) :
     iShelf(aShelf),
     iItem(aItem),
-    iCopyTask(NULL),
+    iCopyTask(Q_NULLPTR),
     iDeleteRequested(false)
 {
     if (iItem && !aExternal) {
@@ -291,11 +329,13 @@ BooksShelf::Data::~Data()
         iItem->release();
     }
     if (iCopyTask) {
-        iCopyTask->release(iShelf);
+        iCopyTask->release();
     }
 }
 
-void BooksShelf::Data::connectSignals(BooksBook* aBook)
+void
+BooksShelf::Data::connectSignals(
+    BooksBook* aBook)
 {
     if (aBook) {
         iShelf->connect(aBook,
@@ -310,7 +350,10 @@ void BooksShelf::Data::connectSignals(BooksBook* aBook)
     }
 }
 
-void BooksShelf::Data::setBook(BooksBook* aBook, bool aExternal)
+void
+BooksShelf::Data::setBook(
+    BooksBook* aBook,
+    bool aExternal)
 {
     if (iItem != aBook) {
         if (iItem) {
@@ -325,9 +368,12 @@ void BooksShelf::Data::setBook(BooksBook* aBook, bool aExternal)
     }
 }
 
-inline bool BooksShelf::Data::copyingOut()
+inline
+bool
+BooksShelf::Data::copyingOut()
 {
     BooksBook* bookItem = book();
+
     return bookItem && bookItem->copyingOut();
 }
 
@@ -343,11 +389,11 @@ BooksShelf::CopyTask::CopyTask(QThreadPool* aPool, BooksShelf::Data* aDestData,
     iDestRelPath(aDestData->iShelf->relativePath()),
     iDestAbsPath(iDestStorage.fullPath(iDestRelPath + "/" + aSrcItem->fileName())),
     iSrcItem(aSrcItem->retain()),
-    iDestItem(NULL),
+    iDestItem(Q_NULLPTR),
     iCopyProgress(0)
 {
     if (iDestData->iCopyTask) {
-        iDestData->iCopyTask->release(iDestData->iShelf);
+        iDestData->iCopyTask->release();
     }
     iDestData->iCopyTask = this;
     iDestData->iShelf->connect(this, SIGNAL(done()), SLOT(onCopyTaskDone()));
@@ -363,27 +409,35 @@ BooksShelf::CopyTask::~CopyTask()
     if (iDestItem) iDestItem->release();
 }
 
-inline QString BooksShelf::CopyTask::srcPath() const
+inline
+QString
+BooksShelf::CopyTask::srcPath() const
 {
     return iSrcItem->path();
 }
 
-inline QString BooksShelf::CopyTask::destPath() const
+inline
+QString
+BooksShelf::CopyTask::destPath() const
 {
     return iDestAbsPath;
 }
 
-void BooksShelf::CopyTask::performTask()
+void
+BooksShelf::CopyTask::performTask()
 {
     iDestItem = iSrcItem->copyTo(iDestStorage, iDestRelPath, this);
 }
 
-bool BooksShelf::CopyTask::isCanceled() const
+bool
+BooksShelf::CopyTask::isCanceled() const
 {
     return HarbourTask::isCanceled();
 }
 
-void BooksShelf::CopyTask::copyProgressChanged(int aProgress)
+void
+BooksShelf::CopyTask::copyProgressChanged(
+    int aProgress)
 {
     iCopyProgress = aProgress;
     Q_EMIT copyProgressChanged();
@@ -393,18 +447,22 @@ void BooksShelf::CopyTask::copyProgressChanged(int aProgress)
 // BooksShelf::DeleteTask
 // ==========================================================================
 
-class BooksShelf::DeleteTask : public HarbourTask {
+class BooksShelf::DeleteTask :
+    public HarbourTask
+{
     Q_OBJECT
 public:
-    DeleteTask(QThreadPool* aPool, BooksItem* aItem);
+    DeleteTask(QThreadPool*, BooksItem*);
     ~DeleteTask();
-    void performTask();
+    void performTask() Q_DECL_OVERRIDE;
 
 public:
     BooksItem* iItem;
 };
 
-BooksShelf::DeleteTask::DeleteTask(QThreadPool* aPool, BooksItem* aItem) :
+BooksShelf::DeleteTask::DeleteTask(
+    QThreadPool* aPool,
+    BooksItem* aItem) :
     HarbourTask(aPool),
     iItem(aItem)
 {
@@ -416,7 +474,8 @@ BooksShelf::DeleteTask::~DeleteTask()
     iItem->release();
 }
 
-void BooksShelf::DeleteTask::performTask()
+void
+BooksShelf::DeleteTask::performTask()
 {
     if (isCanceled()) {
         HDEBUG("cancelled" << iItem->fileName());
@@ -431,27 +490,31 @@ void BooksShelf::DeleteTask::performTask()
 
 class BooksShelf::Counts {
 public:
-    Counts(BooksShelf* aShelf);
-    void count(BooksShelf* aShelf);
-    void emitSignals(BooksShelf* aShelf);
+    Counts(BooksShelf*);
+    void count(BooksShelf*);
+    void emitSignals(BooksShelf*);
 
     int iTotalCount;
     int iBookCount;
     int iShelfCount;
 };
 
-BooksShelf::Counts::Counts(BooksShelf* aShelf)
+BooksShelf::Counts::Counts(
+    BooksShelf* aShelf)
 {
     count(aShelf);
 }
 
-void BooksShelf::Counts::count(BooksShelf* aShelf)
+void
+BooksShelf::Counts::count(
+    BooksShelf* aShelf)
 {
     iTotalCount = aShelf->iList.count(),
     iBookCount = 0;
     iShelfCount = 0;
-    for (int i=0; i<iTotalCount; i++) {
+    for (int i = 0; i < iTotalCount; i++) {
         const Data* data = aShelf->iList.at(i);
+
         if (data->isBook()) {
             iBookCount++;
         } else if (data->isShelf()) {
@@ -460,11 +523,14 @@ void BooksShelf::Counts::count(BooksShelf* aShelf)
     }
 }
 
-void BooksShelf::Counts::emitSignals(BooksShelf* aShelf)
+void
+BooksShelf::Counts::emitSignals(
+    BooksShelf* aShelf)
 {
     const int oldTotalCount = iTotalCount;
     const int oldBookCount = iBookCount;
     const int oldShelfCount = iShelfCount;
+
     count(aShelf);
     if (oldBookCount != iBookCount) {
         Q_EMIT aShelf->bookCountChanged();
@@ -481,10 +547,11 @@ void BooksShelf::Counts::emitSignals(BooksShelf* aShelf)
 // BooksShelf
 // ==========================================================================
 
-BooksShelf::BooksShelf(QObject* aParent) :
+BooksShelf::BooksShelf(
+    QObject* aParent) :
     QAbstractListModel(aParent),
     iLoadBookList(true),
-    iLoadTask(NULL),
+    iLoadTask(Q_NULLPTR),
     iDummyItemIndex(-1),
     iEditMode(false),
     iRef(-1),
@@ -495,15 +562,17 @@ BooksShelf::BooksShelf(QObject* aParent) :
     connect(iSaveTimer, SIGNAL(save()), SLOT(saveState()));
 }
 
-BooksShelf::BooksShelf(BooksStorage aStorage, QString aRelativePath) :
+BooksShelf::BooksShelf(
+    BooksStorage aStorage,
+    QString aRelativePath) :
     iLoadBookList(false),
-    iLoadTask(NULL),
+    iLoadTask(Q_NULLPTR),
     iRelativePath(aRelativePath),
     iStorage(aStorage),
     iDummyItemIndex(-1),
     iEditMode(false),
     iRef(1),
-    iSaveTimer(NULL),
+    iSaveTimer(Q_NULLPTR),
     iTaskQueue(BooksTaskQueue::defaultQueue())
 {
     init();
@@ -517,14 +586,16 @@ BooksShelf::BooksShelf(BooksStorage aStorage, QString aRelativePath) :
 BooksShelf::~BooksShelf()
 {
     const int n = iDeleteTasks.count();
-    for (int i=0; i<n; i++) iDeleteTasks.at(i)->release(this);
-    if (iLoadTask) iLoadTask->release(this);
+    for (int i = 0; i < n; i++) iDeleteTasks.at(i)->release();
+
+    if (iLoadTask) iLoadTask->release();
     if (iSaveTimer && iSaveTimer->saveRequested()) saveState();
     qDeleteAll(iList);
     HDEBUG("destroyed");
 }
 
-void BooksShelf::init()
+void
+BooksShelf::init()
 {
 #if QT_VERSION < 0x050000
     setRoleNames(roleNames());
@@ -535,7 +606,9 @@ void BooksShelf::init()
         SLOT(onStorageReplaced(BooksStorage,BooksStorage)));
 }
 
-void BooksShelf::setRelativePath(QString aPath)
+void
+BooksShelf::setRelativePath(
+    QString aPath)
 {
     if (iRelativePath != aPath) {
         iRelativePath = aPath;
@@ -544,7 +617,9 @@ void BooksShelf::setRelativePath(QString aPath)
     }
 }
 
-void BooksShelf::setDevice(QString aDevice)
+void
+BooksShelf::setDevice(
+    QString aDevice)
 {
     if (device() != aDevice) {
         iStorage = BooksStorageManager::instance()->storageForDevice(aDevice);
@@ -553,7 +628,10 @@ void BooksShelf::setDevice(QString aDevice)
     }
 }
 
-void BooksShelf::onStorageReplaced(BooksStorage aOld, BooksStorage aNew)
+void
+BooksShelf::onStorageReplaced(
+    BooksStorage aOld,
+    BooksStorage aNew)
 {
     if (iStorage == aOld) {
         iStorage = aNew;
@@ -561,18 +639,22 @@ void BooksShelf::onStorageReplaced(BooksStorage aOld, BooksStorage aNew)
     }
 }
 
-void BooksShelf::setName(QString aName)
+void
+BooksShelf::setName(
+    QString aName)
 {
     if (iStorage.isValid() &&
         BooksUtil::isValidFileName(aName) &&
         iFileName != aName) {
         QString parentDir;
         const int lastSlash = iRelativePath.lastIndexOf('/');
+
         if (lastSlash > 0) {
             parentDir = iRelativePath.left(lastSlash);
         }
 
         QString newRelativePath;
+
         if (!parentDir.isEmpty()) {
             newRelativePath = parentDir;
             newRelativePath += '/';
@@ -581,18 +663,21 @@ void BooksShelf::setName(QString aName)
 
         const QString oldPath = iStorage.fullPath(iRelativePath);
         const QString newPath = iStorage.fullPath(newRelativePath);
+
         HDEBUG("renaming" << qPrintable(oldPath) << "->" << qPrintable(newPath));
         if (rename(qPrintable(oldPath), qPrintable(newPath)) == 0) {
-
             // Rename the config/cache directory too
             const QString oldConfPath = iStorage.fullConfigPath(iRelativePath);
             const QString newConfPath = iStorage.fullConfigPath(newRelativePath);
+            QVariantMap state;
+
             HDEBUG(qPrintable(oldConfPath) << "->" << qPrintable(newConfPath));
             if (rename(qPrintable(oldConfPath), qPrintable(newConfPath))) {
                 HWARN(strerror(errno));
             }
 
             const QString oldFileName(iFileName);
+
             iRelativePath = newRelativePath;
             iPath = iStorage.fullPath(iRelativePath);
             updateFileName();
@@ -601,12 +686,12 @@ void BooksShelf::setName(QString aName)
 
             // Since this directiry has been renamed, we need to update the
             // order of objects in the parent directory.
-            QVariantMap state;
             const QString stateFile = stateFileName(parentDir);
             if (HarbourJson::load(stateFile, state)) {
                 QVariantList order = state.value(SHELF_STATE_ORDER).toList();
-                int i, n = order.count();
-                for (i=0; i<n; i++) {
+                const int n = order.count();
+
+                for (int i = 0; i < n; i++) {
                     if (order.at(i).toString() == oldFileName) {
                         order[i] = iFileName;
                         state.insert(SHELF_STATE_ORDER, order);
@@ -623,10 +708,12 @@ void BooksShelf::setName(QString aName)
     }
 }
 
-void BooksShelf::updatePath()
+void
+BooksShelf::updatePath()
 {
     BooksLoadingSignalBlocker block(this);
     const QString oldPath = iPath;
+
     iPath.clear();
     if (iStorage.isValid()) {
         iPath = iStorage.fullPath(iRelativePath);
@@ -635,6 +722,7 @@ void BooksShelf::updatePath()
     if (oldPath != iPath) {
         const int oldDummyItemIndex = iDummyItemIndex;
         Counts counts(this);
+
         HDEBUG(iPath);
         // Clear the model
         if (!iList.isEmpty()) {
@@ -642,6 +730,7 @@ void BooksShelf::updatePath()
             while (!iList.isEmpty()) {
                 Data* data = iList.takeLast();
                 BooksBook* book = data->book();
+
                 if (book) {
                     Q_EMIT bookRemoved(book);
                 }
@@ -662,19 +751,22 @@ void BooksShelf::updatePath()
     }
 }
 
-void BooksShelf::updateFileName()
+void
+BooksShelf::updateFileName()
 {
     const int slashPos = iRelativePath.lastIndexOf('/');
     const QString fileName = (slashPos >= 0) ?
         iRelativePath.right(iRelativePath.length() - slashPos - 1) :
         iRelativePath;
+
     if (iFileName != fileName) {
         iFileName = fileName;
         Q_EMIT nameChanged();
     }
 }
 
-void BooksShelf::onLoadTaskDone()
+void
+BooksShelf::onLoadTaskDone()
 {
     HASSERT(iLoadTask);
     HASSERT(iLoadTask == sender());
@@ -682,13 +774,16 @@ void BooksShelf::onLoadTaskDone()
         BooksLoadingSignalBlocker block(this);
         const int oldSize = iList.size();
         const int newSize = iLoadTask->iItems.size();
+
         HASSERT(iList.isEmpty());
         if (newSize > 0) {
             Counts counts(this);
+
             beginInsertRows(QModelIndex(), oldSize, oldSize + newSize - 1);
             for (int i=0; i<newSize; i++) {
                 BooksItem* item = iLoadTask->iItems.at(i);
                 BooksBook* book = item->book();
+
                 if (book) {
                     Q_EMIT bookAdded(book);
                 }
@@ -697,17 +792,19 @@ void BooksShelf::onLoadTaskDone()
             endInsertRows();
             counts.emitSignals(this);
         }
-        iLoadTask->release(this);
-        iLoadTask = NULL;
+        iLoadTask->release();
+        iLoadTask = Q_NULLPTR;
     }
 }
 
-void BooksShelf::loadBookList()
+void
+BooksShelf::loadBookList()
 {
     BooksLoadingSignalBlocker block(this);
-    if (iLoadTask) iLoadTask->release(this);
+
+    if (iLoadTask) iLoadTask->release();
     if (iPath.isEmpty()) {
-        iLoadTask = NULL;
+        iLoadTask = Q_NULLPTR;
     } else {
         HDEBUG(iPath);
         (iLoadTask = new LoadTask(iTaskQueue->pool(), iStorage, iRelativePath,
@@ -715,31 +812,39 @@ void BooksShelf::loadBookList()
     }
 }
 
-void BooksShelf::saveState()
+void
+BooksShelf::saveState()
 {
     QStringList order;
+    QVariantMap state;
     const int n = iList.count();
-    for (int i=0; i<n; i++) {
+
+    order.reserve(n);
+    for (int i = 0; i < n; i++) {
         order.append(iList.at(i)->fileName());
     }
-    QVariantMap state;
+
     state.insert(SHELF_STATE_ORDER, order);
     if (HarbourJson::save(stateFileName(), state)) {
         HDEBUG("wrote" << qPrintable(stateFileName()));
     }
 }
 
-void BooksShelf::queueStateSave()
+void
+BooksShelf::queueStateSave()
 {
     if (iEditMode && iSaveTimer) {
         iSaveTimer->requestSave();
     }
 }
 
-QString BooksShelf::stateFileName(QString aRelativePath) const
+QString
+BooksShelf::stateFileName(
+    QString aRelativePath) const
 {
     if (iStorage.isValid()) {
         QString path(iStorage.configDir().path());
+
         if (!aRelativePath.isEmpty()) {
             path += "/";
             path += aRelativePath;
@@ -751,11 +856,14 @@ QString BooksShelf::stateFileName(QString aRelativePath) const
     }
 }
 
-int BooksShelf::bookIndex(BooksBook* aBook) const
+int
+BooksShelf::bookIndex(
+    BooksBook* aBook) const
 {
     if (aBook) {
         const int n = iList.count();
-        for (int i=0; i<n; i++) {
+
+        for (int i = 0; i<n; i++) {
             if (iList.at(i)->book() == aBook) {
                 return i;
             }
@@ -764,11 +872,15 @@ int BooksShelf::bookIndex(BooksBook* aBook) const
     return -1;
 }
 
-int BooksShelf::itemIndex(QString aFileName, int aStartIndex) const
+int
+BooksShelf::itemIndex(
+    QString aFileName,
+    int aStartIndex) const
 {
     if (!aFileName.isEmpty()) {
         const int n = iList.count();
-        for (int i=aStartIndex; i<n; i++) {
+
+        for (int i = aStartIndex; i < n; i++) {
             if (iList.at(i)->fileName() == aFileName) {
                 return i;
             }
@@ -777,12 +889,14 @@ int BooksShelf::itemIndex(QString aFileName, int aStartIndex) const
     return -1;
 }
 
-void BooksShelf::setHasDummyItem(bool aHasDummyItem)
+void
+BooksShelf::setHasDummyItem(
+    bool aHasDummyItem)
 {
     if (aHasDummyItem && !hasDummyItem()) {
         iDummyItemIndex = iList.count();
         beginInsertRows(QModelIndex(), iDummyItemIndex, iDummyItemIndex);
-        iList.append(new Data(this, NULL, false));
+        iList.append(new Data(this, Q_NULLPTR, false));
         endInsertRows();
         Q_EMIT countChanged();
         Q_EMIT hasDummyItemChanged();
@@ -792,7 +906,9 @@ void BooksShelf::setHasDummyItem(bool aHasDummyItem)
     }
 }
 
-void BooksShelf::setEditMode(bool aEditMode)
+void
+BooksShelf::setEditMode(
+    bool aEditMode)
 {
     if (iEditMode != aEditMode) {
         iEditMode = aEditMode;
@@ -805,17 +921,21 @@ void BooksShelf::setEditMode(bool aEditMode)
     }
 }
 
-void BooksShelf::setDummyItemIndex(int aIndex)
+void
+BooksShelf::setDummyItemIndex(
+    int aIndex)
 {
     if (validIndex(aIndex) && hasDummyItem() && iDummyItemIndex != aIndex) {
         const int oldDummyItemIndex = iDummyItemIndex;
+
         iDummyItemIndex = aIndex;
         move(oldDummyItemIndex, aIndex);
         Q_EMIT dummyItemIndexChanged();
     }
 }
 
-BooksItem* BooksShelf::retain()
+BooksItem*
+BooksShelf::retain()
 {
     if (iRef.load() >= 0) {
         iRef.ref();
@@ -823,93 +943,112 @@ BooksItem* BooksShelf::retain()
     return this;
 }
 
-void BooksShelf::release()
+void
+BooksShelf::release()
 {
     if (iRef.load() >= 0 && !iRef.deref()) {
         delete this;
     }
 }
 
-QObject* BooksShelf::object()
+QObject*
+BooksShelf::object()
 {
     return this;
 }
 
-BooksShelf* BooksShelf::shelf()
+BooksShelf*
+BooksShelf::shelf()
 {
     return this;
 }
 
-BooksBook* BooksShelf::book()
+BooksBook*
+BooksShelf::book()
 {
-    return NULL;
+    return Q_NULLPTR;
 }
 
-QString BooksShelf::name() const
-{
-    return iFileName;
-}
-
-QString BooksShelf::fileName() const
+QString
+BooksShelf::name() const
 {
     return iFileName;
 }
 
-QString BooksShelf::path() const
+QString
+BooksShelf::fileName() const
+{
+    return iFileName;
+}
+
+QString
+BooksShelf::path() const
 {
     return iPath;
 }
 
-bool BooksShelf::accessible() const
+bool
+BooksShelf::accessible() const
 {
     return true;
 }
 
-int BooksShelf::count() const
+int
+BooksShelf::count() const
 {
     return iList.count();
 }
 
-int BooksShelf::bookCount() const
+int
+BooksShelf::bookCount() const
 {
-    int n=0, total = iList.count();
-    for(int i=0; i<total; i++) {
+    int n = 0, total = iList.count();
+    for(int i = 0; i < total; i++) {
         if (iList.at(i)->book()) n++;
     }
     return n;
 }
 
-int BooksShelf::shelfCount() const
+int
+BooksShelf::shelfCount() const
 {
-    int n=0, total = iList.count();
-    for(int i=0; i<total; i++) {
+    int n = 0, total = iList.count();
+
+    for(int i = 0; i < total; i++) {
         if (iList.at(i)->shelf()) n++;
     }
     return n;
 }
 
-QObject* BooksShelf::get(int aIndex) const
+QObject*
+BooksShelf::get(
+    int aIndex) const
 {
     if (validIndex(aIndex)) {
         return iList.at(aIndex)->object();
     }
     HWARN("invalid index" << aIndex);
-    return NULL;
+    return Q_NULLPTR;
 }
 
-BooksBook* BooksShelf::bookAt(int aIndex) const
+BooksBook*
+BooksShelf::bookAt(
+    int aIndex) const
 {
     if (validIndex(aIndex)) {
         return iList.at(aIndex)->book();
     }
     HWARN("invalid index" << aIndex);
-    return NULL;
+    return Q_NULLPTR;
 }
 
-bool BooksShelf::drop(QObject* aItem)
+bool
+BooksShelf::drop(
+    QObject* aItem)
 {
     if (iDummyItemIndex >= 0) {
         BooksBook* book = qobject_cast<BooksBook*>(aItem);
+
         if (!book) {
             HWARN("unexpected drop object");
         } else if (itemIndex(book->fileName()) >= 0) {
@@ -918,9 +1057,11 @@ bool BooksShelf::drop(QObject* aItem)
         } else {
             HDEBUG("copying" << book->name() << "to" << qPrintable(path()));
             book->setCopyingOut(true);
+
             // Dropped object replaces the dummy placeholder object
             QModelIndex index(createIndex(iDummyItemIndex, 0));
             Data* data = iList.at(iDummyItemIndex);
+
             HASSERT(!data->iItem);
             iDummyItemIndex = -1;
             // Don't connect signals since it's not our item
@@ -938,12 +1079,16 @@ bool BooksShelf::drop(QObject* aItem)
     return false;
 }
 
-void BooksShelf::move(int aFrom, int aTo)
+void
+BooksShelf::move(
+    int aFrom,
+    int aTo)
 {
     if (aFrom != aTo) {
         if (validIndex(aFrom) && validIndex(aTo)) {
-            HDEBUG(iList.at(aFrom)->name() << "from" << aFrom << "to" << aTo);
             int dest = (aTo < aFrom) ? aTo : (aTo+1);
+
+            HDEBUG(iList.at(aFrom)->name() << "from" << aFrom << "to" << aTo);
             beginMoveRows(QModelIndex(), aFrom, aFrom, QModelIndex(), dest);
             iList.move(aFrom, aTo);
             queueStateSave();
@@ -954,11 +1099,15 @@ void BooksShelf::move(int aFrom, int aTo)
     }
 }
 
-void BooksShelf::submitDeleteTask(int aIndex)
+void
+BooksShelf::submitDeleteTask(
+    int aIndex)
 {
     BooksItem* item = iList.at(aIndex)->iItem;
+
     if (item) {
         DeleteTask* task = new DeleteTask(iTaskQueue->pool(), item);
+
         iDeleteTasks.append(task);
         task->submit();
         BooksBook* book = item->book();
@@ -969,10 +1118,13 @@ void BooksShelf::submitDeleteTask(int aIndex)
     }
 }
 
-void BooksShelf::remove(int aIndex)
+void
+BooksShelf::remove(
+    int aIndex)
 {
     if (validIndex(aIndex)) {
         Counts counts(this);
+
         HDEBUG(iList.at(aIndex)->name());
         beginRemoveRows(QModelIndex(), aIndex, aIndex);
         submitDeleteTask(aIndex);
@@ -988,13 +1140,15 @@ void BooksShelf::remove(int aIndex)
     }
 }
 
-void BooksShelf::removeAll()
+void
+BooksShelf::removeAll()
 {
     if (!iList.isEmpty()) {
         Counts counts(this);
+
         beginRemoveRows(QModelIndex(), 0, iList.count()-1);
         const int n = iList.count();
-        for (int i=0; i<n; i++) {
+        for (int i = 0; i < n; i++) {
             submitDeleteTask(i);
         }
         if (iDummyItemIndex >= 0) {
@@ -1010,7 +1164,9 @@ void BooksShelf::removeAll()
     }
 }
 
-bool BooksShelf::deleteRequested(int aIndex) const
+bool
+BooksShelf::deleteRequested(
+    int aIndex) const
 {
     if (validIndex(aIndex)) {
         return iList.at(aIndex)->iDeleteRequested;
@@ -1019,10 +1175,14 @@ bool BooksShelf::deleteRequested(int aIndex) const
     }
 }
 
-void BooksShelf::setDeleteRequested(int aIndex, bool aValue)
+void
+BooksShelf::setDeleteRequested(
+    int aIndex,
+    bool aValue)
 {
     if (validIndex(aIndex)) {
         Data* data = iList.at(aIndex);
+
         if (data->iDeleteRequested != aValue) {
             if (aValue) {
                 if (!data->copyingIn() && !data->copyingOut()) {
@@ -1039,24 +1199,29 @@ void BooksShelf::setDeleteRequested(int aIndex, bool aValue)
     }
 }
 
-void BooksShelf::cancelAllDeleteRequests()
+void
+BooksShelf::cancelAllDeleteRequests()
 {
-    for (int i=iList.count()-1; i>=0; i--) {
+    for (int i = iList.count() - 1; i >= 0; i--) {
         setDeleteRequested(i, false);
     }
 }
 
-void BooksShelf::importBook(QObject* aBook)
+void
+BooksShelf::importBook(
+    QObject* aBook)
 {
     BooksBook* book = qobject_cast<BooksBook*>(aBook);
+
     if (!book) {
         HWARN("unexpected import object");
     } else if (itemIndex(book->fileName()) >= 0) {
         HWARN("duplicate file name" << book->fileName());
     } else {
+        Counts counts(this);
+
         HDEBUG(qPrintable(book->path()) << "->" << qPrintable(iPath));
         beginInsertRows(QModelIndex(), 0, 0);
-        Counts counts(this);
         Data* data = new Data(this, book->retain(), true);
         iList.insert(0, data);
         (new CopyTask(iTaskQueue->pool(), data, book))->submit();
@@ -1066,40 +1231,51 @@ void BooksShelf::importBook(QObject* aBook)
     }
 }
 
-void BooksShelf::emitDataChangedSignal(int aRow, int aRole)
+void
+BooksShelf::emitDataChangedSignal(
+    int aRow,
+    int aRole)
 {
     if (aRow >= 0) {
-        QModelIndex index(createIndex(aRow, 0));
+        const QModelIndex index(createIndex(aRow, 0));
         QVector<int> roles;
+
         roles.append(aRole);
         Q_EMIT dataChanged(index, index, roles);
     }
 }
 
-void BooksShelf::onBookAccessibleChanged()
+void
+BooksShelf::onBookAccessibleChanged()
 {
-    int row = bookIndex(qobject_cast<BooksBook*>(sender()));
+    const int row = bookIndex(qobject_cast<BooksBook*>(sender()));
+
     if (row >= 0) {
         HDEBUG(iList.at(row)->name() << iList.at(row)->accessible());
         emitDataChangedSignal(row, BooksItemAccessible);
     }
 }
 
-void BooksShelf::onBookCopyingOutChanged()
+void
+BooksShelf::onBookCopyingOutChanged()
 {
-    int row = bookIndex(qobject_cast<BooksBook*>(sender()));
+    const int row = bookIndex(qobject_cast<BooksBook*>(sender()));
+
     if (row >= 0) {
         HDEBUG(iList.at(row)->name() << iList.at(row)->copyingOut());
         emitDataChangedSignal(row, BooksItemCopyingOut);
     }
 }
 
-void BooksShelf::onBookMovedAway()
+void
+BooksShelf::onBookMovedAway()
 {
     BooksBook* book = qobject_cast<BooksBook*>(sender());
+
     HASSERT(book);
     if (book) {
         const int row = bookIndex(book);
+
         HDEBUG(book->title() << row);
         if (row >= 0) {
             remove(row);
@@ -1107,32 +1283,37 @@ void BooksShelf::onBookMovedAway()
     }
 }
 
-void BooksShelf::onCopyTaskProgressChanged()
+void
+BooksShelf::onCopyTaskProgressChanged()
 {
     CopyTask* task = qobject_cast<CopyTask*>(sender());
+
     HASSERT(task);
     if (task) {
-        HDEBUG(task->destPath() << task->iCopyProgress);
         const int row = iList.indexOf(task->iDestData);
+
+        HDEBUG(task->destPath() << task->iCopyProgress);
         emitDataChangedSignal(row, BooksItemCopyProgress);
     }
 }
 
-void BooksShelf::onCopyTaskDone()
+void
+BooksShelf::onCopyTaskDone()
 {
     CopyTask* task = qobject_cast<CopyTask*>(sender());
+
     HASSERT(task);
     if (task) {
-        QString dest = task->destPath();
+        const QString dest = task->destPath();
         HDEBUG(qPrintable(task->srcPath()) << "->" << qPrintable(dest) <<
             "copy" << (task->iDestItem ? "done" : "FAILED"));
 
         Data* data = task->iDestData;
         const int row = iList.indexOf(data);
-        HASSERT(row >= 0);
-
-        BooksBook* copy = NULL;
+        BooksBook* copy = Q_NULLPTR;
         BooksBook* src = data->book();
+
+        HASSERT(row >= 0);
         HASSERT(src);
         if (src) {
             src->retain();
@@ -1150,9 +1331,9 @@ void BooksShelf::onCopyTaskDone()
         }
 
         // Disassociate book data from the copy task
-        data->iCopyTask = NULL;
-        task->iDestData = NULL;
-        task->release(this);
+        data->iCopyTask = Q_NULLPTR;
+        task->iDestData = Q_NULLPTR;
+        task->release();
 
         // Notify the source shelf. This will actually remove the source file.
         if (copy) {
@@ -1178,20 +1359,24 @@ void BooksShelf::onCopyTaskDone()
     }
 }
 
-void BooksShelf::onDeleteTaskDone()
+void
+BooksShelf::onDeleteTaskDone()
 {
     DeleteTask* task = qobject_cast<DeleteTask*>(sender());
+
     HASSERT(task);
     if (task) {
-        task->release(this);
+        task->release();
         HVERIFY(iDeleteTasks.removeOne(task));
     }
 }
 
-void BooksShelf::deleteFiles()
+void
+BooksShelf::deleteFiles()
 {
     if (iStorage.isValid()) {
         QString path(iStorage.fullPath(iRelativePath));
+
         HDEBUG("removing" << path);
         if (!QDir(path).removeRecursively()) {
             HWARN("some content couldn't be deleted under" << path);
@@ -1204,16 +1389,21 @@ void BooksShelf::deleteFiles()
     }
 }
 
-BooksItem* BooksShelf::copyTo(const BooksStorage& aStorage, QString aRelPath,
+BooksItem*
+BooksShelf::copyTo(
+    const BooksStorage& aStorage,
+    QString aRelPath,
     CopyOperation* aObserver)
 {
     HWARN("copying folders is not implemented!!");
-    return NULL;
+    return Q_NULLPTR;
 }
 
-QHash<int,QByteArray> BooksShelf::roleNames() const
+QHash<int,QByteArray>
+BooksShelf::roleNames() const
 {
     QHash<int, QByteArray> roles;
+
     roles.insert(BooksItemName, "name");
     roles.insert(BooksItemBook, "book");
     roles.insert(BooksItemShelf, "shelf");
@@ -1231,11 +1421,16 @@ int BooksShelf::rowCount(const QModelIndex&) const
     return iList.count();
 }
 
-QVariant BooksShelf::data(const QModelIndex& aIndex, int aRole) const
+QVariant
+BooksShelf::data(
+    const QModelIndex& aIndex,
+    int aRole) const
 {
     const int i = aIndex.row();
+
     if (validIndex(i)) {
         Data* data = iList.at(i);
+
         switch (aRole) {
         case BooksItemName: return data->name();
         case BooksItemBook: return QVariant::fromValue(data->book());

@@ -1,6 +1,6 @@
 /*
+ * Copyright (C) 2015-2026 Slava Monich <slava@monich.com>
  * Copyright (C) 2015-2018 Jolla Ltd.
- * Copyright (C) 2015-2018 Slava Monich <slava.monich@jolla.com>
  *
  * You may use this file under the terms of the BSD license as follows:
  *
@@ -8,27 +8,33 @@
  * modification, are permitted provided that the following conditions
  * are met:
  *
- *   * Redistributions of source code must retain the above copyright
+ *  1. Redistributions of source code must retain the above copyright
  *     notice, this list of conditions and the following disclaimer.
- *   * Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in
- *     the documentation and/or other materials provided with the
+ *
+ *  2. Redistributions in binary form must reproduce the above copyright
+ *     notice, this list of conditions and the following disclaimer
+ *     in the documentation and/or other materials provided with the
  *     distribution.
- *   * Neither the name of Jolla Ltd nor the names of its contributors
- *     may be used to endorse or promote products derived from this
- *     software without specific prior written permission.
+ *
+ *  3. Neither the names of the copyright holders nor the names of its
+ *     contributors may be used to endorse or promote products derived
+ *     from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
  * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
- * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
  * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
  * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
  * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
  * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ * The views and conclusions contained in the software and documentation
+ * are those of the authors and should not be interpreted as representing
+ * any official policies, either expressed or implied.
  */
 
 #ifndef BOOKS_SHELF_MODEL_H
@@ -40,14 +46,13 @@
 #include "BooksTaskQueue.h"
 #include "BooksLoadingProperty.h"
 
-#include <QDir>
-#include <QHash>
-#include <QVariant>
-#include <QByteArray>
-#include <QAbstractListModel>
+#include <QtCore/QAbstractListModel>
 #include <QtQml>
 
-class BooksShelf: public QAbstractListModel, public BooksItem, public BooksLoadingProperty
+class BooksShelf:
+    public QAbstractListModel,
+    public BooksItem,
+    public BooksLoadingProperty
 {
     Q_OBJECT
     Q_PROPERTY(int count READ count NOTIFY countChanged)
@@ -67,61 +72,61 @@ class BooksShelf: public QAbstractListModel, public BooksItem, public BooksLoadi
     Q_PROPERTY(QObject* storage READ storageObject CONSTANT)
 
 public:
-    explicit BooksShelf(QObject* aParent = NULL);
-    BooksShelf(BooksStorage aStorage, QString aRelativePath);
+    explicit BooksShelf(QObject* aParent = Q_NULLPTR);
+    BooksShelf(BooksStorage, QString relPath);
     ~BooksShelf();
 
-    Q_INVOKABLE QObject* get(int aIndex) const;
-    Q_INVOKABLE bool drop(QObject* aItem);
-    Q_INVOKABLE void move(int aFrom, int aTo);
-    Q_INVOKABLE void remove(int aIndex);
+    Q_INVOKABLE QObject* get(int index) const;
+    Q_INVOKABLE bool drop(QObject*);
+    Q_INVOKABLE void move(int from, int to);
+    Q_INVOKABLE void remove(int index);
     Q_INVOKABLE void removeAll();
-    Q_INVOKABLE bool deleteRequested(int aIndex) const;
-    Q_INVOKABLE void setDeleteRequested(int aIndex, bool aValue);
+    Q_INVOKABLE bool deleteRequested(int index) const;
+    Q_INVOKABLE void setDeleteRequested(int index, bool);
     Q_INVOKABLE void cancelAllDeleteRequests();
-    Q_INVOKABLE void importBook(QObject* aBook);
+    Q_INVOKABLE void importBook(QObject*);
 
     bool loading() const { return iLoadTask != NULL; }
     int count() const;
     int bookCount() const;
     int shelfCount() const;
     QString relativePath() const { return iRelativePath; }
-    void setRelativePath(QString aPath);
-    BooksBook* bookAt(int aIndex) const;
+    void setRelativePath(QString);
+    BooksBook* bookAt(int) const;
     QObject* storageObject() { return &iStorage; }
     const BooksStorage& storage() const { return iStorage; }
-    void setName(QString aName);
+    void setName(QString);
 
     bool editMode() const { return iEditMode; }
-    void setEditMode(bool aEditMode);
+    void setEditMode(bool);
 
     bool hasDummyItem() const { return iDummyItemIndex >= 0; }
-    void setHasDummyItem(bool aHasDummyItem);
+    void setHasDummyItem(bool);
 
     int dummyItemIndex() const { return iDummyItemIndex; }
-    void setDummyItemIndex(int aIndex);
+    void setDummyItemIndex(int);
 
     QString device() { return iStorage.device(); }
-    void setDevice(QString aDevice);
+    void setDevice(QString);
 
     // QAbstractListModel
-    virtual QHash<int,QByteArray> roleNames() const;
-    virtual int rowCount(const QModelIndex& aParent) const;
-    virtual QVariant data(const QModelIndex& aIndex, int aRole) const;
+    QHash<int,QByteArray> roleNames() const Q_DECL_OVERRIDE;
+    int rowCount(const QModelIndex&) const Q_DECL_OVERRIDE;
+    QVariant data(const QModelIndex&, int) const Q_DECL_OVERRIDE;
 
     // BooksItem
-    virtual BooksItem* retain();
-    virtual void release();
-    virtual QObject* object();
-    virtual BooksShelf* shelf();
-    virtual BooksBook* book();
-    virtual QString name() const;
-    virtual QString fileName() const;
-    virtual QString path() const;
-    virtual bool accessible() const;
-    virtual void deleteFiles();
-    virtual BooksItem* copyTo(const BooksStorage& aStorage, QString aRelPath,
-        CopyOperation* aObserver);
+    BooksItem* retain() Q_DECL_OVERRIDE;
+    void release() Q_DECL_OVERRIDE;
+    QObject* object() Q_DECL_OVERRIDE;
+    BooksShelf* shelf() Q_DECL_OVERRIDE;
+    BooksBook* book() Q_DECL_OVERRIDE;
+    QString name() const Q_DECL_OVERRIDE;
+    QString fileName() const Q_DECL_OVERRIDE;
+    QString path() const Q_DECL_OVERRIDE;
+    bool accessible() const Q_DECL_OVERRIDE;
+    void deleteFiles() Q_DECL_OVERRIDE;
+    BooksItem* copyTo(const BooksStorage&, QString relPath,
+        CopyOperation*) Q_DECL_OVERRIDE;
 
 Q_SIGNALS:
     void loadingChanged();
@@ -135,8 +140,8 @@ Q_SIGNALS:
     void editModeChanged();
     void hasDummyItemChanged();
     void dummyItemIndexChanged();
-    void bookAdded(BooksBook* aBook);
-    void bookRemoved(BooksBook* aBook);
+    void bookAdded(BooksBook* book);
+    void bookRemoved(BooksBook* book);
 
 private Q_SLOTS:
     void onLoadTaskDone();
@@ -146,22 +151,22 @@ private Q_SLOTS:
     void onCopyTaskProgressChanged();
     void onCopyTaskDone();
     void onDeleteTaskDone();
-    void onStorageReplaced(BooksStorage aOldStorage, BooksStorage aNewStorage);
+    void onStorageReplaced(BooksStorage old, BooksStorage newStorage);
     void saveState();
 
 private:
     void init();
     QString stateFileName() const;
-    QString stateFileName(QString aRelativePath) const;
-    int bookIndex(BooksBook* aBook) const;
-    int itemIndex(QString aFileName, int aStartIndex = 0) const;
-    bool validIndex(int aIndex) const;
-    void emitDataChangedSignal(int aRow, int aRole);
+    QString stateFileName(QString) const;
+    int bookIndex(BooksBook*) const;
+    int itemIndex(QString fileName, int startAt = 0) const;
+    bool validIndex(int) const;
+    void emitDataChangedSignal(int row, int role);
     void queueStateSave();
     void loadBookList();
     void updatePath();
     void updateFileName();
-    void submitDeleteTask(int aIndex);
+    void submitDeleteTask(int index);
 
 private:
     class Data;
