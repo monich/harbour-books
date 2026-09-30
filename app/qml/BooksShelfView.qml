@@ -1,36 +1,3 @@
-/*
-  Copyright (C) 2015-2026 Slava Monich <slava@monich.com>
-  Copyright (C) 2015-2021 Jolla Ltd.
-
-  You may use this file under the terms of BSD license as follows:
-
-  Redistribution and use in source and binary forms, with or without
-  modification, are permitted provided that the following conditions
-  are met:
-
-    1. Redistributions of source code must retain the above copyright
-       notice, this list of conditions and the following disclaimer.
-    2. Redistributions in binary form must reproduce the above copyright
-       notice, this list of conditions and the following disclaimer
-       in the documentation and/or other materials provided with the
-       distribution.
-    3. Neither the names of the copyright holders nor the names of its
-       contributors may be used to endorse or promote products derived
-       from this software without specific prior written permission.
-
-  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-  ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR CONTRIBUTORS
-  BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-  INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
-  THE POSSIBILITY OF SUCH DAMAGE.
-*/
-
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 import harbour.books 1.0
@@ -45,6 +12,7 @@ Item {
     property bool removableStorage
     property bool editMode
     property bool deleteAllRequest
+    property bool isPortrait: true
     property real cellWidth
     property real cellHeight
     property alias view: grid
@@ -73,8 +41,10 @@ Item {
 
     Shelf {
         id: shelfModel
+
         property bool needDummyItem: dragInProgress && dragItem.shelfIndex !== shelfView.shelfIndex
         property bool _completed // Received Component.onCompleted
+
         onNeedDummyItemChanged: if (needDummyItem) hasDummyItem = true
         editMode: shelfView.editMode
         onRelativePathChanged: longStartTimer.restart()
@@ -93,6 +63,7 @@ Item {
 
     BooksPathModel {
         id: pathModel
+
         path: shelfModel.relativePath
     }
 
@@ -131,6 +102,7 @@ Item {
 
     Component {
         id: remorseComponent
+
         RemorsePopup {
             onCanceled: {
                 shelfView.cancelDeleteAll()
@@ -147,8 +119,12 @@ Item {
 
     BooksStorageHeader {
         id: storageHeader
+
+        x: grid.x
+        width: grid.width
         removable: removableStorage
         count: shelfModel.bookCount
+        isPortrait: shelfView.isPortrait
         showCount: !_loading
         enabled: grid.contentY > grid.minContentY || pathModel.count > 0
         needed: !singleStorage || pathModel.count > 0
@@ -166,6 +142,7 @@ Item {
 
     NumberAnimation {
         id: scrollToTopAnimation
+
         target: grid
         property: "contentY"
         duration: 500
@@ -176,9 +153,9 @@ Item {
     SilicaGridView {
         id: grid
 
-        x: Math.floor((shelfView.width - _gridWidth)/2)
         width: _gridWidth
         anchors {
+            horizontalCenter: parent.horizontalCenter
             top: storageHeader.bottom
             bottom: parent.bottom
         }
@@ -265,6 +242,7 @@ Item {
 
         NumberAnimation {
             id: fadeAnimation
+
             target: grid
             property: "itemOpacity"
             from: 1
@@ -279,6 +257,7 @@ Item {
 
     BooksDragArea {
         id: dragArea
+
         dragParent: storageView
         gridView: grid
         onDeleteItemAt: {
@@ -295,6 +274,7 @@ Item {
 
     Timer {
         id: longStartTimer
+
         interval: 500
         running: true
         onTriggered: {
@@ -307,11 +287,13 @@ Item {
 
     Timer {
         id: startAnimationTimer
+
         interval: 2000
     }
 
     Loader {
         id: leftSwipeHintLoader
+
         anchors.fill: parent
         active: BooksHints.storageLeftSwipe < MaximumHintCount || running
         property bool running

@@ -42,6 +42,7 @@ Item {
     property alias viewScale: storageList.scale
     property alias pullDownMenu: menu
     property alias isCurrentView: menu.visible
+    property bool isPortrait: true
     property bool pageActive
     property bool editMode: false
 
@@ -234,6 +235,7 @@ Item {
             cellHeight: storageView._cellHeight
             singleStorage: storageModel.count < 2
             editMode: storageView.editMode
+            isPortrait: storageView.isPortrait
             deleteAllRequest: model.deleteAllRequest
             device: model.device
             removableStorage: model.removable
