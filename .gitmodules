@@ -1,6 +1,6 @@
 [submodule "fribidi/upstream"]
 	path = fribidi/upstream
-	url = http://anongit.freedesktop.org/git/fribidi/fribidi.git
+	url = https://github.com/fribidi/fribidi.git
 [submodule "fbreader/upstream"]
 	path = fbreader/upstream
 	url = https://github.com/geometer/FBReader.git
